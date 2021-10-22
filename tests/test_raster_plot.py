@@ -25,7 +25,7 @@ def main():
         'plots': plots
     }
 
-    F = fig.Figure(view_url='http://localhost:3000', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-1', data=data)
     url = F.url(label='test_raster_plot')
     print(url)
 
