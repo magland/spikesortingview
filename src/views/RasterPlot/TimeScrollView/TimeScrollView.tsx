@@ -13,11 +13,14 @@ type Props = {
     startTimeSec: number
     endTimeSec: number
     panels: TimeScrollViewPanel[]
+    panelSpacing: number
+    selectedPanelKeys: string[]
+    setSelectedPanelKeys: (keys: string[]) => void
     width: number
     height: number
 }
 
-const TimeScrollView: FunctionComponent<Props> = ({startTimeSec, endTimeSec, panels, width, height}) => {
+const TimeScrollView: FunctionComponent<Props> = ({startTimeSec, endTimeSec, panels, panelSpacing, selectedPanelKeys, setSelectedPanelKeys, width, height}) => {
     const timeRange = useMemo(() => (
         [startTimeSec, endTimeSec] as [number, number]
     ), [startTimeSec, endTimeSec])
@@ -33,6 +36,8 @@ const TimeScrollView: FunctionComponent<Props> = ({startTimeSec, endTimeSec, pan
                 width={width}
                 height={height}
                 panels={panels}
+                panelSpacing={panelSpacing}
+                selectedPanelKeys={selectedPanelKeys}
                 timeRange={timeRange}
                 margins={margins}
             />
@@ -40,6 +45,7 @@ const TimeScrollView: FunctionComponent<Props> = ({startTimeSec, endTimeSec, pan
                 width={width}
                 height={height}
                 panels={panels}
+                panelSpacing={panelSpacing}
                 timeRange={timeRange}
                 margins={margins}
             />

@@ -9,9 +9,15 @@ def main():
     R = sv.LabboxEphysRecordingExtractor.from_memory(recording, serialize=True, serialize_dtype='float32')
     S = sv.LabboxEphysSortingExtractor.from_memory(sorting, serialize=True)
 
+    data = test_autocorrelograms(recording=recording, sorting=sorting)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-1', data=data)
+    url = F.url(label='test_autocorrelograms')
+    print(url)
+
+def test_autocorrelograms(*, recording: sv.LabboxEphysRecordingExtractor, sorting: sv.LabboxEphysSortingExtractor):
     autocorrelograms = []
-    for unit_id in S.get_unit_ids():
-        a = compute_correlogram_data(sorting=S, unit_id1=unit_id, unit_id2=None, window_size_msec=50, bin_size_msec=1)
+    for unit_id in sorting.get_unit_ids():
+        a = compute_correlogram_data(sorting=sorting, unit_id1=unit_id, unit_id2=None, window_size_msec=50, bin_size_msec=1)
         bin_edges_sec = a['bin_edges_sec']
         bin_counts = a['bin_counts']
         autocorrelograms.append({
@@ -24,10 +30,7 @@ def main():
         'type': 'Autocorrelograms',
         'autocorrelograms': autocorrelograms
     }
-
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-1', data=data)
-    url = F.url(label='test_autocorrelograms')
-    print(url)
+    return data
 
 if __name__ == '__main__':
     main()

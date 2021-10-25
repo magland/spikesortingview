@@ -10,7 +10,7 @@ const isRPPlotData = (x: any): x is RPPlotData => {
     return validateObject(x, {
         unitId: isNumber,
         spikeTimesSec: isArrayOf(isNumber)
-    },)
+    })
 }
 
 export type RasterPlotViewData = {
