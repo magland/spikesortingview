@@ -43,6 +43,8 @@ def extract_snippets(*, traces: np.ndarray, times: np.array, snippet_len: Tuple[
     M = traces.shape[1]
     T = snippet_len[0] + snippet_len[1]
     ret = np.zeros((len(times), T, M), dtype=traces.dtype)
+    if len(times) == 0:
+        return ret
     for t in range(T):
         times2 = times + t - snippet_len[0]
         valid = np.where((0 <= times2) & (times2 < N))
