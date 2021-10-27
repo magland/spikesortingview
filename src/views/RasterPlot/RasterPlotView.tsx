@@ -2,7 +2,7 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { RasterPlotViewData } from './RasterPlotViewData'
-import TimeScrollView from './TimeScrollView/TimeScrollView'
+import TimeScrollView, { TimeRangeAction } from './TimeScrollView/TimeScrollView'
 
 type Props = {
     data: RasterPlotViewData
@@ -35,6 +35,8 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const panelWidth = useMemo(() => width - margins.left - margins.right, [width])
     const panelHeight = useMemo(() => (height - margins.top - margins.bottom - panelSpacing * (panelCount - 1)) / panelCount, [height, panelCount])
     const pixelsPerSecond = useMemo(() => panelWidth / (data.endTimeSec - data.startTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
+
+    const {visibleTimeRange} = useVisibleTimeRange()
 
     // Get a 2 x 1 matrix (vector) which we'll use to right-multiply the (augmented) times vectors.
     // The upper element is the conversion factor, the lower element is the offset from the first time unit.
@@ -77,8 +79,6 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
 
     return (
         <TimeScrollView
-            startTimeSec={data.startTimeSec}
-            endTimeSec={data.endTimeSec}
             margins={margins}
             panels={pixelPanels}
             panelSpacing={panelSpacing}

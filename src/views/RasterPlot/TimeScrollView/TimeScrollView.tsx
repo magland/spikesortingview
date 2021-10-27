@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVMainLayer from './TSVMainLayer';
 
@@ -16,9 +16,16 @@ type Margins = {
     bottom: number
 }
 
+export type TimeRangeAction = {
+    type: 'ZoomIn'
+} | {
+    type: 'ZoomOut'
+} | {
+    type: 'Pan'
+    timeOffset: number
+}
+
 type TimeScrollViewProps<T extends {[key: string]: any}> = {
-    startTimeSec: number
-    endTimeSec: number
     margins?: Margins
     panels: TimeScrollViewPanel<T>[]
     panelSpacing: number
@@ -26,6 +33,7 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     setSelectedPanelKeys: (keys: string[]) => void
     width: number
     height: number
+    timeRangeDispatch?: (a: TimeRangeAction) => void
 }
 
 const defaultMargins = {
@@ -43,15 +51,30 @@ const defaultMargins = {
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, width, height } = props
+    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, width, height, timeRangeDispatch } = props
     const timeRange = useMemo(() => (
         [startTimeSec, endTimeSec] as [number, number]
     ), [startTimeSec, endTimeSec])
     const definedMargins = useMemo(() => margins || defaultMargins, [margins])
     const panelHeight = (height - definedMargins.top - definedMargins.bottom - panelSpacing * (panels.length - 1))/panels.length
     const perPanelOffset = panelHeight + panelSpacing
+    const {visibleTimeRange, visibleTimeRangeDispatch} = useVisibleTimeRange()
+    const handleWheel: React.WheelEventHandler<HTMLDivElement> = useCallback((event) => {
+        if (!timeRangeDispatch) return
+        const delta = event.deltaY
+        if (delta < 0) {
+            visibleTimeRangeDispatch({type: 'ZoomIn'})
+        }
+        else if (delta > 0) {
+            visibleTimeRangeDispatch({type: 'ZoomOut'})
+        }
+        console.log('----', event, event.deltaX, event.deltaY, event.deltaZ)
+    }, [])
     return (
-        <div style={{width, height, position: 'relative'}}>
+        <div
+            style={{width, height, position: 'relative'}}
+            onWheel={handleWheel}
+        >
             <TSVAxesLayer<T>
                 width={width}
                 height={height}

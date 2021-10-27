@@ -13,6 +13,7 @@ function App() {
   const {width, height} = useWindowDimensions()
 
   const [sortingSelection, sortingSelectionDispatch] = useReducer(sortingSelectionReducer, defaultSortingSelection)
+  const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
 
   useEffect(() => {
     getFigureData().then((data: any) => {
@@ -39,11 +40,13 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <SortingSelectionContext.Provider value={{sortingSelection, sortingSelectionDispatch}}>
-        <View
-          data={data}
-          width={width - 10}
-          height={height - 5}
-        />
+        <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
+          <View
+            data={data}
+            width={width - 10}
+            height={height - 5}
+          />
+        </RecordingSelectionContext.Provider>
       </SortingSelectionContext.Provider>
     </MuiThemeProvider>
   )
