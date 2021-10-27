@@ -7,6 +7,7 @@ import figurl as fig
 from test_autocorrelograms import test_autocorrelograms
 from test_raster_plot import test_raster_plot
 from test_average_waveforms import test_average_waveforms
+from test_units_table import test_units_table
 
 def main():
     recording, sorting = se.example_datasets.toy_example(K=12, duration=300, seed=0)
@@ -14,9 +15,10 @@ def main():
     R = sv.LabboxEphysRecordingExtractor.from_memory(recording, serialize=True, serialize_dtype='float32')
     S = sv.LabboxEphysSortingExtractor.from_memory(sorting, serialize=True)
 
-    data1 = test_raster_plot(recording=R, sorting=S)
-    data2 = test_autocorrelograms(recording=R, sorting=S)
-    data3 = test_average_waveforms(recording=R, sorting=S)
+    data1 = test_units_table(recording=R, sorting=S)
+    data2 = test_raster_plot(recording=R, sorting=S)
+    data3 = test_autocorrelograms(recording=R, sorting=S)
+    data4 = test_average_waveforms(recording=R, sorting=S)
 
     data = {
         'type': 'Composite',
@@ -28,7 +30,7 @@ def main():
                 'figureDataSha1': _upload_data_and_return_sha1(data0),
                 'defaultHeight': 300
             }
-            for data0 in [data1, data2, data3]
+            for data0 in [data1, data2, data3, data4]
         ]
     }
 

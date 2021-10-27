@@ -1,12 +1,9 @@
 import React, { FunctionComponent } from 'react';
 import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
-import { isAutocorrelogramsViewData } from 'views/Autocorrelograms/AutocorrelogramsViewData';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
-import { isAverageWaveformsViewData } from 'views/AverageWaveforms/AverageWaveformsViewData';
 import CompositeView from 'views/Composite/CompositeView';
-import { isCompositeViewData } from 'views/Composite/CompositeViewData';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
-import { isRasterPlotViewData } from 'views/RasterPlot/RasterPlotViewData';
+import UnitsTableView from 'views/UnitsTable/UnitsTableView'
 import { ViewData } from './ViewData';
 
 type Props = {
@@ -16,17 +13,20 @@ type Props = {
 }
 
 const View: FunctionComponent<Props> = ({data, width, height}) => {
-    if (isAutocorrelogramsViewData(data)) {
+    if (data.type === 'Autocorrelograms') {
         return <AutocorrelogramsView data={data} width={width} height={height} />
     }
-    else if (isRasterPlotViewData(data)) {
+    else if (data.type === 'RasterPlot') {
         return <RasterPlotView data={data} width={width} height={height} />
     }
-    else if (isCompositeViewData(data)) {
+    else if (data.type === 'Composite') {
         return <CompositeView data={data} width={width} height={height} />
     }
-    else if (isAverageWaveformsViewData(data)) {
+    else if (data.type === 'AverageWaveforms') {
         return <AverageWaveformsView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'UnitsTable') {
+        return <UnitsTableView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>
