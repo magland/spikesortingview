@@ -21,6 +21,8 @@ const margins = {
     bottom: 50
 }
 
+const panelSpacing = 4
+
 const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
     const selectedPanelKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
@@ -28,12 +30,16 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
 
-    // Convert panel data to pixel space
-    const panelCount = data.plots.length
-    const panelSpacing = 4
-    const panelWidth = width - margins.left - margins.right
+    // Compute the per-panel pixel drawing area dimensions.
+    const panelCount = useMemo(() => data.plots.length, [data.plots])
+    const panelWidth = useMemo(() => width - margins.left - margins.right, [width])
     const panelHeight = useMemo(() => (height - margins.top - margins.bottom - panelSpacing * (panelCount - 1)) / panelCount, [height, panelCount])
     const pixelsPerSecond = useMemo(() => panelWidth / (data.endTimeSec - data.startTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
+
+    // Get a 2 x 1 matrix (vector) which we'll use to right-multiply the (augmented) times vectors.
+    // The upper element is the conversion factor, the lower element is the offset from the first time unit.
+    const timeToPixelMatrix = useMemo(() => matrix([ [pixelsPerSecond], [data.startTimeSec * -pixelsPerSecond] ]),
+        [pixelsPerSecond, data.startTimeSec])
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -48,11 +54,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         context.stroke()
     }, [panelHeight])
 
-    // Get a 2 x 1 matrix (vector) which we'll use to right-multiply the (augmented) times vectors.
-    // The upper element is the conversion factor, the lower element is the offset from the first time unit.
-    const timeToPixelMatrix = useMemo(() => matrix([ [pixelsPerSecond], [data.startTimeSec * -pixelsPerSecond] ]),
-        [pixelsPerSecond, data.startTimeSec])
-
+    // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
     const pixelPanels = useMemo(() => (data.plots.map(plot => {
         const augmentedSpikes = plot.spikeTimesSec
                                     .filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
