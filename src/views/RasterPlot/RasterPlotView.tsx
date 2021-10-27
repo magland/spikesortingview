@@ -1,7 +1,8 @@
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
-import { RasterPlotViewData } from './RasterPlotViewData';
-import TimeScrollView from './TimeScrollView/TimeScrollView';
+import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
+import { matrix, multiply } from 'mathjs'
+import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { RasterPlotViewData } from './RasterPlotViewData'
+import TimeScrollView from './TimeScrollView/TimeScrollView'
 
 type Props = {
     data: RasterPlotViewData
@@ -10,21 +11,14 @@ type Props = {
 }
 
 type PanelProps = {
-    spikeTimesSec: number[]
+    pixelSpikes: number[]
 }
 
-const paintPanel = (context: CanvasRenderingContext2D, rect: {x: number, y: number, width: number, height: number}, timeRange: [number, number], props: PanelProps) => {
-    const times = props.spikeTimesSec.filter(t => ((timeRange[0] <= t) && (t <= timeRange[1])))
-    context.strokeStyle = 'darkgray'
-    const y1 = rect.y
-    const y2 = rect.y + rect.height
-    for (let t of times) {
-        const x = rect.x + (t - timeRange[0]) / (timeRange[1] - timeRange[0]) * rect.width
-        context.beginPath()
-        context.moveTo(x, y1)
-        context.lineTo(x, y2)
-        context.stroke()
-    }
+const margins = {
+    left: 30,
+    right: 20,
+    top: 20,
+    bottom: 50
 }
 
 const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
@@ -33,20 +27,59 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const setSelectedPanelKeys = useCallback((keys: string[]) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
-    const panels = useMemo(() => (data.plots.map(pp => ({
-        key: `${pp.unitId}`,
-        label: `${pp.unitId}`,
-        props: {
-            spikeTimesSec: pp.spikeTimesSec
-        },
-        paint: paintPanel
-    }))), [data.plots])
+
+    // Convert panel data to pixel space
+    const panelCount = data.plots.length
+    const panelSpacing = 4
+    const panelWidth = width - margins.left - margins.right
+    const panelHeight = useMemo(() => (height - margins.top - margins.bottom - panelSpacing * (panelCount - 1)) / panelCount, [height, panelCount])
+    const pixelsPerSecond = useMemo(() => panelWidth / (data.endTimeSec - data.startTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
+
+    // We need to have the panelHeight before we can use it in the paint function.
+    // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
+    // but simplifies the prop list a bit.
+    const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
+        context.strokeStyle = 'darkgray'
+        context.beginPath()
+        for (const s of props.pixelSpikes) {
+            context.moveTo(s, 0)
+            context.lineTo(s, panelHeight)
+        }
+        context.stroke()
+    }, [panelHeight])
+
+    // Get a 2 x 1 matrix (vector) which we'll use to right-multiply the (augmented) times vectors.
+    // The upper element is the conversion factor, the lower element is the offset from the first time unit.
+    const timeToPixelMatrix = useMemo(() => matrix([ [pixelsPerSecond], [data.startTimeSec * -pixelsPerSecond] ]),
+        [pixelsPerSecond, data.startTimeSec])
+
+    const pixelPanels = useMemo(() => (data.plots.map(plot => {
+        const augmentedSpikes = plot.spikeTimesSec
+                                    .filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
+                                    .map(t => [t, 1])
+        const augmentedSpikesMatrix = matrix(augmentedSpikes)
+        // augmentedSpikesMatrix is an n x 2 matrix of [time, 1]. The multiplication below gives an
+        // n x 1 matrix (n = number of spikes). toArray() yields the data (an array of 1-element arrays).
+        // flat() converts the inner arrays (e.g. [[3], [5], [6]]) to just an array of numbers ([3, 5, 6]) which is what we want.
+        const pixelSpikes = multiply(augmentedSpikesMatrix, timeToPixelMatrix).toArray().flat()
+
+        return {
+            key: `${plot.unitId}`,
+            label: `${plot.unitId}`,
+            props: {
+                pixelSpikes: pixelSpikes
+            },
+            paint: paintPanel
+        }
+    })), [data.plots, data.startTimeSec, data.endTimeSec, timeToPixelMatrix, paintPanel])
+
     return (
         <TimeScrollView
             startTimeSec={data.startTimeSec}
             endTimeSec={data.endTimeSec}
-            panels={panels}
-            panelSpacing={4}
+            margins={margins}
+            panels={pixelPanels}
+            panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
             width={width}
