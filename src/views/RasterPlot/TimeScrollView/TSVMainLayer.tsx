@@ -1,28 +1,28 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas';
-import React, { FunctionComponent, useMemo } from 'react';
-import { paint } from './paint';
+import React, { useMemo } from 'react';
+import { paintPanels } from './paint';
 import { TimeScrollViewPanel } from './TimeScrollView';
 
-export type MainLayerProps = {
-    panels: TimeScrollViewPanel[]
-    timeRange: [number, number]
+export type MainLayerProps<T extends {[key: string]: any}> = {
+    panels: TimeScrollViewPanel<T>[]
     margins: {left: number, right: number, top: number, bottom: number}
-    panelSpacing: number,
+    panelHeight: number
+    perPanelOffset: number
     width: number
     height: number
 }
 
-const TSVMainLayer: FunctionComponent<MainLayerProps> = ({width, height, panels, panelSpacing, timeRange, margins}) => {
+const TSVMainLayer = <T extends {[key: string]: any}>(props: MainLayerProps<T>) => {
+    const {width, height, panels, panelHeight, perPanelOffset, margins} = props
     const drawData = useMemo(() => ({
-        width, height, panels, panelSpacing, timeRange, margins,
-        layer: 'main' as 'axes' | 'main'
-    }), [width, height, panels, panelSpacing, timeRange, margins])
+        width, height, panels, panelHeight, perPanelOffset, margins,
+    }), [width, height, panels, panelHeight, perPanelOffset, margins])
 
     return (
         <BaseCanvas
             width={width}
             height={height}
-            draw={paint}
+            draw={paintPanels}
             drawData={drawData}
         />
     )
