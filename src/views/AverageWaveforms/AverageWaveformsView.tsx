@@ -25,17 +25,25 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             waveform: aw.waveform,
             samplingFrequency: data.samplingFrequency,
             noiseLevel: data.noiseLevel,
-            width: 150,
-            height: 150
+            width: 120,
+            height: 120
         }
     }))), [data.averageWaveforms, data.samplingFrequency, data.noiseLevel])
+    const divStyle: React.CSSProperties = useMemo(() => ({
+        width: width - 20, // leave room for the scrollbar
+        height,
+        position: 'relative',
+        overflowY: 'auto'
+    }), [width, height])
     return (
-        <PlotGrid
-            plots={plots}
-            plotComponent={AverageWaveformPlot}
-            selectedPlotKeys={selectedPlotKeys}
-            setSelectedPlotKeys={setSelectedPlotKeys}
-        />
+        <div style={divStyle}>
+            <PlotGrid
+                plots={plots}
+                plotComponent={AverageWaveformPlot}
+                selectedPlotKeys={selectedPlotKeys}
+                setSelectedPlotKeys={setSelectedPlotKeys}
+            />
+        </div>
     )
 }
 

@@ -23,17 +23,25 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
         props: {
             binEdgesSec: ac.binEdgesSec,
             binCounts: ac.binCounts,
-            width: 150,
-            height: 150
+            width: 120,
+            height: 120
         }
     }))), [data.autocorrelograms])
+    const divStyle: React.CSSProperties = useMemo(() => ({
+        width: width - 20, // leave room for the scrollbar
+        height,
+        position: 'relative',
+        overflowY: 'auto'
+    }), [width, height])
     return (
-        <PlotGrid
-            plots={plots}
-            plotComponent={CorrelogramPlot}
-            selectedPlotKeys={selectedPlotKeys}
-            setSelectedPlotKeys={setSelectedPlotKeys}
-        />
+        <div style={divStyle}>
+            <PlotGrid
+                plots={plots}
+                plotComponent={CorrelogramPlot}
+                selectedPlotKeys={selectedPlotKeys}
+                setSelectedPlotKeys={setSelectedPlotKeys}
+            />
+        </div>
     )
 }
 

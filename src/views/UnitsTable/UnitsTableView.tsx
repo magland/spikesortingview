@@ -36,14 +36,23 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         })
     ), [data.rows, data.columns])
 
+    const divStyle: React.CSSProperties = useMemo(() => ({
+        width: width - 20, // leave room for the scrollbar
+        height,
+        position: 'relative',
+        overflowY: 'auto'
+    }), [width, height])
+
     return (
-        <NiceTable
-            columns={columns}
-            rows={rows}
-            selectedRowKeys={selectedRowKeys}
-            onSelectedRowKeysChanged={setSelectedRowKeys}
-            selectionMode="multiple"
-        />
+        <div style={divStyle}>
+            <NiceTable
+                columns={columns}
+                rows={rows}
+                selectedRowKeys={selectedRowKeys}
+                onSelectedRowKeysChanged={setSelectedRowKeys}
+                selectionMode="multiple"
+            />
+        </div>
     )
 }
 
