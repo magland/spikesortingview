@@ -1,3 +1,4 @@
+import { matrix } from 'mathjs';
 import React, { useMemo } from 'react';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVMainLayer from './TSVMainLayer';
@@ -35,6 +36,40 @@ const defaultMargins = {
     bottom: 50
 }
 
+export const computePanelDimensions = (width: number, height: number, panelCount: number, panelSpacing: number, margins?: Margins) => {
+    // compute the dimensions of each panel in the panel set.
+    const definedMargins = margins ?? defaultMargins
+    const panelWidth = width - definedMargins.left - definedMargins.right
+    const panelHeight = (height - definedMargins.top - definedMargins.bottom - panelSpacing * (panelCount - 1)) / panelCount
+    return {panelWidth, panelHeight}
+}
+
+export const computePixelsPerSecond = (panelWidth: number, startTimeSec: number, endTimeSec: number) => {
+    return panelWidth / (endTimeSec - startTimeSec)
+}
+
+// Returns a 2 x 1 matrix (vector) which, when it right-multiplies an augmented vector of times,
+// will return the pixel equivalents of those times.
+// Upper element of vector is the pixels-per-second conversion factor, bottom element is the
+// offset from the initial time of the range.
+// This is set up as a right-multiplication because to allow mapping a set of times to
+// individual augmented vectors [t, 1] -- producing an n x 2 matrix.
+export const get1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSec: number) => {
+    return matrix([ [pixelsPerSecond], [startTimeSec * -pixelsPerSecond] ])
+}
+
+// This is the 1 x 2 matrix (vector) which can left-multiply an augmented vector of times
+// to return the pixel equivalent.
+// To use this one, you would take the time points in array `times` and then augment them by:
+// const augmentedTimes = matrix([ times, new Array(times.length).fill(1) ])
+// which gives a 2 x n matrix of augmented times; then the vector is the right shape afterward.
+export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number) => {
+    return matrix([pixelsPerSecond, startTimeSec * -pixelsPerSecond])
+}
+
+// TODO: Will implement 2d transform matrices once we actually do something with them.
+
+
 // Unfortunately, you can't nest generic type declarations here: so while this is properly a
 // FunctionComponent<TimeScrollViewPanel<T>>, there just isn't a way to do that syntactically
 // while still using arrow notation. (It *might* be possible with explicit function notation, but
@@ -48,7 +83,8 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         [startTimeSec, endTimeSec] as [number, number]
     ), [startTimeSec, endTimeSec])
     const definedMargins = useMemo(() => margins || defaultMargins, [margins])
-    const panelHeight = (height - definedMargins.top - definedMargins.bottom - panelSpacing * (panels.length - 1))/panels.length
+    const {panelHeight} = useMemo(() => computePanelDimensions(width, height, panels.length, panelSpacing, definedMargins),
+        [width, height, panels.length, panelSpacing, definedMargins])
     const perPanelOffset = panelHeight + panelSpacing
     return (
         <div style={{width, height, position: 'relative'}}>

@@ -2,7 +2,7 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { RasterPlotViewData } from './RasterPlotViewData'
-import TimeScrollView from './TimeScrollView/TimeScrollView'
+import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix } from './TimeScrollView/TimeScrollView'
 
 type Props = {
     data: RasterPlotViewData
@@ -32,14 +32,8 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = useMemo(() => data.plots.length, [data.plots])
-    const panelWidth = useMemo(() => width - margins.left - margins.right, [width])
-    const panelHeight = useMemo(() => (height - margins.top - margins.bottom - panelSpacing * (panelCount - 1)) / panelCount, [height, panelCount])
-    const pixelsPerSecond = useMemo(() => panelWidth / (data.endTimeSec - data.startTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
-
-    // Get a 2 x 1 matrix (vector) which we'll use to right-multiply the (augmented) times vectors.
-    // The upper element is the conversion factor, the lower element is the offset from the first time unit.
-    const timeToPixelMatrix = useMemo(() => matrix([ [pixelsPerSecond], [data.startTimeSec * -pixelsPerSecond] ]),
-        [pixelsPerSecond, data.startTimeSec])
+    const { panelWidth, panelHeight } = useMemo(() => computePanelDimensions(width, height, panelCount, panelSpacing, margins), [width, height, panelCount])
+    const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, data.startTimeSec, data.endTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -55,15 +49,16 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     }, [panelHeight])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
+    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, data.startTimeSec),
+        [pixelsPerSecond, data.startTimeSec])
+
     const pixelPanels = useMemo(() => (data.plots.map(plot => {
-        const augmentedSpikes = plot.spikeTimesSec
-                                    .filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
-                                    .map(t => [t, 1])
-        const augmentedSpikesMatrix = matrix(augmentedSpikes)
-        // augmentedSpikesMatrix is an n x 2 matrix of [time, 1]. The multiplication below gives an
-        // n x 1 matrix (n = number of spikes). toArray() yields the data (an array of 1-element arrays).
-        // flat() converts the inner arrays (e.g. [[3], [5], [6]]) to just an array of numbers ([3, 5, 6]) which is what we want.
-        const pixelSpikes = multiply(augmentedSpikesMatrix, timeToPixelMatrix).toArray().flat()
+        const filteredSpikes = plot.spikeTimesSec.filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
+        const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
+
+        // augmentedSpikesMatrix is a 2 x n matrix; each col vector is [time, 1]. The multiplication below gives an
+        // n x 1 matrix (n = number of spikes). valueOf() yields the data as a simple array.
+        const pixelSpikes = multiply(timeToPixelMatrix, augmentedSpikesMatrix).valueOf() as number[]
 
         return {
             key: `${plot.unitId}`,
