@@ -248,7 +248,7 @@ const zip = (a: any[], b: any[]) => {
 export const transformPoints = (tmatrix: TransformationMatrix, points: Vec2[]): Vec2[] => {
     const A = matrix(tmatrix)
     const x = matrix([points.map((p) => p[0]), points.map((p) => p[1]), points.map((p) => 1)])
-    const [xvalues, yvalues, _] = multiply(A, x).toArray() as number[][]
+    const [xvalues, yvalues] = multiply(A, x).toArray() as number[][]
     // assert xvalues.length = yvalues.length
     return zip(xvalues, yvalues)
 }
