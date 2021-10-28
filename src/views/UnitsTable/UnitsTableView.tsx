@@ -9,7 +9,7 @@ type Props = {
     height: number
 }
 
-const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
+const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
     const selectedRowKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
     const setSelectedRowKeys = useCallback((keys: string[]) => {
@@ -56,4 +56,4 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     )
 }
 
-export default RasterPlotView
+export default UnitsTableView

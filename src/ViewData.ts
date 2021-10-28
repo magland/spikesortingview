@@ -3,6 +3,7 @@ import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Auto
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
+import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
 
 export type ViewData =
@@ -10,7 +11,8 @@ export type ViewData =
     RasterPlotViewData |
     CompositeViewData |
     AverageWaveformsViewData |
-    UnitsTableViewData
+    UnitsTableViewData |
+    SummaryViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -18,6 +20,7 @@ export const isViewData = (x: any): x is ViewData => {
         isRasterPlotViewData,
         isCompositeViewData,
         isAverageWaveformsViewData,
-        isUnitsTableViewData
+        isUnitsTableViewData,
+        isSummaryViewData
     ])(x)
 }

@@ -3,6 +3,7 @@ import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
+import SummaryView from 'views/Summary/SummaryView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView'
 import { ViewData } from './ViewData';
 
@@ -27,6 +28,9 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     }
     else if (data.type === 'UnitsTable') {
         return <UnitsTableView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'Summary') {
+        return <SummaryView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>
