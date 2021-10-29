@@ -2,6 +2,7 @@ import { isOneOf } from "figurl/viewInterface/kacheryTypes"
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
+import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
@@ -12,7 +13,8 @@ export type ViewData =
     CompositeViewData |
     AverageWaveformsViewData |
     UnitsTableViewData |
-    SummaryViewData
+    SummaryViewData |
+    MountainLayoutViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -21,6 +23,7 @@ export const isViewData = (x: any): x is ViewData => {
         isCompositeViewData,
         isAverageWaveformsViewData,
         isUnitsTableViewData,
-        isSummaryViewData
+        isSummaryViewData,
+        isMountainLayoutViewData
     ])(x)
 }
