@@ -4,6 +4,7 @@ import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/Aver
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
+import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
 
@@ -14,7 +15,8 @@ export type ViewData =
     AverageWaveformsViewData |
     UnitsTableViewData |
     SummaryViewData |
-    MountainLayoutViewData
+    MountainLayoutViewData |
+    SpikeAmplitudesViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -24,6 +26,7 @@ export const isViewData = (x: any): x is ViewData => {
         isAverageWaveformsViewData,
         isUnitsTableViewData,
         isSummaryViewData,
-        isMountainLayoutViewData
+        isMountainLayoutViewData,
+        isSpikeAmplitudesViewData
     ])(x)
 }

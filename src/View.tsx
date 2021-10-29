@@ -4,6 +4,7 @@ import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
+import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView'
 import { ViewData } from './ViewData';
@@ -35,6 +36,9 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     }
     else if (data.type === 'MountainLayout') {
         return <MountainLayoutView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'SpikeAmplitudes') {
+        return <SpikeAmplitudesView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>
