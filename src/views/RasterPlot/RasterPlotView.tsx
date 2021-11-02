@@ -1,6 +1,7 @@
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import colorForUnitId from 'views/common/colorForUnitId'
 import { RasterPlotViewData } from './RasterPlotViewData'
 import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix } from './TimeScrollView/TimeScrollView'
 
@@ -11,6 +12,7 @@ type Props = {
 }
 
 type PanelProps = {
+    color: string
     pixelSpikes: number[]
 }
 
@@ -39,7 +41,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
     // but simplifies the prop list a bit.
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
-        context.strokeStyle = 'darkgray'
+        context.strokeStyle = props.color
         context.beginPath()
         for (const s of props.pixelSpikes) {
             context.moveTo(s, 0)
@@ -52,7 +54,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, data.startTimeSec),
         [pixelsPerSecond, data.startTimeSec])
 
-    const pixelPanels = useMemo(() => (data.plots.map(plot => {
+    const pixelPanels = useMemo(() => (data.plots.sort((p1, p2) => (p1.unitId - p2.unitId)).map(plot => {
         const filteredSpikes = plot.spikeTimesSec.filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
         const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
 
@@ -64,6 +66,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             key: `${plot.unitId}`,
             label: `${plot.unitId}`,
             props: {
+                color: colorForUnitId(plot.unitId),
                 pixelSpikes: pixelSpikes
             },
             paint: paintPanel

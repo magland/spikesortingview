@@ -12,6 +12,7 @@ type Props = {
     width: number
     height: number
     bars: BarPlotBar[]
+    color: string
     ticks: BarPlotTick[]
     xLabel?: string
 }
@@ -20,7 +21,7 @@ export type Margins = {
     left: number, right: number, top: number, bottom: number
 }
 
-const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, width, height}) => {
+const BarPlot: FunctionComponent<Props> = ({bars, color, ticks, xLabel, width, height}) => {
     const {xMin, xMax} = useMemo(() => (
         {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
     ), [bars])
@@ -55,6 +56,7 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, width, height})
         <div style={{width, height, position: 'relative'}}>
             <BarPlotMainLayer
                 barBoxes={barBoxes}
+                color={color}
                 margins={margins}
                 pixelTicks={pixelTicks}
                 xLabel={xLabel || ''}

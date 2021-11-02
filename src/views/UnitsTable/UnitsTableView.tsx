@@ -1,6 +1,7 @@
 import NiceTable from 'components/NiceTable/NiceTable';
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import colorForUnitId from 'views/common/colorForUnitId';
 import { UnitsTableViewData } from './UnitsTableViewData';
 
 type Props = {
@@ -24,10 +25,19 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     ), [data.columns])
 
     const rows = useMemo(() => (
-        data.rows.map(r => {
+        data.rows.sort((r1, r2) => (r1.unitId - r2.unitId)).map(r => {
             const columnValues: {[key: string]: any} = {}
             for (let c of data.columns) {
-                columnValues[c.key] = `${r.values[c.key] || ''}`
+                const text = `${r.values[c.key] !== undefined ? r.values[c.key] : ''}`
+                if (c.key === 'unitId') {
+                    columnValues[c.key] = {
+                        text,
+                        element: <span><div style={{backgroundColor: colorForUnitId(r.unitId), width: 10, height: 10, position: 'relative', display: 'inline-block'}} /> {text}</span>
+                    }
+                }
+                else {
+                    columnValues[c.key] = text
+                }
             }
             return {
                 key: `${r.unitId}`,

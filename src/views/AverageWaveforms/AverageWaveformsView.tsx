@@ -3,6 +3,7 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 import AverageWaveformPlot from './AverageWaveformPlot';
+import colorForUnitId from 'views/common/colorForUnitId';
 
 type Props = {
     data: AverageWaveformsViewData
@@ -17,9 +18,10 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const setSelectedPlotKeys = useCallback((keys: string[]) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
-    const plots = useMemo(() => (data.averageWaveforms.map(aw => ({
+    const plots = useMemo(() => (data.averageWaveforms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(aw => ({
         key: `${aw.unitId}`,
         label: `Unit ${aw.unitId}`,
+        labelColor: colorForUnitId(aw.unitId),
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
