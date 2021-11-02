@@ -18,7 +18,7 @@ const highlightedRowFillStyle = '#c5e1ff' // TODO: This should be standardized a
 export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': string[]}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
     // Q: maybe it'd be better to look at context.canvas.width rather than the width prop?
-    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys} = props
+    const {width, height, margins, panels, panelHeight, focusTimePixels, perPanelOffset, selectedPanelKeys} = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     
     // x-axes
@@ -46,6 +46,15 @@ export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderi
         const y1 = margins.top + i * (perPanelOffset)
         context.fillStyle = 'black'
         context.fillText(p.label, margins.left - 5, y1 + panelHeight / 2)
+    }
+
+    // focus time
+    if (focusTimePixels !== undefined) {
+        context.strokeStyle = 'red'
+        context.beginPath()
+        context.moveTo(focusTimePixels, margins.top)
+        context.lineTo(focusTimePixels, context.canvas.height - margins.bottom)
+        context.stroke()
     }
 }
 

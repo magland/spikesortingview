@@ -17,7 +17,7 @@ const defaultGripThickness = 10
 const defaultGripInnerThickness = 4
 const defaultGripMargin = 2
 
-const Splitter: FunctionComponent<Props> = (props) => {
+const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = React.forwardRef((props, ref) => {
     const {width, height, initialPosition, onChange, adjustable=true, positionFromRight=false} = props
 
     const [gripPosition, setGripPosition] = useState<number>(initialPosition)
@@ -137,10 +137,10 @@ const Splitter: FunctionComponent<Props> = (props) => {
             }
 
             <div key="child2" style={{...style2, position: 'absolute'}} className="SplitterChild">
-                <child2.type {...child2.props} width={width2} height={height} />
+                <child2.type ref={ref} {...child2.props} width={width2} height={height} />
             </div>
         </div>
     )
-}
+})
 
 export default Splitter
