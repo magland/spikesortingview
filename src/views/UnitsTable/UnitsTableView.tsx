@@ -1,5 +1,6 @@
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import colorForUnitId from 'views/common/colorForUnitId';
 import SortableTableWidget from './SortableTableWidget/SortableTableWidget';
 import { UnitsTableViewData } from './UnitsTableViewData';
 
@@ -22,7 +23,9 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             label: c.label,
             tooltip: c.label,
             sort: (a: any, b: any) => (a - b),
-            dataElement: (d: any) => <span>{d}</span>,
+            dataElement: c.key === 'unitId' ? (
+               (d: any) => <span><div style={{backgroundColor: colorForUnitId(d), width: 10, height: 10, position: 'relative', display: 'inline-block'}} /> {`${d}`}</span> 
+            ): (d: any) => <span>{d}</span>,
             calculating: false
         }))
     ), [data.columns])
