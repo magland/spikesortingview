@@ -4,6 +4,7 @@ import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 import AverageWaveformPlot from './AverageWaveformPlot';
 import colorForUnitId from 'views/common/colorForUnitId';
+import {mean} from 'mathjs';
 
 type Props = {
     data: AverageWaveformsViewData
@@ -57,11 +58,6 @@ const subtractChannelMeans = (waveform: number[][]) => {
     })
 }
 
-const computeMean = (x: number[]) => {
-    if (x.length === 0) return 0
-    let sum = 0
-    for (let a of x) sum += a
-    return sum / x.length
-}
+const computeMean = (ary: number[]) => ary.length > 0 ? mean(ary) : 0
 
 export default AverageWaveformsView
