@@ -25,7 +25,7 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, sa
         <WaveformWidget
             waveform={waveform}
             electrodes={electrodes}
-            ampScaleFactor={1} // for now
+            ampScaleFactor={10} // for now
             layoutMode={'vertical'} // for now
             width={width}
             height={height}

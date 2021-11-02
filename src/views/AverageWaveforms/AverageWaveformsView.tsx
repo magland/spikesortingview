@@ -22,7 +22,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         label: `Unit ${aw.unitId}`,
         props: {
             channelIds: aw.channelIds,
-            waveform: aw.waveform,
+            waveform: subtractChannelMeans(aw.waveform),
             samplingFrequency: data.samplingFrequency,
             noiseLevel: data.noiseLevel,
             width: 120,
@@ -45,6 +45,20 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             />
         </div>
     )
+}
+
+const subtractChannelMeans = (waveform: number[][]) => {
+    return waveform.map(W => {
+        const mean0 = computeMean(W)
+        return W.map(a => (a - mean0))
+    })
+}
+
+const computeMean = (x: number[]) => {
+    if (x.length === 0) return 0
+    let sum = 0
+    for (let a of x) sum += a
+    return sum / x.length
 }
 
 export default AverageWaveformsView
