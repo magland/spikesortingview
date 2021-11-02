@@ -1,7 +1,6 @@
-import NiceTable from 'components/NiceTable/NiceTable';
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
-import colorForUnitId from 'views/common/colorForUnitId';
+import SortableTableWidget from './SortableTableWidget/SortableTableWidget';
 import { UnitsTableViewData } from './UnitsTableViewData';
 
 type Props = {
@@ -19,29 +18,37 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     
     const columns = useMemo(() => (
         data.columns.map(c => ({
-            key: c.key,
-            label: c.label
+            columnName: c.key,
+            label: c.label,
+            tooltip: c.label,
+            sort: (a: any, b: any) => (a - b),
+            dataElement: (d: any) => <span>{d}</span>,
+            calculating: false
         }))
     ), [data.columns])
 
     const rows = useMemo(() => (
         data.rows.sort((r1, r2) => (r1.unitId - r2.unitId)).map(r => {
-            const columnValues: {[key: string]: any} = {}
+            const rowData: {[key: string]: any} = {}
             for (let c of data.columns) {
                 const text = `${r.values[c.key] !== undefined ? r.values[c.key] : ''}`
-                if (c.key === 'unitId') {
-                    columnValues[c.key] = {
-                        text,
-                        element: <span><div style={{backgroundColor: colorForUnitId(r.unitId), width: 10, height: 10, position: 'relative', display: 'inline-block'}} /> {text}</span>
-                    }
-                }
-                else {
-                    columnValues[c.key] = text
+                // if (c.key === 'unitId') {
+                //     rowData[c.key] = {
+                //         text,
+                //         element: <span><div style={{backgroundColor: colorForUnitId(r.unitId), width: 10, height: 10, position: 'relative', display: 'inline-block'}} /> {text}</span>
+                //     }
+                // }
+                // else {
+                //     rowData[c.key] = text
+                // }
+                rowData[c.key] = {
+                    value: text,
+                    sortValue: r.values[c.key]
                 }
             }
             return {
-                key: `${r.unitId}`,
-                columnValues
+                rowId: `${r.unitId}`,
+                data: rowData
             }
         })
     ), [data.rows, data.columns])
@@ -55,12 +62,12 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
 
     return (
         <div style={divStyle}>
-            <NiceTable
+            <SortableTableWidget
                 columns={columns}
                 rows={rows}
-                selectedRowKeys={selectedRowKeys}
-                onSelectedRowKeysChanged={setSelectedRowKeys}
-                selectionMode="multiple"
+                selectedRowIds={selectedRowKeys}
+                onSelectedRowIdsChanged={setSelectedRowKeys}
+                defaultSortColumnName="unitId"
             />
         </div>
     )
