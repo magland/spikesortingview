@@ -2,6 +2,7 @@ import { isOneOf } from "figurl/viewInterface/kacheryTypes"
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
+import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
@@ -16,7 +17,8 @@ export type ViewData =
     UnitsTableViewData |
     SummaryViewData |
     MountainLayoutViewData |
-    SpikeAmplitudesViewData
+    SpikeAmplitudesViewData |
+    ElectrodeGeometryViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -27,6 +29,7 @@ export const isViewData = (x: any): x is ViewData => {
         isUnitsTableViewData,
         isSummaryViewData,
         isMountainLayoutViewData,
-        isSpikeAmplitudesViewData
+        isSpikeAmplitudesViewData,
+        isElectrodeGeometryViewData
     ])(x)
 }

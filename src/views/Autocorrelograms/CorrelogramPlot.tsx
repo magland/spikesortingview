@@ -5,6 +5,7 @@ import { BarPlotTick } from './BarPlot/BarPlotMainLayer';
 type Props = {
     binEdgesSec: number[],
     binCounts: number[]
+    color: string
     width: number
     height: number
 }
@@ -25,7 +26,7 @@ const determineTickLocationsMsec = (xMin: number, xMax: number): number[] => {
     return ret
 }
 
-const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, width, height}) => {
+const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, color, width, height}) => {
     const bars: BarPlotBar[] = useMemo(() => (
         binCounts.map((count, ii) => {
             const xStart = binEdgesSec[ii] * 1000
@@ -51,6 +52,7 @@ const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, widt
     return (
         <BarPlot
             bars={bars}
+            color={color}
             ticks={ticks}
             width={width}
             height={height}

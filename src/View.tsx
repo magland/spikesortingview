@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react';
 import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
+import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
@@ -39,6 +40,9 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     }
     else if (data.type === 'SpikeAmplitudes') {
         return <SpikeAmplitudesView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'ElectrodeGeometry') {
+        return <ElectrodeGeometryView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>

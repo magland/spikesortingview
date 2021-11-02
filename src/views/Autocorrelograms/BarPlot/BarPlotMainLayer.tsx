@@ -1,5 +1,5 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas';
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent } from 'react';
 import { Margins } from './BarPlot';
 
 export type BarBox = {x1: number, x2: number, y1: number, y2: number, tooltip: string}
@@ -11,6 +11,7 @@ export type BarPlotTick = {
 
 type Props = {
     barBoxes: BarBox[]
+    color: string
     margins: Margins
     pixelTicks: BarPlotTick[]
     xLabel: string
@@ -20,7 +21,7 @@ type Props = {
 
 const draw = (context: CanvasRenderingContext2D, data: Props) => {
     context.clearRect(0, 0, data.width, data.height)
-    const color = 'rgb(140, 120, 200)'
+    const color = data.color
     context.fillStyle = color
     
     data.barBoxes.forEach(b => {

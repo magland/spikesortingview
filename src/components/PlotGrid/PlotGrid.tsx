@@ -5,6 +5,7 @@ type Props = {
     plots: {
         key: string,
         label: string,
+        labelColor: string,
         props: {[key: string]: any}
     }[]
     plotComponent: React.ComponentType<any>
@@ -43,7 +44,7 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
                                 onClick={handlePlotClick}
                             >
                                 <div style={{fontWeight: 'bold', textAlign: 'center'}}>
-                                    <div>{plot.label}</div>
+                                    <div style={{color: plot.labelColor}}>{plot.label}</div>
                                 </div>
                                 <Component
                                     {...plot.props}

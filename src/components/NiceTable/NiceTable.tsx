@@ -23,6 +23,7 @@ interface Props {
     selectionMode?: 'none' | 'single' | 'multiple',
     selectedRowKeys?: string[],
     onSelectedRowKeysChanged?: ((keys: string[]) => void)
+    selectionDisabled?: boolean
 }
 
 const NiceTable: FunctionComponent<Props> = ({
@@ -34,7 +35,8 @@ const NiceTable: FunctionComponent<Props> = ({
     editRowLabel=undefined,
     selectionMode='none', // none, single, multiple
     selectedRowKeys=[],
-    onSelectedRowKeysChanged=undefined
+    onSelectedRowKeysChanged=undefined,
+    selectionDisabled
 }) => {
     const selectedRowKeysObj = useMemo(() => {
         const x: {[key: string]: boolean} = {};
@@ -126,6 +128,7 @@ const NiceTable: FunctionComponent<Props> = ({
                                         <Checkbox
                                             checked={selectedRowKeysObj[row.key] || false}
                                             onClick={() => handleClickRow(row.key)}
+                                            disabled={selectionDisabled}
                                         />
                                     )
                                 }

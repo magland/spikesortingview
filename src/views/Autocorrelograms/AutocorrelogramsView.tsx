@@ -1,6 +1,7 @@
 import PlotGrid from 'components/PlotGrid/PlotGrid';
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import colorForUnitId from 'views/common/colorForUnitId';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';
 import CorrelogramPlot from './CorrelogramPlot';
 
@@ -17,12 +18,14 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
     const setSelectedPlotKeys = useCallback((keys: string[]) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
-    const plots = useMemo(() => (data.autocorrelograms.map(ac => ({
+    const plots = useMemo(() => (data.autocorrelograms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(ac => ({
         key: `${ac.unitId}`,
         label: `Unit ${ac.unitId}`,
+        labelColor: colorForUnitId(ac.unitId),
         props: {
             binEdgesSec: ac.binEdgesSec,
             binCounts: ac.binCounts,
+            color: colorForUnitId(ac.unitId),
             width: 120,
             height: 120
         }

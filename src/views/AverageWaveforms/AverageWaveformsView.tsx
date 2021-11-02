@@ -3,6 +3,8 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 import AverageWaveformPlot from './AverageWaveformPlot';
+import colorForUnitId from 'views/common/colorForUnitId';
+import {mean} from 'mathjs';
 
 type Props = {
     data: AverageWaveformsViewData
@@ -17,18 +19,20 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const setSelectedPlotKeys = useCallback((keys: string[]) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
-    const plots = useMemo(() => (data.averageWaveforms.map(aw => ({
+    const plots = useMemo(() => (data.averageWaveforms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(aw => ({
         key: `${aw.unitId}`,
         label: `Unit ${aw.unitId}`,
+        labelColor: colorForUnitId(aw.unitId),
         props: {
             channelIds: aw.channelIds,
-            waveform: aw.waveform,
+            waveform: subtractChannelMeans(aw.waveform),
+            channelLocations: data.channelLocations,
             samplingFrequency: data.samplingFrequency,
             noiseLevel: data.noiseLevel,
             width: 120,
             height: 120
         }
-    }))), [data.averageWaveforms, data.samplingFrequency, data.noiseLevel])
+    }))), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel])
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
         height,
@@ -46,5 +50,14 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         </div>
     )
 }
+
+const subtractChannelMeans = (waveform: number[][]) => {
+    return waveform.map(W => {
+        const mean0 = computeMean(W)
+        return W.map(a => (a - mean0))
+    })
+}
+
+const computeMean = (ary: number[]) => ary.length > 0 ? mean(ary) : 0
 
 export default AverageWaveformsView

@@ -4,29 +4,31 @@ import WaveformWidget from './WaveformWidget/WaveformWidget'
 type Props = {
     channelIds: number[]
     waveform: number[][]
+    channelLocations?: {[key: string]: number[]}
     samplingFrequency: number
     noiseLevel: number
     width: number
     height: number
 }
 
-const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, samplingFrequency, noiseLevel, width, height}) => {
-    const electrodes = useMemo(() => (
-        channelIds.map(channelId => ({
+const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, channelLocations, samplingFrequency, noiseLevel, width, height}) => {
+    const electrodes = useMemo(() => {
+        const locs = channelLocations || {}
+        return channelIds.map(channelId => ({
             id: channelId,
             label: `${channelId}`,
-            x: channelId, // for now
-            y: 0
+            x: locs[`${channelId}`] ? locs[`${channelId}`][0] : channelId,
+            y: locs[`${channelId}`] ? locs[`${channelId}`][1] : 0
         }))
-    ), [channelIds])
+    }, [channelIds, channelLocations])
     const waveformOpts = useMemo(() => ({waveformWidth: 1}), [])
     const selectedElectrodeIds = useMemo(() => ([]), [])
     return (
         <WaveformWidget
             waveform={waveform}
             electrodes={electrodes}
-            ampScaleFactor={1} // for now
-            layoutMode={'vertical'} // for now
+            ampScaleFactor={1.5} // for now
+            layoutMode={channelLocations ? 'geom' : 'vertical'} // for now
             width={width}
             height={height}
             selectedElectrodeIds={selectedElectrodeIds}

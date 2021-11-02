@@ -1,9 +1,11 @@
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo } from 'react'
-import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
-import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix, TimeScrollViewPanel } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
+import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix, TimeScrollViewPanel } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
+import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
 type Props = {
     data: SpikeAmplitudesViewData
@@ -29,8 +31,26 @@ const margins = {
 
 const panelSpacing = 4
 
+const useLocalSelectedUnitIds = (locked: boolean) => {
+    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
+    const [localValue, setLocalValue] = useState<number[]>([])
+    useEffect(() => {
+        if (!locked) {
+            setLocalValue(selectedUnitIds)
+        }
+    }, [selectedUnitIds, locked])
+    if (!locked) return {selectedUnitIds, setSelectedUnitIds}
+    else {
+        return {selectedUnitIds: localValue, setSelectedUnitIds: setLocalValue}
+    }
+}
+
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds} = useSelectedUnitIds()
+    const [selectionLocked, setSelectionLocked] = useState<boolean>(false)
+    const toggleSelectionLocked = useCallback(() => {
+        setSelectionLocked(a => (!a))
+    }, [])
+    const {selectedUnitIds, setSelectedUnitIds} = useLocalSelectedUnitIds(selectionLocked)
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
@@ -64,6 +84,10 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
     const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, data.startTimeSec),
         [pixelsPerSecond, data.startTimeSec])
+
+    const allUnitIds = useMemo(() => (
+        data.units.map(u => (u.unitId))
+    ), [data.units])
 
     const series = useMemo(() => (
         data.units.filter(u => (selectedUnitIds.includes(u.unitId))).map(unit => {
@@ -111,17 +135,36 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
     return (
-        <TimeScrollView
-            startTimeSec={data.startTimeSec}
-            endTimeSec={data.endTimeSec}
-            margins={margins}
-            panels={panels}
-            panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
+        <Splitter
             width={width}
             height={height}
-        />
+            initialPosition={200}
+        >
+            <LockableSelectUnitsWidget
+                unitIds={allUnitIds}
+                selectedUnitIds={selectedUnitIds}
+                setSelectedUnitIds={setSelectedUnitIds}
+                locked={selectionLocked}
+                toggleLockStateCallback={toggleSelectionLocked}
+            />
+            {
+                series.length > 0 ? (
+                    <TimeScrollView
+                        startTimeSec={data.startTimeSec}
+                        endTimeSec={data.endTimeSec}
+                        margins={margins}
+                        panels={panels}
+                        panelSpacing={panelSpacing}
+                        selectedPanelKeys={selectedPanelKeys}
+                        setSelectedPanelKeys={setSelectedPanelKeys}
+                        width={0} // filled in by splitter
+                        height={0} // filled in by splitter
+                    />
+                ) : (
+                    <div>You must select one or more units.</div>
+                )
+            }
+        </Splitter>
     )
 }
 

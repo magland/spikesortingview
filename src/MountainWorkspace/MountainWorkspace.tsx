@@ -54,7 +54,7 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
         >
             <div>
                 {/* Launch */}
-                <Expandable icon={launchIcon} label="" defaultExpanded={true} unmountOnExit={false}>
+                <Expandable icon={launchIcon} label="Open views" defaultExpanded={true} unmountOnExit={false}>
                     <MWViewLauncher
                         onLaunchView={handleLaunchView}
                         plugins={viewPlugins}
