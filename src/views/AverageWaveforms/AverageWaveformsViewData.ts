@@ -1,4 +1,5 @@
 import { validateObject } from "figurl"
+import { optional } from "figurl/viewInterface/kacheryTypes"
 import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
 
 type AverageWaveformData = {
@@ -20,6 +21,7 @@ export type AverageWaveformsViewData = {
     averageWaveforms: AverageWaveformData[]
     samplingFrequency: number
     noiseLevel: number
+    channelLocations?: {[key: string]: number[]}
 }
 
 export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewData => {
@@ -27,6 +29,7 @@ export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewDat
         type: isEqualTo('AverageWaveforms'),
         averageWaveforms: isArrayOf(isAverageWaveformData),
         samplingFrequency: isNumber,
-        noiseLevel: isNumber
+        noiseLevel: isNumber,
+        channelLocations: optional(() => (true))
     })
 }

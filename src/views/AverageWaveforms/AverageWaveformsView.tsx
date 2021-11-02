@@ -25,12 +25,13 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
+            channelLocations: data.channelLocations,
             samplingFrequency: data.samplingFrequency,
             noiseLevel: data.noiseLevel,
             width: 120,
             height: 120
         }
-    }))), [data.averageWaveforms, data.samplingFrequency, data.noiseLevel])
+    }))), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel])
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
         height,
