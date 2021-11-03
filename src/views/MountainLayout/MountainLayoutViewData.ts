@@ -1,5 +1,5 @@
 import { validateObject } from "figurl"
-import { isSha1Hash, Sha1Hash } from "figurl/viewInterface/kacheryTypes"
+import { isSha1Hash, optional, Sha1Hash } from "figurl/viewInterface/kacheryTypes"
 import { isArrayOf, isEqualTo } from "figurl/viewInterface/validateObject"
 import { isString } from "vega"
 
@@ -20,11 +20,13 @@ const isMLViewData = (x: any): x is MLViewData => {
 export type MountainLayoutViewData = {
     type: 'MountainLayout'
     views: MLViewData[]
+    curationUri?: string
 }
 
 export const isMountainLayoutViewData = (x: any): x is MountainLayoutViewData => {
     return validateObject(x, {
         type: isEqualTo('MountainLayout'),
-        views: isArrayOf(isMLViewData)
+        views: isArrayOf(isMLViewData),
+        curationUri: optional(isString)
     })
 }

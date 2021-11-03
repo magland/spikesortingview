@@ -1,14 +1,15 @@
 import PlotGrid from 'components/PlotGrid/PlotGrid';
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
-import { AverageWaveformsViewData } from './AverageWaveformsViewData';
-import AverageWaveformPlot from './AverageWaveformPlot';
-import colorForUnitId from 'views/common/colorForUnitId';
-import {mean, number} from 'mathjs';
-import ViewToolbar, { ViewToolbarAction } from 'views/common/ViewToolbar';
+import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { FaArrowDown, FaArrowUp, FaRegTimesCircle } from 'react-icons/fa';
+import colorForUnitId from 'views/common/colorForUnitId';
+import { ToolbarItem } from 'views/common/Toolbars';
 import VerticalScrollView from 'views/common/VerticalScrollView';
-import { FaArrowDown, FaArrowUp, FaRegTimesCircle } from 'react-icons/fa'
+import ViewToolbar from 'views/common/ViewToolbar';
+import AverageWaveformPlot from './AverageWaveformPlot';
+import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 
 type Props = {
     data: AverageWaveformsViewData
@@ -58,7 +59,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     }, [])
     
     const scalingActions = useMemo(() => {
-        const actions: ViewToolbarAction[] = [
+        const actions: ToolbarItem[] = [
             {
                 type: 'button',
                 callback: _handleScaleAmplitudeUp,
@@ -89,7 +90,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
                 type: 'divider'
             },
             {
-                type: 'checkbox',
+                type: 'toggle',
+                subtype: 'checkbox',
                 callback: _handleWaveformToggle,
                 title: waveformsMode === 'geom' ? 'Hide electrode geometry' : 'Show electrode geometry',
                 selected: waveformsMode === 'geom'
@@ -109,7 +111,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             <ViewToolbar
                 width={TOOLBAR_WIDTH}
                 height={height}
-                actions={scalingActions}
+                customActions={scalingActions}
             />
             <VerticalScrollView width={0} height={0}>
                 <PlotGrid
