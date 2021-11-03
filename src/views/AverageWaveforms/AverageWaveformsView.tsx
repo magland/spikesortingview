@@ -3,7 +3,7 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
-import { FaArrowDown, FaArrowUp, FaRegTimesCircle } from 'react-icons/fa';
+import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
 import colorForUnitId from 'views/common/colorForUnitId';
 import { ToolbarItem } from 'views/common/Toolbars';
 import VerticalScrollView from 'views/common/VerticalScrollView';
@@ -48,44 +48,11 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const _handleWaveformToggle = useCallback(() => {
         setWaveformsMode(m => (m === 'geom' ? 'vertical' : 'geom'))
     }, [])
-    const _handleScaleAmplitudeUp = useCallback(() => {
-        setAmpScaleFactor(x => (x * 1.2))
-    }, [])
-    const _handleScaleAmplitudeDown = useCallback(() => {
-        setAmpScaleFactor(x => (x / 1.2))
-    }, [])
-    const _handleResetAmplitude = useCallback(() => {
-        setAmpScaleFactor(1)
-    }, [])
     
     const scalingActions = useMemo(() => {
+        const amplitudeScaleToolbarEntries = AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor})
         const actions: ToolbarItem[] = [
-            {
-                type: 'button',
-                callback: _handleScaleAmplitudeUp,
-                title: 'Scale amplitude up [up arrow]',
-                icon: <FaArrowUp />,
-                keyCode: 38
-            },
-            {
-                type: 'button',
-                callback: _handleResetAmplitude,
-                title: 'Reset scale amplitude',
-                icon: <FaRegTimesCircle />
-            },
-            {
-                type: 'button',
-                callback: _handleScaleAmplitudeDown,
-                title: 'Scale amplitude down [down arrow]',
-                icon: <FaArrowDown />,
-                keyCode: 40
-            },
-            {
-                type: 'text',
-                title: 'Zoom level',
-                content: ampScaleFactor,
-                contentSigFigs: 2
-            },
+            ...amplitudeScaleToolbarEntries,
             {
                 type: 'divider'
             },
@@ -98,7 +65,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             }
         ]
         return actions
-    }, [waveformsMode, _handleResetAmplitude, _handleScaleAmplitudeDown, _handleScaleAmplitudeUp, _handleWaveformToggle, ampScaleFactor])
+    }, [waveformsMode, _handleWaveformToggle, ampScaleFactor])
     
     const TOOLBAR_WIDTH = 36 // hard-coded for now
     return (
