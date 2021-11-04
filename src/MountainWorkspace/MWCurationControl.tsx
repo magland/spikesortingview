@@ -20,6 +20,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
     const width = size.width || 300
     const _handleApplyLabel = useCallback(
         (label: string) => {
+            if (!sortingCurationDispatch) return
             sortingCurationDispatch({
                 type: 'ADD_UNIT_LABEL',
                 unitId: selectedUnitIds,
@@ -31,6 +32,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
 
     const _handleRemoveLabel = useCallback(
         (label: string) => {
+            if (!sortingCurationDispatch) return
             sortingCurationDispatch({
                 type: 'REMOVE_UNIT_LABEL',
                 unitId: selectedUnitIds,
@@ -41,6 +43,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
     )
 
     const handleMergeSelected = useCallback(() => {
+        if (!sortingCurationDispatch) return
         sortingCurationDispatch({
             type: 'MERGE_UNITS',
             unitIds: selectedUnitIds
@@ -49,6 +52,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
     }, [sortingCurationDispatch, selectedUnitIds, setSelectedUnitIds])
 
     const handleUnmergeSelected = useCallback(() => {
+        if (!sortingCurationDispatch) return
         sortingCurationDispatch({
             type: 'UNMERGE_UNITS',
             unitIds: selectedUnitIds
@@ -70,6 +74,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
     }
 
     if (!sortingCuration) return <div>No sorting curation</div>
+    if (!sortingCurationDispatch) return <div>Not authorized to curate this sorting</div>
 
     const labelCounts: {[key: string]: number} = {}
     for (const uid of selectedUnitIds) {
