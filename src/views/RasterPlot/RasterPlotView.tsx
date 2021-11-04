@@ -108,6 +108,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
+            zoomRecordingSelection={zoomRecordingSelecion}
             width={width}
             height={height}
         />

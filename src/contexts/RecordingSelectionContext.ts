@@ -63,9 +63,10 @@ export const useRecordingSelection = () => {
 // Not sure if this is really the right thing to do, or if we should just expose the underlying reducer directly...
 export const useTimeRange = () => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-    const zoomRecordingSelecion = useCallback((direction: 'in' | 'out') => {
+    const zoomRecordingSelecion = useCallback((direction: 'in' | 'out', factor?: number) => {
         recordingSelectionDispatch({
-            type: direction === 'in' ? 'zoomIn' : 'zoomOut'
+            type: direction === 'in' ? 'zoomIn' : 'zoomOut',
+            factor
         })
     }, [recordingSelectionDispatch])
     const panRecordingSelection = useCallback((direction: 'forward' | 'back', pct?: number) => {
@@ -91,18 +92,16 @@ type InitializeRecordingSelectionAction = {
 }
 
 const defaultPanPct = 10
-const defaultZoomScaleFactor = 1.4
+export const defaultZoomScaleFactor = 1.4
 
 type PanRecordingSelectionAction = {
     type: 'panForward' | 'panBack',
-    panAmountPct: number    // how far to pan, as a percent of the current visible window. Should always be positive.
+    panAmountPct: number    // how far to pan, as a percent of the current visible window (e.g. 10). Should always be positive.
 }
 
 type ZoomRecordingSelectionAction = {
     type: 'zoomIn' | 'zoomOut',
-    // TODO: Debounce multiple interactions with the zoom controls to avoid repeated re-computations.
-    // (Just set factor = base_factor ^ (zoomOuts - zoomIns))
-    factor?: number // Factor should always be >= 1 (if we zoom in, we'll use the inverse.)
+    factor?: number // Factor should always be >= 1 (if we zoom in, we'll use the inverse of factor.)
 }
 
 type SetFocusTimeRecordingSelectionAction = {

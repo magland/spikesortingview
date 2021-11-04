@@ -1,5 +1,6 @@
-import { matrix } from 'mathjs';
-import React, { useMemo } from 'react';
+import { defaultZoomScaleFactor } from 'contexts/RecordingSelectionContext';
+import { abs, matrix } from 'mathjs';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVMainLayer from './TSVMainLayer';
 
@@ -25,6 +26,7 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     panelSpacing: number
     selectedPanelKeys: string[]
     setSelectedPanelKeys: (keys: string[]) => void
+    zoomRecordingSelection?: (direction: "in" | "out", factor?: number) => void
     width: number
     height: number
 }
@@ -78,7 +80,8 @@ export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: nu
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, width, height } = props
+    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, zoomRecordingSelection, width, height } = props
+    const divRef = useRef<HTMLDivElement | null>(null)
     const timeRange = useMemo(() => (
         [startTimeSec, endTimeSec] as [number, number]
     ), [startTimeSec, endTimeSec])
@@ -86,8 +89,63 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const {panelHeight} = useMemo(() => computePanelDimensions(width, height, panels.length, panelSpacing, definedMargins),
         [width, height, panels.length, panelSpacing, definedMargins])
     const perPanelOffset = panelHeight + panelSpacing
+
+    const zoomsCount = useRef(0)
+    const zoomsPending = useRef(false)
+
+    useEffect(() => {
+        if (!divRef.current) return
+        const canvases = Array.from(divRef.current.children).filter(e => e.nodeName === 'CANVAS')
+        canvases.forEach(c => {
+            c.addEventListener('wheel', (e: Event) => {
+                if ((divRef?.current as any)['_hasFocus']) {
+                    e.preventDefault()
+                }
+            })
+        })
+    }, [divRef])
+
+    // This is the non-debounced version of zooming
+    // const handleWheel = useCallback((e: React.WheelEvent) => {
+    //     if (!(divRef?.current as any)['_hasFocus']) return
+    //     const direction = e.deltaY < 0 ? 'in' : 'out'
+    //     zoomRecordingSelection && zoomRecordingSelection(direction)
+    //     return false
+    // }, [zoomRecordingSelection])
+
+    // TODO: It'd be nice to show some sort of visual indication of how much zoom has been requested,
+    // one that's cheap to update (so redraws immediately).
+    const resolveZooms = useCallback(() => {
+        if (!zoomsCount.current || zoomsCount.current === 0) return
+        const direction = zoomsCount.current > 0 ? 'in' : 'out'
+        const factor = defaultZoomScaleFactor ** abs(zoomsCount.current)
+        // console.log(`Applying ${zoomsCount.current} operations leads to factor ${factor}`)
+        zoomRecordingSelection && zoomRecordingSelection(direction, factor)
+        zoomsPending.current = false
+        zoomsCount.current = 0
+    }, [zoomRecordingSelection])
+
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        if (!(divRef?.current as any)['_hasFocus']) return
+        zoomsCount.current += e.deltaY < 0 ? 1 : -1
+        if (!zoomsPending.current) {
+            // console.log('No zoom scheduled, scheduling one')
+            setTimeout(resolveZooms, 300)
+            zoomsPending.current = true
+        } /*else {
+            console.log(`Updated scheduled zoom amount to ${zoomsCount.current}.`)
+        }*/
+        return false
+    }, [resolveZooms])
+
     return (
-        <div style={{width, height, position: 'relative'}}>
+        <div
+            ref={divRef}
+            style={{width, height, position: 'relative'}}
+            onWheel={handleWheel}
+            onClick={((e) => (divRef?.current as any)['_hasFocus'] = true)}
+            onMouseOut={(e) => (divRef?.current as any)['_hasFocus'] = false}
+        >
             <TSVAxesLayer<T>
                 width={width}
                 height={height}
