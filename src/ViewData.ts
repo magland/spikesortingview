@@ -4,6 +4,7 @@ import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/Aver
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
+import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
@@ -18,7 +19,8 @@ export type ViewData =
     SummaryViewData |
     MountainLayoutViewData |
     SpikeAmplitudesViewData |
-    ElectrodeGeometryViewData
+    ElectrodeGeometryViewData |
+    PositionPlotViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -30,6 +32,7 @@ export const isViewData = (x: any): x is ViewData => {
         isSummaryViewData,
         isMountainLayoutViewData,
         isSpikeAmplitudesViewData,
-        isElectrodeGeometryViewData
+        isElectrodeGeometryViewData,
+        isPositionPlotViewData
     ])(x)
 }
