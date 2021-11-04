@@ -61,15 +61,17 @@ export const useRecordingSelection = () => {
 // }
 
 // Not sure if this is really the right thing to do, or if we should just expose the underlying reducer directly...
+export type ZoomDirection = 'in' | 'out'
+export type PanDirection = 'forward' | 'back'
 export const useTimeRange = () => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-    const zoomRecordingSelecion = useCallback((direction: 'in' | 'out', factor?: number) => {
+    const zoomRecordingSelecion = useCallback((direction: ZoomDirection, factor?: number) => {
         recordingSelectionDispatch({
             type: direction === 'in' ? 'zoomIn' : 'zoomOut',
             factor
         })
     }, [recordingSelectionDispatch])
-    const panRecordingSelection = useCallback((direction: 'forward' | 'back', pct?: number) => {
+    const panRecordingSelection = useCallback((direction: PanDirection, pct?: number) => {
         recordingSelectionDispatch({
             type: direction === 'forward' ? 'panForward' : 'panBack',
             panAmountPct: pct ?? defaultPanPct
@@ -157,7 +159,7 @@ const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction)
     } else if (action.type === 'panBack') {
         // panning backward. Need to make sure not to put the window start time before the recording start time.
         newStart = Math.max(state.visibleTimeStartSeconds - panDisplacementSeconds, state.recordingStartTimeSeconds)
-        newEnd = Math.min(newEnd + windowLength, state.recordingEndTimeSeconds)
+        newEnd = Math.min(newStart + windowLength, state.recordingEndTimeSeconds)
     } else {
         console.warn(`Unrecognized action type ${action.type} in panTime. Can't happen.`)
         return state
@@ -168,6 +170,7 @@ const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction)
     // Avoid creating new object if we didn't actually change anything
     if (newStart === state.visibleTimeStartSeconds && newEnd === state.visibleTimeEndSeconds) return state
 
+    // console.log(`Returning new state: ${newStart} - ${newEnd} (was ${state.visibleTimeStartSeconds} - ${state.visibleTimeEndSeconds})`)
     return {...state, visibleTimeStartSeconds: newStart, visibleTimeEndSeconds: newEnd, focusTimeSeconds: focus }
 }
 

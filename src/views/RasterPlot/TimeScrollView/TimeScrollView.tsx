@@ -1,6 +1,10 @@
-import { defaultZoomScaleFactor } from 'contexts/RecordingSelectionContext';
+import { defaultZoomScaleFactor, PanDirection, ZoomDirection } from 'contexts/RecordingSelectionContext';
 import { abs, matrix } from 'mathjs';
+import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
+import { ToolbarItem } from 'views/common/Toolbars';
+import ViewToolbar from 'views/common/ViewToolbar';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVMainLayer from './TSVMainLayer';
 
@@ -26,7 +30,8 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     panelSpacing: number
     selectedPanelKeys: string[]
     setSelectedPanelKeys: (keys: string[]) => void
-    zoomRecordingSelection?: (direction: "in" | "out", factor?: number) => void
+    zoomRecordingSelection?: (direction: ZoomDirection, factor?: number) => void
+    panRecordingSelection?: (direction: PanDirection, pct?: number) => void
     width: number
     height: number
 }
@@ -41,7 +46,7 @@ const defaultMargins = {
 export const computePanelDimensions = (width: number, height: number, panelCount: number, panelSpacing: number, margins?: Margins) => {
     // compute the dimensions of each panel in the panel set.
     const definedMargins = margins ?? defaultMargins
-    const panelWidth = width - definedMargins.left - definedMargins.right
+    const panelWidth = width - definedMargins.left - definedMargins.right - DefaultToolbarWidth
     const panelHeight = (height - definedMargins.top - definedMargins.bottom - panelSpacing * (panelCount - 1)) / panelCount
     return {panelWidth, panelHeight}
 }
@@ -80,7 +85,7 @@ export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: nu
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, zoomRecordingSelection, width, height } = props
+    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, zoomRecordingSelection, panRecordingSelection, width, height } = props
     const divRef = useRef<HTMLDivElement | null>(null)
     const timeRange = useMemo(() => (
         [startTimeSec, endTimeSec] as [number, number]
@@ -89,6 +94,16 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const {panelHeight} = useMemo(() => computePanelDimensions(width, height, panels.length, panelSpacing, definedMargins),
         [width, height, panels.length, panelSpacing, definedMargins])
     const perPanelOffset = panelHeight + panelSpacing
+
+    const timeControlActions = useMemo(() => {
+        if (!zoomRecordingSelection || !panRecordingSelection) return []
+        const timeControls = TimeWidgetToolbarEntries({zoomRecordingSelection, panRecordingSelection})
+        const actions: ToolbarItem[] = [
+            // This is the skeleton for where we'd fit any other controls around the time controls
+            ...timeControls
+        ]
+        return actions
+    }, [zoomRecordingSelection, panRecordingSelection])
 
     const zoomsCount = useRef(0)
     const zoomsPending = useRef(false)
@@ -138,33 +153,89 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         return false
     }, [resolveZooms])
 
+    const handleClick = (e: React.MouseEvent) => {
+        if (!divRef || !divRef.current || divRef.current === null) {
+            console.log(`divref is null.`)
+            return
+        }
+        (divRef?.current as any)['_hasFocus'] = true
+    }
+    const handleMouseLeave = (e: React.MouseEvent) => {
+        if (!divRef || !divRef.current || divRef.current === null) {
+            console.log(`divref is null.`)
+            return
+        }
+        (divRef?.current as any)['_hasFocus'] = false
+    }
+
+    // return (
+    //     <div
+    //         ref={divRef}
+    //         style={{width: width - DefaultToolbarWidth, height, position: 'relative'}}
+    //         onWheel={handleWheel}
+    //         onClick={handleClick}
+    //         onMouseOut={handleMouseLeave}
+    //     >
+    //         <TSVAxesLayer<T>
+    //             width={width - DefaultToolbarWidth}
+    //             height={height}
+    //             panels={panels}
+    //             panelHeight={panelHeight}
+    //             perPanelOffset={perPanelOffset}
+    //             selectedPanelKeys={selectedPanelKeys}
+    //             timeRange={timeRange}
+    //             margins={definedMargins}
+    //         />
+    //         <TSVMainLayer<T>
+    //             width={width - DefaultToolbarWidth}
+    //             height={height}
+    //             panels={panels}
+    //             panelHeight={panelHeight}
+    //             perPanelOffset={perPanelOffset}
+    //             margins={definedMargins}
+    //         />
+    //     </div>
+    // )
+
     return (
-        <div
+        <Splitter
             ref={divRef}
-            style={{width, height, position: 'relative'}}
-            onWheel={handleWheel}
-            onClick={((e) => (divRef?.current as any)['_hasFocus'] = true)}
-            onMouseOut={(e) => (divRef?.current as any)['_hasFocus'] = false}
+            width={width}
+            height={height}
+            initialPosition={DefaultToolbarWidth}
+            adjustable={false}
         >
-            <TSVAxesLayer<T>
-                width={width}
+            <ViewToolbar
+                width={DefaultToolbarWidth}
                 height={height}
-                panels={panels}
-                panelHeight={panelHeight}
-                perPanelOffset={perPanelOffset}
-                selectedPanelKeys={selectedPanelKeys}
-                timeRange={timeRange}
-                margins={definedMargins}
+                customActions={timeControlActions}
             />
-            <TSVMainLayer<T>
-                width={width}
-                height={height}
-                panels={panels}
-                panelHeight={panelHeight}
-                perPanelOffset={perPanelOffset}
-                margins={definedMargins}
-            />
-        </div>
+            <div
+                style={{width: width - DefaultToolbarWidth, height, position: 'relative'}}
+                onWheel={handleWheel}
+                onClick={handleClick}
+                onMouseOut={handleMouseLeave}
+            >
+                <TSVAxesLayer<T>
+                    width={width - DefaultToolbarWidth}
+                    height={height}
+                    panels={panels}
+                    panelHeight={panelHeight}
+                    perPanelOffset={perPanelOffset}
+                    selectedPanelKeys={selectedPanelKeys}
+                    timeRange={timeRange}
+                    margins={definedMargins}
+                />
+                <TSVMainLayer<T>
+                    width={width - DefaultToolbarWidth}
+                    height={height}
+                    panels={panels}
+                    panelHeight={panelHeight}
+                    perPanelOffset={perPanelOffset}
+                    margins={definedMargins}
+                />
+            </div>
+        </Splitter>
     )
 }
 

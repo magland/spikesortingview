@@ -56,8 +56,10 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = useMemo(() => data.plots.length, [data.plots])
     const { panelWidth, panelHeight } = useMemo(() => computePanelDimensions(width, height, panelCount, panelSpacing, margins), [width, height, panelCount])
-    const pixelsPerSecond = useMemo(() => 
-        computePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds),
+    const pixelsPerSecond = useMemo(() => {
+        // console.log(`Computing new pixels per second from ${visibleTimeStartSeconds} to ${visibleTimeEndSeconds}`)
+        return computePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
+    },
         [visibleTimeStartSeconds, visibleTimeEndSeconds, panelWidth]
     )
 
@@ -75,11 +77,11 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     }, [panelHeight])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, data.startTimeSec),
-        [pixelsPerSecond, data.startTimeSec])
+    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds),
+        [pixelsPerSecond, visibleTimeStartSeconds])
 
     const pixelPanels = useMemo(() => (data.plots.sort((p1, p2) => (p1.unitId - p2.unitId)).map(plot => {
-        const filteredSpikes = plot.spikeTimesSec.filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
+        const filteredSpikes = plot.spikeTimesSec.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
         const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
 
         // augmentedSpikesMatrix is a 2 x n matrix; each col vector is [time, 1]. The multiplication below gives an
@@ -95,7 +97,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             },
             paint: paintPanel
         }
-    })), [data.plots, data.startTimeSec, data.endTimeSec, timeToPixelMatrix, paintPanel])
+    })), [data.plots, visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, paintPanel])
 
     return visibleTimeStartSeconds < 0
     ? (<div>Loading...</div>)
@@ -109,6 +111,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
             zoomRecordingSelection={zoomRecordingSelecion}
+            panRecordingSelection={panRecordingSelection}
             width={width}
             height={height}
         />
