@@ -1,3 +1,4 @@
+import { useRecordingSelection, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
@@ -52,10 +53,47 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     }, [])
     const {selectedUnitIds, setSelectedUnitIds} = useLocalSelectedUnitIds(selectionLocked)
 
+    const allUnitIds = useMemo(() => (
+        data.units.map(u => (u.unitId))
+    ), [data.units])
+    
+    return (
+        <Splitter
+            width={width}
+            height={height}
+            initialPosition={200}
+        >
+            <LockableSelectUnitsWidget
+                unitIds={allUnitIds}
+                selectedUnitIds={selectedUnitIds}
+                setSelectedUnitIds={setSelectedUnitIds}
+                locked={selectionLocked}
+                toggleLockStateCallback={toggleSelectionLocked}
+            />
+            <SpikeAmplitudesViewChild
+                data={data}
+                width={0} // filled in by splitter
+                height={0} // filled in by splitter
+                selectedUnitIds={selectedUnitIds}
+            />
+        </Splitter>
+    )
+}
+
+type ChildProps = {
+    data: SpikeAmplitudesViewData
+    selectedUnitIds: number[]
+    width: number
+    height: number
+}
+
+const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selectedUnitIds, width, height}) => {
+    const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
+
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
     const { panelWidth, panelHeight } = useMemo(() => computePanelDimensions(width, height, panelCount, panelSpacing, margins), [width, height, panelCount])
-    const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, data.startTimeSec, data.endTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
+    const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds), [visibleTimeEndSeconds, visibleTimeStartSeconds, panelWidth])
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -82,24 +120,20 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     }, [width])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, data.startTimeSec),
-        [pixelsPerSecond, data.startTimeSec])
-
-    const allUnitIds = useMemo(() => (
-        data.units.map(u => (u.unitId))
-    ), [data.units])
+    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds),
+        [pixelsPerSecond, visibleTimeStartSeconds])
 
     const series = useMemo(() => (
         data.units.filter(u => (selectedUnitIds.includes(u.unitId))).map(unit => {
-            const filteredTimes = unit.spikeTimesSec.filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
-            const filteredAmplitudes = unit.spikeAmplitudes.filter((a, ii) => (data.startTimeSec <= unit.spikeTimesSec[ii]) && (unit.spikeTimesSec[ii] <= data.endTimeSec))
+            const filteredTimes = unit.spikeTimesSec.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
+            const filteredAmplitudes = unit.spikeAmplitudes.filter((a, ii) => (visibleTimeStartSeconds <= unit.spikeTimesSec[ii]) && (unit.spikeTimesSec[ii] <= visibleTimeEndSeconds))
             return {
                 unitId: unit.unitId,
                 times: filteredTimes,
                 amplitudes: filteredAmplitudes
             }
         })
-    ), [data.units, data.startTimeSec, data.endTimeSec, selectedUnitIds])
+    ), [data.units, visibleTimeStartSeconds, visibleTimeEndSeconds, selectedUnitIds])
 
     const amplitudeRange = useMemo(() => {
         const yMin = Math.min(0, min(series.map(S => (min(S.amplitudes)))))
@@ -134,38 +168,22 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     const selectedPanelKeys = useMemo(() => ([]), [])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
-    return (
-        <Splitter
+    const content = series.length > 0 ? (
+        <TimeScrollView
+            startTimeSec={data.startTimeSec}
+            endTimeSec={data.endTimeSec}
+            margins={margins}
+            panels={panels}
+            panelSpacing={panelSpacing}
+            selectedPanelKeys={selectedPanelKeys}
+            setSelectedPanelKeys={setSelectedPanelKeys}
             width={width}
             height={height}
-            initialPosition={200}
-        >
-            <LockableSelectUnitsWidget
-                unitIds={allUnitIds}
-                selectedUnitIds={selectedUnitIds}
-                setSelectedUnitIds={setSelectedUnitIds}
-                locked={selectionLocked}
-                toggleLockStateCallback={toggleSelectionLocked}
-            />
-            {
-                series.length > 0 ? (
-                    <TimeScrollView
-                        startTimeSec={data.startTimeSec}
-                        endTimeSec={data.endTimeSec}
-                        margins={margins}
-                        panels={panels}
-                        panelSpacing={panelSpacing}
-                        selectedPanelKeys={selectedPanelKeys}
-                        setSelectedPanelKeys={setSelectedPanelKeys}
-                        width={0} // filled in by splitter
-                        height={0} // filled in by splitter
-                    />
-                ) : (
-                    <div>You must select one or more units.</div>
-                )
-            }
-        </Splitter>
+        />
+    ) : (
+        <div>You must select one or more units.</div>
     )
+    return content
 }
 
 const min = (a: number[]) => {

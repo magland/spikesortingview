@@ -20,13 +20,13 @@ const isMLViewData = (x: any): x is MLViewData => {
 export type MountainLayoutViewData = {
     type: 'MountainLayout'
     views: MLViewData[]
-    curationUri?: string
+    sortingCurationUri?: string
 }
 
 export const isMountainLayoutViewData = (x: any): x is MountainLayoutViewData => {
     return validateObject(x, {
         type: isEqualTo('MountainLayout'),
         views: isArrayOf(isMLViewData),
-        curationUri: optional(isString)
+        sortingCurationUri: optional(isString)
     })
 }
