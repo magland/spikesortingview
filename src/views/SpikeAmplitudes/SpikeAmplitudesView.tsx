@@ -1,4 +1,4 @@
-import { useRecordingSelection, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
@@ -87,37 +87,37 @@ type ChildProps = {
     height: number
 }
 
+
+
+const paintPanel = (context: CanvasRenderingContext2D, props: PanelProps) => {
+    context.strokeStyle = 'black'
+    context.setLineDash([5, 15]);
+    context.beginPath()
+    context.moveTo(0, props.pixelZero)
+    context.lineTo(context.canvas.width, props.pixelZero)
+    context.stroke()
+    context.setLineDash([]);
+
+    for (let unit of props.units) {
+        context.fillStyle = colorForUnitId(unit.unitId)
+        for (let i=0; i<unit.pixelTimes.length; i++) {
+            const x = unit.pixelTimes[i]
+            const y = unit.pixelAmplitudes[i]
+            context.beginPath()
+            context.ellipse(x, y, 3, 3, 0, 0, Math.PI * 2, false)
+            context.fill()
+        }
+    }
+}
+
 const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selectedUnitIds, width, height}) => {
+    useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
     const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
     const { panelWidth, panelHeight } = useMemo(() => computePanelDimensions(width, height, panelCount, panelSpacing, margins), [width, height, panelCount])
     const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds), [visibleTimeEndSeconds, visibleTimeStartSeconds, panelWidth])
-
-    // We need to have the panelHeight before we can use it in the paint function.
-    // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
-    // but simplifies the prop list a bit.
-    const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
-        context.strokeStyle = 'black'
-        context.setLineDash([5, 15]);
-        context.beginPath()
-        context.moveTo(0, props.pixelZero)
-        context.lineTo(width, props.pixelZero)
-        context.stroke()
-        context.setLineDash([]);
-
-        for (let unit of props.units) {
-            context.fillStyle = colorForUnitId(unit.unitId)
-            for (let i=0; i<unit.pixelTimes.length; i++) {
-                const x = unit.pixelTimes[i]
-                const y = unit.pixelAmplitudes[i]
-                context.beginPath()
-                context.ellipse(x, y, 3, 3, 0, 0, Math.PI * 2, false)
-                context.fill()
-            }
-        }
-    }, [width])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
     const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds),
@@ -163,15 +163,13 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selected
             } as PanelProps,
             paint: paintPanel
         }]
-    }, [series, amplitudeRange, timeToPixelMatrix, paintPanel, panelHeight])
+    }, [series, amplitudeRange, timeToPixelMatrix, panelHeight])
 
     const selectedPanelKeys = useMemo(() => ([]), [])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
     const content = series.length > 0 ? (
         <TimeScrollView
-            startTimeSec={data.startTimeSec}
-            endTimeSec={data.endTimeSec}
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}

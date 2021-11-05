@@ -1,7 +1,7 @@
-import { defaultRecordingSelection, useRecordingSelection, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useEffect, useMemo } from 'react'
+import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { RasterPlotViewData } from './RasterPlotViewData'
 import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix } from './TimeScrollView/TimeScrollView'
@@ -32,26 +32,9 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const setSelectedPanelKeys = useCallback((keys: string[]) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
-    const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
 
-    useEffect(() => {
-        // This check is a bit of defensive coding: I don't know that we actually *need* to cut this off here if
-        // we have a non-default recordingSelection; theoretically the reducer should handle this fine.
-        // However, better to be sure.
-        // We *do* have to call the initialization in a useEffect hook though, otherwise we'll wind up attempting to
-        // change the props of App while its child (this Element) is rendering, which is a no-no.
-        if (recordingSelection === defaultRecordingSelection) {
-            recordingSelectionDispatch({
-                type: 'initializeRecordingSelection',
-                recordingStartSec: data.startTimeSec,
-                recordingEndSec: data.endTimeSec
-            })
-        }
-    // sic: we only want to rerun this if the underlying data changes, not every time recordingselection state changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [data.startTimeSec, data.endTimeSec])
-
-    const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelecion, panRecordingSelection } = useTimeRange()
+    useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
+    const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = useMemo(() => data.plots.length, [data.plots])
@@ -99,19 +82,15 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         }
     })), [data.plots, visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, paintPanel])
 
-    return visibleTimeStartSeconds < 0
+    return visibleTimeStartSeconds === false
     ? (<div>Loading...</div>)
     : (
         <TimeScrollView
-            startTimeSec={data.startTimeSec}
-            endTimeSec={data.endTimeSec}
             margins={margins}
             panels={pixelPanels}
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
-            zoomRecordingSelection={zoomRecordingSelecion}
-            panRecordingSelection={panRecordingSelection}
             width={width}
             height={height}
         />

@@ -1,24 +1,30 @@
-import React, { useCallback, useContext } from 'react'
+import React, { useCallback, useContext, useEffect } from 'react'
 
 export type RecordingSelection = {
-    recordingStartTimeSeconds: number
-    recordingEndTimeSeconds: number
+    recordingStartTimeSeconds: number | false
+    recordingEndTimeSeconds: number | false
     focusTimeSeconds?: number
-    visibleTimeStartSeconds: number
-    visibleTimeEndSeconds: number
+    visibleTimeStartSeconds: number | false
+    visibleTimeEndSeconds: number | false
 }
 
 export const defaultRecordingSelection: RecordingSelection = {
-    recordingStartTimeSeconds: -1,
-    recordingEndTimeSeconds: -1,
-    visibleTimeStartSeconds: -1,
-    visibleTimeEndSeconds: -1
+    recordingStartTimeSeconds: false,
+    recordingEndTimeSeconds: false,
+    visibleTimeStartSeconds: false,
+    visibleTimeEndSeconds: false
 }
 
 export const stubRecordingSelectionDispatch = (action: RecordingSelectionAction) => {}
 
-// We probably won't call this, but it's good to spell out the conditions of validity
 export const selectionIsValid = (r: RecordingSelection) => {
+    // If any of the required times are unset, the state is not valid.
+    if (r.recordingStartTimeSeconds === false
+        || r.recordingEndTimeSeconds === false
+        || r.visibleTimeEndSeconds === false
+        || r.visibleTimeStartSeconds === false) {
+            return false
+        }
     // recording start and end times must be non-negative
     if (r.recordingStartTimeSeconds < 0 || r.recordingEndTimeSeconds < 0) return false
     // recording end time must not precede recording start time
@@ -53,19 +59,30 @@ export const useRecordingSelection = () => {
     return c
 }
 
-// export const useInitializedRecordingSelectionContext = (recordingStart: number, recordingEnd: number) => {
-//     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-//     if (recordingSelection === defaultRecordingSelection) {
+export const useRecordingSelectionInitialization = (start: number, end: number) => {
+    const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
 
-//     }
-// }
+    useEffect(() => {
+        if (recordingSelection.recordingStartTimeSeconds === start &&
+            recordingSelection.recordingEndTimeSeconds === end) return
 
-// Not sure if this is really the right thing to do, or if we should just expose the underlying reducer directly...
+        recordingSelectionDispatch({
+            type: 'initializeRecordingSelection',
+            recordingStartSec: start,
+            recordingEndSec: end
+        })
+    }, [recordingSelection.recordingStartTimeSeconds, recordingSelection.recordingEndTimeSeconds, recordingSelectionDispatch, start, end])
+}
+
+
 export type ZoomDirection = 'in' | 'out'
 export type PanDirection = 'forward' | 'back'
 export const useTimeRange = () => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-    const zoomRecordingSelecion = useCallback((direction: ZoomDirection, factor?: number) => {
+    if (recordingSelection.visibleTimeEndSeconds === false || recordingSelection.visibleTimeStartSeconds === false) {
+        console.warn('WARNING: useTimeRange() with uninitialized recording selection state. Time ranges replaced with MIN_SAFE_INTEGER.')
+    }
+    const zoomRecordingSelection = useCallback((direction: ZoomDirection, factor?: number) => {
         recordingSelectionDispatch({
             type: direction === 'in' ? 'zoomIn' : 'zoomOut',
             factor
@@ -80,9 +97,14 @@ export const useTimeRange = () => {
     return {
         visibleTimeStartSeconds: recordingSelection.visibleTimeStartSeconds,
         visibleTimeEndSeconds: recordingSelection.visibleTimeEndSeconds,
-        zoomRecordingSelecion,
+        zoomRecordingSelection,
         panRecordingSelection
     }
+}
+
+export const useTimeFocus = () => {
+    const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
+    
 }
 
 /* RecordingSelection state management code, probably belongs in a different file *********************** */
@@ -131,11 +153,13 @@ export const recordingSelectionReducer = (state: RecordingSelection, action: Rec
 
 const initializeRecordingSelection = (state: RecordingSelection, action: InitializeRecordingSelectionAction): RecordingSelection => {
     if (state !== defaultRecordingSelection) { // TODO: do we need to actually test this, can this break due to reference issues?
-        console.log(`******** Ignoring recording-selection initialization request.`)
         if (state.recordingStartTimeSeconds !== action.recordingStartSec || state.recordingEndTimeSeconds !== action.recordingEndSec) {
             console.warn(`WARNING: Recording-selection reinitialization times (${action.recordingStartSec}, ${action.recordingEndSec}) do not match existing ones (${state.recordingStartTimeSeconds}, ${state.recordingEndTimeSeconds}). Attempt to load components with different recordings?`)
+            console.warn('New recording times will be loaded, but this behavior may not be intended.')
+        } else {    
+            console.log(`******** Ignoring redundant recording-selection initialization request.`)
+            return state
         }
-        return state
     }
     const newState: RecordingSelection = {
         recordingStartTimeSeconds: action.recordingStartSec,
@@ -148,6 +172,10 @@ const initializeRecordingSelection = (state: RecordingSelection, action: Initial
 }
 
 const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction): RecordingSelection => {
+    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+        console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
+        return state
+    }
     const windowLength = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
     const panDisplacementSeconds = action.panAmountPct/100 * windowLength
     let newStart = state.visibleTimeStartSeconds    
@@ -175,6 +203,10 @@ const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction)
 }
 
 const zoomTime = (state: RecordingSelection, action: ZoomRecordingSelectionAction): RecordingSelection => {
+    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+        console.warn(`WARNING: Attempt to call zoomTime() with uninitialized state ${state}.`)
+        return state
+    }
     const totalRecordingLength = state.recordingEndTimeSeconds - state.recordingStartTimeSeconds
     const currentWindow = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
 

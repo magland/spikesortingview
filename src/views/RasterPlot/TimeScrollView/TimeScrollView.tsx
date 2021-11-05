@@ -1,4 +1,4 @@
-import { defaultZoomScaleFactor, PanDirection, ZoomDirection } from 'contexts/RecordingSelectionContext';
+import { defaultZoomScaleFactor, useTimeRange } from 'contexts/RecordingSelectionContext';
 import { abs, matrix } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -23,15 +23,11 @@ type Margins = {
 }
 
 type TimeScrollViewProps<T extends {[key: string]: any}> = {
-    startTimeSec: number
-    endTimeSec: number
     margins?: Margins
     panels: TimeScrollViewPanel<T>[]
     panelSpacing: number
     selectedPanelKeys: string[]
     setSelectedPanelKeys: (keys: string[]) => void
-    zoomRecordingSelection?: (direction: ZoomDirection, factor?: number) => void
-    panRecordingSelection?: (direction: PanDirection, pct?: number) => void
     width: number
     height: number
 }
@@ -51,7 +47,11 @@ export const computePanelDimensions = (width: number, height: number, panelCount
     return {panelWidth, panelHeight}
 }
 
-export const computePixelsPerSecond = (panelWidth: number, startTimeSec: number, endTimeSec: number) => {
+export const computePixelsPerSecond = (panelWidth: number, startTimeSec: number | false, endTimeSec: number | false) => {
+    if (startTimeSec === false || endTimeSec === false || startTimeSec === endTimeSec) {
+        console.warn('Attempting to compute pixels-per-second with unset times or zero denominator. Returning default of 1.')
+        return 1
+    }
     return panelWidth / (endTimeSec - startTimeSec)
 }
 
@@ -61,7 +61,11 @@ export const computePixelsPerSecond = (panelWidth: number, startTimeSec: number,
 // offset from the initial time of the range.
 // This is set up as a right-multiplication because to allow mapping a set of times to
 // individual augmented vectors [t, 1] -- producing an n x 2 matrix.
-export const get1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSec: number) => {
+export const get1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSec: number | false) => {
+    if (startTimeSec === false) {
+        console.warn('Attempt to compute time transform with unset start time. Mapping to null.')
+        return matrix([[0], [0]])
+    }
     return matrix([ [pixelsPerSecond], [startTimeSec * -pixelsPerSecond] ])
 }
 
@@ -70,7 +74,11 @@ export const get1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSe
 // To use this one, you would take the time points in array `times` and then augment them by:
 // const augmentedTimes = matrix([ times, new Array(times.length).fill(1) ])
 // which gives a 2 x n matrix of augmented times; then the vector is the right shape afterward.
-export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number) => {
+export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | false) => {
+    if (startTimeSec === false) {
+        console.warn('Attempt to compute time transform with unset start time. Mapping to null.')
+        return matrix([0, 0])
+    }
     return matrix([pixelsPerSecond, startTimeSec * -pixelsPerSecond])
 }
 
@@ -85,11 +93,12 @@ export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: nu
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const {startTimeSec, endTimeSec, margins, panels, panelSpacing, selectedPanelKeys, zoomRecordingSelection, panRecordingSelection, width, height } = props
+    const { margins, panels, panelSpacing, selectedPanelKeys, width, height } = props
+    const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelection, panRecordingSelection } = useTimeRange()
     const divRef = useRef<HTMLDivElement | null>(null)
     const timeRange = useMemo(() => (
-        [startTimeSec, endTimeSec] as [number, number]
-    ), [startTimeSec, endTimeSec])
+        [visibleTimeStartSeconds, visibleTimeEndSeconds] as [number, number]
+    ), [visibleTimeStartSeconds, visibleTimeEndSeconds])
     const definedMargins = useMemo(() => margins || defaultMargins, [margins])
     const {panelHeight} = useMemo(() => computePanelDimensions(width, height, panels.length, panelSpacing, definedMargins),
         [width, height, panels.length, panelSpacing, definedMargins])
@@ -134,7 +143,6 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         if (!zoomsCount.current || zoomsCount.current === 0) return
         const direction = zoomsCount.current > 0 ? 'in' : 'out'
         const factor = defaultZoomScaleFactor ** abs(zoomsCount.current)
-        // console.log(`Applying ${zoomsCount.current} operations leads to factor ${factor}`)
         zoomRecordingSelection && zoomRecordingSelection(direction, factor)
         zoomsPending.current = false
         zoomsCount.current = 0
@@ -144,12 +152,9 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         if (!(divRef?.current as any)['_hasFocus']) return
         zoomsCount.current += e.deltaY < 0 ? 1 : -1
         if (!zoomsPending.current) {
-            // console.log('No zoom scheduled, scheduling one')
             setTimeout(resolveZooms, 300)
             zoomsPending.current = true
-        } /*else {
-            console.log(`Updated scheduled zoom amount to ${zoomsCount.current}.`)
-        }*/
+        }
         return false
     }, [resolveZooms])
 
@@ -167,35 +172,6 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         }
         (divRef?.current as any)['_hasFocus'] = false
     }
-
-    // return (
-    //     <div
-    //         ref={divRef}
-    //         style={{width: width - DefaultToolbarWidth, height, position: 'relative'}}
-    //         onWheel={handleWheel}
-    //         onClick={handleClick}
-    //         onMouseOut={handleMouseLeave}
-    //     >
-    //         <TSVAxesLayer<T>
-    //             width={width - DefaultToolbarWidth}
-    //             height={height}
-    //             panels={panels}
-    //             panelHeight={panelHeight}
-    //             perPanelOffset={perPanelOffset}
-    //             selectedPanelKeys={selectedPanelKeys}
-    //             timeRange={timeRange}
-    //             margins={definedMargins}
-    //         />
-    //         <TSVMainLayer<T>
-    //             width={width - DefaultToolbarWidth}
-    //             height={height}
-    //             panels={panels}
-    //             panelHeight={panelHeight}
-    //             perPanelOffset={perPanelOffset}
-    //             margins={definedMargins}
-    //         />
-    //     </div>
-    // )
 
     return (
         <Splitter
