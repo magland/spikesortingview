@@ -1,6 +1,6 @@
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { ToolbarItem } from 'views/common/Toolbars'
