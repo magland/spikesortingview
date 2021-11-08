@@ -12,7 +12,7 @@ const TaskStatusView: FunctionComponent<Props> = ({label, task}) => {
         <div>Waiting for task: {label}</div>
     )
     if ((task.status === 'waiting') || (task.status === 'pending') || (task.status === 'running') || (task.status === 'finished')) {
-        return <div>{label}: {task.status}</div>
+        return <div>{label ? label + ': ' : ''}{task.status}</div>
     }
     else if (task.status === 'error') {
         return <div>Error running {label}: {task.errorMessage}</div>
