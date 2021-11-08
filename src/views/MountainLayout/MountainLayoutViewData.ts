@@ -27,6 +27,6 @@ export const isMountainLayoutViewData = (x: any): x is MountainLayoutViewData =>
     return validateObject(x, {
         type: isEqualTo('MountainLayout'),
         views: isArrayOf(isMLViewData),
-        curationUri: optional(isString)
-    })
+        sortingCurationUri: optional(isString)
+    }, {allowAdditionalFields: true})
 }
