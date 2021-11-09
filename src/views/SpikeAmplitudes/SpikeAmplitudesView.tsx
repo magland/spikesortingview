@@ -1,7 +1,6 @@
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { ToolbarItem } from 'views/common/Toolbars'
@@ -9,6 +8,7 @@ import ViewToolbar from 'views/common/ViewToolbar'
 import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix, TimeScrollViewPanel } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
+import useLocalSelectedUnitIds from './useLocalSelectedUnitIds'
 
 type Props = {
     data: SpikeAmplitudesViewData
@@ -34,27 +34,9 @@ const margins = {
 
 const panelSpacing = 4
 
-const useLocalSelectedUnitIds = (locked: boolean) => {
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
-    const [localValue, setLocalValue] = useState<number[]>([])
-    useEffect(() => {
-        if (!locked) {
-            setLocalValue(selectedUnitIds)
-        }
-    }, [selectedUnitIds, locked])
-    if (!locked) return {selectedUnitIds, setSelectedUnitIds}
-    else {
-        return {selectedUnitIds: localValue, setSelectedUnitIds: setLocalValue}
-    }
-}
-
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) => {
-    const [selectionLocked, setSelectionLocked] = useState<boolean>(false)
-    const toggleSelectionLocked = useCallback(() => {
-        setSelectionLocked(a => (!a))
-    }, [])
-    const {selectedUnitIds, setSelectedUnitIds} = useLocalSelectedUnitIds(selectionLocked)
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
+    const {selectedUnitIds, setSelectedUnitIds, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
