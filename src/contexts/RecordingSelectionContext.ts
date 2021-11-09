@@ -104,7 +104,29 @@ export const useTimeRange = () => {
 
 export const useTimeFocus = () => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-    
+    const setTimeFocus = useCallback((time: number) => {
+        recordingSelectionDispatch({
+            type: 'setFocusTime',
+            focusTimeSec: time
+        })
+    }, [recordingSelectionDispatch])
+    const setTimeFocusFraction = useCallback((fraction: number) => {
+        if (fraction > 1 || fraction < 0) {
+            console.warn(`Attempt to set time focus to fraction outside range 0-1 (${fraction})`)
+            return
+        }
+        const window = (recordingSelection.visibleTimeEndSeconds || 0) - (recordingSelection.visibleTimeStartSeconds || 0)
+        const time = window * fraction
+        recordingSelectionDispatch({
+            type: 'setFocusTime',
+            focusTimeSec: time
+        })
+    }, [recordingSelection.visibleTimeEndSeconds, recordingSelection.visibleTimeStartSeconds, recordingSelectionDispatch])
+    return {
+        focusTime: recordingSelection.focusTimeSeconds,
+        setTimeFocus,
+        setTimeFocusFraction
+    }
 }
 
 /* RecordingSelection state management code, probably belongs in a different file *********************** */

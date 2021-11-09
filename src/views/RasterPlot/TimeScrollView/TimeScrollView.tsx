@@ -1,4 +1,4 @@
-import { defaultZoomScaleFactor, useTimeRange } from 'contexts/RecordingSelectionContext';
+import { defaultZoomScaleFactor, useTimeFocus, useTimeRange } from 'contexts/RecordingSelectionContext';
 import { abs, matrix } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
@@ -95,14 +95,23 @@ export const get1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: nu
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
     const { margins, panels, panelSpacing, selectedPanelKeys, width, height } = props
     const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelection, panRecordingSelection } = useTimeRange()
+    const { focusTime, setTimeFocusFraction } = useTimeFocus()
     const divRef = useRef<HTMLDivElement | null>(null)
     const timeRange = useMemo(() => (
         [visibleTimeStartSeconds, visibleTimeEndSeconds] as [number, number]
     ), [visibleTimeStartSeconds, visibleTimeEndSeconds])
     const definedMargins = useMemo(() => margins || defaultMargins, [margins])
-    const {panelHeight} = useMemo(() => computePanelDimensions(width, height, panels.length, panelSpacing, definedMargins),
+    const {panelHeight, panelWidth} = useMemo(() => computePanelDimensions(width, height, panels.length, panelSpacing, definedMargins),
         [width, height, panels.length, panelSpacing, definedMargins])
     const perPanelOffset = panelHeight + panelSpacing
+
+    const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds),
+        [panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds])
+    const focusTimeInPixels = useMemo(() => {
+        if (focusTime === undefined) return undefined
+        if (visibleTimeStartSeconds === false) return undefined
+        return pixelsPerSecond * (focusTime - visibleTimeStartSeconds) + definedMargins.left
+    }, [focusTime, visibleTimeStartSeconds, pixelsPerSecond, definedMargins.left])
 
     const timeControlActions = useMemo(() => {
         if (!zoomRecordingSelection || !panRecordingSelection) return []
@@ -158,16 +167,26 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         return false
     }, [resolveZooms])
 
-    const handleClick = (e: React.MouseEvent) => {
+    const handleClick = useCallback((e: React.MouseEvent) => {
         if (!divRef || !divRef.current || divRef.current === null) {
-            console.log(`divref is null.`)
             return
         }
-        (divRef?.current as any)['_hasFocus'] = true
-    }
+        if ((divRef?.current as any)['_hasFocus']) {
+            // clicks should only set the focus time if the div is already focused;
+            // don't change focus time from the focusing click only.
+            const clickX = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
+            // Constrain fraction to be in the range (0, 1) -- the clickable range is greater than the
+            // actual display/drawing area of the panels.
+            const frac = Math.max(0, Math.min(1, clickX / panelWidth))
+            setTimeFocusFraction(frac)
+        } else {
+            // Don't bother setting focus if we already have it
+            (divRef?.current as any)['_hasFocus'] = true
+        }
+    }, [definedMargins.left, panelWidth, setTimeFocusFraction])
+
     const handleMouseLeave = (e: React.MouseEvent) => {
         if (!divRef || !divRef.current || divRef.current === null) {
-            console.log(`divref is null.`)
             return
         }
         (divRef?.current as any)['_hasFocus'] = false
@@ -201,6 +220,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                     selectedPanelKeys={selectedPanelKeys}
                     timeRange={timeRange}
                     margins={definedMargins}
+                    focusTimePixels={focusTimeInPixels}
                 />
                 <TSVMainLayer<T>
                     width={width - DefaultToolbarWidth}
