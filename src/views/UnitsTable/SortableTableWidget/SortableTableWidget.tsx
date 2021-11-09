@@ -6,7 +6,7 @@ import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } f
 import './SortableTableWidget.css'
 
 
-export interface Row {
+export interface SortableTableWidgetRow {
     rowId: string
     data: {[key: string]: {
         value: any,
@@ -14,7 +14,7 @@ export interface Row {
     }}
 }
 
-export interface Column {
+export interface SortableTableWidgetColumn {
     columnName: string
     label: string
     tooltip: string
@@ -54,7 +54,7 @@ const HeaderRow: FunctionComponent<HeaderRowProps> = (props) => {
             const tooltip = (column.tooltip || column.label || '') + ' (click to sort)'
             return (
                 <TableCell key={column.name} onClick={() => onColumnClick(column.name)} title={tooltip} style={{cursor: 'pointer'}}>
-                    <Grid container justify="flex-start" style={{flexFlow: 'row'}}>
+                    <Grid container justifyContent="flex-start" style={{flexFlow: 'row'}}>
                         <Grid item key="icon">
                             <span style={{fontSize: 16, color: 'gray', paddingLeft: 3, paddingRight: 5, paddingTop: 2}}>
                                 {
@@ -143,8 +143,8 @@ const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
 interface TableProps {
     selectedRowIds: string[]
     onSelectedRowIdsChanged: (x: string[]) => void
-    rows: Row[]
-    columns: Column[]
+    rows: SortableTableWidgetRow[]
+    columns: SortableTableWidgetColumn[]
     defaultSortColumnName?: string
     displayedRowCount?: number
     height?: number
@@ -185,7 +185,7 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
         [_selections, selectedRowsSet, onSelectedRowIdsChanged]
     )
 
-    const columnForName = useCallback((columnName: string): Column => (columns.filter(c => (c.columnName === columnName))[0]), [columns])
+    const columnForName = useCallback((columnName: string): SortableTableWidgetColumn => (columns.filter(c => (c.columnName === columnName))[0]), [columns])
     const sortingRules = useMemoCompare<sortFieldEntry[]>('sortingRules', interpretSortFields(sortFieldOrder), [])
 
     const sortedRows = useMemo(() => {

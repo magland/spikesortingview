@@ -3,7 +3,10 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
+import { ToolbarItem } from 'views/common/Toolbars'
+import ViewToolbar from 'views/common/ViewToolbar'
 import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix, TimeScrollViewPanel } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
@@ -113,6 +116,7 @@ const paintPanel = (context: CanvasRenderingContext2D, props: PanelProps) => {
 const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selectedUnitIds, width, height}) => {
     useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
     const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
+    const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
@@ -136,10 +140,10 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selected
     ), [data.units, visibleTimeStartSeconds, visibleTimeEndSeconds, selectedUnitIds])
 
     const amplitudeRange = useMemo(() => {
-        const yMin = Math.min(0, min(series.map(S => (min(S.amplitudes)))))
-        const yMax = Math.max(0, max(series.map(S => (max(S.amplitudes)))))
+        const yMin = Math.min(0, min(series.map(S => (min(S.amplitudes))))) / ampScaleFactor
+        const yMax = Math.max(0, max(series.map(S => (max(S.amplitudes))))) / ampScaleFactor
         return {yMin, yMax}
-    }, [series])
+    }, [series, ampScaleFactor])
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         const yMap = ((y: number) => (
@@ -168,20 +172,48 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selected
     const selectedPanelKeys = useMemo(() => ([]), [])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
-    const content = series.length > 0 ? (
-        <TimeScrollView
-            margins={margins}
-            panels={panels}
-            panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
+    const scalingActions = useMemo(() => {
+        const amplitudeScaleToolbarEntries = AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor})
+        const actions: ToolbarItem[] = [
+            ...amplitudeScaleToolbarEntries,
+            {
+                type: 'divider'
+            }
+        ]
+        return actions
+    }, [ampScaleFactor])
+
+    const content = (
+        series.length > 0 ? (
+            <TimeScrollView
+                margins={margins}
+                panels={panels}
+                panelSpacing={panelSpacing}
+                selectedPanelKeys={selectedPanelKeys}
+                setSelectedPanelKeys={setSelectedPanelKeys}
+                width={0} // filled in by splitter
+                height={0} // filled in by splitter
+            />
+        ) : (
+            <div>You must select one or more units.</div>
+        )
+    )
+    const TOOLBAR_WIDTH = 36 // hard-coded for now
+    return (
+        <Splitter
             width={width}
             height={height}
-        />
-    ) : (
-        <div>You must select one or more units.</div>
+            initialPosition={TOOLBAR_WIDTH}
+            adjustable={false}
+        >
+            <ViewToolbar
+                width={TOOLBAR_WIDTH}
+                height={height}
+                customActions={scalingActions}
+            />
+            {content}
+        </Splitter>
     )
-    return content
 }
 
 const min = (a: number[]) => {

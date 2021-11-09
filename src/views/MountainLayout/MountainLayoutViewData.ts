@@ -13,8 +13,8 @@ const isMLViewData = (x: any): x is MLViewData => {
     return validateObject(x, {
         label: isString,
         type: isString,
-        figureDataSha1: isSha1Hash
-    })
+        figureDataSha1: isSha1Hash,
+    }, {allowAdditionalFields: true})
 }
 
 export type MountainLayoutViewData = {
@@ -28,5 +28,5 @@ export const isMountainLayoutViewData = (x: any): x is MountainLayoutViewData =>
         type: isEqualTo('MountainLayout'),
         views: isArrayOf(isMLViewData),
         sortingCurationUri: optional(isString)
-    })
+    }, {allowAdditionalFields: true})
 }

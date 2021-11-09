@@ -7,6 +7,7 @@ import MWViewContainer from './MWContainer';
 import MWViewLauncher from './MWViewLauncher';
 import { MWView, MWViewPlugin } from './MWViewPlugin';
 import MWViewWidget from './MWViewWidget';
+import MWCurationControl from './MWCurationControl';
 
 type Props = {
     viewPlugins: MWViewPlugin[]
@@ -59,6 +60,11 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
                         onLaunchView={handleLaunchView}
                         plugins={viewPlugins}
                     />
+                </Expandable>
+
+                {/* Curation */}
+                <Expandable icon={launchIcon} label="Curation" defaultExpanded={true} unmountOnExit={false}>
+                    <MWCurationControl />
                 </Expandable>
             </div>
             <MWViewContainer
