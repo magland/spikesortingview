@@ -21,6 +21,8 @@ export type WaveformPoint = {
 export type WaveformProps = {
     electrodes: PixelSpaceElectrode[]
     waveformPoints?: WaveformPoint[][]
+    waveformLowerPoints?: WaveformPoint[][]
+    waveformUpperPoints?: WaveformPoint[][]
     waveformOpts: {
         colors?: WaveformColors
         waveformWidth: number
@@ -44,6 +46,8 @@ type PaintProps = {
         waveformWidth: number
     }
     pixelSpacePaths: PixelSpacePath[]
+    pixelSpacePathsLower?: PixelSpacePath[]
+    pixelSpacePathsUpper?: PixelSpacePath[]
     xMargin: number
 }
 
@@ -65,11 +69,10 @@ const computePaths = (transform: TransformationMatrix, waveforms: WaveformPoint[
 }
 
 const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
-    const { waveformOpts, pixelSpacePaths, xMargin } = props
+    const { waveformOpts, pixelSpacePaths, pixelSpacePathsLower, pixelSpacePathsUpper, xMargin } = props
     if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
 
     const colors = waveformOpts?.colors || defaultWaveformColors
-    ctxt.strokeStyle = colors.base
     ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
     ctxt.resetTransform()
     ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
@@ -77,7 +80,31 @@ const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
     // ctxt.scale(1, yScale) // This would be a neat native way to adjust the vertical scaling, BUT it changes the pen aspect ratio.
     // So it doesn't work, alas. Leaving this comment here as a warning to future generations.
     const baseTransform = ctxt.getTransform()
+
+    pixelSpacePathsLower && pixelSpacePathsUpper && pixelSpacePathsLower.forEach((p, ii) => {
+        const pLower = pixelSpacePathsLower[ii]
+        const pUpper = pixelSpacePathsUpper[ii]
+
+        ctxt.fillStyle = '#dddddd'
+        ctxt.strokeStyle = '#bbbbbb'
+        ctxt.translate(pLower.offsetFromParentCenter[0], pLower.offsetFromParentCenter[1])
+        ctxt.beginPath()
+        
+        ctxt.moveTo(pLower.pointsInPaintBox[0][0], pLower.pointsInPaintBox[0][1])
+        for (let j=0; j<pLower.pointsInPaintBox.length; j++) {
+            ctxt.lineTo(pLower.pointsInPaintBox[j][0], pLower.pointsInPaintBox[j][1])
+        }
+        for (let j=pUpper.pointsInPaintBox.length - 1; j>=0; j--) {
+            ctxt.lineTo(pUpper.pointsInPaintBox[j][0], pUpper.pointsInPaintBox[j][1])
+        }
+
+        ctxt.fill()
+        ctxt.stroke()
+        ctxt.setTransform(baseTransform)
+    })
+
     pixelSpacePaths.forEach((p) => {
+        ctxt.strokeStyle = colors.base
         ctxt.translate(p.offsetFromParentCenter[0], p.offsetFromParentCenter[1])
         ctxt.beginPath()
         ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
@@ -92,7 +119,7 @@ const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
 
 
 const WaveformPlot = (props: WaveformProps) => {
-    const { electrodes, waveformPoints, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, layoutMode } = props
+    const { electrodes, waveformPoints, waveformLowerPoints, waveformUpperPoints, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, layoutMode } = props
     const opts = waveformOpts ?? defaultWaveformOpts
 
     const canvas = useMemo(() => {
@@ -108,11 +135,15 @@ const WaveformPlot = (props: WaveformProps) => {
                                   [        0,               0,                1]]
                                 ).toArray() as TransformationMatrix
         const paths = computePaths(transform, waveformPoints, electrodes)
+        const pathsLower = waveformLowerPoints ? computePaths(transform, waveformLowerPoints, electrodes) : undefined
+        const pathsUpper = waveformUpperPoints ? computePaths(transform, waveformUpperPoints, electrodes) : undefined
         const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0
 
         const paintProps: PaintProps = {
             waveformOpts: opts,
             pixelSpacePaths: paths,
+            pixelSpacePathsLower: pathsLower,
+            pixelSpacePathsUpper: pathsUpper,
             xMargin: xMargin
         }
 
@@ -122,7 +153,7 @@ const WaveformPlot = (props: WaveformProps) => {
             draw={paint}
             drawData={paintProps}
         />
-    }, [waveformPoints, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
+    }, [waveformPoints, waveformLowerPoints, waveformUpperPoints, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
 
     return canvas
 }

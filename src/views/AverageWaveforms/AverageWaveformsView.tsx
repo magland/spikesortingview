@@ -35,6 +35,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
+            waveformStdDev: aw.waveformStdDev,
             layoutMode: waveformsMode,
             channelLocations: data.channelLocations,
             samplingFrequency: data.samplingFrequency,

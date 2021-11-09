@@ -6,14 +6,16 @@ type AverageWaveformData = {
     unitId: number
     channelIds: number[]
     waveform: number[][]
+    waveformStdDev?: number[][]
 }
 
 export const isAverageWaveformData = (x: any): x is AverageWaveformData => {
     return validateObject(x, {
         unitId: isNumber,
         channelIds: isArrayOf(isNumber),
-        waveform: () => (true)
-    },)
+        waveform: () => (true),
+        waveformStdDev: optional(() => (true))
+    }, {allowAdditionalFields: true})
 }
 
 export type AverageWaveformsViewData = {
@@ -31,5 +33,5 @@ export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewDat
         samplingFrequency: isNumber,
         noiseLevel: isNumber,
         channelLocations: optional(() => (true))
-    })
+    }, {allowAdditionalFields: true})
 }
