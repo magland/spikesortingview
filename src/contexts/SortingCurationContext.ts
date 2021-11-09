@@ -78,12 +78,9 @@ export const sortingCurationReducer = (state: SortingCuration, action: SortingCu
 }
 
 const SortingCurationContext = React.createContext<{
-    sortingCuration: SortingCuration | undefined,
-    sortingCurationDispatch: (action: SortingCurationAction) => void
-}>({
-    sortingCuration: undefined,
-    sortingCurationDispatch: (action: SortingCurationAction) => {}
-})
+    sortingCuration?: SortingCuration,
+    sortingCurationDispatch?: (action: SortingCurationAction) => void
+}>({})
 
 export const useSortingCuration = () => {
     const c = useContext(SortingCurationContext)
