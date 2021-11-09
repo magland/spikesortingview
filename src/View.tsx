@@ -4,6 +4,7 @@ import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
+import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
@@ -43,6 +44,9 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     }
     else if (data.type === 'ElectrodeGeometry') {
         return <ElectrodeGeometryView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'PositionPlot') {
+        return <PositionPlotView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>

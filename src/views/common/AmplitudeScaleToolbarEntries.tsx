@@ -37,7 +37,7 @@ const AmplitudeScaleToolbarEntries = (props: AmplitudeScaleToolbarProps): Toolba
         },
         {
             type: 'text',
-            title: 'Zoom level',
+            title: 'Amplitude scaling factor',
             content: ampScaleFactor,
             contentSigFigs: 2
         }

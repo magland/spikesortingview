@@ -2,7 +2,10 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
+import { ToolbarItem } from 'views/common/Toolbars'
+import ViewToolbar from 'views/common/ViewToolbar'
 import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix, TimeScrollViewPanel } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
@@ -51,6 +54,7 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
         setSelectionLocked(a => (!a))
     }, [])
     const {selectedUnitIds, setSelectedUnitIds} = useLocalSelectedUnitIds(selectionLocked)
+    const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
@@ -102,10 +106,10 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     ), [data.units, data.startTimeSec, data.endTimeSec, selectedUnitIds])
 
     const amplitudeRange = useMemo(() => {
-        const yMin = Math.min(0, min(series.map(S => (min(S.amplitudes)))))
-        const yMax = Math.max(0, max(series.map(S => (max(S.amplitudes)))))
+        const yMin = Math.min(0, min(series.map(S => (min(S.amplitudes))))) / ampScaleFactor
+        const yMax = Math.max(0, max(series.map(S => (max(S.amplitudes))))) / ampScaleFactor
         return {yMin, yMax}
-    }, [series])
+    }, [series, ampScaleFactor])
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         const yMap = ((y: number) => (
@@ -134,10 +138,21 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
     const selectedPanelKeys = useMemo(() => ([]), [])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
-    return (
+    const scalingActions = useMemo(() => {
+        const amplitudeScaleToolbarEntries = AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor})
+        const actions: ToolbarItem[] = [
+            ...amplitudeScaleToolbarEntries,
+            {
+                type: 'divider'
+            }
+        ]
+        return actions
+    }, [ampScaleFactor])
+
+    const content = (
         <Splitter
-            width={width}
-            height={height}
+            width={0} // filled in by parent splitter
+            height={0} // filled in by parent splitter
             initialPosition={200}
         >
             <LockableSelectUnitsWidget
@@ -164,6 +179,22 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
                     <div>You must select one or more units.</div>
                 )
             }
+        </Splitter>
+    )
+    const TOOLBAR_WIDTH = 36 // hard-coded for now
+    return (
+        <Splitter
+            width={width}
+            height={height}
+            initialPosition={TOOLBAR_WIDTH}
+            adjustable={false}
+        >
+            <ViewToolbar
+                width={TOOLBAR_WIDTH}
+                height={height}
+                customActions={scalingActions}
+            />
+            {content}
         </Splitter>
     )
 }

@@ -60,7 +60,7 @@ const ToolbarItem: FunctionComponent<ToolbarElement> = (props: ToolbarElement) =
             <div
                 key={props.elementIndex}
                 title={props.title}
-                style={{textAlign: 'center', fontWeight: 'bold'}}
+                style={{textAlign: 'center', fontWeight: 'bold', cursor: 'default'}}
             >
                 {_content}
             </div>
