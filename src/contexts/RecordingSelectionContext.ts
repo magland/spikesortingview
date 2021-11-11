@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect } from 'react'
+import React, { useCallback, useContext, useEffect, useMemo } from 'react'
 
 export type RecordingSelection = {
     recordingStartTimeSeconds: number | false
@@ -94,16 +94,28 @@ export const useTimeRange = () => {
             panAmountPct: pct ?? defaultPanPct
         })
     }, [recordingSelectionDispatch])
+    const panRecordingSelectionDeltaT = useCallback((deltaT: number) => {
+        recordingSelectionDispatch({
+            type: 'panDeltaT',
+            deltaT
+        })
+    }, [recordingSelectionDispatch])
     return {
         visibleTimeStartSeconds: recordingSelection.visibleTimeStartSeconds,
         visibleTimeEndSeconds: recordingSelection.visibleTimeEndSeconds,
         zoomRecordingSelection,
-        panRecordingSelection
+        panRecordingSelection,
+        panRecordingSelectionDeltaT
     }
 }
 
 export const useTimeFocus = () => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
+    const timeForFraction = useMemo(() => ((fraction: number) => {
+        const window = (recordingSelection.visibleTimeEndSeconds || 0) - (recordingSelection.visibleTimeStartSeconds || 0)
+        const time = window * fraction
+        return time + (recordingSelection.visibleTimeStartSeconds || 0)
+    }), [recordingSelection.visibleTimeStartSeconds, recordingSelection.visibleTimeEndSeconds])
     const setTimeFocus = useCallback((time: number) => {
         recordingSelectionDispatch({
             type: 'setFocusTime',
@@ -115,17 +127,17 @@ export const useTimeFocus = () => {
             console.warn(`Attempt to set time focus to fraction outside range 0-1 (${fraction})`)
             return
         }
-        const window = (recordingSelection.visibleTimeEndSeconds || 0) - (recordingSelection.visibleTimeStartSeconds || 0)
-        const time = window * fraction
+        
         recordingSelectionDispatch({
             type: 'setFocusTime',
-            focusTimeSec: time + (recordingSelection.visibleTimeStartSeconds || 0)
+            focusTimeSec: timeForFraction(fraction)
         })
-    }, [recordingSelection.visibleTimeEndSeconds, recordingSelection.visibleTimeStartSeconds, recordingSelectionDispatch])
+    }, [recordingSelectionDispatch, timeForFraction])
     return {
         focusTime: recordingSelection.focusTimeSeconds,
         setTimeFocus,
-        setTimeFocusFraction
+        setTimeFocusFraction,
+        timeForFraction
     }
 }
 
@@ -145,6 +157,11 @@ type PanRecordingSelectionAction = {
     panAmountPct: number    // how far to pan, as a percent of the current visible window (e.g. 10). Should always be positive.
 }
 
+type PanRecordingSelectionDeltaTAction = {
+    type: 'panDeltaT',
+    deltaT: number
+}
+
 type ZoomRecordingSelectionAction = {
     type: 'zoomIn' | 'zoomOut',
     factor?: number // Factor should always be >= 1 (if we zoom in, we'll use the inverse of factor.)
@@ -155,7 +172,7 @@ type SetFocusTimeRecordingSelectionAction = {
     focusTimeSec: number
 }
 
-export type RecordingSelectionAction = InitializeRecordingSelectionAction | PanRecordingSelectionAction | ZoomRecordingSelectionAction
+export type RecordingSelectionAction = InitializeRecordingSelectionAction | PanRecordingSelectionAction | PanRecordingSelectionDeltaTAction | ZoomRecordingSelectionAction
     |  SetFocusTimeRecordingSelectionAction
 
 export const recordingSelectionReducer = (state: RecordingSelection, action: RecordingSelectionAction): RecordingSelection => {
@@ -163,6 +180,8 @@ export const recordingSelectionReducer = (state: RecordingSelection, action: Rec
         return initializeRecordingSelection(state, action)
     } else if (action.type === 'panForward' || action.type === 'panBack') {
         return panTime(state, action)
+    } else if (action.type === 'panDeltaT') {
+        return panTimeDeltaT(state, action)
     } else if (action.type === 'zoomIn' || action.type === 'zoomOut') {
         return zoomTime(state, action)
     } else if (action.type === 'setFocusTime') {
@@ -212,6 +231,36 @@ const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction)
         newEnd = Math.min(newStart + windowLength, state.recordingEndTimeSeconds)
     } else {
         console.warn(`Unrecognized action type ${action.type} in panTime. Can't happen.`)
+        return state
+    }
+    const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
+    const focus = keepFocus ? state.focusTimeSeconds : undefined
+
+    // Avoid creating new object if we didn't actually change anything
+    if (newStart === state.visibleTimeStartSeconds && newEnd === state.visibleTimeEndSeconds) return state
+
+    // console.log(`Returning new state: ${newStart} - ${newEnd} (was ${state.visibleTimeStartSeconds} - ${state.visibleTimeEndSeconds})`)
+    return {...state, visibleTimeStartSeconds: newStart, visibleTimeEndSeconds: newEnd, focusTimeSeconds: focus }
+}
+
+const panTimeDeltaT = (state: RecordingSelection, action: PanRecordingSelectionDeltaTAction): RecordingSelection => {
+    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+        console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
+        return state
+    }
+    const windowLength = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
+    const panDisplacementSeconds = action.deltaT
+    let newStart = state.visibleTimeStartSeconds    
+    let newEnd = state.visibleTimeEndSeconds
+    if (panDisplacementSeconds > 0) {
+        // panning forward. Just need to check that we don't run over the end of the recording.
+        newEnd = Math.min(state.visibleTimeEndSeconds + panDisplacementSeconds, state.recordingEndTimeSeconds)
+        newStart = Math.max(newEnd - windowLength, state.recordingStartTimeSeconds)
+    } else if (panDisplacementSeconds < 0) {
+        // panning backward. Need to make sure not to put the window start time before the recording start time.
+        newStart = Math.max(state.visibleTimeStartSeconds + panDisplacementSeconds, state.recordingStartTimeSeconds)
+        newEnd = Math.min(newStart + windowLength, state.recordingEndTimeSeconds)
+    } else {
         return state
     }
     const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
