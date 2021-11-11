@@ -206,7 +206,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const resolveZooms = useCallback(() => {
         if (!zoomsCount.current || zoomsCount.current === 0) return
         const direction = zoomsCount.current > 0 ? 'in' : 'out'
-        const factor = defaultZoomScaleFactor ** abs(zoomsCount.current)
+        const factor = defaultZoomScaleFactor ** abs(zoomsCount.current) // note that zoomsCount.current will be fractional
         zoomRecordingSelection && zoomRecordingSelection(direction, factor)
         zoomsPending.current = false
         zoomsCount.current = 0
@@ -214,9 +214,12 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
         if (!(divRef?.current as any)['_hasFocus']) return
-        zoomsCount.current += e.deltaY < 0 ? 1 : -1
+        // zoomsCount.current += e.deltaY < 0 ? 1 : -1
+        // use continuous zoom count so that it works nicely with countinuous as well as discrete mouse wheel. For example, trackpad is continuous wheel.
+        zoomsCount.current += -e.deltaY / 100
+        console.log('--- handle wheel', zoomsCount.current, e.deltaY)
         if (!zoomsPending.current) {
-            setTimeout(resolveZooms, 300)
+            setTimeout(resolveZooms, 50)
             zoomsPending.current = true
         }
         return false
