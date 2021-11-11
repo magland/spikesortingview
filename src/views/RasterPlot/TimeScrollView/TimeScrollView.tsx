@@ -226,18 +226,13 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         if (!divRef || !divRef.current || divRef.current === null) {
             return
         }
-        if ((divRef?.current as any)['_hasFocus']) {
-            // clicks should only set the focus time if the div is already focused;
-            // don't change focus time from the focusing click only.
-            const clickX = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
-            // Constrain fraction to be in the range (0, 1) -- the clickable range is greater than the
-            // actual display/drawing area of the panels.
-            const frac = Math.max(0, Math.min(1, clickX / panelWidth))
-            setTimeFocusFraction(frac)
-        } else {
-            // Don't bother setting focus if we already have it
-            (divRef?.current as any)['_hasFocus'] = true
-        }
+        const clickX = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
+        // Constrain fraction to be in the range (0, 1) -- the clickable range is greater than the
+        // actual display/drawing area of the panels.
+        const frac = Math.max(0, Math.min(1, clickX / panelWidth))
+        setTimeFocusFraction(frac)
+        
+        ;(divRef?.current as any)['_hasFocus'] = true
     }, [definedMargins.left, panelWidth, setTimeFocusFraction])
 
     const handleMouseLeave = (e: React.MouseEvent) => {
