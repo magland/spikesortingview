@@ -212,44 +212,12 @@ const initializeRecordingSelection = (state: RecordingSelection, action: Initial
     return newState
 }
 
-const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction): RecordingSelection => {
+const panTimeHelper = (state: RecordingSelection, panDisplacementSeconds: number) => {
     if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
         console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
         return state
     }
     const windowLength = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
-    const panDisplacementSeconds = action.panAmountPct/100 * windowLength
-    let newStart = state.visibleTimeStartSeconds    
-    let newEnd = state.visibleTimeEndSeconds
-    if (action.type === 'panForward') {
-        // panning forward. Just need to check that we don't run over the end of the recording.
-        newEnd = Math.min(state.visibleTimeEndSeconds + panDisplacementSeconds, state.recordingEndTimeSeconds)
-        newStart = Math.max(newEnd - windowLength, state.recordingStartTimeSeconds)
-    } else if (action.type === 'panBack') {
-        // panning backward. Need to make sure not to put the window start time before the recording start time.
-        newStart = Math.max(state.visibleTimeStartSeconds - panDisplacementSeconds, state.recordingStartTimeSeconds)
-        newEnd = Math.min(newStart + windowLength, state.recordingEndTimeSeconds)
-    } else {
-        console.warn(`Unrecognized action type ${action.type} in panTime. Can't happen.`)
-        return state
-    }
-    const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
-    const focus = keepFocus ? state.focusTimeSeconds : undefined
-
-    // Avoid creating new object if we didn't actually change anything
-    if (newStart === state.visibleTimeStartSeconds && newEnd === state.visibleTimeEndSeconds) return state
-
-    // console.log(`Returning new state: ${newStart} - ${newEnd} (was ${state.visibleTimeStartSeconds} - ${state.visibleTimeEndSeconds})`)
-    return {...state, visibleTimeStartSeconds: newStart, visibleTimeEndSeconds: newEnd, focusTimeSeconds: focus }
-}
-
-const panTimeDeltaT = (state: RecordingSelection, action: PanRecordingSelectionDeltaTAction): RecordingSelection => {
-    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
-        console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
-        return state
-    }
-    const windowLength = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
-    const panDisplacementSeconds = action.deltaT
     let newStart = state.visibleTimeStartSeconds    
     let newEnd = state.visibleTimeEndSeconds
     if (panDisplacementSeconds > 0) {
@@ -271,6 +239,25 @@ const panTimeDeltaT = (state: RecordingSelection, action: PanRecordingSelectionD
 
     // console.log(`Returning new state: ${newStart} - ${newEnd} (was ${state.visibleTimeStartSeconds} - ${state.visibleTimeEndSeconds})`)
     return {...state, visibleTimeStartSeconds: newStart, visibleTimeEndSeconds: newEnd, focusTimeSeconds: focus }
+}
+
+const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction): RecordingSelection => {
+    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+        console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
+        return state
+    }
+    const windowLength = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
+    const panDisplacementSeconds = action.panAmountPct / 100 * windowLength * (action.type === 'panBack' ? -1 : 1)
+    return panTimeHelper(state, panDisplacementSeconds)
+}
+
+const panTimeDeltaT = (state: RecordingSelection, action: PanRecordingSelectionDeltaTAction): RecordingSelection => {
+    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+        console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
+        return state
+    }
+    const panDisplacementSeconds = action.deltaT
+    return panTimeHelper(state, panDisplacementSeconds)
 }
 
 const zoomTime = (state: RecordingSelection, action: ZoomRecordingSelectionAction): RecordingSelection => {
