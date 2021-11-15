@@ -148,8 +148,8 @@ export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSe
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
     const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActionsAboveDefault, optionalActionsBelowDefault } = props
-    const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelection, panRecordingSelection } = useTimeRange()
-    const { focusTime, setTimeFocusFraction } = useTimeFocus()
+    const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelection, panRecordingSelection, panRecordingSelectionDeltaT } = useTimeRange()
+    const { focusTime, setTimeFocusFraction, timeForFraction } = useTimeFocus()
     const divRef = useRef<HTMLDivElement | null>(null)
     const timeRange = useMemo(() => (
         [visibleTimeStartSeconds, visibleTimeEndSeconds] as [number, number]
@@ -206,7 +206,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const resolveZooms = useCallback(() => {
         if (!zoomsCount.current || zoomsCount.current === 0) return
         const direction = zoomsCount.current > 0 ? 'in' : 'out'
-        const factor = defaultZoomScaleFactor ** abs(zoomsCount.current)
+        const factor = defaultZoomScaleFactor ** abs(zoomsCount.current) // note that zoomsCount.current will be fractional
         zoomRecordingSelection && zoomRecordingSelection(direction, factor)
         zoomsPending.current = false
         zoomsCount.current = 0
@@ -214,9 +214,11 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
         if (!(divRef?.current as any)['_hasFocus']) return
-        zoomsCount.current += e.deltaY < 0 ? 1 : -1
+        // zoomsCount.current += e.deltaY < 0 ? 1 : -1
+        // use continuous zoom count so that it works nicely with countinuous as well as discrete mouse wheel. For example, trackpad is continuous wheel.
+        zoomsCount.current += -e.deltaY / 100
         if (!zoomsPending.current) {
-            setTimeout(resolveZooms, 300)
+            setTimeout(resolveZooms, 50)
             zoomsPending.current = true
         }
         return false
@@ -226,25 +228,84 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         if (!divRef || !divRef.current || divRef.current === null) {
             return
         }
-        if ((divRef?.current as any)['_hasFocus']) {
-            // clicks should only set the focus time if the div is already focused;
-            // don't change focus time from the focusing click only.
-            const clickX = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
-            // Constrain fraction to be in the range (0, 1) -- the clickable range is greater than the
-            // actual display/drawing area of the panels.
-            const frac = Math.max(0, Math.min(1, clickX / panelWidth))
-            setTimeFocusFraction(frac)
-        } else {
-            // Don't bother setting focus if we already have it
-            (divRef?.current as any)['_hasFocus'] = true
-        }
+        const clickX = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
+        // Constrain fraction to be in the range (0, 1) -- the clickable range is greater than the
+        // actual display/drawing area of the panels.
+        const frac = Math.max(0, Math.min(1, clickX / panelWidth))
+        setTimeFocusFraction(frac)
+        
+        ;(divRef?.current as any)['_hasFocus'] = true
     }, [definedMargins.left, panelWidth, setTimeFocusFraction])
+
+    const panState = useRef<{
+        anchorTime?: number,
+        anchorX?: number,
+        panning?: boolean
+        pannedTime?: number
+        pannedX?: number
+        panPending?: boolean
+    }>({})
+
+    const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        if (!divRef || !divRef.current || divRef.current === null) {
+            return
+        }
+        const clickX = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
+        const frac = Math.max(0, Math.min(1, clickX / panelWidth))
+        panState.current.anchorTime = timeForFraction(frac)
+        panState.current.anchorX = clickX
+        panState.current.panning = false
+        panState.current.pannedX = undefined
+    }, [panelWidth, definedMargins, timeForFraction])
+
+    const handleMouseUp = useCallback((e: React.MouseEvent) => {
+        if (!divRef || !divRef.current || divRef.current === null) {
+            return
+        }
+        if (!panState.current.panning) {
+            handleClick(e)
+        }
+        panState.current = {}
+    }, [handleClick])
+
+    const resolvePanning = useCallback(() => {
+        if (!panState.current.panPending) return
+        panState.current.panPending = false
+        // what we want is for pannedX to correspond to anchorTime
+        // but pannedX corresponds to pannedTime
+        // so we need to translate time by anchorTime - pannedTime
+        const deltaT = (panState.current.anchorTime || 0) - (panState.current.pannedTime || 0)
+        panRecordingSelectionDeltaT(deltaT)
+    }, [panRecordingSelectionDeltaT])
+
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        if (!divRef || !divRef.current || divRef.current === null) {
+            return
+        }
+        const x = e.clientX - e.currentTarget.getBoundingClientRect().x - definedMargins.left
+        const frac = Math.max(0, Math.min(1, x / panelWidth))
+        if (panState.current.anchorX) {
+            const deltaX = x - panState.current.anchorX
+            if (Math.abs(deltaX) > 5) {
+                panState.current.panning = true
+            }
+        }
+        if (panState.current.panning) {
+            panState.current.pannedTime = timeForFraction(frac)
+            panState.current.pannedX = x
+            panState.current.panPending = true
+            setTimeout(() => {
+                resolvePanning()
+            }, 50)
+        }
+    }, [timeForFraction, definedMargins, panelWidth, resolvePanning])
 
     const handleMouseLeave = (e: React.MouseEvent) => {
         if (!divRef || !divRef.current || divRef.current === null) {
             return
         }
-        (divRef?.current as any)['_hasFocus'] = false
+        panState.current = {}
+        ;(divRef?.current as any)['_hasFocus'] = false
     }
 
     return (
@@ -263,7 +324,10 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
             <div
                 style={{width: width - DefaultToolbarWidth, height, position: 'relative'}}
                 onWheel={handleWheel}
-                onClick={handleClick}
+                // onClick={handleClick}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
                 onMouseOut={handleMouseLeave}
             >
                 <TSVAxesLayer<T>
