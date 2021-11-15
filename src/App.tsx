@@ -1,11 +1,12 @@
 import { MuiThemeProvider } from '@material-ui/core';
+import RecordingSelectionContext, { defaultRecordingSelection, recordingSelectionReducer } from 'contexts/RecordingSelectionContext';
+import SortingSelectionContext, { defaultSortingSelection, sortingSelectionReducer } from 'contexts/SortingSelectionContext';
 import { getFigureData, useWindowDimensions } from 'figurl';
 import React, { useEffect, useReducer, useState } from 'react';
+import './localStyles.css';
 import theme from './theme';
 import View from './View';
 import { isViewData, ViewData } from './ViewData';
-import './localStyles.css'
-import SortingSelectionContext, { defaultSortingSelection, sortingSelectionReducer } from 'contexts/SortingSelectionContext';
 
 function App() {
   const [data, setData] = useState<ViewData>()
@@ -13,6 +14,7 @@ function App() {
   const {width, height} = useWindowDimensions()
 
   const [sortingSelection, sortingSelectionDispatch] = useReducer(sortingSelectionReducer, defaultSortingSelection)
+  const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
 
   useEffect(() => {
     getFigureData().then((data: any) => {
@@ -38,13 +40,15 @@ function App() {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <SortingSelectionContext.Provider value={{sortingSelection, sortingSelectionDispatch}}>
-        <View
-          data={data}
-          width={width - 10}
-          height={height - 5}
-        />
-      </SortingSelectionContext.Provider>
+      <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
+        <SortingSelectionContext.Provider value={{sortingSelection, sortingSelectionDispatch}}>
+            <View
+            data={data}
+            width={width - 10}
+            height={height - 5}
+            />
+        </SortingSelectionContext.Provider>
+      </RecordingSelectionContext.Provider>
     </MuiThemeProvider>
   )
 }

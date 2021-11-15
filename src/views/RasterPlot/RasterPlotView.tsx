@@ -1,9 +1,10 @@
+import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { RasterPlotViewData } from './RasterPlotViewData'
-import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix } from './TimeScrollView/TimeScrollView'
+import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from './TimeScrollView/TimeScrollView'
 
 type Props = {
     data: RasterPlotViewData
@@ -32,10 +33,13 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
 
+    useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
+    const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
+
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = useMemo(() => data.plots.length, [data.plots])
-    const { panelWidth, panelHeight } = useMemo(() => computePanelDimensions(width, height, panelCount, panelSpacing, margins), [width, height, panelCount])
-    const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, data.startTimeSec, data.endTimeSec), [data.endTimeSec, data.startTimeSec, panelWidth])
+    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
+    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -51,11 +55,10 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     }, [panelHeight])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, data.startTimeSec),
-        [pixelsPerSecond, data.startTimeSec])
+    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
 
     const pixelPanels = useMemo(() => (data.plots.sort((p1, p2) => (p1.unitId - p2.unitId)).map(plot => {
-        const filteredSpikes = plot.spikeTimesSec.filter(t => (data.startTimeSec <= t) && (t <= data.endTimeSec))
+        const filteredSpikes = plot.spikeTimesSec.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
         const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
 
         // augmentedSpikesMatrix is a 2 x n matrix; each col vector is [time, 1]. The multiplication below gives an
@@ -71,12 +74,12 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             },
             paint: paintPanel
         }
-    })), [data.plots, data.startTimeSec, data.endTimeSec, timeToPixelMatrix, paintPanel])
+    })), [data.plots, visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, paintPanel])
 
-    return (
+    return visibleTimeStartSeconds === false
+    ? (<div>Loading...</div>)
+    : (
         <TimeScrollView
-            startTimeSec={data.startTimeSec}
-            endTimeSec={data.endTimeSec}
             margins={margins}
             panels={pixelPanels}
             panelSpacing={panelSpacing}

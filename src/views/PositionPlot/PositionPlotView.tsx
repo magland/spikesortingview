@@ -1,7 +1,8 @@
+import { useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
-import TimeScrollView, { computePanelDimensions, computePixelsPerSecond, get1dTimeToPixelMatrix, TimeScrollViewPanel } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {
@@ -30,16 +31,12 @@ const margins = {
 const panelSpacing = 4
 
 const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {startTimeSec, endTimeSec} = useMemo(() => {
-        const startTimeSec = min(data.timestamps)
-        const endTimeSec = max(data.timestamps)
-        return {startTimeSec, endTimeSec}
-    }, [data.timestamps])
+    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
-    const { panelWidth, panelHeight } = useMemo(() => computePanelDimensions(width, height, panelCount, panelSpacing, margins), [width, height, panelCount])
-    const pixelsPerSecond = useMemo(() => computePixelsPerSecond(panelWidth, startTimeSec, endTimeSec), [endTimeSec, startTimeSec, panelWidth])
+    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
+    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -69,14 +66,13 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     }, [width])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = useMemo(() => get1dTimeToPixelMatrix(pixelsPerSecond, startTimeSec),
-        [pixelsPerSecond, startTimeSec])
+    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
 
     const series = useMemo(() => {
         const series: {dimensionIndex: number, times: number[], values: number[]}[] = []
         for (let dimensionIndex=0; dimensionIndex<data.dimensionLabels.length; dimensionIndex++) {
-            const filteredTimes = data.timestamps.filter(t => (startTimeSec <= t) && (t <= endTimeSec))
-            const filteredValues = data.timestamps.map((t, ii) => (data.positions[ii][dimensionIndex])).filter((a, ii) => (startTimeSec <= data.timestamps[ii]) && (data.timestamps[ii] <= endTimeSec))
+            const filteredTimes = data.timestamps.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
+            const filteredValues = data.timestamps.map((t, ii) => (data.positions[ii][dimensionIndex])).filter((a, ii) => (visibleTimeStartSeconds <= data.timestamps[ii]) && (data.timestamps[ii] <= visibleTimeEndSeconds))
             series.push({
                 dimensionIndex,
                 times: filteredTimes,
@@ -84,7 +80,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             })
         }
         return series
-    }, [data.timestamps, startTimeSec, endTimeSec, data.dimensionLabels, data.positions])
+    }, [data.timestamps, visibleTimeStartSeconds, visibleTimeEndSeconds, data.dimensionLabels, data.positions])
 
     const valueRange = useMemo(() => {
         const yMin = Math.min(0, min(series.map(S => (min(S.values)))))
@@ -122,8 +118,6 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
 
     const content = (
         <TimeScrollView
-            startTimeSec={startTimeSec}
-            endTimeSec={endTimeSec}
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
