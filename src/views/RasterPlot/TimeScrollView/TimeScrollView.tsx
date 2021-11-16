@@ -1,5 +1,5 @@
 import { defaultZoomScaleFactor, useTimeFocus, useTimeRange } from 'contexts/RecordingSelectionContext';
-import { abs, matrix } from 'mathjs';
+import { abs, matrix, Matrix, multiply } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
@@ -60,20 +60,23 @@ export const usePixelsPerSecond = (panelWidth: number, startTimeSec: number | fa
     }, [panelWidth, startTimeSec, endTimeSec])
 }
 
+
+/* Scaling matrix computations */
+
 // Returns a 2 x 1 matrix (vector) which, when it right-multiplies an augmented vector of times,
 // will return the pixel equivalents of those times.
 // Upper element of vector is the pixels-per-second conversion factor, bottom element is the
 // offset from the initial time of the range.
 // This is set up as a right-multiplication because to allow mapping a set of times to
 // individual augmented vectors [t, 1] -- producing an n x 2 matrix.
-export const use1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSec: number | false) => {
+export const use1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSec: number | false, extraPixelOffset: number = 0) => {
     return useMemo(() => {
         if (startTimeSec === false) {
             console.warn('Attempt to compute time transform with unset start time. Mapping to null.')
             return matrix([[0], [0]])
         }
-        return matrix([ [pixelsPerSecond], [startTimeSec * -pixelsPerSecond] ])
-    }, [pixelsPerSecond, startTimeSec])
+        return matrix([ [pixelsPerSecond], [extraPixelOffset + startTimeSec * -pixelsPerSecond] ])
+    }, [pixelsPerSecond, startTimeSec, extraPixelOffset])
 }
 
 // This is the 1 x 2 matrix (vector) which can left-multiply an augmented vector of times
@@ -81,14 +84,14 @@ export const use1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSe
 // To use this one, you would take the time points in array `times` and then augment them by:
 // const augmentedTimes = matrix([ times, new Array(times.length).fill(1) ])
 // which gives a 2 x n matrix of augmented times; then the vector is the right shape afterward.
-export const use1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | false) => {
+export const use1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | false, extraPixelOffset: number = 0) => {
     return useMemo(() => {
         if (startTimeSec === false) {
             console.warn('Attempt to compute time transform with unset start time. Mapping to null.')
             return matrix([0, 0])
         }
-        return matrix([pixelsPerSecond, startTimeSec * -pixelsPerSecond])
-    }, [pixelsPerSecond, startTimeSec])
+        return matrix([pixelsPerSecond, extraPixelOffset + startTimeSec * -pixelsPerSecond])
+    }, [pixelsPerSecond, startTimeSec, extraPixelOffset])
 }
 
 export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | false, dataMin: number, dataMax: number, userScaleFactor: number, panelHeight: number, invertY?: boolean) => {
@@ -138,6 +141,126 @@ export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSe
     }, [pixelsPerSecond, startTimeSec, dataMin, dataMax, userScaleFactor, panelHeight, invertY])
 }
 
+/* Time-axis Tick computations */
+
+export type TimeTick = {
+    value: number
+    label: string
+    major: boolean
+    pixelXposition: number
+}
+
+type TickUnit = {
+    name: string,
+    secondsPerTick: number,
+    countPerLargerUnit: number,
+    scale_appropriate_label: (a: number) => string
+}
+
+const tickUnits: TickUnit[] = [
+    {
+        name: '1ms',
+        secondsPerTick: 0.001,
+        countPerLargerUnit: 10,
+        scale_appropriate_label: (a: number) => (`${a % 1000} ms`)
+    },
+    {
+        name: '10ms',
+        secondsPerTick: 0.01,
+        countPerLargerUnit: 10,
+        scale_appropriate_label: (a: number) => (`${(a * 10) % 1000} ms`)
+    },
+    {
+        name: '100ms',
+        secondsPerTick: 0.1,
+        countPerLargerUnit: 10,
+        scale_appropriate_label: (a: number) => (`${(a * 100) % 1000} ms`)
+    },
+    {
+        name: '1s',
+        secondsPerTick: 1,
+        countPerLargerUnit: 10,
+        scale_appropriate_label: (a: number) => (`${a % 60} s`)
+    },
+    {
+        name: '10s',
+        secondsPerTick: 10,
+        countPerLargerUnit: 6,
+        scale_appropriate_label: (a: number) => (`${(a * 10) % 60} s`)
+    },
+    {
+        name: '1min',
+        secondsPerTick: 60,
+        countPerLargerUnit: 10,
+        scale_appropriate_label: (a: number) => (`${a % 60} min`)
+    },
+    {
+        name: '10min',
+        secondsPerTick: 60 * 10,
+        countPerLargerUnit: 6,
+        scale_appropriate_label: (a: number) => (`${(a * 10) % 60} min`)
+    },
+    {
+        name: '1hr',
+        secondsPerTick: 60 * 60,
+        countPerLargerUnit: 6,
+        scale_appropriate_label: (a: number) => (`${a % 24} hr`)
+    },
+    {
+        name: '6hr',
+        secondsPerTick: 60 * 60 * 6,
+        countPerLargerUnit: 4,
+        scale_appropriate_label: (a: number) => (`${(a * 6) % 24} hr`)
+    },
+    {
+        name: '1day',
+        secondsPerTick: 60 * 60 * 24,
+        countPerLargerUnit: 10,
+        scale_appropriate_label: (a: number) => (`${a} day`)
+    },
+    {
+        name: '10day',
+        secondsPerTick: 60 * 60 * 24 * 10,
+        countPerLargerUnit: 10000,
+        scale_appropriate_label: (a: number) => (`${10 * a} day`)
+    }
+]
+
+const useTimeTicks = (startTimeSec: number | false, endTimeSec: number | false, timeToPixelMatrix: Matrix, pixelsPerSecond: number) => {
+    return useMemo(() => {
+        if (startTimeSec === false || endTimeSec === false) return []
+        const ret: any[] = []
+        // iterate over the defined tick scales and populate individual ticks of the appropriate scale.
+        for (let u of tickUnits) {
+            // pixels/second * seconds/tick = pixels/tick
+            const pixelsPerTick = pixelsPerSecond * u.secondsPerTick
+            if (pixelsPerTick <= 50) continue // ignore scales which would have too many ticks
+
+            const firstTickInRange = Math.ceil(startTimeSec / u.secondsPerTick)
+            const lastTickInRange = Math.floor(endTimeSec / u.secondsPerTick)
+            // A tick scale is major if it passes a minimum width or if there's fewer than 5 ticks at that scale.
+            const major = (pixelsPerTick > 200) || ((lastTickInRange - firstTickInRange) < 5)
+
+            for (let tickNumber = firstTickInRange; tickNumber <= lastTickInRange; tickNumber++) {
+                // skip ticks which would be represented by the next-larger scale
+                if ((tickNumber % u.countPerLargerUnit) === 0) continue
+
+                // const frac = ((tickNumber * u.duration_sec) - timeRange[0]) / (timeRange[1] - timeRange[0])
+                // const pixelX = leftMargin + panelWidth * frac
+                ret.push({
+                    value: tickNumber * u.secondsPerTick,
+                    label: u.scale_appropriate_label(tickNumber),
+                    major,
+                })
+            }
+        }
+        const augmentedTimes = matrix([ret.map(tick => tick.value), new Array(ret.length).fill(1) ])
+        const tickPositions = multiply(timeToPixelMatrix, augmentedTimes).valueOf() as number[]
+        tickPositions.forEach((t, i) => ret[i].pixelXposition = t)
+        return ret as TimeTick[]
+    }, [startTimeSec, endTimeSec, timeToPixelMatrix, pixelsPerSecond])
+}
+
 
 // Unfortunately, you can't nest generic type declarations here: so while this is properly a
 // FunctionComponent<TimeScrollViewPanel<T>>, there just isn't a way to do that syntactically
@@ -164,6 +287,9 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
         if (visibleTimeStartSeconds === false) return undefined
         return pixelsPerSecond * (focusTime - visibleTimeStartSeconds) + definedMargins.left
     }, [focusTime, visibleTimeStartSeconds, pixelsPerSecond, definedMargins.left])
+
+    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds, definedMargins.left)
+    const timeTicks = useTimeTicks(visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, pixelsPerSecond)
 
     const timeControlActions = useMemo(() => {
         if (!zoomRecordingSelection || !panRecordingSelection) return []
@@ -338,6 +464,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                     perPanelOffset={perPanelOffset}
                     selectedPanelKeys={selectedPanelKeys}
                     timeRange={timeRange}
+                    timeTicks={timeTicks}
                     margins={definedMargins}
                     focusTimePixels={focusTimeInPixels}
                 />
