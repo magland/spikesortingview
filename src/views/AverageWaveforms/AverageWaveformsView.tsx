@@ -25,6 +25,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
 
+    // NEED INITIALIZATION CALL HERE BUT WE DON'T ACTUALLY HAVE A FULL LIST OF KNOWN ELECTRODES
+
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
 

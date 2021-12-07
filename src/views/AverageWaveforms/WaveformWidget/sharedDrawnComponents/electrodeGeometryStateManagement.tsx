@@ -1,6 +1,7 @@
+import { Electrode } from 'contexts/RecordingSelectionContext'
 import { DragAction, dragReducer, DragState } from 'FigurlCanvas/DragCanvas'
 import { pointSpanToRegion, Vec2 } from "FigurlCanvas/Geometry"
-import { Electrode, LayoutMode, PixelSpaceElectrode } from './ElectrodeGeometry'
+import { LayoutMode, PixelSpaceElectrode } from './ElectrodeGeometry'
 import { computeElectrodeLocations, getDraggedElectrodeIds, getElectrodeAtPoint, xMargin as xMarginDefault } from './electrodeGeometryLayout'
 
 export interface ElectrodeGeometryState {

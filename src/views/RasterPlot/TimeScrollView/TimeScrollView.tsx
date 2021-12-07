@@ -118,16 +118,19 @@ export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSe
         //
         // which gives us an input, a scale, and an offset.
         // For the inverted case, rewrite [2] as:
-        //      [2']  y --> (1 - ((y * userScaleFactor)/y_range) + (y_min/y_range)) * panelHeight
+        //      [2']  y --> (1                 - ((y * userScaleFactor)/y_range) + (y_min/y_range)) * panelHeight
+        // Distribute the panelHeight:
+        //      [2"]  y --> (panelHeight      - (panelHeight * y * usf)/y_range) + (panelHeight * y_min)/y_range)
         // Again, use yScale = (panelHeight) / y_range:
-        //      [2"] y --> (yScale * y_range) - (yScale * y * userScaleFactor) + (yScale * y_min)
+        //      [2"'] y --> (yScale * y_range) - (yScale  * y * userScaleFactor) + (yScale * y_min)
         // and as a scale and offset version:
         //
         //      [2f]  y --> (-yScale * y * userScaleFactor) + (yScale * (y_range + y_min))
+        // (and observe that since y_range = y_max - y_min, then y_range + y_min = y_max.)
 
         const yRange = (dataMax - dataMin)
         const yScale = (panelHeight) / (yRange)
-        const yOffset = invertY ?  yScale * (dataMin + yRange)
+        const yOffset = invertY ?  yScale * dataMax
                                 : -yScale * dataMin
         const finalYScale = userScaleFactor * (invertY ? -yScale : yScale)
         
