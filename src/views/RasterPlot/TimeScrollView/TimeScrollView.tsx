@@ -6,6 +6,7 @@ import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/Time
 import { Divider, ToolbarItem } from 'views/common/Toolbars';
 import ViewToolbar from 'views/common/ViewToolbar';
 import TSVAxesLayer from './TSVAxesLayer';
+import TSVCursorLayer from './TSVCursorLayer';
 import TSVMainLayer from './TSVMainLayer';
 
 export type TimeScrollViewPanel<T extends {[key: string]: any}> = {
@@ -466,7 +467,6 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                     timeRange={timeRange}
                     timeTicks={timeTicks}
                     margins={definedMargins}
-                    focusTimePixels={focusTimeInPixels}
                 />
                 <TSVMainLayer<T>
                     width={width - DefaultToolbarWidth}
@@ -475,6 +475,13 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                     panelHeight={panelHeight}
                     perPanelOffset={perPanelOffset}
                     margins={definedMargins}
+                />
+                <TSVCursorLayer
+                    width={width - DefaultToolbarWidth}
+                    height={height}
+                    timeRange={timeRange}
+                    margins={definedMargins}
+                    focusTimePixels={focusTimeInPixels}
                 />
             </div>
         </Splitter>

@@ -4,6 +4,7 @@ import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/Aver
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
+import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "views/LivePositionPdfPlot/LivePositionPdfPlotViewData"
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
@@ -24,7 +25,8 @@ export type ViewData =
     ElectrodeGeometryViewData |
     PositionPlotViewData |
     LiveCrossCorrelogramsViewData |
-    PositionPdfPlotViewData
+    PositionPdfPlotViewData |
+    LivePositionPdfPlotViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -39,6 +41,7 @@ export const isViewData = (x: any): x is ViewData => {
         isElectrodeGeometryViewData,
         isPositionPlotViewData,
         isLiveCrossCorrelogramsViewData,
-        isPositionPdfPlotViewData
+        isPositionPdfPlotViewData,
+        isLivePositionPdfPlotViewData
     ])(x)
 }

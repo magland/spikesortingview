@@ -1,8 +1,6 @@
-import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
-import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo } from 'react'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import React, { FunctionComponent, useMemo } from 'react'
 import { PositionPdfPlotViewData } from './PositionPdfPlotViewData'
+import PositionPdfPlotWidget, { allocate2d, FetchSegmentQuery } from './PositionPdfPlotWidget'
 
 type Props = {
     data: PositionPdfPlotViewData
@@ -10,116 +8,42 @@ type Props = {
     height: number
 }
 
-type PanelProps = {
-}
-
-const margins = {
-    left: 30,
-    right: 20,
-    top: 20,
-    bottom: 50
-}
-
-const panelSpacing = 4
-
 const PositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) => {
-    useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
-    const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
-
-    const {visibleValues, visibleTimes} = useMemo(() => {
-        const visibleValues: number[][] = []
-        const visibleTimes: number[] = []
-        for (let i = 0; i < data.timeCoord.length; i++) {
-            const t = data.timeCoord[i]
-            if ((visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds)) {
-                visibleTimes.push(t)
-                visibleValues.push(data.pdf[i])
+    const numPositions = data.pdf[0].length
+    const fetchSegment = useMemo(() => (async (query: FetchSegmentQuery) => {
+        const ret = allocate2d(query.segmentSize, numPositions, 0) as number[][]
+        for (let i = 0; i < query.segmentSize; i++) {
+            for (let a = 0; a < query.downsampleFactor; a++) {
+                const i2 = i * query.downsampleFactor + a
+                const j = query.segmentNumber * query.segmentSize + i2
+                if ((0 <= j) && (j < data.pdf.length)) {
+                    for (let p = 0; p < numPositions; p++) {
+                        ret[i][p] += data.pdf[j][p]
+                    }
+                }
             }
         }
-        return {visibleValues, visibleTimes}
-    }, [data.timeCoord, data.pdf, visibleTimeStartSeconds, visibleTimeEndSeconds])
-
-    const panelCount = 1
-    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
-    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
-
-    const pixelTimes = useMemo(() => {
-        const augmentedVisibleTimesMatrix = matrix([ visibleTimes, new Array(visibleTimes.length).fill(1) ])
-        const pixelTimes = multiply(timeToPixelMatrix, augmentedVisibleTimesMatrix).valueOf() as number[]
-        return pixelTimes
-    }, [visibleTimes, timeToPixelMatrix])
-
-    const pixelPositions = useMemo(() => {
-        const minPosition = min(data.positionCoord)
-        const maxPosition = max(data.positionCoord)
-        const pixelPositions = data.positionCoord.map(x => (
-            (1 - (x - minPosition) / (maxPosition - minPosition)) * panelHeight
-        ))
-        return pixelPositions
-    }, [data.positionCoord, panelHeight])
-
-    const {minValue, maxValue} = useMemo(() => {
-        return {
-            minValue: min(visibleValues.map(a => (min(a)))),
-            maxValue: max(visibleValues.map(a => (max(a)))),
-        }
-    }, [visibleValues])
-
-    const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
-        for (let i = 0; i < pixelTimes.length; i++) {
-            const deltaPixelTime = (i + 1 < pixelTimes.length) ? (pixelTimes[i + 1] - pixelTimes[i]) : (pixelTimes[i] - pixelTimes[i - 1])
-            for (let j = 0; j < pixelPositions.length; j++) {
-                const deltaPixelPosition = (j + 1 < pixelPositions.length) ? (pixelPositions[j] - pixelPositions[j + 1]) : (pixelPositions[j - 1] - pixelPositions[j])
-                const v = (visibleValues[i][j] - minValue) / (maxValue - minValue)
-                const color = colorForValue(v)
-                const x0 = pixelTimes[i]
-                const y0 = pixelPositions[j] - deltaPixelPosition - 1
-                const w0 = deltaPixelTime + 1
-                const h0 = deltaPixelPosition + 1
-                context.fillStyle = color
-                context.fillRect(x0, y0, w0, h0)
+        for (let i = 0; i < query.segmentSize; i++) {
+            for (let p = 0; p < numPositions; p++) {
+                ret[i][p] /= query.downsampleFactor
             }
         }
-    }, [pixelTimes, pixelPositions, minValue, maxValue, visibleValues])
+        return ret
+    }), [data.pdf, numPositions])
 
-    const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
-        return [{
-            key: `pdf`,
-            label: ``,
-            props: {} as PanelProps,
-            paint: paintPanel
-        }]
-    }, [paintPanel])
+    const endTimeSec = data.startTimeSec + data.pdf.length / data.samplingFrequency
 
-    const selectedPanelKeys = useMemo(() => ([]), [])
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
-    const content = (
-        <TimeScrollView
-            margins={margins}
-            panels={panels}
-            panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
+    return (
+        <PositionPdfPlotWidget
+            startTimeSec={data.startTimeSec}
+            endTimeSec={endTimeSec}
+            samplingFrequency={data.samplingFrequency}
+            fetchSegment={fetchSegment}
+            numPositions={numPositions}
             width={width}
             height={height}
         />
     )
-    return content
-}
-
-const colorForValue = (v: number) => {
-    const a = Math.max(0, Math.min(255, Math.floor(v * 255) * 3))
-    return `rgb(${a},0,${a})`
-}
-
-const min = (a: number[]) => {
-    return a.reduce((prev, current) => (prev < current) ? prev : current, a[0] || 0)
-}
-
-const max = (a: number[]) => {
-    return a.reduce((prev, current) => (prev > current) ? prev : current, a[0] || 0)
 }
 
 export default PositionPdfPlotView
