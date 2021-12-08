@@ -17,7 +17,6 @@ const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}
             {
                 pdf_object: data.pdfObject,
                 segment_number: query.segmentNumber,
-                segment_size: query.segmentSize,
                 downsample_factor: query.downsampleFactor
             },
             {}
@@ -30,6 +29,8 @@ const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}
             endTimeSec={data.endTimeSec}
             samplingFrequency={data.samplingFrequency}
             fetchSegment={fetchSegment}
+            segmentSize={data.segmentSize}
+            multiscaleFactor={data.multiscaleFactor}
             numPositions={numPositions}
             width={width}
             height={height}

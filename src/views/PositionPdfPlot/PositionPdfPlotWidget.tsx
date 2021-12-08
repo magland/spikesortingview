@@ -17,6 +17,8 @@ type Props = {
     endTimeSec: number
     samplingFrequency: number
     numPositions: number
+    segmentSize: number
+    multiscaleFactor: number
     width: number
     height: number
 }
@@ -32,9 +34,8 @@ const margins = {
 }
 
 const panelSpacing = 4
-const segmentSize = 50000
 
-const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise<number[][]>, numTimepoints: number, numPositions: number) => {
+const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise<number[][]>, numTimepoints: number, numPositions: number, segmentSize: number, multiscaleFactor: number) => {
     const fetchSegmentCache = useFetchCache<FetchSegmentQuery>(fetchSegment)
     const get = useCallback((i1: number, i2: number, downsampleFactor: number) => {
         const s1 = Math.floor(i1 / segmentSize)
@@ -56,19 +57,21 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
             }
         }
         return ret
-    }, [fetchSegmentCache, numPositions])
+    }, [fetchSegmentCache, numPositions, segmentSize])
     return {
         get,
         numTimepoints,
-        numPositions
+        numPositions,
+        segmentSize,
+        multiscaleFactor
     }
 }
 
-const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, width, height}) => {
+const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, segmentSize, multiscaleFactor, width, height}) => {
     useRecordingSelectionInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
-    const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions)
+    const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions, segmentSize, multiscaleFactor)
 
     const {visibleValues, t1, t2} = useMemo(() => {
         if (!visibleTimeStartSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
@@ -78,7 +81,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         if (i2 <= i1) return {visibleValues: undefined, t1: 0, t2: 0}
         let downsampleFactor = 1
         while ((i2 - i1) / downsampleFactor > 1000) {
-            downsampleFactor *= 3
+            downsampleFactor *= dataModel.multiscaleFactor
         }
         const j1 = Math.floor(i1 / downsampleFactor)
         const j2 = Math.ceil(i2 / downsampleFactor)

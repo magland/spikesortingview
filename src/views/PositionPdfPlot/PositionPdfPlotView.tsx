@@ -8,6 +8,9 @@ type Props = {
     height: number
 }
 
+const segmentSize = 10000
+const multiscaleFactor = 3
+
 const PositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const numPositions = data.pdf[0].length
     const fetchSegment = useMemo(() => (async (query: FetchSegmentQuery) => {
@@ -40,6 +43,8 @@ const PositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) =>
             samplingFrequency={data.samplingFrequency}
             fetchSegment={fetchSegment}
             numPositions={numPositions}
+            segmentSize={segmentSize}
+            multiscaleFactor={multiscaleFactor}
             width={width}
             height={height}
         />
