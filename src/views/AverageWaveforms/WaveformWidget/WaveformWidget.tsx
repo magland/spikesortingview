@@ -1,6 +1,5 @@
-import { Electrode } from 'contexts/RecordingSelectionContext'
 import { FunctionComponent, useMemo } from 'react'
-import ElectrodeGeometry, { defaultMaxPixelRadius, LayoutMode } from './sharedDrawnComponents/ElectrodeGeometry'
+import ElectrodeGeometry, { defaultMaxPixelRadius, Electrode, LayoutMode } from './sharedDrawnComponents/ElectrodeGeometry'
 import { computeElectrodeLocations, xMargin as xMarginDefault } from './sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeColors } from './sharedDrawnComponents/electrodeGeometryPainting'
 import { getSpikeAmplitudeNormalizationFactor } from './waveformLogic'

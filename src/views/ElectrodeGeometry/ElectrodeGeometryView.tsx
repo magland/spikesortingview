@@ -1,6 +1,6 @@
-import { useElectrodeSet, useRecordingSelectionElectrodeInitialization } from 'contexts/RecordingSelectionContext'
 import React, { FunctionComponent } from 'react'
 import ElectrodeGeometry from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/ElectrodeGeometry'
+import { computeElectrodesFromIdsAndLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeGeometryViewData } from './ElectrodeGeometryViewData'
 
 type ElectrodeGeometryViewProps = {
@@ -12,12 +12,7 @@ type ElectrodeGeometryViewProps = {
 const ElectrodeGeometryView: FunctionComponent<ElectrodeGeometryViewProps> = (props: ElectrodeGeometryViewProps) => {
     const { data, width, height } = props
     const channelIds = Object.keys(data.channelLocations).map(id => parseInt(id))
-
-    useRecordingSelectionElectrodeInitialization(channelIds, data.channelLocations)
-    const { electrodes } = useElectrodeSet()
-
-    // TODO: Have the underlying component pull the electrode list from context
-    // and have the parent pass in only a list of the visible electrodes to filter
+    const electrodes = computeElectrodesFromIdsAndLocations(channelIds, data.channelLocations)
 
     return (
         <ElectrodeGeometry

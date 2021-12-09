@@ -1,19 +1,11 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react'
 
-export type Electrode = {
-    id: number
-    label: string
-    x: number
-    y: number
-}
-
 export type RecordingSelection = {
     recordingStartTimeSeconds: number | false
     recordingEndTimeSeconds: number | false
     focusTimeSeconds?: number
     visibleTimeStartSeconds: number | false
     visibleTimeEndSeconds: number | false
-    electrodes: Electrode[]
     selectedElectrodeIds: number[]
 }
 
@@ -22,7 +14,6 @@ export const defaultRecordingSelection: RecordingSelection = {
     recordingEndTimeSeconds: false,
     visibleTimeStartSeconds: false,
     visibleTimeEndSeconds: false,
-    electrodes: [],
     selectedElectrodeIds: []
 }
 
@@ -51,24 +42,8 @@ export const selectionIsValid = (r: RecordingSelection) => {
         // if set, focus time must be within the visible window
         if (r.focusTimeSeconds < r.visibleTimeStartSeconds || r.focusTimeSeconds > r.visibleTimeEndSeconds) return false
     }
-    // There mustn't be any selected electrode IDs that aren't part of the list of known electrode IDs.
-    if (r.selectedElectrodeIds.length > 0) {
-        const ids = new Set(r.electrodes.map(e => e.id))
-        if (r.selectedElectrodeIds.some(id => !ids.has(id))) return false
-    }
 
     return true
-}
-
-const electrodeListsAreEqual = (a: Electrode[], b: Electrode[]): boolean => {
-    if (a.length !== b.length) return false
-    if (a.length === 0 && b.length === 0) return true // two empty lists are equal
-    // compare IDs and locations
-    const mappedList: {[key: number]: number[]} = b.reduce((m, e) => ({
-        ...m, [e.id]: [e.x, e.y]
-    }), {})
-
-    return (a.every(e => mappedList[e.id] && e.x === mappedList[e.id][0] && e.y === mappedList[e.id][1]))
 }
 
 type RecordingSelectionContextType = {
@@ -100,40 +75,6 @@ export const useRecordingSelectionTimeInitialization = (start: number, end: numb
         })
     }, [recordingSelection.recordingStartTimeSeconds, recordingSelection.recordingEndTimeSeconds, recordingSelectionDispatch, start, end])
 }
-
-export const useRecordingSelectionElectrodeInitialization = (ids: number[], channelLocations?: {[key: string]: number[]}) => {
-    const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
-
-    useEffect(() => {
-        const locs = channelLocations || {}
-        if (channelLocations &&
-            (Object.keys(locs).length !== ids.length
-             || ids.some(id => !locs[`${id}`])
-        )) {
-            console.warn(`Attempt to initialize recording selection electrodes with location list that does not match IDs. Skipping...`)
-            return
-        }
-    
-        const newElectrodes = ids.map(id => {
-            const locationForElectrode = locs[`${id}`] || [id, 0]
-            return {
-                id,
-                label: `${id}`,
-                x: locationForElectrode[0],
-                y: locationForElectrode[1]
-            }
-        })
-
-        // Avoid doing an update if we'd just be replicating the same data
-        if (electrodeListsAreEqual(newElectrodes, recordingSelection.electrodes)) return
-
-        recordingSelectionDispatch({
-            type: 'initializeRecordingSelectionElectrodes',
-            electrodes: newElectrodes
-        })
-    }, [ids, channelLocations, recordingSelection.electrodes, recordingSelectionDispatch])
-}
-
 
 export type ZoomDirection = 'in' | 'out'
 export type PanDirection = 'forward' | 'back'
@@ -201,16 +142,6 @@ export const useTimeFocus = () => {
     }
 }
 
-export const useElectrodeSet = () => {
-    const { recordingSelection } = useRecordingSelection()
-    if (recordingSelection.electrodes.length === 0) {
-        console.warn('WARNING: useElectrodeSet() with empty list of electrodes.')
-    }
-    return {
-        electrodes: recordingSelection.electrodes
-    }
-}
-
 export const useSelectedElectrodes = () => {
     const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
     const setSelectedElectrodeIds = useCallback((ids: number[]) => {
@@ -232,11 +163,6 @@ type InitializeRecordingSelectionTimesAction = {
     type: 'initializeRecordingSelectionTimes',
     recordingStartSec: number,
     recordingEndSec: number
-}
-
-type InitializeRecordingSelectionElectrodesAction = {
-    type: 'initializeRecordingSelectionElectrodes',
-    electrodes: Electrode[]
 }
 
 const defaultPanPct = 10
@@ -267,14 +193,12 @@ type SetSelectedElectrodeIdsRecordingSelectionAction = {
     selectedIds: number[]
 }
 
-export type RecordingSelectionAction = InitializeRecordingSelectionTimesAction | InitializeRecordingSelectionElectrodesAction | PanRecordingSelectionAction
+export type RecordingSelectionAction = InitializeRecordingSelectionTimesAction  | PanRecordingSelectionAction
     | PanRecordingSelectionDeltaTAction | ZoomRecordingSelectionAction | SetFocusTimeRecordingSelectionAction | SetSelectedElectrodeIdsRecordingSelectionAction
 
 export const recordingSelectionReducer = (state: RecordingSelection, action: RecordingSelectionAction): RecordingSelection => {
     if (action.type === 'initializeRecordingSelectionTimes') {
         return initializeRecordingSelectionTimes(state, action)
-    } else if (action.type === 'initializeRecordingSelectionElectrodes'){
-        return initializeRecordingSelectionElectrodes(state, action)
     } else if (action.type === 'panForward' || action.type === 'panBack') {
         return panTime(state, action)
     } else if (action.type === 'panDeltaT') {
@@ -307,24 +231,9 @@ const initializeRecordingSelectionTimes = (state: RecordingSelection, action: In
         recordingEndTimeSeconds: action.recordingEndSec,
         visibleTimeStartSeconds: action.recordingStartSec,
         visibleTimeEndSeconds: action.recordingEndSec,
-        electrodes: state.electrodes,
         selectedElectrodeIds: state.selectedElectrodeIds
     }
     selectionIsValid(newState) || console.warn(`Bad initialization value for recordingSelection: start ${action.recordingStartSec}, end ${action.recordingEndSec}`)
-    return newState
-}
-
-const initializeRecordingSelectionElectrodes = (state: RecordingSelection, action: InitializeRecordingSelectionElectrodesAction): RecordingSelection => {
-    if (state.electrodes !== []) {
-        if (electrodeListsAreEqual(state.electrodes, action.electrodes)) return state
-    }
-    const newState: RecordingSelection = {
-        ...state,
-        electrodes: action.electrodes
-    }
-    // NB: DON'T check validity here: we might not have times set, and don't want to blow up if that happens.
-    // TODO: FIXME: validity check should be flexible enough to allow this to pass...
-    console.log(`After conversion: ${JSON.stringify(newState.electrodes)}`)
     return newState
 }
 

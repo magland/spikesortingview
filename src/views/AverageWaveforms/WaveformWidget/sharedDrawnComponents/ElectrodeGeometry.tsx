@@ -1,4 +1,4 @@
-import { Electrode, useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
+import { useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
 import DragCanvas, { DragAction, handleMouseDownIfDragging, handleMouseMoveIfDragging, handleMouseUpIfDragging } from 'FigurlCanvas/DragCanvas'
 import { Vec2 } from 'FigurlCanvas/Geometry'
@@ -10,6 +10,13 @@ import SvgElectrodeLayout from './ElectrodeGeometrySvg'
 const USE_SVG = false
 
 export const defaultMaxPixelRadius = 25
+
+export type Electrode = {
+    id: number
+    label: string
+    x: number
+    y: number
+}
 
 export type PixelSpaceElectrode = {
     e: Electrode
