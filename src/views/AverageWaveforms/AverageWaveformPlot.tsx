@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import WaveformWidget from './WaveformWidget/WaveformWidget'
+import WaveformWidget from './WaveformWidget/WaveformWidget';
 
 type Props = {
     channelIds: number[]
@@ -25,7 +25,6 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
         }))
     }, [channelIds, channelLocations])
     const waveformOpts = useMemo(() => ({waveformWidth: 1}), [])
-    const selectedElectrodeIds = useMemo(() => ([]), [])
     return (
         <WaveformWidget
             waveform={waveform}
@@ -35,7 +34,6 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             layoutMode={channelLocations ? layoutMode : 'vertical'}
             width={width}
             height={height}
-            selectedElectrodeIds={selectedElectrodeIds}
             showLabels={true} // for now
             noiseLevel={noiseLevel}
             samplingFrequency={samplingFrequency}

@@ -110,7 +110,7 @@ export const electrodeGeometryReducer = (state: ElectrodeGeometryState, action: 
         const clickedId = getElectrodeAtPoint(state.convertedElectrodes, state.pixelRadius, action.point)
         // Suppose we clicked nothing. If no modifier was down & there's a selection to clear, clear it;
         // otherwise nothing actually happens so return the existing state.
-        if (clickedId === 0 || clickedId === undefined) {
+        if (clickedId === undefined) {
             return (!(action.shift || action.ctrl) && action.selectedElectrodeIds.length > 0) 
             ?   {
                     ...state,

@@ -1,4 +1,4 @@
-import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
@@ -112,7 +112,7 @@ const paintPanel = (context: CanvasRenderingContext2D, props: PanelProps) => {
 }
 
 const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selectedUnitIds, width, height}) => {
-    useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
+    useRecordingSelectionTimeInitialization(data.startTimeSec, data.endTimeSec)
     const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
 

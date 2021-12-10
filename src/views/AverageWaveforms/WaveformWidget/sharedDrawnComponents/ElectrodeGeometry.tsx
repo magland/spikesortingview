@@ -1,3 +1,4 @@
+import { useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
 import DragCanvas, { DragAction, handleMouseDownIfDragging, handleMouseMoveIfDragging, handleMouseUpIfDragging } from 'FigurlCanvas/DragCanvas'
 import { Vec2 } from 'FigurlCanvas/Geometry'
@@ -21,15 +22,12 @@ export type PixelSpaceElectrode = {
     e: Electrode
     pixelX: number
     pixelY: number
-    // transform: TransformationMatrix // Dunno if we really need this?
 }
 
 export type LayoutMode = 'geom' | 'vertical'
 
 interface WidgetProps {
     electrodes: Electrode[],
-    selectedElectrodeIds: number[]
-    // selectionDispatch: RecordingSelectionDispatch
     width: number
     height: number
     colors?: ElectrodeColors
@@ -53,20 +51,21 @@ const getEventPoint = (e: React.MouseEvent) => {
 }
 
 const ElectrodeGeometry = (props: WidgetProps) => {
-    const { width, height, electrodes, selectedElectrodeIds } = props
+    const { width, height, electrodes } = props
+    const { selectedElectrodeIds, setSelectedElectrodeIds } = useSelectedElectrodes()
     const disableSelection = props.disableSelection ?? false
     const offsetLabels = props.offsetLabels ?? false
     const colors = props.colors ?? defaultColors
     const layoutMode: LayoutMode = props.layoutMode ?? 'geom'
     const maxElectrodePixelRadius = props.maxElectrodePixelRadius || defaultElectrodeLayerProps.maxElectrodePixelRadius
     const [state, dispatchState] = useReducer(electrodeGeometryReducer, {
-            convertedElectrodes: [],
-            pixelRadius: -1,
-            draggedElectrodeIds: [],
-            pendingSelectedElectrodeIds: selectedElectrodeIds,
-            dragState: {isActive: false},
-            xMarginWidth: -1
-        })
+                                                convertedElectrodes: [],
+                                                pixelRadius: -1,
+                                                draggedElectrodeIds: [],
+                                                pendingSelectedElectrodeIds: selectedElectrodeIds,
+                                                dragState: {isActive: false},
+                                                xMarginWidth: -1
+                                            })
 
     useEffect(() => {
         const type: ElectrodeGeometryActionType = 'INITIALIZE'
@@ -81,11 +80,12 @@ const ElectrodeGeometry = (props: WidgetProps) => {
         dispatchState(a)
     }, [width, height, electrodes, layoutMode, maxElectrodePixelRadius])
 
-    // // Call to update selected electrode IDs if our opinion differs from the one that was passed in
-    // // (but only if our opinion has changed)
-    // useEffect(() => {
-    //     selectionDispatch({type: 'SetSelectedElectrodeIds', selectedElectrodeIds: state.pendingSelectedElectrodeIds})
-    // }, [selectionDispatch, state.pendingSelectedElectrodeIds])
+    // Call to update selected electrode IDs if our opinion differs from the one that was passed in
+    // (but only if our opinion has changed)
+    // TODO: Does this create a race condition??
+    useEffect(() => {
+        setSelectedElectrodeIds(state.pendingSelectedElectrodeIds)
+    }, [setSelectedElectrodeIds, state.pendingSelectedElectrodeIds])
 
     const nextDragStateUpdate = useRef<DragAction | null>(null)
     const nextFrame = useRef<number>(0)

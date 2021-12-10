@@ -1,20 +1,25 @@
 import React, { FunctionComponent } from 'react'
+import ElectrodeGeometry from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/ElectrodeGeometry'
+import { computeElectrodesFromIdsAndLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeGeometryViewData } from './ElectrodeGeometryViewData'
 
-type Props = {
+type ElectrodeGeometryViewProps = {
     data: ElectrodeGeometryViewData
     width: number
     height: number
 }
 
-const ElectrodeGeometryView: FunctionComponent<Props> = ({data, width, height}) => {
+const ElectrodeGeometryView: FunctionComponent<ElectrodeGeometryViewProps> = (props: ElectrodeGeometryViewProps) => {
+    const { data, width, height } = props
+    const channelIds = Object.keys(data.channelLocations).map(id => parseInt(id))
+    const electrodes = computeElectrodesFromIdsAndLocations(channelIds, data.channelLocations)
+
     return (
-        <div>
-            <p>Not yet implemented</p>
-            <div>
-                <pre>{JSON.stringify(data, null, 4)}</pre>
-            </div>
-        </div>
+        <ElectrodeGeometry
+            width={width}
+            height={height}
+            electrodes={electrodes}
+        />
     )
 }
 
