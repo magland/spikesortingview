@@ -1,4 +1,4 @@
-import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
@@ -68,7 +68,7 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
 }
 
 const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, segmentSize, multiscaleFactor, width, height}) => {
-    useRecordingSelectionInitialization(startTimeSec, endTimeSec)
+    useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
     const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions, segmentSize, multiscaleFactor)
