@@ -171,7 +171,7 @@ const computeDataToPixelTransform = (width: number, height: number, scaleFactor:
 const normalizeElectrodeLocations = (width: number, height: number, electrodes: Electrode[]): Electrode[] => {
     const canvasAspectRatio = (width - xMargin * 2) / (height - yMargin * 2)
     const _electrodes = replaceEmptyLocationsWithDefaultLayout(electrodes)
-    const {boxAspect: boxAspectRatio, boxCenter} = getElectrodesAspectRatio(_electrodes)
+    const {boxAspect: boxAspectRatio} = getElectrodesAspectRatio(_electrodes)
     if (boxAspectRatio === 1 || canvasAspectRatio === 1 || (boxAspectRatio > 1) === (canvasAspectRatio > 1)) {
         // Aspect ratios (W/H) < 1 are portrait mode. > 1 are landscape.
         // If either source or target is a square, or if the canvas & native-space aspect ratios match,
