@@ -1,11 +1,34 @@
 import funcToTransform from "FigurlCanvas/funcToTransform"
-import { getBoundingBoxForEllipse, getHeight, getWidth, RectangularRegion, TransformationMatrix, transformPoints, Vec2 } from "FigurlCanvas/Geometry"
+import { getHeight, getWidth, RectangularRegion, TransformationMatrix, transformPoints, Vec2 } from "FigurlCanvas/Geometry"
 import { min, norm } from "mathjs"
-import { getArrayMax, getArrayMin } from "./utility"
 import { defaultMaxPixelRadius, Electrode, PixelSpaceElectrode } from './ElectrodeGeometry'
+import { getArrayMax, getArrayMin } from "./utility"
 
 export const xMargin = 10
 const yMargin = 10
+
+export const computeElectrodesFromIdsAndLocations = (ids: number[], channelLocations?: {[key: string]: number[]}): Electrode[] => {
+    const locs = channelLocations || {}
+    if (channelLocations &&
+        (Object.keys(locs).length !== ids.length
+         || ids.some(id => !locs[`${id}`])
+    )) {
+        console.warn(`Attempt to compute electrode locations with mismatched lists. Skipping...`)
+        return []
+    }
+
+    const electrodes = ids.map(id => {
+        const locationForElectrode = locs[`${id}`] || [id, 0]
+        return {
+            id,
+            label: `${id}`,
+            x: locationForElectrode[0],
+            y: locationForElectrode[1]
+        }
+    })
+
+    return electrodes
+}
 
 const computeRadiusCache = new Map<string, number>()
 const computeRadiusDataSpace = (electrodes: Electrode[]): number => {
@@ -25,7 +48,7 @@ const computeRadiusDataSpace = (electrodes: Electrode[]): number => {
             leastNorm = Math.min(leastNorm, dist as number)
         })
     })
-    // (might set a hard cap, but remember these numbers are in electrode-space coordinates)
+    // (could set a hard cap, but remember these numbers are in electrode-space coordinates)
     const radius = 0.45 * leastNorm
     computeRadiusCache.set(key, radius)
     return radius
@@ -43,8 +66,11 @@ const getElectrodeSetBoundingBox = (electrodes: Electrode[], radius: number): Re
 const getElectrodesAspectRatio = (electrodes: Electrode[]) => {
     const radius = computeRadiusDataSpace(electrodes)
     const boundingBox = getElectrodeSetBoundingBox(electrodes, radius)
-    const boxAspect = getWidth(boundingBox) / getHeight(boundingBox)
-    return boxAspect
+    const boxWidth = getWidth(boundingBox)
+    const boxHeight = getHeight(boundingBox)
+    const boxCenter = { x: (boxWidth/2) + boundingBox.xmin, y: (boxHeight/2) + boundingBox.ymin}
+    const boxAspect = boxWidth / boxHeight
+    return {boxAspect, boxCenter}
 }
 
 const replaceEmptyLocationsWithDefaultLayout = (electrodes: Electrode[]): Electrode[] => {
@@ -72,35 +98,20 @@ const computeDataToPixelTransformVerticalLayout = (width: number, height: number
     })
 }
 
-// NOTE TO SELF: for vertical layout, radius is 1/(n+1) in dataspace.
+// NOTE: for vertical layout, radius is 1/(n+1) in dataspace.
 // pixelradius is thus (canvas height less vertical margins) / n+1 (where n = # of electrodes).
-
 const convertElectrodesToPixelSpaceVerticalLayout = (electrodes: Electrode[], transform: TransformationMatrix): PixelSpaceElectrode[] => {
     // for vertical layout, we ignore any actual location information and just distribute the electrodes evenly over a column.
     // Do that here by resetting the processed electrode geometry into the assigned points.
     const points = electrodes.map((e, ii) => [0.5, (0.5 + ii)/(1 + electrodes.length)])
     const pixelspacePoints = transformPoints(transform, points)
 
-    // pixelRadius is only used to compute the 'transform' value, which we may not even use...
     return electrodes.map((e, ii) =>  {
         const [pixelX, pixelY] = pixelspacePoints[ii]
-        const electrodeBoundingBox: RectangularRegion = {
-            xmin: 0,
-            xmax: 1,
-            ymin: (ii / electrodes.length),
-            ymax: ((ii + 1)/electrodes.length)
-        }
         return {
             e: e,
             pixelX: pixelX,
             pixelY: pixelY,
-            // This is the transform *from the unit square* to the electrode bounding box's pixelspace directly
-            // If you want to project anything into that space you need to normalize to the unit square first.
-            transform: funcToTransform((p: Vec2): Vec2 => {
-                const a = electrodeBoundingBox.xmin + p[0] * (electrodeBoundingBox.xmax - electrodeBoundingBox.xmin)
-                const b = electrodeBoundingBox.ymin + p[1] * (electrodeBoundingBox.ymax - electrodeBoundingBox.ymin)
-                return [a, b]
-            })
         }
     })
 }
@@ -132,30 +143,56 @@ const computeDataToPixelTransform = (width: number, height: number, scaleFactor:
     // the margins on each side.
     // Since we computed scale using a default margin, the final margin will never be less than the default.
     const electrodeBoxWidth = getWidth(electrodeLayoutBoundingBox)
-    const electrodeBoxHeight = getHeight(electrodeLayoutBoundingBox)
-    const xMarginFinal = (width - electrodeBoxWidth * scaleFactor) / 2 
-    const yMarginFinal = (height - electrodeBoxHeight * scaleFactor) / 2
+    const xMarginFinal = (width - electrodeBoxWidth * scaleFactor) / 2
 
-    return funcToTransform((p: Vec2): Vec2 => {
-        const x = xMarginFinal + (p[0] - electrodeLayoutBoundingBox.xmin) * scaleFactor
-        const y = yMarginFinal + (p[1] - electrodeLayoutBoundingBox.ymin) * scaleFactor
-        return [x, y]
-    })
+    // Note the need to invert the y-axis here.
+    // We want to map -s * ymin -> h - ymargin, and -s * ymax -> ymargin. This will put the scaled minimum
+    // data value at {pixel drawing margin} away from the figure bottom, and the scaled maximum data
+    // value at {pixel drawing margin} away from the figure top.
+    // So we need to scale by -scaleFactor and offset by some value Q, where:
+    //    -s * ymin + Q = h - ymargin
+    //    -s * ymax + Q = ymargin
+    // Sum those:
+    //    -s*ymin + -s*ymax + 2Q = h - ymargin + ymargin --> -s (ymin + ymax) + 2Q = h -->
+    //           2Q = h + s (ymin + ymax)
+    // So Q is half of (the height, plus the scaled sum of the extreme range values in the input data).
+    // Observations:
+    //  - This holds for any choice of y-margin, since that term cancels.
+    //  - When the data extremes are symmetric around the x-axis -- i.e. ymin = -ymax -- that term cancels &
+    //    it *looks* like we can just offset by half the drawing-space height. But this doesn't work for the general case.
+    //  - In TimeScrollView, we used an offset Q = s * ymax -- this formula reduces to that one for the special case
+    //    where s = h / (ymax - ymin), but that doesn't hold here since the scale factor s might be set by
+    //    the drawing-space width or the maximum pixel radius.
+    const xrow = [ scaleFactor, 0, xMarginFinal - electrodeLayoutBoundingBox.xmin * scaleFactor ]
+    const yrow = [0, -scaleFactor, (height + scaleFactor * (electrodeLayoutBoundingBox.ymin + electrodeLayoutBoundingBox.ymax)) / 2 ]
+    return [xrow, yrow, [0, 0, 1]]
 }
 
 const normalizeElectrodeLocations = (width: number, height: number, electrodes: Electrode[]): Electrode[] => {
     const canvasAspectRatio = (width - xMargin * 2) / (height - yMargin * 2)
     const _electrodes = replaceEmptyLocationsWithDefaultLayout(electrodes)
-    const boxAspectRatio = getElectrodesAspectRatio(_electrodes)
-    if ((boxAspectRatio > 1) === (canvasAspectRatio > 1)) {
-        // Aspect ratios > 1 are portrait mode. < 1 are landscape. We want to check that the orientations match.
-        // If they do, just return the input.
+    const {boxAspect: boxAspectRatio} = getElectrodesAspectRatio(_electrodes)
+    if (boxAspectRatio === 1 || canvasAspectRatio === 1 || (boxAspectRatio > 1) === (canvasAspectRatio > 1)) {
+        // Aspect ratios (W/H) < 1 are portrait mode. > 1 are landscape.
+        // If either source or target is a square, or if the canvas & native-space aspect ratios match,
+        // then we don't need to do anything.
         return electrodes
     }
-    // If the orientations don't match, we'll rotate the electrode set 90 degrees CCW around the origin.
-    // (This is accomplished by making new-x = old-y and new-y = negative old-x.)
-    // Subsequent functions will then pick up the new bounding box correctly.
-    return electrodes.map((e) => {return {...e, x: e.y, y: -e.x }})
+    // If the orientations don't match, we'll rotate the electrode set 90 degrees around the origin, which
+    // is accomplished by setting new-x = old-y and new-y = negative old-x.
+    return electrodes.map((e) => ({...e, x: e.y, y: -e.x}))
+
+    // We could also rotate around the center of the bounding box. We dono't actually need to, since the
+    // conversion to pixelspace is indifferent to translations of the source data set.
+    // But just in case it comes up in the future, here's how you would do that:
+    //   1) Get a new location relative to the set center (by subtracting the original point from the center point)
+    //   2) In those coordinates, rotate by setting new-x = old-y and new-y = negative old-x; and
+    //   3) Recenter by adding in again the center point.
+    // return electrodes.map((e) => {
+    //     const relativeX = e.x - boxCenter.x
+    //     const relativeY = e.y - boxCenter.y
+    //     return {...e, x: relativeY + boxCenter.x, y: -relativeX + boxCenter.y }
+    // })
 }
 
 const convertElectrodesToPixelSpace = (electrodes: Electrode[], transform: TransformationMatrix, pixelRadius: number): PixelSpaceElectrode[] => {
@@ -164,16 +201,12 @@ const convertElectrodesToPixelSpace = (electrodes: Electrode[], transform: Trans
     // pixelRadius is only used to compute the 'transform' value, which we may not even use...
     return electrodes.map((e, ii) =>  {
         const [pixelX, pixelY] = pixelspacePoints[ii]
-        const electrodeBoundingBox = getBoundingBoxForEllipse([pixelX, pixelY], pixelRadius, pixelRadius)
+        // Again, per-electrode transform isn't actually needed for anything
+        // const electrodeBoundingBox = getBoundingBoxForEllipse([pixelX, pixelY], pixelRadius, pixelRadius)
         return {
             e: e,
             pixelX: pixelX,
             pixelY: pixelY,
-            transform: funcToTransform((p: Vec2): Vec2 => {
-                const a = electrodeBoundingBox.xmin + p[0] * (electrodeBoundingBox.xmax - electrodeBoundingBox.xmin)
-                const b = electrodeBoundingBox.ymin + p[1] * (electrodeBoundingBox.ymax - electrodeBoundingBox.ymin)
-                return [a, b]
-            })
         }
     })
 }
@@ -212,7 +245,6 @@ export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: num
             pixelRadius: pixelRadius
         }
     }
-
     const normalizedElectrodes = normalizeElectrodeLocations(canvasWidth, canvasHeight, electrodes)
     const nativeRadius = computeRadiusDataSpace(normalizedElectrodes)
 
@@ -220,8 +252,9 @@ export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: num
     const scaleFactor = getScalingFactor(canvasWidth, canvasHeight, nativeRadius, maxElectrodePixelRadius, nativeBoundingBox)
     const pixelRadius = nativeRadius * scaleFactor
     const transform = computeDataToPixelTransform(canvasWidth, canvasHeight, scaleFactor, nativeBoundingBox)
-    const xMarginFinal = (canvasWidth - getWidth(nativeBoundingBox) * scaleFactor) / 2 
+    const xMarginFinal = (canvasWidth - getWidth(nativeBoundingBox) * scaleFactor) / 2
     const convertedElectrodes = convertElectrodesToPixelSpace(normalizedElectrodes, transform, pixelRadius)
+
     return {
         transform: transform,
         convertedElectrodes: convertedElectrodes,

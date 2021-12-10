@@ -1,4 +1,4 @@
-import { useRecordingSelectionInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
@@ -33,7 +33,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         setSelectedUnitIds(keys.map(k => (Number(k))))
     }, [setSelectedUnitIds])
 
-    useRecordingSelectionInitialization(data.startTimeSec, data.endTimeSec)
+    useRecordingSelectionTimeInitialization(data.startTimeSec, data.endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
     // Compute the per-panel pixel drawing area dimensions.

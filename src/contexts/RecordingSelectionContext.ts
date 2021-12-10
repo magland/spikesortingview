@@ -6,13 +6,15 @@ export type RecordingSelection = {
     focusTimeSeconds?: number
     visibleTimeStartSeconds: number | false
     visibleTimeEndSeconds: number | false
+    selectedElectrodeIds: number[]
 }
 
 export const defaultRecordingSelection: RecordingSelection = {
     recordingStartTimeSeconds: false,
     recordingEndTimeSeconds: false,
     visibleTimeStartSeconds: false,
-    visibleTimeEndSeconds: false
+    visibleTimeEndSeconds: false,
+    selectedElectrodeIds: []
 }
 
 export const stubRecordingSelectionDispatch = (action: RecordingSelectionAction) => {}
@@ -59,7 +61,7 @@ export const useRecordingSelection = () => {
     return c
 }
 
-export const useRecordingSelectionInitialization = (start: number, end: number) => {
+export const useRecordingSelectionTimeInitialization = (start: number, end: number) => {
     const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
 
     useEffect(() => {
@@ -67,13 +69,12 @@ export const useRecordingSelectionInitialization = (start: number, end: number) 
             recordingSelection.recordingEndTimeSeconds === end) return
 
         recordingSelectionDispatch({
-            type: 'initializeRecordingSelection',
+            type: 'initializeRecordingSelectionTimes',
             recordingStartSec: start,
             recordingEndSec: end
         })
     }, [recordingSelection.recordingStartTimeSeconds, recordingSelection.recordingEndTimeSeconds, recordingSelectionDispatch, start, end])
 }
-
 
 export type ZoomDirection = 'in' | 'out'
 export type PanDirection = 'forward' | 'back'
@@ -141,10 +142,25 @@ export const useTimeFocus = () => {
     }
 }
 
+export const useSelectedElectrodes = () => {
+    const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
+    const setSelectedElectrodeIds = useCallback((ids: number[]) => {
+        recordingSelectionDispatch({
+            type: 'setSelectedElectrodeIds',
+            selectedIds: ids
+        })
+    }, [recordingSelectionDispatch])
+
+    return {
+        selectedElectrodeIds: recordingSelection.selectedElectrodeIds,
+        setSelectedElectrodeIds
+    }
+}
+
 /* RecordingSelection state management code, probably belongs in a different file *********************** */
 
-type InitializeRecordingSelectionAction = {
-    type: 'initializeRecordingSelection',
+type InitializeRecordingSelectionTimesAction = {
+    type: 'initializeRecordingSelectionTimes',
     recordingStartSec: number,
     recordingEndSec: number
 }
@@ -172,12 +188,17 @@ type SetFocusTimeRecordingSelectionAction = {
     focusTimeSec: number
 }
 
-export type RecordingSelectionAction = InitializeRecordingSelectionAction | PanRecordingSelectionAction | PanRecordingSelectionDeltaTAction | ZoomRecordingSelectionAction
-    |  SetFocusTimeRecordingSelectionAction
+type SetSelectedElectrodeIdsRecordingSelectionAction = {
+    type: 'setSelectedElectrodeIds',
+    selectedIds: number[]
+}
+
+export type RecordingSelectionAction = InitializeRecordingSelectionTimesAction  | PanRecordingSelectionAction
+    | PanRecordingSelectionDeltaTAction | ZoomRecordingSelectionAction | SetFocusTimeRecordingSelectionAction | SetSelectedElectrodeIdsRecordingSelectionAction
 
 export const recordingSelectionReducer = (state: RecordingSelection, action: RecordingSelectionAction): RecordingSelection => {
-    if (action.type === 'initializeRecordingSelection') {
-        return initializeRecordingSelection(state, action)
+    if (action.type === 'initializeRecordingSelectionTimes') {
+        return initializeRecordingSelectionTimes(state, action)
     } else if (action.type === 'panForward' || action.type === 'panBack') {
         return panTime(state, action)
     } else if (action.type === 'panDeltaT') {
@@ -186,14 +207,17 @@ export const recordingSelectionReducer = (state: RecordingSelection, action: Rec
         return zoomTime(state, action)
     } else if (action.type === 'setFocusTime') {
         return setFocusTime(state, action)
+    } else if (action.type === 'setSelectedElectrodeIds') {
+        return setSelectedElectrodeIds(state, action)
     } else {
         console.warn(`Unhandled recording selection action ${action.type} in recordingSelectionReducer.`)
         return state
     }
 }
 
-const initializeRecordingSelection = (state: RecordingSelection, action: InitializeRecordingSelectionAction): RecordingSelection => {
-    if (state !== defaultRecordingSelection) { // TODO: do we need to actually test this, can this break due to reference issues?
+const initializeRecordingSelectionTimes = (state: RecordingSelection, action: InitializeRecordingSelectionTimesAction): RecordingSelection => {
+    if (state.recordingStartTimeSeconds !== defaultRecordingSelection.recordingStartTimeSeconds ||
+        state.recordingEndTimeSeconds !== defaultRecordingSelection.recordingEndTimeSeconds) {
         if (state.recordingStartTimeSeconds !== action.recordingStartSec || state.recordingEndTimeSeconds !== action.recordingEndSec) {
             console.warn(`WARNING: Recording-selection reinitialization times (${action.recordingStartSec}, ${action.recordingEndSec}) do not match existing ones (${state.recordingStartTimeSeconds}, ${state.recordingEndTimeSeconds}). Attempt to load components with different recordings?`)
             console.warn('New recording times will be loaded, but this behavior may not be intended.')
@@ -206,7 +230,8 @@ const initializeRecordingSelection = (state: RecordingSelection, action: Initial
         recordingStartTimeSeconds: action.recordingStartSec,
         recordingEndTimeSeconds: action.recordingEndSec,
         visibleTimeStartSeconds: action.recordingStartSec,
-        visibleTimeEndSeconds: action.recordingEndSec
+        visibleTimeEndSeconds: action.recordingEndSec,
+        selectedElectrodeIds: state.selectedElectrodeIds
     }
     selectionIsValid(newState) || console.warn(`Bad initialization value for recordingSelection: start ${action.recordingStartSec}, end ${action.recordingEndSec}`)
     return newState
@@ -308,6 +333,17 @@ const zoomTime = (state: RecordingSelection, action: ZoomRecordingSelectionActio
 const setFocusTime = (state: RecordingSelection, action: SetFocusTimeRecordingSelectionAction): RecordingSelection => {
     const newState = { ...state, focusTimeSeconds: action.focusTimeSec }
     return selectionIsValid(newState) ? newState : state
+}
+
+const setSelectedElectrodeIds = (state: RecordingSelection, action: SetSelectedElectrodeIdsRecordingSelectionAction): RecordingSelection => {
+    if (action.selectedIds.length === state.selectedElectrodeIds.length) {
+        const currentSet = new Set<number>(state.selectedElectrodeIds)
+        if (action.selectedIds.every(id => currentSet.has(id))) {
+            return state
+        }
+    }
+    const newState = { ...state, selectedElectrodeIds: action.selectedIds }
+    return newState
 }
 
 export default RecordingSelectionContext

@@ -14,8 +14,6 @@ export type WaveformWidgetProps = {
     layoutMode: LayoutMode
     width: number
     height: number
-    selectedElectrodeIds: number[]
-    // selectionDispatch: RecordingSelectionDispatch
     colors?: ElectrodeColors
     showLabels?: boolean
     noiseLevel: number
@@ -35,7 +33,7 @@ const electrodeColors: ElectrodeColors = {
     dragged: 'rgb(0, 0, 196)',
     draggedSelected: 'rgb(180, 180, 150)',
     dragRect: 'rgba(196, 196, 196, 0.5)',
-    textLight: 'rgb(32, 92, 92)',
+    textLight: 'rgb(162, 162, 162)',
     textDark: 'rgb(32, 150, 150)'
 }
 const waveformColors: WaveformColors = {
@@ -58,21 +56,19 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
     const colors = props.colors ?? defaultElectrodeOpts.colors
     const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
-    const {electrodes, selectedElectrodeIds, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
+    const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
 
     const geometry = useMemo(() => <ElectrodeGeometry
         electrodes={electrodes}
-        selectedElectrodeIds={selectedElectrodeIds}
-        // selectionDispatch={selectionDispatch}
         width={width}
         height={height}
         layoutMode={layoutMode}
         colors={colors}
         showLabels={showLabels}      // Would we ever not want to show labels for this?
-        offsetLabels={true}
+        // offsetLabels={true}  // this isn't appropriate for a waveform view--it mislabels the electrodes
         maxElectrodePixelRadius={defaultMaxPixelRadius}
         disableSelection={true}      // ??
-    />, [electrodes, selectedElectrodeIds, width, height, layoutMode, colors, showLabels])
+    />, [electrodes, width, height, layoutMode, colors, showLabels])
 
     // TODO: Don't do this twice, work it out differently
     const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, defaultMaxPixelRadius)
