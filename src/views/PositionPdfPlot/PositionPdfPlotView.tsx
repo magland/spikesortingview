@@ -41,38 +41,6 @@ const PositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) =>
     const numPositions = data.pdf[0].length
     const fetchSegment = useMemo(() => (async (query: FetchSegmentQuery) => {
         return downsample(data.pdf, query.downsampleFactor, query.segmentNumber * query.segmentSize)
-
-        // // Downsample data.pdf[], a number[][] array of vectors.
-        // // We'd like to replace the full-resolution observations of pdf vectors
-        // // by splitting the range into (downsampleFactor)-sized chunks. Each
-        // // resulting index i will be the average of the next (downsampleFactor) observations.
-        // const ret = allocate2d(query.segmentSize, numPositions, 0) as number[][]
-        // const baseIndex = query.segmentNumber * query.segmentSize
-        // if (query.segmentNumber < 0 || query.segmentSize < 0 || query.downsampleFactor < 0) {
-        //     console.warn('Error: segment counts or sizes, and downsampling factors, must all be non-negative.')
-        //     return ret
-        // }
-        // for (let i = 0; i < query.segmentSize; i++) {
-        //     // I'm not sure this is the right limit--don't we wind up going too far forward?
-        //     const sampleStartIndex = i * query.downsampleFactor
-        //     for (let a = 0; a < query.downsampleFactor; a++) {
-        //         const j = baseIndex + sampleStartIndex + a
-        //         // j cannot be < 0
-        //         // j always increases, so if we pass the end, we can just break
-        //         if (j < data.pdf.length) break // inner for-loop
-        //         // sum the vectors, component-wise
-        //         for (let p = 0; p < numPositions; p++) {
-        //             ret[i][p] += data.pdf[j][p]
-        //         }
-        //     }
-        //     // now divide each component by the number of observations to complete the sum
-        //     // (Note: dividing by downsampleFactor might be incorrect if we ran out of underlying
-        //     // data before completing a downsampling segment.)
-        //     for (let p = 0; p < numPositions; p++) {
-        //         ret[i][p] /= query.downsampleFactor
-        //     }
-        // }
-        // return ret
     }), [data.pdf])
 
     const endTimeSec = data.startTimeSec + data.pdf.length / data.samplingFrequency
