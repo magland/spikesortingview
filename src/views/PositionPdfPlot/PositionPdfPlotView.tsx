@@ -30,9 +30,9 @@ const downsample = (data: number[][], downsampleFactor: number, startIndex: numb
     const downsampled: number[][] = []
     // This downsamples from a starting index to the end of the data set.
     // If you wanted to stop early, could just slice the incoming data array to begin with
-    const iterations = Math.ceil((data.length - startIndex) / downsampleFactor)
+    const iterations = Math.ceil(data.length / downsampleFactor - startIndex)
     for (let i = 0; i < iterations; i++) {
-        downsampled.push(vectorAverage(data, startIndex + (i * downsampleFactor), downsampleFactor))
+        downsampled.push(vectorAverage(data, (startIndex + i) * downsampleFactor, downsampleFactor))
     }
     return downsampled
 }
