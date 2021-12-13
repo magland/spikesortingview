@@ -40,8 +40,6 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
     const get = useCallback((i1: number, i2: number, downsampleFactor: number) => {
         const s1 = Math.floor(i1 / segmentSize)
         const s2 = Math.ceil(i2 / segmentSize)
-        if (s2 - s1 + 1 >= 8) return undefined
-        // if (downsampleFactor > 9) return undefined
         const ret = allocate2d(i2 - i1, numPositions, undefined)
         for (let s = s1; s < s2; s++) {
             const S = fetchSegmentCache.get({type: 'fetchSegment', segmentNumber: s, segmentSize, downsampleFactor})
