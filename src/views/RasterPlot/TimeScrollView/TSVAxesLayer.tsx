@@ -7,7 +7,6 @@ export type TSVAxesLayerProps<T extends {[key: string]: any}> = {
     panels: TimeScrollViewPanel<T>[]
     timeRange: [number, number]
     timeTicks: TimeTick[]
-    focusTimePixels?: number
     margins: {left: number, right: number, top: number, bottom: number}
     selectedPanelKeys: string[]
     panelHeight: number
@@ -17,10 +16,10 @@ export type TSVAxesLayerProps<T extends {[key: string]: any}> = {
 }
 
 const TSVAxesLayer = <T extends {[key: string]: any}>(props: TSVAxesLayerProps<T>) => {
-    const {width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, focusTimePixels, margins, selectedPanelKeys} = props
+    const {width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys} = props
     const drawData = useMemo(() => ({
-        width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, focusTimePixels, margins, selectedPanelKeys,
-    }), [width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, focusTimePixels, margins, selectedPanelKeys])
+        width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys,
+    }), [width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys])
 
     return (
         <BaseCanvas

@@ -3,8 +3,11 @@ import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Auto
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
+import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
+import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "views/LivePositionPdfPlot/LivePositionPdfPlotViewData"
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
+import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
@@ -22,7 +25,10 @@ export type ViewData =
     SpikeAmplitudesViewData |
     ElectrodeGeometryViewData |
     PositionPlotViewData |
-    LiveCrossCorrelogramsViewData
+    LiveCrossCorrelogramsViewData |
+    PositionPdfPlotViewData |
+    LivePositionPdfPlotViewData |
+    EpochsViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -36,6 +42,9 @@ export const isViewData = (x: any): x is ViewData => {
         isSpikeAmplitudesViewData,
         isElectrodeGeometryViewData,
         isPositionPlotViewData,
-        isLiveCrossCorrelogramsViewData
+        isLiveCrossCorrelogramsViewData,
+        isPositionPdfPlotViewData,
+        isLivePositionPdfPlotViewData,
+        isEpochsViewData
     ])(x)
 }

@@ -6,11 +6,14 @@ import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView
 import LiveCrossCorrelogramsView from 'views/LiveCrossCorrelograms/LiveCrossCorrelogramsView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
 import PositionPlotView from 'views/PositionPlot/PositionPlotView';
+import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView'
 import { ViewData } from './ViewData';
+import LivePositionPdfPlotView from 'views/LivePositionPdfPlot/LivePositionPdfPlotView';
+import EpochsView from 'views/Epochs/EpochsView';
 
 type Props = {
     data: ViewData
@@ -51,6 +54,15 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     }
     else if (data.type === 'LiveCrossCorrelograms') {
         return <LiveCrossCorrelogramsView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'PositionPdfPlot') {
+        return <PositionPdfPlotView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'LivePositionPdfPlot') {
+        return <LivePositionPdfPlotView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'Epochs') {
+        return <EpochsView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>
