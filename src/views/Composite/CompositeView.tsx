@@ -15,6 +15,8 @@ const CompositeView: FunctionComponent<Props> = ({data, width, height}) => {
         overflowX: 'hidden',
         overflowY: 'auto'
     }), [width, height])
+
+    const H = (height - 80 * (data.views.length - 1)) / data.views.length
     
     return (
         <div style={divStyle}>
@@ -25,7 +27,7 @@ const CompositeView: FunctionComponent<Props> = ({data, width, height}) => {
                         <ViewWrapper
                             figureDataSha1={view.figureDataSha1}
                             width={width}
-                            height={view.defaultHeight || 600}
+                            height={H}
                         />
                     </div>
                 ))

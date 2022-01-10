@@ -1,4 +1,4 @@
-import { useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
@@ -32,6 +32,8 @@ const panelSpacing = 4
 
 const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
+
+    useRecordingSelectionTimeInitialization(data.timestamps[0], data.timestamps[data.timestamps.length - 1])
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
