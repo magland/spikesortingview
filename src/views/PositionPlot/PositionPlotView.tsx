@@ -2,7 +2,7 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {
@@ -19,6 +19,7 @@ type PanelProps = {
         pixelTimes: number[]
         pixelValues: number[]
     }[]
+    plotType: 'line' | 'scatter'
 }
 
 const margins = {
@@ -52,35 +53,58 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         context.stroke()
         context.setLineDash([]);
 
-        for (let dim of props.dimensions) {
-            context.strokeStyle = colorForUnitId(dim.dimensionIndex)
-            context.beginPath()
-            let first = true
-            for (let i=0; i<dim.pixelTimes.length; i++) {
-                const x = dim.pixelTimes[i]
-                const y = dim.pixelValues[i]
-                if (first) context.moveTo(x, y)
-                else context.lineTo(x, y)
-                first = false
-            }
-            context.stroke()
+        if (props.plotType === 'line' || !props.plotType) {
+            props.dimensions.forEach(dim => {
+                context.strokeStyle = colorForUnitId(dim.dimensionIndex)
+                context.lineWidth = 1.1 // hack--but fixes the 'disappearing lines' issue
+                context.beginPath()
+                dim.pixelTimes.forEach((x, ii) => {
+                    const y = dim.pixelValues[ii]
+                    ii === 0 ? context.moveTo(x, y) : context.lineTo(x, y)
+                })
+                context.stroke()
+            })
+        } else if (props.plotType === 'scatter') {
+            const circleWidthPx = 0.1 // could go even lighter
+            props.dimensions.forEach(d => {
+                context.fillStyle = colorForUnitId(d.dimensionIndex)
+                d.pixelTimes.forEach((t, ii) => {
+                    context.beginPath()
+                    context.arc(t, d.pixelValues[ii], circleWidthPx, 0, 2 * Math.PI)
+                    context.fill()
+                })
+            })
+        } else {
+            console.error(`Invalid plot type in PositionPlotView inputs: ${props.plotType}`)
         }
     }, [width])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
+    // const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
 
     const series = useMemo(() => {
         const series: {dimensionIndex: number, times: number[], values: number[]}[] = []
-        for (let dimensionIndex=0; dimensionIndex<data.dimensionLabels.length; dimensionIndex++) {
-            const filteredTimes = data.timestamps.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
-            const filteredValues = data.timestamps.map((t, ii) => (data.positions[ii][dimensionIndex])).filter((a, ii) => (visibleTimeStartSeconds <= data.timestamps[ii]) && (data.timestamps[ii] <= visibleTimeEndSeconds))
+        const filteredTimeIndices = data.timestamps.flatMap((t, ii) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
+        const filteredTimes = filteredTimeIndices.map(i => data.timestamps[i])
+        const filteredValues = filteredTimeIndices.map(index => data.positions[index])
+        data.dimensionLabels.forEach((d, ii) => {
             series.push({
-                dimensionIndex,
+                dimensionIndex: ii,
                 times: filteredTimes,
-                values: filteredValues
+                values: filteredValues.map(filteredValue => filteredValue[ii])
             })
-        }
+        })
+
+        // ought to profile these two
+        // for (let dimensionIndex=0; dimensionIndex<data.dimensionLabels.length; dimensionIndex++) {
+        //     const filteredTimes = data.timestamps.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
+        //     const filteredValues = data.timestamps.map((t, ii) => (data.positions[ii][dimensionIndex])).filter((a, ii) => (visibleTimeStartSeconds <= data.timestamps[ii]) && (data.timestamps[ii] <= visibleTimeEndSeconds))
+        //     series.push({
+        //         dimensionIndex,
+        //         times: filteredTimes,
+        //         values: filteredValues
+        //     })
+        // }
         return series
     }, [data.timestamps, visibleTimeStartSeconds, visibleTimeEndSeconds, data.dimensionLabels, data.positions])
 
@@ -90,30 +114,43 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         return {yMin, yMax}
     }, [series])
 
+    const pixelTransform = use2dPanelDataToPixelMatrix(
+        pixelsPerSecond,
+        visibleTimeStartSeconds,
+        valueRange.yMin,
+        valueRange.yMax,
+        1,
+        panelHeight,
+        true
+    )
+
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
-        const yMap = ((y: number) => (
-            (1 - (y - valueRange.yMin) / (valueRange.yMax - valueRange.yMin)) * panelHeight
-        ))
+        const pixelZero = getYAxisPixelZero(pixelTransform)
+        // this could also be done as one matrix multiplication by concatenating the dimensions;
+        // and we could even separate out the time series values (which are repeated). But probably not worth it.
+        // TODO: ought to profile these two versions
+        const pixelData = series.map(s => {
+            const augmentedPoints = matrix([ s.times, s.values, new Array(s.times.length).fill(1) ])
+            const pixelPoints = multiply(pixelTransform, augmentedPoints).valueOf() as number[][]
+            return {
+                dimensionIndex: s.dimensionIndex,
+                dimensionLabel: data.dimensionLabels[s.dimensionIndex],
+                pixelTimes: pixelPoints[0],
+                pixelValues: pixelPoints[1]
+            }
+        })
         return [{
             key: `position`,
             label: ``,
             props: {
-                pixelZero: yMap(0),
-                dimensions: series.map(S => {
-                    const augmentedTimes = matrix([S.times, new Array(S.times.length).fill(1) ])
-                    const pixelTimes = multiply(timeToPixelMatrix, augmentedTimes).valueOf() as number[]
-                    const pixelValues = S.values.map(a => (yMap(a)))                    
-                    return {
-                        dimensionIndex: S.dimensionIndex,
-                        dimensionLabel: data.dimensionLabels[S.dimensionIndex],
-                        pixelTimes,
-                        pixelValues
-                    }
-                })
+                pixelZero: pixelZero,
+                dimensions: pixelData,
+                plotType: data.type === 'PositionPlotScatter' ? 'scatter' : 'line'
+                // plotType: 'scatter'
             } as PanelProps,
             paint: paintPanel
         }]
-    }, [series, valueRange, timeToPixelMatrix, paintPanel, panelHeight, data.dimensionLabels])
+    }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.type])
 
     const selectedPanelKeys = useMemo(() => ([]), [])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])

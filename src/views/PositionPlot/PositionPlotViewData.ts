@@ -2,7 +2,7 @@ import { validateObject } from "figurl"
 import { isArrayOf, isEqualTo, isString } from "figurl/viewInterface/validateObject"
 
 export type PositionPlotViewData = {
-    type: 'PositionPlot'
+    type: 'PositionPlot' | 'PositionPlotScatter'
     timestamps: number[]
     positions: number[][]
     dimensionLabels: string[]
