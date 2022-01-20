@@ -65,13 +65,19 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
                 context.stroke()
             })
         } else if (props.plotType === 'scatter') {
-            const circleWidthPx = 0.1 // could go even lighter
+
+            // it is faster to fill a rect rather than a circle
+            // const circleWidthPx = 0.1 // could go even lighter
+
             props.dimensions.forEach(d => {
                 context.fillStyle = colorForUnitId(d.dimensionIndex)
                 d.pixelTimes.forEach((t, ii) => {
-                    context.beginPath()
-                    context.arc(t, d.pixelValues[ii], circleWidthPx, 0, 2 * Math.PI)
-                    context.fill()
+                    // it is faster to fill a rect rather than a circle
+                    // context.beginPath()
+                    // context.arc(t, d.pixelValues[ii], circleWidthPx, 0, 2 * Math.PI)
+                    // context.fill()
+
+                    context.fillRect(t, d.pixelValues[ii], 1, 1)
                 })
             })
         } else {
