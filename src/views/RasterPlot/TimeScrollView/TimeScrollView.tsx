@@ -145,6 +145,12 @@ export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSe
     }, [pixelsPerSecond, startTimeSec, dataMin, dataMax, userScaleFactor, panelHeight, invertY])
 }
 
+export const getYAxisPixelZero = (TransformMatrix2d: Matrix) => {
+    const augmentedZero = matrix([[0], [0], [1]])
+    const value = (multiply(TransformMatrix2d, augmentedZero).valueOf() as number[][])[1][0]
+    return value
+}
+
 /* Time-axis Tick computations */
 
 export type TimeTick = {

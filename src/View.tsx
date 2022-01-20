@@ -3,17 +3,17 @@ import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
+import EpochsView from 'views/Epochs/EpochsView';
 import LiveCrossCorrelogramsView from 'views/LiveCrossCorrelograms/LiveCrossCorrelogramsView';
+import LivePositionPdfPlotView from 'views/LivePositionPdfPlot/LivePositionPdfPlotView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
-import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
+import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
-import UnitsTableView from 'views/UnitsTable/UnitsTableView'
+import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import { ViewData } from './ViewData';
-import LivePositionPdfPlotView from 'views/LivePositionPdfPlot/LivePositionPdfPlotView';
-import EpochsView from 'views/Epochs/EpochsView';
 
 type Props = {
     data: ViewData
@@ -49,7 +49,7 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     else if (data.type === 'ElectrodeGeometry') {
         return <ElectrodeGeometryView data={data} width={width} height={height} />
     }
-    else if (data.type === 'PositionPlot') {
+    else if (data.type === 'PositionPlot' || data.type === 'PositionPlotScatter') {
         return <PositionPlotView data={data} width={width} height={height} />
     }
     else if (data.type === 'LiveCrossCorrelograms') {
