@@ -32,8 +32,10 @@ export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderi
         // const frac = (tt.value - timeRange[0]) / (timeRange[1] - timeRange[0])
         // const x = margins.left + frac * (width - margins.left - margins.right)
         context.strokeStyle = tt.major ? 'gray' : 'lightgray'
+        // this is the tick line inside the plot view
         drawLine(context, tt.pixelXposition, height - margins.bottom, tt.pixelXposition, margins.top)
         if (!hideTimeAxis) {
+            // this is the tick line that extends below the plot view
             drawLine(context, tt.pixelXposition, height - margins.bottom, tt.pixelXposition, height - margins.bottom + 5)
             context.textAlign = 'center'
             context.textBaseline = 'top'

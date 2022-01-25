@@ -41,7 +41,7 @@ def main():
 def _upload_data_and_return_sha1(data):
     data_uri = _store_json(data)
     data_hash = data_uri.split('/')[2]
-    kc.upload_file(data_uri, channel=os.environ['FIGURL_CHANNEL'])
+    kc.upload_file(data_uri, channel=os.environ['FIGURL_CHANNEL'], single_chunk=True)
     return data_hash
 
 def _store_json(x: dict):
