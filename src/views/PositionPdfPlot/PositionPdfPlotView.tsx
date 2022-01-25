@@ -1,9 +1,11 @@
 import React, { FunctionComponent, useMemo } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 import { PositionPdfPlotViewData } from './PositionPdfPlotViewData'
 import PositionPdfPlotWidget, { FetchSegmentQuery } from './PositionPdfPlotWidget'
 
 type Props = {
     data: PositionPdfPlotViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
@@ -37,7 +39,7 @@ const downsample = (data: number[][], downsampleFactor: number, startIndex: numb
     return downsampled
 }
 
-const PositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) => {
+const PositionPdfPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const numPositions = data.pdf[0].length
     const fetchSegment = useMemo(() => (async (query: FetchSegmentQuery) => {
         return downsample(data.pdf, query.downsampleFactor, query.segmentNumber * query.segmentSize)
@@ -54,6 +56,7 @@ const PositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) =>
             numPositions={numPositions}
             segmentSize={segmentSize}
             multiscaleFactor={multiscaleFactor}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />

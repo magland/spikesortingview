@@ -7,6 +7,7 @@ import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
 import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "views/LivePositionPdfPlot/LivePositionPdfPlotViewData"
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
+import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "views/MultiTimeseries/MultiTimeseriesViewData"
 import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
@@ -18,6 +19,7 @@ export type ViewData =
     AutocorrelogramsViewData |
     RasterPlotViewData |
     CompositeViewData |
+    MultiTimeseriesViewData |
     AverageWaveformsViewData |
     UnitsTableViewData |
     SummaryViewData |
@@ -35,6 +37,7 @@ export const isViewData = (x: any): x is ViewData => {
         isAutocorrelogramsViewData,
         isRasterPlotViewData,
         isCompositeViewData,
+        isMultiTimeseriesViewData,
         isAverageWaveformsViewData,
         isUnitsTableViewData,
         isSummaryViewData,

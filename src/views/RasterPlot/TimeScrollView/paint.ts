@@ -18,12 +18,14 @@ const highlightedRowFillStyle = '#c5e1ff' // TODO: This should be standardized a
 export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': string[]}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
     // Q: maybe it'd be better to look at context.canvas.width rather than the width prop?
-    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, timeTicks} = props
+    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, timeTicks, hideTimeAxis} = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     
     // x-axes
-    context.strokeStyle = 'black'
-    drawLine(context, margins.left, height - margins.bottom, width - margins.right, height - margins.bottom)
+    if (!hideTimeAxis) {
+        context.strokeStyle = 'black'
+        drawLine(context, margins.left, height - margins.bottom, width - margins.right, height - margins.bottom)
+    }
 
     // time ticks
     for (let tt of timeTicks) {
@@ -31,11 +33,14 @@ export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderi
         // const x = margins.left + frac * (width - margins.left - margins.right)
         context.strokeStyle = tt.major ? 'gray' : 'lightgray'
         drawLine(context, tt.pixelXposition, height - margins.bottom, tt.pixelXposition, margins.top)
-        context.textAlign = 'center'
-        context.textBaseline = 'top'
-        const y1 = height - margins.bottom + 5
-        context.fillStyle = tt.major ? 'black' : 'gray'
-        context.fillText(tt.label, tt.pixelXposition, y1)
+        if (!hideTimeAxis) {
+            drawLine(context, tt.pixelXposition, height - margins.bottom, tt.pixelXposition, height - margins.bottom + 5)
+            context.textAlign = 'center'
+            context.textBaseline = 'top'
+            const y1 = height - margins.bottom + 7
+            context.fillStyle = tt.major ? 'black' : 'gray'
+            context.fillText(tt.label, tt.pixelXposition, y1)
+        }
     }
 
     // selected panels

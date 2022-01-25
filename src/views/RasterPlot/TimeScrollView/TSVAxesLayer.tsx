@@ -11,15 +11,16 @@ export type TSVAxesLayerProps<T extends {[key: string]: any}> = {
     selectedPanelKeys: string[]
     panelHeight: number
     perPanelOffset: number
+    hideTimeAxis?: boolean
     width: number
     height: number
 }
 
 const TSVAxesLayer = <T extends {[key: string]: any}>(props: TSVAxesLayerProps<T>) => {
-    const {width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys} = props
+    const {width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys, hideTimeAxis} = props
     const drawData = useMemo(() => ({
-        width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys,
-    }), [width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys])
+        width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys, hideTimeAxis
+    }), [width, height, panels, panelHeight, perPanelOffset, timeRange, timeTicks, margins, selectedPanelKeys, hideTimeAxis])
 
     return (
         <BaseCanvas

@@ -7,6 +7,7 @@ import EpochsView from 'views/Epochs/EpochsView';
 import LiveCrossCorrelogramsView from 'views/LiveCrossCorrelograms/LiveCrossCorrelogramsView';
 import LivePositionPdfPlotView from 'views/LivePositionPdfPlot/LivePositionPdfPlotView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
+import MultiTimeseriesView from 'views/MultiTimeseries/MultiTimeseriesView';
 import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
 import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
@@ -15,13 +16,19 @@ import SummaryView from 'views/Summary/SummaryView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import { ViewData } from './ViewData';
 
+export type TimeseriesLayoutOpts = {
+    hideToolbar?: boolean
+    hideTimeAxis?: boolean
+}
+
 type Props = {
     data: ViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
 
-const View: FunctionComponent<Props> = ({data, width, height}) => {
+const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOpts}) => {
     if (data.type === 'Autocorrelograms') {
         return <AutocorrelogramsView data={data} width={width} height={height} />
     }
@@ -30,6 +37,9 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
     }
     else if (data.type === 'Composite') {
         return <CompositeView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'MultiTimeseries') {
+        return <MultiTimeseriesView data={data} width={width} height={height} />
     }
     else if (data.type === 'AverageWaveforms') {
         return <AverageWaveformsView data={data} width={width} height={height} />
@@ -50,16 +60,16 @@ const View: FunctionComponent<Props> = ({data, width, height}) => {
         return <ElectrodeGeometryView data={data} width={width} height={height} />
     }
     else if (data.type === 'PositionPlot' || data.type === 'PositionPlotScatter') {
-        return <PositionPlotView data={data} width={width} height={height} />
+        return <PositionPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'LiveCrossCorrelograms') {
         return <LiveCrossCorrelogramsView data={data} width={width} height={height} />
     }
     else if (data.type === 'PositionPdfPlot') {
-        return <PositionPdfPlotView data={data} width={width} height={height} />
+        return <PositionPdfPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'LivePositionPdfPlot') {
-        return <LivePositionPdfPlotView data={data} width={width} height={height} />
+        return <LivePositionPdfPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'Epochs') {
         return <EpochsView data={data} width={width} height={height} />

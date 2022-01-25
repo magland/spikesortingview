@@ -1,12 +1,15 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/colorForUnitId'
+import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {
     data: PositionPlotViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
@@ -22,23 +25,45 @@ type PanelProps = {
     plotType: 'line' | 'scatter'
 }
 
-const margins = {
-    left: 30,
-    right: 20,
-    top: 20,
-    bottom: 50
-}
-
 const panelSpacing = 4
 
-const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
+export const useTimeseriesMargins = (timeseriesLayoutOpts: TimeseriesLayoutOpts | undefined) => {
+    return useMemo(() => {
+        const {hideTimeAxis, hideToolbar} = timeseriesLayoutOpts || {}
+        if (hideToolbar) {
+            return (
+                {
+                    left: 30,
+                    right: 20,
+                    top: 20,
+                    bottom: hideTimeAxis ? 20 : 50
+                }
+            )
+        }
+        else {
+            return (
+                {
+                    left: 20,
+                    right: 20,
+                    top: 0,
+                    bottom: hideTimeAxis ? 0 : 40
+                }
+            )
+        }
+    }, [timeseriesLayoutOpts])
+}
+
+const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
     useRecordingSelectionTimeInitialization(data.timestamps[0], data.timestamps[data.timestamps.length - 1])
 
+    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
+
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
-    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
+    const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
+    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     // We need to have the panelHeight before we can use it in the paint function.
@@ -49,7 +74,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         context.setLineDash([5, 15]);
         context.beginPath()
         context.moveTo(0, props.pixelZero)
-        context.lineTo(width, props.pixelZero)
+        context.lineTo(panelWidth, props.pixelZero)
         context.stroke()
         context.setLineDash([]);
 
@@ -74,7 +99,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         } else {
             console.error(`Invalid plot type in PositionPlotView inputs: ${props.plotType}`)
         }
-    }, [width])
+    }, [panelWidth])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
     // const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
@@ -159,6 +184,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />

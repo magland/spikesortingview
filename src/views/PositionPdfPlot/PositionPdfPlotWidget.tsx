@@ -1,6 +1,9 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
+import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
+import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
 import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import useFetchCache from './useFetchCache'
 
@@ -19,18 +22,12 @@ type Props = {
     numPositions: number
     segmentSize: number
     multiscaleFactor: number
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
 
 type PanelProps = {
-}
-
-const margins = {
-    left: 30,
-    right: 20,
-    top: 20,
-    bottom: 50
 }
 
 const panelSpacing = 4
@@ -65,7 +62,7 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
     }
 }
 
-const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, segmentSize, multiscaleFactor, width, height}) => {
+const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
@@ -89,8 +86,11 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         return {visibleValues, t1, t2}
     }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency])
 
+    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
+
     const panelCount = 1
-    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
+    const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
+    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
     const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
 
@@ -190,6 +190,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />

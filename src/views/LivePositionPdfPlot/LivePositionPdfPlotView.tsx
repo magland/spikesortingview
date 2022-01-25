@@ -1,15 +1,17 @@
 import { runPureCalculationTaskAsync } from 'figurl'
 import React, { FunctionComponent, useMemo } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 import PositionPdfPlotWidget, { FetchSegmentQuery } from 'views/PositionPdfPlot/PositionPdfPlotWidget'
 import { LivePositionPdfPlotViewData } from './LivePositionPdfPlotViewData'
 
 type Props = {
     data: LivePositionPdfPlotViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
 
-const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}) => {
+const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const numPositions = data.numPositions
     const fetchSegment = useMemo(() => (async (query: FetchSegmentQuery) => {
         const ret = await runPureCalculationTaskAsync<number[][]>(
@@ -32,6 +34,7 @@ const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, width, height}
             segmentSize={data.segmentSize}
             multiscaleFactor={data.multiscaleFactor}
             numPositions={numPositions}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />

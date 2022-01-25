@@ -5,6 +5,8 @@ import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
+import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
+import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
 import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
@@ -22,13 +24,6 @@ type PanelProps = {
         pixelTimes: number[]
         pixelAmplitudes: number[]
     }[]
-}
-
-const margins = {
-    left: 30,
-    right: 20,
-    top: 20,
-    bottom: 50
 }
 
 const panelSpacing = 4
@@ -88,8 +83,6 @@ type ChildProps = {
     height: number
 }
 
-
-
 const paintPanel = (context: CanvasRenderingContext2D, props: PanelProps) => {
     context.strokeStyle = 'black'
     context.setLineDash([5, 15]);
@@ -116,9 +109,12 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selected
     const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
 
+    const margins = useTimeseriesMargins(undefined)
+
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
-    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
+    const toolbarWidth = DefaultToolbarWidth
+    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
 

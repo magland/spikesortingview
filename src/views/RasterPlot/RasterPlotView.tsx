@@ -3,6 +3,8 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
+import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
+import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
 import { RasterPlotViewData } from './RasterPlotViewData'
 import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from './TimeScrollView/TimeScrollView'
 
@@ -17,13 +19,6 @@ type PanelProps = {
     pixelSpikes: number[]
 }
 
-const margins = {
-    left: 30,
-    right: 20,
-    top: 20,
-    bottom: 50
-}
-
 const panelSpacing = 4
 
 const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
@@ -36,9 +31,12 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     useRecordingSelectionTimeInitialization(data.startTimeSec, data.endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
+    const margins = useTimeseriesMargins(undefined)
+
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = useMemo(() => data.plots.length, [data.plots])
-    const { panelWidth, panelHeight } = usePanelDimensions(width, height, panelCount, panelSpacing, margins)
+    const toolbarWidth = DefaultToolbarWidth
+    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     // We need to have the panelHeight before we can use it in the paint function.
