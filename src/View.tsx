@@ -59,7 +59,7 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     else if (data.type === 'ElectrodeGeometry') {
         return <ElectrodeGeometryView data={data} width={width} height={height} />
     }
-    else if (data.type === 'PositionPlot' || data.type === 'PositionPlotScatter') {
+    else if (data.type === 'PositionPlot') {
         return <PositionPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'LiveCrossCorrelograms') {

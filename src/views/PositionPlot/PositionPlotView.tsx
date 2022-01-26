@@ -170,12 +170,11 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
             props: {
                 pixelZero: pixelZero,
                 dimensions: pixelData,
-                plotType: data.type === 'PositionPlotScatter' ? 'scatter' : 'line'
-                // plotType: 'scatter'
+                plotType: data.discontinuous ? 'scatter' : 'line',
             } as PanelProps,
             paint: paintPanel
         }]
-    }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.type])
+    }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.discontinuous])
 
     const selectedPanelKeys = useMemo(() => ([]), [])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
