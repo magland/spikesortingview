@@ -53,9 +53,9 @@ export const usePanelDimensions = (width: number, height: number, panelCount: nu
     }, [width, height, panelCount, panelSpacing, margins])
 }
 
-export const usePixelsPerSecond = (panelWidth: number, startTimeSec: number | false, endTimeSec: number | false) => {
+export const usePixelsPerSecond = (panelWidth: number, startTimeSec: number | undefined, endTimeSec: number | undefined) => {
     return useMemo(() => {
-        if (startTimeSec === false || endTimeSec === false || startTimeSec === endTimeSec) {
+        if (startTimeSec === undefined || endTimeSec === undefined || startTimeSec === endTimeSec) {
             console.warn('Attempting to compute pixels-per-second with unset times or zero denominator. Returning default of 1.')
             return 1
         }
@@ -87,9 +87,9 @@ export const use1dTimeToPixelMatrixRight = (pixelsPerSecond: number, startTimeSe
 // To use this one, you would take the time points in array `times` and then augment them by:
 // const augmentedTimes = matrix([ times, new Array(times.length).fill(1) ])
 // which gives a 2 x n matrix of augmented times; then the vector is the right shape afterward.
-export const use1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | false, extraPixelOffset: number = 0) => {
+export const use1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | undefined, extraPixelOffset: number = 0) => {
     return useMemo(() => {
-        if (startTimeSec === false) {
+        if (startTimeSec === undefined) {
             console.warn('Attempt to compute time transform with unset start time. Mapping to null.')
             return matrix([0, 0])
         }
@@ -97,9 +97,9 @@ export const use1dTimeToPixelMatrix = (pixelsPerSecond: number, startTimeSec: nu
     }, [pixelsPerSecond, startTimeSec, extraPixelOffset])
 }
 
-export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | false, dataMin: number, dataMax: number, userScaleFactor: number, panelHeight: number, invertY?: boolean) => {
+export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSec: number | undefined, dataMin: number, dataMax: number, userScaleFactor: number, panelHeight: number, invertY?: boolean) => {
     return useMemo(() => {
-        if (startTimeSec === false) {
+        if (startTimeSec === undefined) {
             console.warn('Attmept to compute time panel transform with unset start time. Mapping to null.')
             return matrix([[0, 0, 0], [0, 0, 0,]])
         }
@@ -238,9 +238,9 @@ const tickUnits: TickUnit[] = [
     }
 ]
 
-const useTimeTicks = (startTimeSec: number | false, endTimeSec: number | false, timeToPixelMatrix: Matrix, pixelsPerSecond: number) => {
+const useTimeTicks = (startTimeSec: number | undefined, endTimeSec: number | undefined, timeToPixelMatrix: Matrix, pixelsPerSecond: number) => {
     return useMemo(() => {
-        if (startTimeSec === false || endTimeSec === false) return []
+        if (startTimeSec === undefined || endTimeSec === undefined) return []
         const ret: any[] = []
         // iterate over the defined tick scales and populate individual ticks of the appropriate scale.
         for (let u of tickUnits) {
@@ -298,7 +298,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
     const focusTimeInPixels = useMemo(() => {
         if (focusTime === undefined) return undefined
-        if (visibleTimeStartSeconds === false) return undefined
+        if (visibleTimeStartSeconds === undefined) return undefined
         return pixelsPerSecond * (focusTime - visibleTimeStartSeconds) + definedMargins.left
     }, [focusTime, visibleTimeStartSeconds, pixelsPerSecond, definedMargins.left])
 

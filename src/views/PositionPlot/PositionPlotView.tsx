@@ -106,6 +106,9 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
 
     const series = useMemo(() => {
         const series: {dimensionIndex: number, times: number[], values: number[]}[] = []
+        if ((visibleTimeStartSeconds === undefined) || (visibleTimeEndSeconds === undefined)) {
+            return series
+        }
         const filteredTimeIndices = data.timestamps.flatMap((t, ii) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
         const filteredTimes = filteredTimeIndices.map(i => data.timestamps[i])
         const filteredValues = filteredTimeIndices.map(index => data.positions[index])

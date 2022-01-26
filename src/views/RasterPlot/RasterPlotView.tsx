@@ -56,7 +56,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
 
     const pixelPanels = useMemo(() => (data.plots.sort((p1, p2) => (p1.unitId - p2.unitId)).map(plot => {
-        const filteredSpikes = plot.spikeTimesSec.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
+        const filteredSpikes = plot.spikeTimesSec.filter(t => (visibleTimeStartSeconds !== undefined) && (visibleTimeStartSeconds <= t) && (visibleTimeEndSeconds !== undefined) && (t <= visibleTimeEndSeconds))
         const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
 
         // augmentedSpikesMatrix is a 2 x n matrix; each col vector is [time, 1]. The multiplication below gives an
@@ -74,7 +74,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
         }
     })), [data.plots, visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, paintPanel])
 
-    return visibleTimeStartSeconds === false
+    return visibleTimeStartSeconds === undefined
     ? (<div>Loading...</div>)
     : (
         <TimeScrollView

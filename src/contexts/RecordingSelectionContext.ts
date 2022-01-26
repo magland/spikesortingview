@@ -1,19 +1,19 @@
 import React, { useCallback, useContext, useEffect, useMemo } from 'react'
 
 export type RecordingSelection = {
-    recordingStartTimeSeconds: number | false
-    recordingEndTimeSeconds: number | false
+    recordingStartTimeSeconds?: number
+    recordingEndTimeSeconds?: number
     focusTimeSeconds?: number
-    visibleTimeStartSeconds: number | false
-    visibleTimeEndSeconds: number | false
+    visibleTimeStartSeconds?: number
+    visibleTimeEndSeconds?: number
     selectedElectrodeIds: number[]
 }
 
 export const defaultRecordingSelection: RecordingSelection = {
-    recordingStartTimeSeconds: false,
-    recordingEndTimeSeconds: false,
-    visibleTimeStartSeconds: false,
-    visibleTimeEndSeconds: false,
+    recordingStartTimeSeconds: undefined,
+    recordingEndTimeSeconds: undefined,
+    visibleTimeStartSeconds: undefined,
+    visibleTimeEndSeconds: undefined,
     selectedElectrodeIds: []
 }
 
@@ -21,10 +21,10 @@ export const stubRecordingSelectionDispatch = (action: RecordingSelectionAction)
 
 export const selectionIsValid = (r: RecordingSelection) => {
     // If any of the required times are unset, the state is not valid.
-    if (r.recordingStartTimeSeconds === false
-        || r.recordingEndTimeSeconds === false
-        || r.visibleTimeEndSeconds === false
-        || r.visibleTimeStartSeconds === false) {
+    if (r.recordingStartTimeSeconds === undefined
+        || r.recordingEndTimeSeconds === undefined
+        || r.visibleTimeEndSeconds === undefined
+        || r.visibleTimeStartSeconds === undefined) {
             return false
         }
     // recording start and end times must be non-negative
@@ -80,7 +80,7 @@ export type ZoomDirection = 'in' | 'out'
 export type PanDirection = 'forward' | 'back'
 export const useTimeRange = () => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-    if (recordingSelection.visibleTimeEndSeconds === false || recordingSelection.visibleTimeStartSeconds === false) {
+    if (recordingSelection.visibleTimeEndSeconds === undefined || recordingSelection.visibleTimeStartSeconds === undefined) {
         console.warn('WARNING: useTimeRange() with uninitialized recording selection state. Time ranges replaced with MIN_SAFE_INTEGER.')
     }
     const zoomRecordingSelection = useCallback((direction: ZoomDirection, factor?: number) => {
@@ -216,21 +216,13 @@ export const recordingSelectionReducer = (state: RecordingSelection, action: Rec
 }
 
 const initializeRecordingSelectionTimes = (state: RecordingSelection, action: InitializeRecordingSelectionTimesAction): RecordingSelection => {
-    if (state.recordingStartTimeSeconds !== defaultRecordingSelection.recordingStartTimeSeconds ||
-        state.recordingEndTimeSeconds !== defaultRecordingSelection.recordingEndTimeSeconds) {
-        if (state.recordingStartTimeSeconds !== action.recordingStartSec || state.recordingEndTimeSeconds !== action.recordingEndSec) {
-            console.warn(`WARNING: Recording-selection reinitialization times (${action.recordingStartSec}, ${action.recordingEndSec}) do not match existing ones (${state.recordingStartTimeSeconds}, ${state.recordingEndTimeSeconds}). Attempt to load components with different recordings?`)
-            console.warn('New recording times will be loaded, but this behavior may not be intended.')
-        } else {    
-            console.log(`******** Ignoring redundant recording-selection initialization request.`)
-            return state
-        }
-    }
+    const newStart = state.recordingStartTimeSeconds === undefined ? action.recordingStartSec : Math.min(state.recordingStartTimeSeconds, action.recordingStartSec)
+    const newEnd = state.recordingEndTimeSeconds === undefined ? action.recordingEndSec : Math.max(state.recordingEndTimeSeconds, action.recordingEndSec)
     const newState: RecordingSelection = {
-        recordingStartTimeSeconds: action.recordingStartSec,
-        recordingEndTimeSeconds: action.recordingEndSec,
-        visibleTimeStartSeconds: action.recordingStartSec,
-        visibleTimeEndSeconds: action.recordingEndSec,
+        recordingStartTimeSeconds: newStart,
+        recordingEndTimeSeconds: newEnd,
+        visibleTimeStartSeconds: newStart,
+        visibleTimeEndSeconds: newEnd,
         selectedElectrodeIds: state.selectedElectrodeIds
     }
     selectionIsValid(newState) || console.warn(`Bad initialization value for recordingSelection: start ${action.recordingStartSec}, end ${action.recordingEndSec}`)
@@ -238,7 +230,7 @@ const initializeRecordingSelectionTimes = (state: RecordingSelection, action: In
 }
 
 const panTimeHelper = (state: RecordingSelection, panDisplacementSeconds: number) => {
-    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+    if (state.visibleTimeStartSeconds === undefined || state.visibleTimeEndSeconds === undefined || state.recordingStartTimeSeconds === undefined || state.recordingEndTimeSeconds === undefined) {
         console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
         return state
     }
@@ -267,7 +259,7 @@ const panTimeHelper = (state: RecordingSelection, panDisplacementSeconds: number
 }
 
 const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction): RecordingSelection => {
-    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+    if (state.visibleTimeStartSeconds === undefined || state.visibleTimeEndSeconds === undefined || state.recordingStartTimeSeconds === undefined || state.recordingEndTimeSeconds === undefined) {
         console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
         return state
     }
@@ -277,7 +269,7 @@ const panTime = (state: RecordingSelection, action: PanRecordingSelectionAction)
 }
 
 const panTimeDeltaT = (state: RecordingSelection, action: PanRecordingSelectionDeltaTAction): RecordingSelection => {
-    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+    if (state.visibleTimeStartSeconds === undefined || state.visibleTimeEndSeconds === undefined || state.recordingStartTimeSeconds === undefined || state.recordingEndTimeSeconds === undefined) {
         console.warn(`WARNING: Attempt to call panTime() with uninitialized state ${state}.`)
         return state
     }
@@ -286,7 +278,7 @@ const panTimeDeltaT = (state: RecordingSelection, action: PanRecordingSelectionD
 }
 
 const zoomTime = (state: RecordingSelection, action: ZoomRecordingSelectionAction): RecordingSelection => {
-    if (state.visibleTimeStartSeconds === false || state.visibleTimeEndSeconds === false || state.recordingStartTimeSeconds === false || state.recordingEndTimeSeconds === false) {
+    if (state.visibleTimeStartSeconds === undefined || state.visibleTimeEndSeconds === undefined || state.recordingStartTimeSeconds === undefined || state.recordingEndTimeSeconds === undefined) {
         console.warn(`WARNING: Attempt to call zoomTime() with uninitialized state ${state}.`)
         return state
     }

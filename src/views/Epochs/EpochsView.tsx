@@ -42,6 +42,9 @@ const EpochsView: FunctionComponent<Props> = ({data, width, height}) => {
 
     const pixelEpochs = useMemo(() => { 
         const ret: {startPixel: number, endPixel: number, epoch: EpochData}[] = []
+        if ((visibleTimeStartSeconds === undefined) || (visibleTimeEndSeconds === undefined)) {
+            return ret
+        }
         for (let epoch of epochs) {
             if ((epoch.startTime <= visibleTimeEndSeconds) && (epoch.endTime >= visibleTimeStartSeconds)) {
                 const augmentedTimes = matrix([[epoch.startTime, epoch.endTime], new Array(2).fill(1) ])

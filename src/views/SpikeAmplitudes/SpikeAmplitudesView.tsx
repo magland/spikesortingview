@@ -123,7 +123,7 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selected
             // we are going to assume that spikeTimesSec is *sorted*!
             // (Unfortunately there is no improvement from doing this.)
             const indices = unit.spikeTimesSec.reduce((array, time, indexInArrays) => {
-                (visibleTimeStartSeconds <= time) && (time <= visibleTimeEndSeconds) && array.push(indexInArrays)
+                (visibleTimeStartSeconds !== undefined) && (visibleTimeStartSeconds <= time) && (visibleTimeEndSeconds !== undefined) && (time <= visibleTimeEndSeconds) && array.push(indexInArrays)
                 return array
             }, [] as number[])
             const bottomIndex = indices[0]
