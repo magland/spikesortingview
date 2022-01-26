@@ -489,9 +489,11 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     )
 
     if (hideToolbar) {
-        <div ref={divRef}>
-            {content}
-        </div>
+        return (
+            <div ref={divRef}>
+                {content}
+            </div>
+        )
     }
 
     return (
