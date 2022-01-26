@@ -2,6 +2,7 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/
 import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
@@ -10,6 +11,7 @@ import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPe
 
 type Props = {
     data: RasterPlotViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
@@ -21,7 +23,7 @@ type PanelProps = {
 
 const panelSpacing = 4
 
-const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
+const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
     const selectedPanelKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
     const setSelectedPanelKeys = useCallback((keys: string[]) => {
@@ -31,11 +33,11 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
     useRecordingSelectionTimeInitialization(data.startTimeSec, data.endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
-    const margins = useTimeseriesMargins(undefined)
+    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = useMemo(() => data.plots.length, [data.plots])
-    const toolbarWidth = DefaultToolbarWidth
+    const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
@@ -83,6 +85,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, width, height}) => {
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />
