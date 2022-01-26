@@ -33,7 +33,7 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <AutocorrelogramsView data={data} width={width} height={height} />
     }
     else if (data.type === 'RasterPlot') {
-        return <RasterPlotView data={data} width={width} height={height} />
+        return <RasterPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'Composite') {
         return <CompositeView data={data} width={width} height={height} />
@@ -54,7 +54,7 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <MountainLayoutView data={data} width={width} height={height} />
     }
     else if (data.type === 'SpikeAmplitudes') {
-        return <SpikeAmplitudesView data={data} width={width} height={height} />
+        return <SpikeAmplitudesView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'ElectrodeGeometry') {
         return <ElectrodeGeometryView data={data} width={width} height={height} />
@@ -72,7 +72,7 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <LivePositionPdfPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'Epochs') {
-        return <EpochsView data={data} width={width} height={height} />
+        return <EpochsView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>

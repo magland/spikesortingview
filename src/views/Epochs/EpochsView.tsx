@@ -1,6 +1,7 @@
 import { useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
 import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
@@ -8,6 +9,7 @@ import { EpochData, EpochsViewData } from './EpochsViewData'
 
 type Props = {
     data: EpochsViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
@@ -24,14 +26,14 @@ type PanelProps = {
 
 const panelSpacing = 4
 
-const EpochsView: FunctionComponent<Props> = ({data, width, height}) => {
+const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
-    const margins = useTimeseriesMargins(undefined)
+    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
-    const toolbarWidth = DefaultToolbarWidth
+    const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
@@ -91,6 +93,7 @@ const EpochsView: FunctionComponent<Props> = ({data, width, height}) => {
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />

@@ -3,6 +3,7 @@ import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
@@ -13,6 +14,7 @@ import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
 type Props = {
     data: SpikeAmplitudesViewData
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
@@ -42,7 +44,7 @@ const useLocalSelectedUnitIds = (locked: boolean) => {
     }
 }
 
-const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) => {
+const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const [selectionLocked, setSelectionLocked] = useState<boolean>(false)
     const toggleSelectionLocked = useCallback(() => {
         setSelectionLocked(a => (!a))
@@ -68,6 +70,7 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
             />
             <SpikeAmplitudesViewChild
                 data={data}
+                timeseriesLayoutOpts={timeseriesLayoutOpts}
                 width={0} // filled in by splitter
                 height={0} // filled in by splitter
                 selectedUnitIds={selectedUnitIds}
@@ -79,6 +82,7 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, width, height}) =>
 type ChildProps = {
     data: SpikeAmplitudesViewData
     selectedUnitIds: number[]
+    timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
 }
@@ -104,16 +108,16 @@ const paintPanel = (context: CanvasRenderingContext2D, props: PanelProps) => {
     }
 }
 
-const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selectedUnitIds, width, height}) => {
+const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseriesLayoutOpts, selectedUnitIds, width, height}) => {
     useRecordingSelectionTimeInitialization(data.startTimeSec, data.endTimeSec)
     const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
 
-    const margins = useTimeseriesMargins(undefined)
+    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
     // Compute the per-panel pixel drawing area dimensions.
     const panelCount = 1
-    const toolbarWidth = DefaultToolbarWidth
+    const toolbarWidth = timeseriesLayoutOpts?.hideTimeAxis ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
@@ -192,6 +196,7 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, selected
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
             optionalActionsAboveDefault={scalingActions}
+            timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
         />
