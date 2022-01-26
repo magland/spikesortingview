@@ -75,7 +75,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
         if (i2 <= i1) return {visibleValues: undefined, t1: 0, t2: 0}
         let downsampleFactor = 1
-        while ((i2 - i1) / downsampleFactor > 1000) {
+        while ((i2 - i1) / (downsampleFactor * dataModel.multiscaleFactor) > width) {
             downsampleFactor *= dataModel.multiscaleFactor
         }
         const j1 = Math.floor(i1 / downsampleFactor)
@@ -84,7 +84,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         const t1 = startTimeSec + j1 * downsampleFactor / samplingFrequency
         const t2 = startTimeSec + j2 * downsampleFactor / samplingFrequency
         return {visibleValues, t1, t2}
-    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency])
+    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency, width])
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
