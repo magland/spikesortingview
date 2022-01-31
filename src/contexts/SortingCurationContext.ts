@@ -11,8 +11,7 @@ export type SortingCuration = {
 export const sortingCurationReducer = (state: SortingCuration, action: SortingCurationAction): SortingCuration => {
     // disable state changes for a closed curation
     if (action.type !== 'REOPEN_CURATION' && state.isClosed) {
-        console.log(`WARNING: Attempt to curate a closed sorting curation:\n\tAction: ${action.type}`)
-        return state
+        console.log(`WARNING: Applying curation action to a closed sorting curation:\n\tAction: ${action.type}`)
     }
 
     if (action.type === 'SET_CURATION') {
