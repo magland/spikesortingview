@@ -18,7 +18,6 @@ const MultiTimeseriesView: FunctionComponent<Props> = ({data, width, height}) =>
 
     const total_height_allocated = data.panels.reduce((total, panel) => total + (panel?.relativeHeight ?? 1), 0)
     const unit_height = Math.floor(height / total_height_allocated)
-    console.log(`Allocating net ${total_height_allocated} panelheight with base unit height ${unit_height}`)
 
     return (
         <div style={divStyle}>
