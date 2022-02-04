@@ -16,7 +16,9 @@ const MultiTimeseriesView: FunctionComponent<Props> = ({data, width, height}) =>
         overflowY: 'auto'
     }), [width, height])
 
-    const H = height / data.panels.length
+    const total_height_allocated = data.panels.reduce((total, panel) => total + (panel?.relativeHeight ?? 1), 0)
+    const unit_height = Math.floor(height / total_height_allocated)
+    console.log(`Allocating net ${total_height_allocated} panelheight with base unit height ${unit_height}`)
 
     return (
         <div style={divStyle}>
@@ -28,7 +30,7 @@ const MultiTimeseriesView: FunctionComponent<Props> = ({data, width, height}) =>
                             figureDataSha1={panel.figureDataSha1}
                             isBottomPanel={ii === (data.panels.length - 1)}
                             width={width}
-                            height={H}
+                            height={Math.floor(unit_height * (panel?.relativeHeight ?? 1))}
                         />
                     </div>
                 ))
