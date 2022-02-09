@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react';
 import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
+import ConsoleView from 'views/Console/ConsoleView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
 import EpochsView from 'views/Epochs/EpochsView';
 import LiveCrossCorrelogramsView from 'views/LiveCrossCorrelograms/LiveCrossCorrelogramsView';
@@ -73,6 +74,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'Epochs') {
         return <EpochsView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+    }
+    else if (data.type === 'Console') {
+        return <ConsoleView data={data} width={width} height={height} />
     }
     else {
         return <div>Unexpected view data</div>

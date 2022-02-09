@@ -2,6 +2,7 @@ import { isOneOf } from "figurl/viewInterface/kacheryTypes"
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
+import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
 import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
@@ -30,7 +31,8 @@ export type ViewData =
     LiveCrossCorrelogramsViewData |
     PositionPdfPlotViewData |
     LivePositionPdfPlotViewData |
-    EpochsViewData
+    EpochsViewData |
+    ConsoleViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -48,6 +50,7 @@ export const isViewData = (x: any): x is ViewData => {
         isLiveCrossCorrelogramsViewData,
         isPositionPdfPlotViewData,
         isLivePositionPdfPlotViewData,
-        isEpochsViewData
+        isEpochsViewData,
+        isConsoleViewData
     ])(x)
 }
