@@ -12,6 +12,7 @@ import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "views/MultiT
 import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
+import { isRawTracesPlotViewData, RawTracesPlotViewData } from "views/RawTracesPlot/RawTracesPlotViewData"
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
@@ -32,7 +33,8 @@ export type ViewData =
     PositionPdfPlotViewData |
     LivePositionPdfPlotViewData |
     EpochsViewData |
-    ConsoleViewData
+    ConsoleViewData |
+    RawTracesPlotViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -51,6 +53,7 @@ export const isViewData = (x: any): x is ViewData => {
         isPositionPdfPlotViewData,
         isLivePositionPdfPlotViewData,
         isEpochsViewData,
-        isConsoleViewData
+        isConsoleViewData,
+        isRawTracesPlotViewData
     ])(x)
 }
