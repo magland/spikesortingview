@@ -29,7 +29,6 @@ const paintCursor = (context: CanvasRenderingContext2D, props: TSVCursorLayerPro
     }
 }
 
-// const defaultSpanHighlightColor = "rgba(161, 87, 201, 0.5)" // a nice light purple. or try rgba(117, 56, 150, 0.5)
 // some nice purples: [161, 87, 201], or darker: [117, 56, 150]
 // dark blue: 0, 30, 255
 const defaultSpanHighlightColor = [0, 30, 255]
