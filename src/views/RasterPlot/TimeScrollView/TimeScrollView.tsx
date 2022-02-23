@@ -6,6 +6,7 @@ import { TimeseriesLayoutOpts } from 'View';
 import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
 import { Divider, ToolbarItem } from 'views/common/Toolbars';
 import ViewToolbar from 'views/common/ViewToolbar';
+import { HighlightIntervalSet } from './TimeScrollViewData';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVCursorLayer from './TSVCursorLayer';
 import TSVMainLayer from './TSVMainLayer';
@@ -24,12 +25,23 @@ type Margins = {
     bottom: number
 }
 
+export type PixelSpan = {
+    start: number,
+    width: number
+}
+
+export type PixelHighlightSpanSet = {
+    pixelSpans: PixelSpan[],
+    color?: number[]
+}
+
 type TimeScrollViewProps<T extends {[key: string]: any}> = {
     margins?: Margins
     panels: TimeScrollViewPanel<T>[]
     panelSpacing: number
     selectedPanelKeys: string[]
     setSelectedPanelKeys: (keys: string[]) => void
+    highlightSpans?: PixelHighlightSpanSet[]
     optionalActionsAboveDefault?: ToolbarItem[]
     optionalActionsBelowDefault?: ToolbarItem[]
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
@@ -147,10 +159,61 @@ export const use2dPanelDataToPixelMatrix = (pixelsPerSecond: number, startTimeSe
     }, [pixelsPerSecond, startTimeSec, dataMin, dataMax, userScaleFactor, panelHeight, invertY])
 }
 
+export const useTimespanToPixelMatrix = (timeToPixelMatrix: Matrix) => {
+    return useMemo(() => {
+        // Get a matrix that operates on matrix([[starttimesSec], [endtimesSec]]) to yield [[startPixels], [pixelWidths]]
+        const baseTransformValues = timeToPixelMatrix.valueOf().flat()
+        const pixelsPerSecond = baseTransformValues[0]
+        const netPixelOffset = baseTransformValues[1]
+
+        // First row scales the start time and adds offset
+        // Second row subtracts the end time (presumed larger) from the start time, no offset
+        const transform = matrix([
+            [ pixelsPerSecond,      0         ,  netPixelOffset],
+            [-pixelsPerSecond, pixelsPerSecond,       0        ]
+        ])
+        return transform
+    }, [timeToPixelMatrix])
+}
+
 export const getYAxisPixelZero = (TransformMatrix2d: Matrix) => {
     const augmentedZero = matrix([[0], [0], [1]])
     const value = (multiply(TransformMatrix2d, augmentedZero).valueOf() as number[][])[1][0]
     return value
+}
+
+export const convertStartAndEndTimesToPixelRects = (startsSec: number[], endsSec: number[], timespanTransform: Matrix) => {
+    const augmentedTimes = matrix([startsSec, endsSec, new Array(startsSec.length).fill(1)])
+    const pixelStartsAndWidths = multiply(timespanTransform, augmentedTimes).valueOf()
+    // returns array w/ first index = list of start times (in pixels), second index = list of widths (in pixels)
+    return pixelStartsAndWidths as number[][]
+}
+
+export const filterTimeRanges = (startsSec: number[], endsSec: number[], rangeStartSec: number | undefined, rangeEndSec: number | undefined): number[][] => {
+    // Take all intervals that begin before the range end or end after the range start
+    const definedRangeStartSec = rangeStartSec || 0
+
+    const startIndices = (rangeEndSec ? startsSec.map((s, i) => s <= rangeEndSec ? i : null) : startsSec.map((s, i) => i)).filter(i => i) as number[] // filter removes nulls
+    const endIndices = endsSec.map((s, i) => s >= definedRangeStartSec ? i : null).filter(i => i) as number[]
+    // get set intersection to find all those spans that begin before our window ends and end after our window begins
+    const largerSet = new Set(startIndices.length > endIndices.length ? startIndices : endIndices)
+    const smallerList = startIndices.length > endIndices.length ? endIndices : startIndices
+    const validIndices = smallerList.filter(i => largerSet.has(i))
+    const finalStarts = validIndices.map(i => Math.max(startsSec[i], definedRangeStartSec))
+    const finalEnds = validIndices.map(i => Math.min(endsSec[i], (rangeEndSec ?? endsSec[i])))
+    return [finalStarts, finalEnds]
+}
+
+export const filterAndProjectHighlightSpans = (highlightIntervals: HighlightIntervalSet[], visibleTimeStartSeconds: number | undefined, visibleTimeEndSeconds: number | undefined, spanTransform: Matrix) => {
+    const highlightSpans = highlightIntervals.map(spanSet => {
+        const filteredSpanSet = filterTimeRanges(spanSet.intervalStarts, spanSet.intervalEnds, visibleTimeStartSeconds, visibleTimeEndSeconds)
+        const pixelSpanStartsAndWidths = convertStartAndEndTimesToPixelRects(filteredSpanSet[0], filteredSpanSet[1], spanTransform)
+        const pixelSpans = pixelSpanStartsAndWidths[0].map((start, index) => {return {start, width: pixelSpanStartsAndWidths[1][index]} as PixelSpan})
+        // something with the color if it were provided which we don't support here
+        return { pixelSpans, color: spanSet.color } as PixelHighlightSpanSet
+    })
+
+    return highlightSpans
 }
 
 /* Time-axis Tick computations */
@@ -282,7 +345,7 @@ const useTimeTicks = (startTimeSec: number | undefined, endTimeSec: number | und
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActionsAboveDefault, optionalActionsBelowDefault, timeseriesLayoutOpts } = props
+    const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActionsAboveDefault, optionalActionsBelowDefault, timeseriesLayoutOpts, highlightSpans } = props
     const { hideToolbar, hideTimeAxis } = timeseriesLayoutOpts || {}
     const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelection, panRecordingSelection, panRecordingSelectionDeltaT } = useTimeRange()
     const { focusTime, setTimeFocusFraction, timeForFraction } = useTimeFocus()
@@ -484,6 +547,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
+                highlightSpans={highlightSpans}
             />
         </div>
     )

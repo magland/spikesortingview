@@ -1,5 +1,6 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
+import { HighlightIntervalSet, isHighlightIntervalSet } from './TimeScrollView/TimeScrollViewData'
 
 type RPPlotData = {
     unitId: number
@@ -18,6 +19,7 @@ export type RasterPlotViewData = {
     startTimeSec: number
     endTimeSec: number
     plots: RPPlotData[]
+    highlightIntervals?: HighlightIntervalSet[]
 }
 
 export const isRasterPlotViewData = (x: any): x is RasterPlotViewData => {
@@ -25,6 +27,7 @@ export const isRasterPlotViewData = (x: any): x is RasterPlotViewData => {
         type: isEqualTo('RasterPlot'),
         startTimeSec: isNumber,
         endTimeSec: isNumber,
-        plots: isArrayOf(isRPPlotData)
+        plots: isArrayOf(isRPPlotData),
+        highlightIntervals: optional(isArrayOf(isHighlightIntervalSet))
     })
 }
