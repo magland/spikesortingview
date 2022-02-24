@@ -7,7 +7,7 @@ import colorForUnitId from 'views/common/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
 import { RasterPlotViewData } from './RasterPlotViewData'
-import TimeScrollView, { filterAndProjectHighlightSpans, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimespanToPixelMatrix } from './TimeScrollView/TimeScrollView'
+import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from './TimeScrollView/TimeScrollView'
 
 type Props = {
     data: RasterPlotViewData
@@ -76,10 +76,6 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
         }
     })), [data.plots, visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, paintPanel])
 
-    const spanTransform = useTimespanToPixelMatrix(timeToPixelMatrix)
-    const highlightSpans = data.highlightIntervals ? filterAndProjectHighlightSpans(data.highlightIntervals, visibleTimeStartSeconds, visibleTimeEndSeconds, spanTransform)
-                                                   : []
-
     return visibleTimeStartSeconds === undefined
     ? (<div>Loading...</div>)
     : (
@@ -89,7 +85,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
-            highlightSpans={highlightSpans}
+            highlightSpans={data.highlightIntervals}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}

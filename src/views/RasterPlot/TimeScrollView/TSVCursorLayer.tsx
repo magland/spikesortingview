@@ -25,7 +25,7 @@ const paintCursor = (context: CanvasRenderingContext2D, props: TSVCursorLayerPro
     }
 
     if (highlightSpans && highlightSpans.length > 0) {
-        paintSpanHighlights(context, margins.top, context.canvas.height - margins.bottom, highlightSpans)
+        paintSpanHighlights(context, margins.top, context.canvas.height - margins.bottom - margins.top, highlightSpans)
     }
 }
 

@@ -41,7 +41,7 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     panelSpacing: number
     selectedPanelKeys: string[]
     setSelectedPanelKeys: (keys: string[]) => void
-    highlightSpans?: PixelHighlightSpanSet[]
+    highlightSpans?: HighlightIntervalSet[]
     optionalActionsAboveDefault?: ToolbarItem[]
     optionalActionsBelowDefault?: ToolbarItem[]
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
@@ -167,10 +167,10 @@ export const useTimespanToPixelMatrix = (timeToPixelMatrix: Matrix) => {
         const netPixelOffset = baseTransformValues[1]
 
         // First row scales the start time and adds offset
-        // Second row subtracts the end time (presumed larger) from the start time, no offset
+        // Second row subtracts the start time (presumed smaller) from the end time, no offset
         const transform = matrix([
-            [ pixelsPerSecond,      0         ,  netPixelOffset],
-            [-pixelsPerSecond, pixelsPerSecond,       0        ]
+            [ pixelsPerSecond,        0       ,  netPixelOffset],
+            [-pixelsPerSecond, pixelsPerSecond,         0      ]
         ])
         return transform
     }, [timeToPixelMatrix])
@@ -204,7 +204,8 @@ export const filterTimeRanges = (startsSec: number[], endsSec: number[], rangeSt
     return [finalStarts, finalEnds]
 }
 
-export const filterAndProjectHighlightSpans = (highlightIntervals: HighlightIntervalSet[], visibleTimeStartSeconds: number | undefined, visibleTimeEndSeconds: number | undefined, spanTransform: Matrix) => {
+export const filterAndProjectHighlightSpans = (highlightIntervals: HighlightIntervalSet[] | undefined, visibleTimeStartSeconds: number | undefined, visibleTimeEndSeconds: number | undefined, spanTransform: Matrix) => {
+    if (!highlightIntervals) return []
     const highlightSpans = highlightIntervals.map(spanSet => {
         const filteredSpanSet = filterTimeRanges(spanSet.intervalStarts, spanSet.intervalEnds, visibleTimeStartSeconds, visibleTimeEndSeconds)
         const pixelSpanStartsAndWidths = convertStartAndEndTimesToPixelRects(filteredSpanSet[0], filteredSpanSet[1], spanTransform)
@@ -367,6 +368,9 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
 
     const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds, definedMargins.left)
     const timeTicks = useTimeTicks(visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix, pixelsPerSecond)
+
+    const spanTransform = useTimespanToPixelMatrix(timeToPixelMatrix)
+    const pixelHighlightSpans = filterAndProjectHighlightSpans(highlightSpans, visibleTimeStartSeconds, visibleTimeEndSeconds, spanTransform)
 
     const timeControlActions = useMemo(() => {
         if (!zoomRecordingSelection || !panRecordingSelection) return []
@@ -547,7 +551,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
-                highlightSpans={highlightSpans}
+                highlightSpans={pixelHighlightSpans}
             />
         </div>
     )
