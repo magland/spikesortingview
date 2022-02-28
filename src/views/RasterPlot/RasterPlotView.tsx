@@ -46,6 +46,7 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
     // but simplifies the prop list a bit.
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
         context.strokeStyle = props.color
+        context.lineWidth = 3.0
         context.beginPath()
         for (const s of props.pixelSpikes) {
             context.moveTo(s, 0)

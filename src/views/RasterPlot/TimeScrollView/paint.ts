@@ -1,5 +1,6 @@
-import { TSVAxesLayerProps } from "./TSVAxesLayer"
-import { MainLayerProps } from "./TSVMainLayer"
+import { PixelHighlightSpanSet } from './TimeScrollView';
+import { TSVAxesLayerProps } from "./TSVAxesLayer";
+import { MainLayerProps } from "./TSVMainLayer";
 
 export const paintPanels = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: MainLayerProps<T>) => {
     const {margins, panels, perPanelOffset } = props
@@ -15,10 +16,31 @@ export const paintPanels = <T extends {[key: string]: any}>(context: CanvasRende
 
 const highlightedRowFillStyle = '#c5e1ff' // TODO: This should be standardized across the application
 
+// some nice purples: [161, 87, 201], or darker: [117, 56, 150]
+// dark blue: 0, 30, 255
+const defaultSpanHighlightColor = [0, 30, 255]
+
+const paintSpanHighlights = (context: CanvasRenderingContext2D, zeroHeight: number, visibleHeight: number, highlightSets: PixelHighlightSpanSet[]) => {
+    highlightSets.forEach(h => {
+        const definedColor = h.color || defaultSpanHighlightColor
+        const [r, g, b, a] = [...definedColor]
+        if (a) context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
+
+        h.pixelSpans.forEach((span) => {
+            if (!a) {
+                const alpha = span.width < 2 ? 1 : 0.5
+                context.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
+            }
+            context.fillRect(span.start, zeroHeight, span.width, visibleHeight)
+        })
+    })
+}
+
+
 export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': string[]}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
     // Q: maybe it'd be better to look at context.canvas.width rather than the width prop?
-    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, timeTicks, hideTimeAxis} = props
+    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, timeTicks, highlightSpans, hideTimeAxis} = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     
     // x-axes
@@ -57,6 +79,12 @@ export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderi
             }
         }
     }
+
+    // Highlighted spans
+    if (highlightSpans && highlightSpans.length > 0) {
+        paintSpanHighlights(context, margins.top, context.canvas.height - margins.bottom - margins.top, highlightSpans)
+    }
+
 
     // panel axes
     for (let i = 0; i < panels.length; i++) {

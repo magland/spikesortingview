@@ -534,6 +534,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 selectedPanelKeys={selectedPanelKeys}
                 timeRange={timeRange}
                 timeTicks={timeTicks}
+                highlightSpans={pixelHighlightSpans}
                 margins={definedMargins}
                 hideTimeAxis={hideTimeAxis}
             />
@@ -551,7 +552,6 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
-                highlightSpans={pixelHighlightSpans}
             />
         </div>
     )
