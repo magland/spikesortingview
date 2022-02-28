@@ -2,6 +2,7 @@ import getFileData from 'figurl/getFileData';
 import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
 import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import View, { TimeseriesLayoutOpts } from 'View';
+import './MultiTimeseriesView.css';
 
 type Props = {
     label: string
@@ -58,40 +59,27 @@ const ViewWrapper: FunctionComponent<Props> = ({ label, figureDataSha1, isBottom
     )
 
     const parentDivStyle: React.CSSProperties = useMemo(() => ({
-        position: 'relative',
-        left: 0,
-        top: 0,
         width,
         height
     }), [width, height])
 
     const labelDivStyle: React.CSSProperties = useMemo(() => ({
-        position: 'absolute',
-        writingMode: 'vertical-lr',
-        transform: 'rotate(-180deg)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        left: 0,
-        top: 0,
         width: labelWidth,
         height
     }), [labelWidth, height])
 
     const contentDivStyle: React.CSSProperties = useMemo(() => ({
-        position: 'absolute',
         left: labelWidth,
-        top: 0,
         width: contentWidth,
         height
     }), [labelWidth, contentWidth, height])
 
     return (
-        <div style={parentDivStyle}>
-            <div style={labelDivStyle}>
+        <div className={"MultiTimeseriesViewParent"} style={parentDivStyle}>
+            <div className={"MultiTimeseriesViewLabels"} style={labelDivStyle}>
                 {label}
             </div>
-            <div style={contentDivStyle}>
+            <div className={"MultiTimeseriesViewContent"} style={contentDivStyle}>
                 {content}
             </div>
         </div>
