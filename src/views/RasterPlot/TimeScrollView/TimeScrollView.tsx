@@ -546,7 +546,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 perPanelOffset={perPanelOffset}
                 margins={definedMargins}
             />
-            <TSVHighlightLayer<T>
+            <TSVHighlightLayer
                 width={width - toolbarWidth}
                 height={height}
                 highlightSpans={pixelHighlightSpans}

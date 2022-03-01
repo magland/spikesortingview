@@ -20,7 +20,7 @@ const highlightedRowFillStyle = '#c5e1ff' // TODO: This should be standardized a
 // dark blue: 0, 30, 255
 const defaultSpanHighlightColor = [0, 30, 255]
 
-export const paintSpanHighlights = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVHighlightLayerProps<T>) => {
+export const paintSpanHighlights = (context: CanvasRenderingContext2D, props: TSVHighlightLayerProps) => {
     const { height, margins, highlightSpans } = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     if (!highlightSpans || highlightSpans.length === 0) { return }
