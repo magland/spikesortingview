@@ -6,13 +6,10 @@ interface Props {
     width: number
     height: number
     top?: number
+    topPadding?: number
     customActions?: any[] | null
     useHorizontalLayout?: boolean
 }
-
-// interface PropsPlus extends Props {
-//     controls: JSX.Element[]
-// }
 
 const iconButtonStyle = {paddingLeft: 6, paddingRight: 6, paddingTop: 4, paddingBottom: 4}
 
@@ -152,50 +149,20 @@ const rectifyElements = (elements?: any[] | null): ToolbarElement[] => {
     }))
 }
 
-// const HorizontalToolbar: FunctionComponent<PropsPlus> = (props) => {
-//     const { controls } = props
-//     // in horizontal layout, width and height should have different values from in vertical layout...
-//     // NEED TO SET PADDING TO CENTER THE ELEMENT MAYBE
-//     const toolbarStyle = useMemo(() => ({
-//         width: props.width, // need this?
-//         height: props.height,
-//         top: props.top ?? 0,
-//     }), [props.width, props.height, props.top])
-
-//     return (<div className="HorizontalToolbar" style={{...toolbarStyle}}>
-//         {controls}
-//     </div>)
-// }
-
-// const VerticalToolbar: FunctionComponent<PropsPlus> = (props) => {
-//     const { controls } = props
-//     const toolbarStyle = useMemo(() => ({
-//         width: props.width,
-//         height: props.height,
-//         top: props.top ?? 0,
-//     }), [props.width, props.height, props.top])
-//     // const elements: ToolbarElement[] = useMemo(() => rectifyElements(props.customActions), [props.customActions])
-//     // // The 'key' prop won't ever get used in this way, because the ToolbarItem is really a catch-all that gets replaced
-//     // // with more specific components, but this makes React happier.
-//     // const renderedElements = useMemo(() => elements.map((e) => <ToolbarItem {...e} key={e.elementIndex}/>), [elements])
-//     return (
-//         <div className="VerticalToolbar" style={{...toolbarStyle}}>
-//             {controls}
-//         </div>
-//     );
-// }
-
 const ViewToolbar: FunctionComponent<Props> = (props) => {
     const rectifiedControls = useMemo(() => rectifyElements(props.customActions), [props.customActions])
     const renderedControls = useMemo(() =>
         rectifiedControls.map((e) => <ToolbarItem {...e} useHorizontalLayout={props.useHorizontalLayout} />),
         [rectifiedControls, props.useHorizontalLayout])
 
+    // NOTE: It's the parent's responsibility to make sure the width/height/top properties are set in a way that makes sense
+    // for the requested layout (vertical or horizontal).
     const toolbarStyle = useMemo(() => ({
         width: props.width,
         height: props.height,
         top: props.top ?? 0,
-    }), [props.width, props.height, props.top])
+        paddingTop: props.topPadding ?? 0
+    }), [props.width, props.height, props.top, props.topPadding])
 
     const className = props.useHorizontalLayout ? "HorizontalToolbar" : "VerticalToolbar"
 
@@ -204,10 +171,6 @@ const ViewToolbar: FunctionComponent<Props> = (props) => {
             {renderedControls}
         </div>
     )
-
-    // return useHorizontalLayout
-    //     ? <HorizontalToolbar {...props} controls={renderedControls} />
-    //     : <VerticalToolbar {...props} controls={renderedControls} />
 }
 
 export default ViewToolbar

@@ -210,7 +210,7 @@ export const filterAndProjectHighlightSpans = (highlightIntervals: HighlightInte
         const filteredSpanSet = filterTimeRanges(spanSet.intervalStarts, spanSet.intervalEnds, visibleTimeStartSeconds, visibleTimeEndSeconds)
         const pixelSpanStartsAndWidths = convertStartAndEndTimesToPixelRects(filteredSpanSet[0], filteredSpanSet[1], spanTransform)
         const pixelSpans = pixelSpanStartsAndWidths[0].map((start, index) => {return {start, width: pixelSpanStartsAndWidths[1][index]} as PixelSpan})
-        // something with the color if it were provided which we don't support here
+        // TODO: something with the color if it were provided which we don't support here
         return { pixelSpans, color: spanSet.color } as PixelHighlightSpanSet
     })
 
