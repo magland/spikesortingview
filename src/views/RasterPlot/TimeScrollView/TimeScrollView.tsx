@@ -9,6 +9,7 @@ import ViewToolbar from 'views/common/ViewToolbar';
 import { HighlightIntervalSet } from './TimeScrollViewData';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVCursorLayer from './TSVCursorLayer';
+import TSVHighlightLayer from './TSVHighlightLayer';
 import TSVMainLayer from './TSVMainLayer';
 
 export type TimeScrollViewPanel<T extends {[key: string]: any}> = {
@@ -545,13 +546,18 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 perPanelOffset={perPanelOffset}
                 margins={definedMargins}
             />
+            <TSVHighlightLayer
+                width={width - toolbarWidth}
+                height={height}
+                highlightSpans={pixelHighlightSpans}
+                margins={definedMargins}
+            />
             <TSVCursorLayer
                 width={width - toolbarWidth}
                 height={height}
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
-                highlightSpans={pixelHighlightSpans}
             />
         </div>
     )
