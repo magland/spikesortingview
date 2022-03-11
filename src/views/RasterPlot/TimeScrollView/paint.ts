@@ -1,3 +1,5 @@
+import { TickSet } from "views/common/TimeScrollView/YAxisTicks";
+import { TimeScrollViewPanel, TimeTick } from "./TimeScrollView";
 import { TSVAxesLayerProps } from "./TSVAxesLayer";
 import { TSVHighlightLayerProps } from './TSVHighlightLayer';
 import { MainLayerProps } from "./TSVMainLayer";
@@ -45,63 +47,86 @@ export const paintSpanHighlights = (context: CanvasRenderingContext2D, props: TS
 
 export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': string[]}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
-    // Q: maybe it'd be better to look at context.canvas.width rather than the width prop?
-    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, timeTicks, hideTimeAxis} = props
+    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, yTickSet, timeTicks, hideTimeAxis} = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    
-    // x-axes
+
+    const xAxisVerticalPosition = height - margins.bottom
+    paintTimeTicks(context, timeTicks, hideTimeAxis, xAxisVerticalPosition, margins.top)
     if (!hideTimeAxis) {
         context.strokeStyle = 'black'
-        drawLine(context, margins.left, height - margins.bottom, width - margins.right, height - margins.bottom)
+        drawLine(context, margins.left, xAxisVerticalPosition, width - margins.right, xAxisVerticalPosition)
     }
-
-    // time ticks
-    for (let tt of timeTicks) {
-        // const frac = (tt.value - timeRange[0]) / (timeRange[1] - timeRange[0])
-        // const x = margins.left + frac * (width - margins.left - margins.right)
-        context.strokeStyle = tt.major ? 'gray' : 'lightgray'
-        // this is the tick line inside the plot view
-        drawLine(context, tt.pixelXposition, height - margins.bottom, tt.pixelXposition, margins.top)
-        if (!hideTimeAxis) {
-            // this is the tick line that extends below the plot view
-            drawLine(context, tt.pixelXposition, height - margins.bottom, tt.pixelXposition, height - margins.bottom + 5)
-            context.textAlign = 'center'
-            context.textBaseline = 'top'
-            const y1 = height - margins.bottom + 7
-            context.fillStyle = tt.major ? 'black' : 'gray'
-            context.fillText(tt.label, tt.pixelXposition, y1)
-        }
-    }
-
-    // selected panels
-    if (selectedPanelKeys) {
-        for (let i = 0; i < panels.length; i++) {
-            const p = panels[i]
-            if (selectedPanelKeys.includes(p.key)) {
-                const y1 = margins.top + i * (perPanelOffset)
-                const rect = {x: 0, y: y1, width: width, height: panelHeight}
-                context.fillStyle = highlightedRowFillStyle
-                context.fillRect(rect.x, rect.y, rect.width, rect.height)
-            }
-        }
-    }
-
-    // // Highlighted spans
-    // if (highlightSpans && highlightSpans.length > 0) {
-    //     paintSpanHighlights(context, margins.top, context.canvas.height - margins.bottom - margins.top, highlightSpans)
-    // }
-
-
-    // panel axes
-    for (let i = 0; i < panels.length; i++) {
-        const p = panels[i]
-        context.textAlign = 'right'
-        context.textBaseline = 'middle'
-        const y1 = margins.top + i * (perPanelOffset)
-        context.fillStyle = 'black'
-        context.fillText(p.label, margins.left - 5, y1 + panelHeight / 2)
-    }
+    yTickSet && paintYTicks(context, yTickSet, xAxisVerticalPosition, margins.left, width - margins.right, margins.top)
+    paintPanelHighlights(context, panels, selectedPanelKeys, margins.top, width, perPanelOffset, panelHeight)
+    paintPanelLabels(context, panels, margins.left, margins.top, perPanelOffset, panelHeight)
 }
+
+// TODO: This logic is highly similar to paintTimeTicks. Try to unify.
+const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisYCoordinate: number, yAxisXCoordinate: number, plotRightPx: number, topMargin: number) => {
+    const labelOffsetFromGridline = 2
+    const gridlineLeftEdge = yAxisXCoordinate - 5
+    const labelRightEdge = gridlineLeftEdge - labelOffsetFromGridline
+    const { datamax, datamin, ticks } = tickSet
+    context.fillStyle = 'black'
+    context.textAlign = 'right'
+    // Range-end labels
+    context.textBaseline = 'bottom'
+    context.fillText(datamax.toFixed(0), labelRightEdge, topMargin)
+    context.textBaseline = 'middle'
+    context.fillText(datamin.toString(), labelRightEdge, xAxisYCoordinate)
+
+    ticks.forEach(tick => {
+        if (!tick.pixelValue) return
+        const pixelValueWithMargin = tick.pixelValue + topMargin
+        context.strokeStyle = tick.isMajor ? 'gray' : 'lightgray'
+        context.fillStyle = tick.isMajor ? 'black' : 'gray'
+        drawLine(context, gridlineLeftEdge, pixelValueWithMargin, plotRightPx, pixelValueWithMargin)
+        context.fillText(tick.label, labelRightEdge, pixelValueWithMargin) // TODO: Add a max width thingy
+    })
+}
+
+const paintTimeTicks = (context: CanvasRenderingContext2D, timeTicks: TimeTick[], hideTimeAxis: boolean | undefined, xAxisPixelHeight: number, plotTopPixelHeight: number) => {
+    if (!timeTicks || timeTicks.length === 0) return
+    // Grid line length: if time axis is shown, grid lines extends 5 pixels below it. Otherwise they should stop at the edge of the plotting space.
+    const labelOffsetFromGridline = 2
+    const gridlineBottomEdge = xAxisPixelHeight + (hideTimeAxis ? 0 : + 5)
+    context.textAlign = 'center'
+    context.textBaseline = 'top'
+    timeTicks.forEach(tick => {
+        context.strokeStyle = tick.major ? 'gray' : 'lightgray'
+        drawLine(context, tick.pixelXposition, gridlineBottomEdge, tick.pixelXposition, plotTopPixelHeight)
+        if (!hideTimeAxis) {
+            context.fillStyle = tick.major ? 'black' : 'gray'
+            context.fillText(tick.label, tick.pixelXposition, gridlineBottomEdge + labelOffsetFromGridline)
+        }
+    })
+}
+
+const paintPanelHighlights = (context: CanvasRenderingContext2D, panels: TimeScrollViewPanel<any>[], selectedPanelKeys: string[], topMargin: number, width: number, perPanelOffset: number, panelHeight: number) => {
+    if (!selectedPanelKeys || selectedPanelKeys.length === 0) return
+    context.fillStyle = highlightedRowFillStyle
+    panels.forEach((panel, ii) => {
+        if (selectedPanelKeys.includes(panel.key)) {
+            const topOfHighlight = topMargin + ii * (perPanelOffset)
+            context.fillRect(0, topOfHighlight, width, panelHeight)
+        }
+    })
+}
+
+const paintPanelLabels = (context: CanvasRenderingContext2D, panels: TimeScrollViewPanel<any>[], leftMargin: number, topMargin: number, perPanelOffset: number, panelHeight: number) => {
+    if (!panels.some(p => p.label) || perPanelOffset < 7.2) return  // based on our default '10px sans-serif' font -- probably should be dynamic
+
+    context.textAlign = 'right'
+    context.textBaseline = 'middle'
+    context.fillStyle = 'black'
+    const rightEdgeOfText = leftMargin - 5
+    let yPosition = topMargin + panelHeight / 2
+    panels.forEach((panel) => {
+        context.fillText(panel.label, rightEdgeOfText, yPosition)
+        yPosition += perPanelOffset
+    })
+}
+
 
 const drawLine = (context: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number) => {
     context.beginPath()

@@ -36,7 +36,8 @@ const ViewWrapper: FunctionComponent<Props> = ({ label, figureDataSha1, isBottom
     const timeseriesLayoutOpts: TimeseriesLayoutOpts = useMemo(() => {
         return {
             hideToolbar: true,
-            hideTimeAxis: !isBottomPanel
+            hideTimeAxis: !isBottomPanel,
+            useYAxis: true // TODO: THIS IS FOR TESTING, REVERT ME
         }
     }, [isBottomPanel])
 

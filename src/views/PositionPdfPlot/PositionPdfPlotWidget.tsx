@@ -3,8 +3,7 @@ import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import useFetchCache from './useFetchCache'
 
 export type FetchSegmentQuery = {

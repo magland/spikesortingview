@@ -2,12 +2,11 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
+import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
+import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { RawTracesPlotViewData } from './RawTracesPlotViewData'
-import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
-import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 
 type Props = {
     data: RawTracesPlotViewData
