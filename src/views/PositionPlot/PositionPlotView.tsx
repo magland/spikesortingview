@@ -3,8 +3,9 @@ import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/colorForUnitId'
+import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {
@@ -26,32 +27,6 @@ type PanelProps = {
 }
 
 const panelSpacing = 4
-
-export const useTimeseriesMargins = (timeseriesLayoutOpts: TimeseriesLayoutOpts | undefined) => {
-    return useMemo(() => {
-        const {hideTimeAxis, hideToolbar} = timeseriesLayoutOpts || {}
-        if (hideToolbar) {
-            return (
-                {
-                    left: 30,
-                    right: 20,
-                    top: 20,
-                    bottom: hideTimeAxis ? 20 : 50
-                }
-            )
-        }
-        else {
-            return (
-                {
-                    left: 20,
-                    right: 20,
-                    top: 0,
-                    bottom: hideTimeAxis ? 0 : 40
-                }
-            )
-        }
-    }, [timeseriesLayoutOpts])
-}
 
 const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
@@ -149,6 +124,15 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         true
     )
 
+    // TODO: All this computational stuff should probably get pushed to the TimeScrollView...
+    const yTicks = useYAxisTicks({ datamin: valueRange.yMin, datamax: valueRange.yMax, pixelHeight: panelHeight })
+    const finalYTicks = useProjectedYAxisTicks(yTicks, pixelTransform)
+    const yTickSet: TickSet = {
+        ticks: finalYTicks,
+        datamin: valueRange.yMin,
+        datamax: valueRange.yMax
+    }
+
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         const pixelZero = getYAxisPixelZero(pixelTransform)
         // this could also be done as one matrix multiplication by concatenating the dimensions;
@@ -187,6 +171,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
             selectedPanelKeys={selectedPanelKeys}
             setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
+            yTickSet={yTickSet}
             width={width}
             height={height}
         />

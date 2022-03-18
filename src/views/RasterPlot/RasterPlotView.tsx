@@ -5,9 +5,8 @@ import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
 import { RasterPlotViewData } from './RasterPlotViewData'
-import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from './TimeScrollView/TimeScrollView'
+import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from './TimeScrollView/TimeScrollView'
 
 type Props = {
     data: RasterPlotViewData

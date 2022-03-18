@@ -6,9 +6,9 @@ import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } f
 import { TimeseriesLayoutOpts } from 'View'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/colorForUnitId'
+import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import { useTimeseriesMargins } from 'views/PositionPlot/PositionPlotView'
-import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond } from '../RasterPlot/TimeScrollView/TimeScrollView'
+import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
@@ -70,7 +70,7 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
             />
             <SpikeAmplitudesViewChild
                 data={data}
-                timeseriesLayoutOpts={timeseriesLayoutOpts}
+                timeseriesLayoutOpts={{...timeseriesLayoutOpts, useYAxis: true }}
                 width={0} // filled in by splitter
                 height={0} // filled in by splitter
                 selectedUnitIds={selectedUnitIds}
@@ -144,7 +144,6 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
     ), [data.units, visibleTimeStartSeconds, visibleTimeEndSeconds, selectedUnitIds])
 
     const amplitudeRange = useMemo(() => {
-        // console.log(`Actual max/min values: ${series.map(s => min(s.amplitudes))}, ${series.map(s => max(s.amplitudes))}`)
         const yMin = Math.min(0, min(series.map(S => (min(S.amplitudes)))))
         const yMax = Math.max(0, max(series.map(S => (max(S.amplitudes)))))
         return {yMin, yMax}
@@ -160,7 +159,13 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
         true
     )
 
-
+    const yTicks = useYAxisTicks({ datamin: amplitudeRange.yMin, datamax: amplitudeRange.yMax, pixelHeight: panelHeight })
+    const finalYTicks = useProjectedYAxisTicks(yTicks, pixelTransform)
+    const yTickSet: TickSet = {
+        ticks: finalYTicks,
+        datamin: amplitudeRange.yMin,
+        datamax: amplitudeRange.yMax
+    }
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         return [{
@@ -197,6 +202,7 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
             setSelectedPanelKeys={setSelectedPanelKeys}
             optionalActionsAboveDefault={scalingActions}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
+            yTickSet={yTickSet}
             width={width}
             height={height}
         />

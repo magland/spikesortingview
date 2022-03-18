@@ -3,6 +3,7 @@ import { abs, matrix, Matrix, multiply } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { TimeseriesLayoutOpts } from 'View';
+import { Step, TickSet } from 'views/common/TimeScrollView/YAxisTicks';
 import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
 import { Divider, ToolbarItem } from 'views/common/Toolbars';
 import ViewToolbar from 'views/common/ViewToolbar';
@@ -17,6 +18,13 @@ export type TimeScrollViewPanel<T extends {[key: string]: any}> = {
     label: string,
     props: T,
     paint: (context: CanvasRenderingContext2D, props: T) =>  void
+}
+
+type PartialMargins = {
+    left?: number,
+    right?: number,
+    top?: number,
+    bottom?: number
 }
 
 type Margins = {
@@ -46,6 +54,7 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     optionalActionsAboveDefault?: ToolbarItem[]
     optionalActionsBelowDefault?: ToolbarItem[]
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
+    yTickSet?: TickSet
     width: number
     height: number
 }
@@ -76,6 +85,24 @@ export const usePixelsPerSecond = (panelWidth: number, startTimeSec: number | un
     }, [panelWidth, startTimeSec, endTimeSec])
 }
 
+export const useTimeseriesMargins = (timeseriesLayoutOpts: TimeseriesLayoutOpts | undefined, manualMargins?: PartialMargins | undefined): Margins => {
+    return useMemo(() => {
+        const {hideTimeAxis, hideToolbar, useYAxis } = timeseriesLayoutOpts || {}
+        const yAxisLeftMargin = useYAxis ? 20 : 0
+        const defaultMargins = hideToolbar ? {
+                    left: 30 + yAxisLeftMargin,
+                    right: 20,
+                    top: 20,
+                    bottom: hideTimeAxis ? 20 : 50
+                } : {
+                    left: 20 + yAxisLeftMargin,
+                    right: 20,
+                    top: 0,
+                    bottom: hideTimeAxis ? 0 : 40
+                }
+        return { ...defaultMargins, ...manualMargins}
+    }, [timeseriesLayoutOpts, manualMargins])
+}
 
 /* Scaling matrix computations */
 
@@ -338,6 +365,18 @@ const useTimeTicks = (startTimeSec: number | undefined, endTimeSec: number | und
     }, [startTimeSec, endTimeSec, timeToPixelMatrix, pixelsPerSecond])
 }
 
+export const useProjectedYAxisTicks = (ticks: Step[], transform: Matrix) => {
+    // transform is assumed to be the output of our use2dPanelDataToPixelMatrix
+    return useMemo(() => {
+        const augmentedValues = matrix([
+            new Array(ticks.length).fill(0),
+            ticks.map(t => t.dataValue),
+            new Array(ticks.length).fill(1)])
+        const pixelValues = (multiply(transform, augmentedValues).valueOf() as number[][])[1]
+        return ticks.map((t, ii) => {return {...t, pixelValue: pixelValues[ii]}})
+    }, [ticks, transform])
+}
+
 
 // Unfortunately, you can't nest generic type declarations here: so while this is properly a
 // FunctionComponent<TimeScrollViewPanel<T>>, there just isn't a way to do that syntactically
@@ -347,7 +386,7 @@ const useTimeTicks = (startTimeSec: number | undefined, endTimeSec: number | und
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActionsAboveDefault, optionalActionsBelowDefault, timeseriesLayoutOpts, highlightSpans } = props
+    const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActionsAboveDefault, optionalActionsBelowDefault, timeseriesLayoutOpts, highlightSpans, yTickSet } = props
     const { hideToolbar, hideTimeAxis } = timeseriesLayoutOpts || {}
     const { visibleTimeStartSeconds, visibleTimeEndSeconds, zoomRecordingSelection, panRecordingSelection, panRecordingSelectionDeltaT } = useTimeRange()
     const { focusTime, setTimeFocusFraction, timeForFraction } = useTimeFocus()
@@ -535,6 +574,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 selectedPanelKeys={selectedPanelKeys}
                 timeRange={timeRange}
                 timeTicks={timeTicks}
+                yTickSet={yTickSet}
                 margins={definedMargins}
                 hideTimeAxis={hideTimeAxis}
             />
