@@ -1,5 +1,5 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
+import { useSelectedUnitIds } from 'contexts/RowSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'

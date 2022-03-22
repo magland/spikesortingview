@@ -1,4 +1,4 @@
-import { useSelectedUnitIds } from "contexts/SortingSelectionContext"
+import { useSelectedUnitIds } from "contexts/RowSelectionContext"
 import { useCallback, useEffect, useState } from "react"
 
 const useLocalSelectedUnitIds = () => {

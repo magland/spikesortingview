@@ -1,9 +1,10 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Checkbox, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import { useMemoCompare } from './useMemoCompare'
+import { RowSelectionAction } from 'contexts/RowSelectionContext'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import './SortableTableWidget.css'
+import { useMemoCompare } from './useMemoCompare'
 
 
 export interface SortableTableWidgetRow {
@@ -12,6 +13,7 @@ export interface SortableTableWidgetRow {
         value: any,
         sortValue: any
     }}
+    checkboxFn?: (evt: React.MouseEvent) => void
 }
 
 export interface SortableTableWidgetColumn {
@@ -97,18 +99,22 @@ const HeaderRow: FunctionComponent<HeaderRowProps> = (props) => {
 type CheckboxProps = {
     rowId: string,
     selected: boolean,
-    onClick: (rowId: string) => void,
+    onClick: (m: Modifier) => void,
     isDeselectAll?: boolean,
     isDisabled?: boolean
 }
 
 const RowCheckbox: FunctionComponent<CheckboxProps> = (props: CheckboxProps) => {
     const { rowId, selected, onClick, isDeselectAll, isDisabled } = props
+    const handleClick: React.MouseEventHandler<HTMLButtonElement> = useCallback((evt) => {
+        const modifier = evt.shiftKey ? 'shift' : null
+        onClick(modifier)
+    }, [onClick])
     return (
         <Checkbox
             checked={selected}
             indeterminate={isDeselectAll ? true : false}
-            onClick={() => onClick(rowId)}
+            onClick={handleClick}
             style={{
                 padding: 1
             }}
@@ -121,18 +127,19 @@ const RowCheckbox: FunctionComponent<CheckboxProps> = (props: CheckboxProps) => 
 type RowProps = {
     rowId: string,
     selected: boolean,
-    onClick: (rowId: string) => void,
+    // onClick: (m: Modifier, rowId: string) => void,
+    handleClick: (m: Modifier) => void,
     isDisabled: boolean,
     contentRepository: {[key: string]: JSX.Element[]}
 }
 const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
-    const {rowId, selected, onClick, isDisabled, contentRepository} = props
+    const {rowId, selected, handleClick, isDisabled, contentRepository} = props
     return <TableRow key={rowId} className={selected ? "selectedRow": ""}>
         <TableCell key="_checkbox">
             <RowCheckbox
                 rowId={rowId}
                 selected={selected}
-                onClick={() => onClick(rowId)}
+                onClick={(m: Modifier) => handleClick(m)}
                 isDisabled={isDisabled}
             />
         </TableCell>
@@ -142,7 +149,8 @@ const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
 
 interface TableProps {
     selectedRowIds: string[]
-    onSelectedRowIdsChanged: (x: string[]) => void
+    // onSelectedRowIdsChanged: (x: string[]) => void
+    selectionDispatch: React.Dispatch<RowSelectionAction>
     rows: SortableTableWidgetRow[]
     columns: SortableTableWidgetColumn[]
     defaultSortColumnName?: string
@@ -176,6 +184,19 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
             setSortFieldOrder([defaultSortColumnName])
         }
     }, [sortFieldOrder, setSortFieldOrder, defaultSortColumnName])
+
+    const toggleSelectedRange = useCallback((sortedRowIds: string[], anchorRowId: string, clickedRowId: string) => {
+        const rangeStart = sortedRowIds.findIndex(id => id === anchorRowId)
+        const rangeEnd = sortedRowIds.findIndex(id => id === clickedRowId)
+        if (rangeStart === -1 || rangeEnd === -1) {
+            throw new Error(`Row ID ranges not found from ${anchorRowId} to ${clickedRowId}`)
+        }
+        const affectedIds = sortedRowIds.slice(Math.min(rangeStart, rangeEnd), Math.max(rangeStart, rangeEnd) + 1)
+
+        const isActivating = !selectedRowsSet.has(clickedRowId)
+        const newSelectedRowIds = isActivating ? [..._selections, ...affectedIds] : _selections.filter(x => !affectedIds.includes(x))
+        onSelectedRowIdsChanged(newSelectedRowIds)
+    }, [_selections, selectedRowsSet, onSelectedRowIdsChanged])
 
     const toggleSelectedRowId = useCallback(
         (rowId: string) => {

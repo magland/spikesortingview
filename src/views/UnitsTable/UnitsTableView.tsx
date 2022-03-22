@@ -1,6 +1,6 @@
+import { checkboxDispatchCurry, checkboxRowIdCurry, useSelectedUnitIds } from 'contexts/RowSelectionContext';
 import { SortingCuration, useSortingCuration } from 'contexts/SortingCurationContext';
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 import colorForUnitId from 'views/common/colorForUnitId';
 import SortableTableWidget, { SortableTableWidgetColumn } from './SortableTableWidget/SortableTableWidget';
 import { UnitsTableViewData } from './UnitsTableViewData';
@@ -12,11 +12,12 @@ type Props = {
 }
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
+    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
     const selectedRowKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
-    const setSelectedRowKeys = useCallback((keys: string[]) => {
-        setSelectedUnitIds(keys.map(k => (Number(k))))
-    }, [setSelectedUnitIds])
+    const wrappedDispatch = useMemo(() => checkboxDispatchCurry(unitIdSelectionDispatch), [unitIdSelectionDispatch])
+    // const setSelectedRowKeys = useCallback((keys: string[]) => {
+    //     setSelectedUnitIds(keys.map(k => (Number(k))))
+    // }, [setSelectedUnitIds])
     const {sortingCuration} = useSortingCuration()
     
     const columns = useMemo(() => {
@@ -85,10 +86,11 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             }
             return {
                 rowId: `${r.unitId}`,
-                data: rowData
+                data: rowData,
+                checkboxFn: checkboxRowIdCurry(r.unitId, wrappedDispatch)
             }
         })
-    ), [data.rows, data.columns, sortingCuration])
+    ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
 
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
