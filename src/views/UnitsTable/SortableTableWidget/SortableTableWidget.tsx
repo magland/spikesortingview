@@ -1,7 +1,7 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Checkbox, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import { RowSelectionAction } from 'contexts/RowSelectionContext'
+import { DESELECT_ALL, intermed, RowSelectionAction, SELECT_ALL } from 'contexts/RowSelectionContext'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import './SortableTableWidget.css'
 import { useMemoCompare } from './useMemoCompare'
@@ -13,7 +13,8 @@ export interface SortableTableWidgetRow {
         value: any,
         sortValue: any
     }}
-    checkboxFn?: (evt: React.MouseEvent) => void
+    // checkboxFn?: (evt: React.MouseEvent, allRowsSorted: number[]) => void
+    checkboxFn?: intermed
 }
 
 export interface SortableTableWidgetColumn {
@@ -99,22 +100,22 @@ const HeaderRow: FunctionComponent<HeaderRowProps> = (props) => {
 type CheckboxProps = {
     rowId: string,
     selected: boolean,
-    onClick: (m: Modifier) => void,
+    onClick: (evt: React.MouseEvent) => void,
     isDeselectAll?: boolean,
     isDisabled?: boolean
 }
 
 const RowCheckbox: FunctionComponent<CheckboxProps> = (props: CheckboxProps) => {
     const { rowId, selected, onClick, isDeselectAll, isDisabled } = props
-    const handleClick: React.MouseEventHandler<HTMLButtonElement> = useCallback((evt) => {
-        const modifier = evt.shiftKey ? 'shift' : null
-        onClick(modifier)
-    }, [onClick])
+    // const handleClick: React.MouseEventHandler<HTMLButtonElement> = useCallback((evt) => {
+    //     const modifier = evt.shiftKey ? 'shift' : null
+    //     onClick(modifier)
+    // }, [onClick])
     return (
         <Checkbox
             checked={selected}
             indeterminate={isDeselectAll ? true : false}
-            onClick={handleClick}
+            onClick={onClick}
             style={{
                 padding: 1
             }}
@@ -128,18 +129,19 @@ type RowProps = {
     rowId: string,
     selected: boolean,
     // onClick: (m: Modifier, rowId: string) => void,
-    handleClick: (m: Modifier) => void,
+    // handleClick: (m: Modifier) => void,
+    onClick: (evt: React.MouseEvent) => void,
     isDisabled: boolean,
     contentRepository: {[key: string]: JSX.Element[]}
 }
 const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
-    const {rowId, selected, handleClick, isDisabled, contentRepository} = props
+    const {rowId, selected, onClick, isDisabled, contentRepository} = props
     return <TableRow key={rowId} className={selected ? "selectedRow": ""}>
         <TableCell key="_checkbox">
             <RowCheckbox
                 rowId={rowId}
                 selected={selected}
-                onClick={(m: Modifier) => handleClick(m)}
+                onClick={onClick}
                 isDisabled={isDisabled}
             />
         </TableCell>
@@ -148,8 +150,7 @@ const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
 }
 
 interface TableProps {
-    selectedRowIds: string[]
-    // onSelectedRowIdsChanged: (x: string[]) => void
+    selectedRowIds: Set<number>
     selectionDispatch: React.Dispatch<RowSelectionAction>
     rows: SortableTableWidgetRow[]
     columns: SortableTableWidgetColumn[]
@@ -172,39 +173,14 @@ const interpretSortFields = (fields: string[]): sortFieldEntry[] => {
 
 const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     // useCheckForChanges('TableWidget', props)
-    const { selectedRowIds, onSelectedRowIdsChanged, rows, columns, defaultSortColumnName, displayedRowCount, height, selectionDisabled } = props
+    const { selectedRowIds, selectionDispatch, rows, columns, defaultSortColumnName, displayedRowCount, height, selectionDisabled } = props
     const [sortFieldOrder, setSortFieldOrder] = useState<string[]>([])
-    const _selections = useMemoCompare<string[]>('_selections', selectedRowIds, [])
-    const selectedRowsSet: Set<string> = useMemo(() => {
-        return new Set(_selections || [])
-    }, [_selections])
 
     useEffect(() => {
         if ((sortFieldOrder.length === 0) && (defaultSortColumnName)) {
             setSortFieldOrder([defaultSortColumnName])
         }
     }, [sortFieldOrder, setSortFieldOrder, defaultSortColumnName])
-
-    const toggleSelectedRange = useCallback((sortedRowIds: string[], anchorRowId: string, clickedRowId: string) => {
-        const rangeStart = sortedRowIds.findIndex(id => id === anchorRowId)
-        const rangeEnd = sortedRowIds.findIndex(id => id === clickedRowId)
-        if (rangeStart === -1 || rangeEnd === -1) {
-            throw new Error(`Row ID ranges not found from ${anchorRowId} to ${clickedRowId}`)
-        }
-        const affectedIds = sortedRowIds.slice(Math.min(rangeStart, rangeEnd), Math.max(rangeStart, rangeEnd) + 1)
-
-        const isActivating = !selectedRowsSet.has(clickedRowId)
-        const newSelectedRowIds = isActivating ? [..._selections, ...affectedIds] : _selections.filter(x => !affectedIds.includes(x))
-        onSelectedRowIdsChanged(newSelectedRowIds)
-    }, [_selections, selectedRowsSet, onSelectedRowIdsChanged])
-
-    const toggleSelectedRowId = useCallback(
-        (rowId: string) => {
-            const newSelectedRowIds = selectedRowsSet.has(rowId) ? _selections.filter(x => (x !== rowId)) : [..._selections, rowId]
-            onSelectedRowIdsChanged(newSelectedRowIds)
-        },
-        [_selections, selectedRowsSet, onSelectedRowIdsChanged]
-    )
 
     const columnForName = useCallback((columnName: string): SortableTableWidgetColumn => (columns.filter(c => (c.columnName === columnName))[0]), [columns])
     const sortingRules = useMemoCompare<sortFieldEntry[]>('sortingRules', interpretSortFields(sortFieldOrder), [])
@@ -226,17 +202,25 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
         return _draft
     }, [rows, sortingRules, columnForName])
 
+    const sortedRowIds = useMemo(() => {
+        return sortedRows.map(r => Number(r.rowId))
+    }, [sortedRows])
+    // CURRYING FUNCTION -- better to put the entire list of rows (or at least their IDs in sorted order) in the state
+    const checkboxClickWrapFn = useCallback((evt: React.MouseEvent, fn: intermed) => {
+        return fn(sortedRowIds, evt)
+    }, [sortedRowIds])
+
     const visibleRows = useMemo(() => sortedRows.slice(0, displayedRowCount || sortedRows.length), [sortedRows, displayedRowCount])
     const allRowIds = useMemo(() => visibleRows.map(r => r.rowId), [visibleRows])
-    const allRowsSelected = useMemo(() => _selections.length >= allRowIds.length, [_selections, allRowIds])
+    const allRowsSelected = useMemo(() => allRowIds.every(id => selectedRowIds.has(Number(id))), [selectedRowIds, allRowIds])
 
     const handleSelectAll = useCallback(() => {
-        onSelectedRowIdsChanged(allRowIds)
-    }, [onSelectedRowIdsChanged, allRowIds])
+        selectionDispatch({type: SELECT_ALL, allRowIds: allRowIds.map(a => Number(a))})
+    }, [selectionDispatch, allRowIds])
 
     const handleDeselectAll = useCallback(() => {
-        onSelectedRowIdsChanged([])
-    }, [onSelectedRowIdsChanged])
+        selectionDispatch({type: DESELECT_ALL})
+    }, [selectionDispatch])
 
     const handleColumnClick = useCallback((columnName) => {
         const len = sortFieldOrder.length
@@ -341,18 +325,19 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     // status changed...
     const _unitrows = useMemo(() => {
         return visibleRows.map((row) => {
+            const clickFn = (row.checkboxFn === undefined ? voidFn : (evt: React.MouseEvent) => checkboxClickWrapFn(evt, row.checkboxFn as intermed))
             return (
                 <ContentRow
                     key={row.rowId}
                     rowId={row.rowId}
-                    selected={selectedRowsSet.has(row.rowId)}
-                    onClick={toggleSelectedRowId}
+                    selected={selectedRowIds.has(Number(row.rowId))}
+                    onClick={clickFn}
                     isDisabled={selectionDisabled || false}
                     contentRepository={_metricsByRow}
                 />
             )
         })
-    }, [selectedRowsSet, visibleRows, _metricsByRow, selectionDisabled, toggleSelectedRowId])
+    }, [selectedRowIds, visibleRows, _metricsByRow, selectionDisabled, checkboxClickWrapFn])
 
     return (
         <TableContainer style={height !== undefined ? {maxHeight: height} : {}}>
@@ -365,5 +350,7 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
         </TableContainer>
     );
 }
+
+const voidFn = (evt: React.MouseEvent) => {}
 
 export default SortableTableWidget

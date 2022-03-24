@@ -25,6 +25,8 @@ type PanelProps = {
 
 const panelSpacing = 4
 
+const emptyPanelSelection = new Set<number>()
+
 const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
@@ -82,7 +84,7 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
         }]
     }, [paintPanel])
 
-    const selectedPanelKeys = useMemo(() => ([]), [])
+    // TODO: Delete, not used by anything
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
     const content = (
@@ -90,7 +92,7 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
+            selectedPanelKeys={emptyPanelSelection}
             setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}

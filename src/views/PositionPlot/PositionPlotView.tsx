@@ -27,6 +27,7 @@ type PanelProps = {
 }
 
 const panelSpacing = 4
+const emptyPanelSelection = new Set<number>()
 
 const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
@@ -160,7 +161,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         }]
     }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.discontinuous])
 
-    const selectedPanelKeys = useMemo(() => ([]), [])
+    // TODO: Not used by anything, remove
     const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
 
     const content = (
@@ -168,7 +169,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
+            selectedPanelKeys={emptyPanelSelection}
             setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             yTickSet={yTickSet}

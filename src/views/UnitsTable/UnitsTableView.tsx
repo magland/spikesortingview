@@ -1,4 +1,4 @@
-import { checkboxDispatchCurry, checkboxRowIdCurry, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { checkboxDispatchCurry, curryTwo, useSelectedUnitIds } from 'contexts/RowSelectionContext';
 import { SortingCuration, useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useMemo } from 'react';
 import colorForUnitId from 'views/common/colorForUnitId';
@@ -13,7 +13,6 @@ type Props = {
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
-    const selectedRowKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
     const wrappedDispatch = useMemo(() => checkboxDispatchCurry(unitIdSelectionDispatch), [unitIdSelectionDispatch])
     // const setSelectedRowKeys = useCallback((keys: string[]) => {
     //     setSelectedUnitIds(keys.map(k => (Number(k))))
@@ -87,7 +86,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             return {
                 rowId: `${r.unitId}`,
                 data: rowData,
-                checkboxFn: checkboxRowIdCurry(r.unitId, wrappedDispatch)
+                checkboxFn: curryTwo(r.unitId, wrappedDispatch)
             }
         })
     ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
@@ -104,8 +103,8 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             <SortableTableWidget
                 columns={columns}
                 rows={rows}
-                selectedRowIds={selectedRowKeys}
-                onSelectedRowIdsChanged={setSelectedRowKeys}
+                selectedRowIds={selectedUnitIds}
+                selectionDispatch={unitIdSelectionDispatch}
                 defaultSortColumnName="unitId"
             />
         </div>

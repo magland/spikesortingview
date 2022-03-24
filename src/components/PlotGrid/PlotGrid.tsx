@@ -1,4 +1,5 @@
 import { Grid } from '@material-ui/core';
+import { RowSelectionAction, TOGGLE_ROW, UNIQUE_SELECT } from 'contexts/RowSelectionContext';
 import React, { FunctionComponent, useCallback } from 'react';
 
 type PGPlot = {
@@ -11,30 +12,25 @@ type PGPlot = {
 type Props = {
     plots: PGPlot[]
     plotComponent: React.ComponentType<any>
-    selectedPlotKeys?: string[]
-    setSelectedPlotKeys?: (keys: string[]) => void
+    selectedPlotKeys?: Set<number>
+    selectionDispatch?: (action: RowSelectionAction) => void
     numPlotsPerRow?: number
 }
 
-const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotKeys, setSelectedPlotKeys, numPlotsPerRow}) => {
+const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotKeys, selectionDispatch, numPlotsPerRow}) => {
     const Component = plotComponent
     const handlePlotClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (!setSelectedPlotKeys) return
+        if (!selectionDispatch) return
         if (!selectedPlotKeys) return
         const key = event.currentTarget.dataset.key
         if (!key) return
         if (event.ctrlKey) {
-            if (selectedPlotKeys.includes(key)) {
-                setSelectedPlotKeys(selectedPlotKeys.filter(k => (k !== key)))
-            }
-            else {
-                setSelectedPlotKeys([...selectedPlotKeys, key])
-            }
+            selectionDispatch({type: TOGGLE_ROW, targetRow: Number(key)})
         }
         else {
-            setSelectedPlotKeys([key])
+            selectionDispatch({type: UNIQUE_SELECT, targetRow: Number(key)})
         }
-    }, [selectedPlotKeys, setSelectedPlotKeys])
+    }, [selectedPlotKeys, selectionDispatch])
     const plotRows = numPlotsPerRow === undefined ? [
         {plots}
     ] : splitPlotsIntoRows(plots, numPlotsPerRow)
@@ -49,7 +45,7 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
                                     <div className='plotWrapperStyle'>
                                         <div
                                             data-key={plot.key}
-                                            className={selectedPlotKeys?.includes(plot.key) ? 'plotSelectedStyle' : 'plotUnselectedStyle'}
+                                            className={selectedPlotKeys?.has(Number(plot.key)) ? 'plotSelectedStyle' : 'plotUnselectedStyle'}
                                             onClick={handlePlotClick}
                                         >
                                             <div style={{fontWeight: 'bold', textAlign: 'center'}}>

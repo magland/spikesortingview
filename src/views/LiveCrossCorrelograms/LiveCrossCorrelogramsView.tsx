@@ -13,7 +13,7 @@ type Props = {
 }
 
 const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, setSelectedUnitIds, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
+    const {selectedUnitIds, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
 
     return (
         <Splitter
@@ -24,7 +24,7 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
             <LockableSelectUnitsWidget
                 unitIds={data.unitIds}
                 selectedUnitIds={selectedUnitIds}
-                setSelectedUnitIds={setSelectedUnitIds}
+                unitIdSelectionDispatch={unitIdSelectionDispatch}
                 locked={selectionLocked}
                 toggleLockStateCallback={toggleSelectionLocked}
             />
@@ -40,7 +40,7 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
 
 type ChildProps = {
     data: LiveCrossCorrelogramsViewData
-    unitIds: number[]
+    unitIds: Set<number>
     width: number
     height: number
 }
@@ -49,12 +49,12 @@ const maxNumUnits = 6
 
 const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, unitIds, width, height}) => {
     const plots = useMemo(() => {
-        if (unitIds.length > maxNumUnits) return []
-        const plotHeight = height / unitIds.length - 30
+        if (unitIds.size > maxNumUnits) return []
+        const plotHeight = height / unitIds.size - 30
         const plotWidth = plotHeight
-        const plots = []
-        for (let unitId1 of unitIds) {
-            for (let unitId2 of unitIds) {
+        const plots: any[] = []
+        unitIds.forEach(unitId1 => {
+            unitIds.forEach(unitId2 => {
                 plots.push({
                     key: `${unitId1}-${unitId2}`,
                     label: `Unit ${unitId1}/${unitId2}`,
@@ -67,15 +67,15 @@ const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, un
                         unitId2
                     }
                 })
-            }
-        }
+            })
+        })
         return plots
     }, [unitIds, data.dataUri, height])
 
-    if (unitIds.length === 0) {
+    if (unitIds.size === 0) {
         return <div>Select at least one unit.</div>
     }
-    if (unitIds.length > maxNumUnits) {
+    if (unitIds.size > maxNumUnits) {
         return <div>Select at most {maxNumUnits} units.</div>
     }
     return (
@@ -83,8 +83,8 @@ const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, un
             plots={plots}
             plotComponent={LiveCrossCorrelogramPlot}
             selectedPlotKeys={undefined}
-            setSelectedPlotKeys={undefined}
-            numPlotsPerRow={unitIds.length}
+            selectionDispatch={undefined}
+            numPlotsPerRow={unitIds.size}
         />
     )
 }

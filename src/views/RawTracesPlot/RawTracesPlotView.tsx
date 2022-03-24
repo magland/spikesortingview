@@ -112,9 +112,6 @@ const RawTracesPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts
         return pixelPanels
     }, [paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, traces, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor])
 
-    const selectedPanelKeys: string[] = useMemo(() => ([]), [])
-    const setSelectedPanelKeys = useMemo(() => (() => {}), [])
-
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
 
     return visibleTimeStartSeconds === undefined
@@ -124,8 +121,6 @@ const RawTracesPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts
             margins={margins}
             panels={pixelPanels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             optionalActionsAboveDefault={scalingActions}
             width={width}

@@ -1,6 +1,6 @@
 import PlotGrid from 'components/PlotGrid/PlotGrid';
 import { useSelectedUnitIds } from 'contexts/RowSelectionContext';
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 import colorForUnitId from 'views/common/colorForUnitId';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';
 import CorrelogramPlot from './CorrelogramPlot';
@@ -12,12 +12,7 @@ type Props = {
 }
 
 const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) => {
-    // const [selectedUnitIds, setSelectedUnitIds] = useState<number[]>([])
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
-    const selectedPlotKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
-    const setSelectedPlotKeys = useCallback((keys: string[]) => {
-        setSelectedUnitIds(keys.map(k => (Number(k))))
-    }, [setSelectedUnitIds])
+    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
     const plots = useMemo(() => (data.autocorrelograms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(ac => ({
         key: `${ac.unitId}`,
         label: `Unit ${ac.unitId}`,
@@ -41,8 +36,8 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
             <PlotGrid
                 plots={plots}
                 plotComponent={CorrelogramPlot}
-                selectedPlotKeys={selectedPlotKeys}
-                setSelectedPlotKeys={setSelectedPlotKeys}
+                selectedPlotKeys={selectedUnitIds}
+                selectionDispatch={unitIdSelectionDispatch}
             />
         </div>
     )

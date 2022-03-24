@@ -19,11 +19,7 @@ type Props = {
 
 const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) => {
     // const [selectedUnitIds, setSelectedUnitIds] = useState<number[]>([])
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
-    const selectedPlotKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
-    const setSelectedPlotKeys = useCallback((keys: string[]) => {
-        setSelectedUnitIds(keys.map(k => (Number(k))))
-    }, [setSelectedUnitIds])
+    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
 
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
@@ -85,8 +81,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
                 <PlotGrid
                     plots={plots}
                     plotComponent={AverageWaveformPlot}
-                    selectedPlotKeys={selectedPlotKeys}
-                    setSelectedPlotKeys={setSelectedPlotKeys}
+                    selectedPlotKeys={selectedUnitIds}
+                    selectionDispatch={unitIdSelectionDispatch}
                 />
             </VerticalScrollView>
         </Splitter>

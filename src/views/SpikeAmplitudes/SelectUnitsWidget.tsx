@@ -1,15 +1,16 @@
 import NiceTable from 'components/NiceTable/NiceTable'
+import { RowSelectionAction, SET_SELECTION } from 'contexts/RowSelectionContext'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import colorForUnitId from 'views/common/colorForUnitId'
 
 type Props = {
     unitIds: number[]
-    selectedUnitIds: number[]
-    setSelectedUnitIds: (x: number[]) => void
+    selectedUnitIds: Set<number>
+    unitIdSelectionDispatch: (action: RowSelectionAction) => void
     selectionDisabled?: boolean
 }
 
-const SelectUnitsWidget: FunctionComponent<Props> = ({ unitIds, selectedUnitIds, setSelectedUnitIds, selectionDisabled }) => {
+const SelectUnitsWidget: FunctionComponent<Props> = ({ unitIds, selectedUnitIds, unitIdSelectionDispatch, selectionDisabled }) => {
     const columns = useMemo(() => ([
         {
             key: 'unitId',
@@ -29,12 +30,13 @@ const SelectUnitsWidget: FunctionComponent<Props> = ({ unitIds, selectedUnitIds,
             }
         ))
     ), [unitIds])
+    // TODO: Make this conform with the new system
     const selectedRowKeys = useMemo(() => (
-        selectedUnitIds.map(unitId => (`${unitId}`))
+        [...selectedUnitIds].map(unitId => (`${unitId}`))
     ), [selectedUnitIds])
     const handleSelectedRowKeysChanged = useCallback((keys: string[]) => {
-        setSelectedUnitIds(keys.map(k => (Number(k))))
-    }, [setSelectedUnitIds])
+        unitIdSelectionDispatch({type: SET_SELECTION, incomingSelectedRowIds: keys.map(k => (Number(k)))})
+    }, [unitIdSelectionDispatch])
     return (
         <NiceTable
             columns={columns}
