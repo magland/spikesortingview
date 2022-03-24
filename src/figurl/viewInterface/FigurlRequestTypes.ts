@@ -1,5 +1,5 @@
 import { ErrorMessage, FeedId, isArrayOf, isErrorMessage, isFeedId, isSha1Hash, isSubfeedHash, isSubfeedMessage, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskStatus, Sha1Hash, SubfeedHash, SubfeedMessage, TaskFunctionId, TaskFunctionType, TaskId, TaskStatus } from "./kacheryTypes"
-import validateObject, { isBoolean, isEqualTo, isOneOf, optional } from "./validateObject"
+import validateObject, { isBoolean, isEqualTo, isOneOf, isString, optional } from "./validateObject"
 
 // getFigureData
 
@@ -25,17 +25,17 @@ export const isGetFigureDataResponse = (x: any): x is GetFigureDataResponse => {
     })
 }
 
-// getFileData
-
 export type GetFileDataRequest = {
     type: 'getFileData'
-    sha1: Sha1Hash
+    uri?: string
+    sha1?: Sha1Hash // old
 }
 
 export const isGetFileDataRequest = (x: any): x is GetFileDataRequest => {
     return validateObject(x, {
         type: isEqualTo('getFileData'),
-        sha1: isSha1Hash
+        uri: optional(isString),
+        sha1: optional(isSha1Hash) // old
     })
 }
 

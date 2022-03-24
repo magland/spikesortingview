@@ -6,7 +6,8 @@ import { isString } from "vega"
 type CVViewData = {
     label: string
     type: string
-    figureDataSha1: Sha1Hash
+    figureDataSha1?: Sha1Hash // old
+    figureDataUri?: string // new
     defaultHeight?: number
 }
 
@@ -14,7 +15,8 @@ const isCVViewData = (x: any): x is CVViewData => {
     return validateObject(x, {
         label: isString,
         type: isString,
-        figureDataSha1: isSha1Hash,
+        figureDataSha1: optional(isSha1Hash), // old
+        figureDataUri: optional(isString), // new
         defaultHeight: optional(isNumber)
     })
 }

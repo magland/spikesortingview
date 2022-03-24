@@ -25,7 +25,8 @@ const CompositeView: FunctionComponent<Props> = ({data, width, height}) => {
                     <div key={ii}>
                         <h3>{view.label}</h3>
                         <ViewWrapper
-                            figureDataSha1={view.figureDataSha1}
+                            figureDataSha1={view.figureDataSha1} // old
+                            figureDataUri={view.figureDataUri} // new
                             width={width}
                             height={H}
                         />

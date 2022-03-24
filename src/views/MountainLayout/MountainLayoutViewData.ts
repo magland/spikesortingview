@@ -6,14 +6,16 @@ import { isString } from "vega"
 type MLViewData = {
     label: string
     type: string
-    figureDataSha1: Sha1Hash
+    figureDataSha1?: Sha1Hash // old
+    figureDataUri?: string // new
 }
 
 const isMLViewData = (x: any): x is MLViewData => {
     return validateObject(x, {
         label: isString,
         type: isString,
-        figureDataSha1: isSha1Hash,
+        figureDataSha1: optional(isSha1Hash), // old
+        figureDataUri: optional(isString) // new
     }, {allowAdditionalFields: true})
 }
 

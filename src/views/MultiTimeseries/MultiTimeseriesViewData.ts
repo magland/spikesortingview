@@ -6,7 +6,8 @@ import { isString } from "vega"
 type MTPanelData = {
     label: string
     type: string
-    figureDataSha1: Sha1Hash
+    figureDataSha1?: Sha1Hash // old
+    figureDataUri?: string // new
     relativeHeight?: number
 }
 
@@ -14,7 +15,8 @@ const isMTPanelData = (x: any): x is MTPanelData => {
     return validateObject(x, {
         label: isString,
         type: isString,
-        figureDataSha1: isSha1Hash,
+        figureDataSha1: optional(isSha1Hash),
+        figureDataUri: optional(isString),
         relativeHeight: optional(isNumber)
     })
 }
