@@ -1,8 +1,8 @@
-import { checkboxDispatchCurry, curryTwo, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { checkboxDispatchCurry, INITIALIZE_ROWS, rowCheckboxClickHandler, useSelectedUnitIds } from 'contexts/RowSelectionContext';
 import { SortingCuration, useSortingCuration } from 'contexts/SortingCurationContext';
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import colorForUnitId from 'views/common/colorForUnitId';
-import SortableTableWidget, { SortableTableWidgetColumn } from './SortableTableWidget/SortableTableWidget';
+import SortableTableWidget, { SortableTableWidgetColumn, SortableTableWidgetRow } from './SortableTableWidget/SortableTableWidget';
 import { UnitsTableViewData } from './UnitsTableViewData';
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 }
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const {selectedUnitIds, orderedRowIds, visibleRowIndices, unitIdSelectionDispatch} = useSelectedUnitIds()
     const wrappedDispatch = useMemo(() => checkboxDispatchCurry(unitIdSelectionDispatch), [unitIdSelectionDispatch])
     // const setSelectedRowKeys = useCallback((keys: string[]) => {
     //     setSelectedUnitIds(keys.map(k => (Number(k))))
@@ -62,8 +62,38 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
         return ret
     }, [data.columns, sortingCuration])
 
+    // const rows = useMemo(() => (
+    //     data.rows.sort((r1, r2) => (r1.unitId - r2.unitId)).map(r => {
+    //         const curationLabels = ((sortingCuration?.labelsByUnit || {})[`${r.unitId}`] || [])
+    //         const unitIdData = {
+    //             value: {unitId: r.unitId, mergeGroup: mergeGroupForUnitId(r.unitId, sortingCuration)},
+    //             sortValue: r.unitId
+    //         }
+    //         const rowData: {[key: string]: any} = {
+    //             _unitId: unitIdData,
+    //             _labels: {
+    //                 value: curationLabels,
+    //                 sortValue: curationLabels.join(', ')
+    //             }
+    //         }
+    //         for (let c of data.columns) {
+    //             const text = `${r.values[c.key] !== undefined ? r.values[c.key] : ''}`
+    //             rowData[c.key] = {
+    //                 value: text,
+    //                 sortValue: r.values[c.key]
+    //             }
+    //         }
+    //         return {
+    //             rowId: `${r.unitId}`,
+    //             rowIdNumeric: r.unitId,
+    //             data: rowData,
+    //             // checkboxFn: curryTwo(r.unitId, wrappedDispatch)
+    //             checkboxFn: rowCheckboxClickHandler(r.unitId, wrappedDispatch)
+    //         }
+    //     })
+    // ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
     const rows = useMemo(() => (
-        data.rows.sort((r1, r2) => (r1.unitId - r2.unitId)).map(r => {
+        data.rows.map(r => {
             const curationLabels = ((sortingCuration?.labelsByUnit || {})[`${r.unitId}`] || [])
             const unitIdData = {
                 value: {unitId: r.unitId, mergeGroup: mergeGroupForUnitId(r.unitId, sortingCuration)},
@@ -85,11 +115,23 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             }
             return {
                 rowId: `${r.unitId}`,
+                rowIdNumeric: r.unitId,
                 data: rowData,
-                checkboxFn: curryTwo(r.unitId, wrappedDispatch)
+                // checkboxFn: curryTwo(r.unitId, wrappedDispatch)
+                checkboxFn: rowCheckboxClickHandler(r.unitId, wrappedDispatch)
             }
         })
     ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
+
+    useEffect(() => {
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => a - b) })
+    }, [rows, unitIdSelectionDispatch])
+
+    const rowMap = useMemo(() => {
+        const draft = new Map<number, SortableTableWidgetRow>()
+        rows.forEach(r => draft.set(r.rowIdNumeric, r))
+        return draft
+    }, [rows])
 
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
@@ -102,7 +144,9 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
         <div style={divStyle}>
             <SortableTableWidget
                 columns={columns}
-                rows={rows}
+                rows={rowMap}
+                orderedRowIds={orderedRowIds}
+                visibleRowIndices={visibleRowIndices}
                 selectedRowIds={selectedUnitIds}
                 selectionDispatch={unitIdSelectionDispatch}
                 defaultSortColumnName="unitId"

@@ -1,7 +1,7 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Checkbox, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import { DESELECT_ALL, intermed, RowSelectionAction, SELECT_ALL } from 'contexts/RowSelectionContext'
+import { allRowSelectionState, DESELECT_ALL, realizeVisibleRowIndices, rowCheckboxClickHandlerType, RowSelectionAction, SET_ROW_ORDER, TOGGLE_SELECT_ALL } from 'contexts/RowSelectionContext'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import './SortableTableWidget.css'
 import { useMemoCompare } from './useMemoCompare'
@@ -9,12 +9,13 @@ import { useMemoCompare } from './useMemoCompare'
 
 export interface SortableTableWidgetRow {
     rowId: string
+    rowIdNumeric: number
     data: {[key: string]: {
         value: any,
         sortValue: any
     }}
-    // checkboxFn?: (evt: React.MouseEvent, allRowsSorted: number[]) => void
-    checkboxFn?: intermed
+    // checkboxFn?: (evt: React.MouseEvent, allRowsSorted: number[]) => void // TODO: Remove
+    checkboxFn?: rowCheckboxClickHandlerType
 }
 
 export interface SortableTableWidgetColumn {
@@ -149,13 +150,20 @@ const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
     </TableRow>
 }
 
+// type RowDict = { [key: number]: SortableTableWidgetRow }
+// type ColDict = { [key: number]: SortableTableWidgetColumn }
+
 interface TableProps {
     selectedRowIds: Set<number>
     selectionDispatch: React.Dispatch<RowSelectionAction>
-    rows: SortableTableWidgetRow[]
+    // rows: SortableTableWidgetRow[]
     columns: SortableTableWidgetColumn[]
+    // rows: RowDict
+    rows: Map<number, SortableTableWidgetRow>
+    // columns: ColDict
+    orderedRowIds: number[]
+    visibleRowIndices?: number[]
     defaultSortColumnName?: string
-    displayedRowCount?: number
     height?: number
     selectionDisabled?: boolean
 }
@@ -173,7 +181,7 @@ const interpretSortFields = (fields: string[]): sortFieldEntry[] => {
 
 const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     // useCheckForChanges('TableWidget', props)
-    const { selectedRowIds, selectionDispatch, rows, columns, defaultSortColumnName, displayedRowCount, height, selectionDisabled } = props
+    const { selectedRowIds, selectionDispatch, rows, columns, orderedRowIds, visibleRowIndices, defaultSortColumnName, height, selectionDisabled } = props
     const [sortFieldOrder, setSortFieldOrder] = useState<string[]>([])
 
     useEffect(() => {
@@ -185,43 +193,69 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     const columnForName = useCallback((columnName: string): SortableTableWidgetColumn => (columns.filter(c => (c.columnName === columnName))[0]), [columns])
     const sortingRules = useMemoCompare<sortFieldEntry[]>('sortingRules', interpretSortFields(sortFieldOrder), [])
 
-    const sortedRows = useMemo(() => {
-        let _draft = [...rows]
-        for (const r of sortingRules) {
-            const columnName = r.columnName
+    // TODO: This seems awkward as a useEffect callback...
+    // TODO: DOES THIS STATE BELONG IN THE REDUCER AS WELL???
+    // const resort = useMemo(() => {
+    useEffect(() => {
+        console.log(`Resorting.`)
+        let _draft = Array.from(rows.values())
+        sortingRules.forEach(rule => {
+            const columnName = rule.columnName
             const column = columnForName(columnName)
             _draft.sort((a, b) => {
                 const dA = (a.data[columnName] || {})
                 const dB = (b.data[columnName] || {})
                 const valueA = dA.sortValue
                 const valueB = dB.sortValue
-    
-                return r.sortAscending ? column.sort(valueA, valueB) : column.sort(valueB, valueA)
+
+                return rule.sortAscending ? column.sort(valueA, valueB) : column.sort(valueB, valueA)
             })
-        }
-        return _draft
-    }, [rows, sortingRules, columnForName])
+        })
+        const newSortedRowIds = _draft.map(row => row.rowIdNumeric)
+        selectionDispatch({ type: SET_ROW_ORDER, newRowOrder: newSortedRowIds })
+    }, [rows, sortingRules, columnForName, selectionDispatch])
 
-    const sortedRowIds = useMemo(() => {
-        return sortedRows.map(r => Number(r.rowId))
-    }, [sortedRows])
-    // CURRYING FUNCTION -- better to put the entire list of rows (or at least their IDs in sorted order) in the state
-    const checkboxClickWrapFn = useCallback((evt: React.MouseEvent, fn: intermed) => {
-        return fn(sortedRowIds, evt)
-    }, [sortedRowIds])
+    // const sortedRows = useMemo(() => {
+    //     let _draft = [...rows]
+    //     for (const r of sortingRules) {
+    //         const columnName = r.columnName
+    //         const column = columnForName(columnName)
+    //         _draft.sort((a, b) => {
+    //             const dA = (a.data[columnName] || {})
+    //             const dB = (b.data[columnName] || {})
+    //             const valueA = dA.sortValue
+    //             const valueB = dB.sortValue
+    
+    //             return r.sortAscending ? column.sort(valueA, valueB) : column.sort(valueB, valueA)
+    //         })
+    //     }
+    //     return _draft
+    // }, [rows, sortingRules, columnForName])
 
-    const visibleRows = useMemo(() => sortedRows.slice(0, displayedRowCount || sortedRows.length), [sortedRows, displayedRowCount])
-    const allRowIds = useMemo(() => visibleRows.map(r => r.rowId), [visibleRows])
-    const allRowsSelected = useMemo(() => allRowIds.every(id => selectedRowIds.has(Number(id))), [selectedRowIds, allRowIds])
+    const displayRows = useMemo(() => {
+        if (!rows) return []
+        const visibleIds = realizeVisibleRowIndices(orderedRowIds, visibleRowIndices)
+        const realizedRows = visibleIds.map(id => rows.get(id))
+        if (realizedRows.some(r => r === undefined)) throw Error('Rows missing from row dict')
+        return realizedRows as any as SortableTableWidgetRow[]
+    }, [orderedRowIds, visibleRowIndices, rows])
 
+    // const visibleRows = useMemo(() => sortedRows.slice(0, displayedRowCount || sortedRows.length), [sortedRows, displayedRowCount])
+    // const allRowIds = useMemo(() => visibleRows.map(r => r.rowId), [visibleRows])
+    // const allRowsSelected = useMemo(() => allRowIds.every(id => selectedRowIds.has(Number(id))), [selectedRowIds, allRowIds])
+    const rowSelectionStatus = useMemo(() => allRowSelectionState({selectedRowIds, orderedRowIds, visibleRowIndices}), [selectedRowIds, orderedRowIds, visibleRowIndices])
+    const allRowsSelected = useMemo(() => rowSelectionStatus === 'all', [rowSelectionStatus])
+
+    // TODO: THESE TWO THINGS CAN BE SIMPLIFIED MAYBE?
     const handleSelectAll = useCallback(() => {
-        selectionDispatch({type: SELECT_ALL, allRowIds: allRowIds.map(a => Number(a))})
-    }, [selectionDispatch, allRowIds])
+        selectionDispatch({type: TOGGLE_SELECT_ALL})
+    }, [selectionDispatch])
 
     const handleDeselectAll = useCallback(() => {
         selectionDispatch({type: DESELECT_ALL})
     }, [selectionDispatch])
 
+    // TODO: DOES THIS BELONG IN THE REDUCER?
     const handleColumnClick = useCallback((columnName) => {
         const len = sortFieldOrder.length
         const priorSortField = len === 0 ? '' : sortFieldOrder[sortFieldOrder.length - 1]
@@ -269,7 +303,8 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     const _metricsByRow = useMemo(() => {
         const contents = Object.assign(
             {},
-            ...rows.map((row) => {
+            Array.from(rows.values()).map((row) => {
+                // console.log(`Processing row with ID ${row.rowIdNumeric} with data ${JSON.stringify(row.data)}`)
                 const columnValues = columns.map(column => (
                     <TableCell key={column.columnName}>
                         <div title={column.tooltip}>
@@ -277,6 +312,7 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
                         </div>
                     </TableCell>
                 ))
+                // console.log(`Returning ${row.rowId} mapped to ${columnValues.length} elements`)
                 return {[row.rowId]: columnValues}
             })
         )
@@ -324,20 +360,19 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     // every time the selections change, instead of just touching the rows whose selection
     // status changed...
     const _unitrows = useMemo(() => {
-        return visibleRows.map((row) => {
-            const clickFn = (row.checkboxFn === undefined ? voidFn : (evt: React.MouseEvent) => checkboxClickWrapFn(evt, row.checkboxFn as intermed))
+        return displayRows.map((row) => {
             return (
                 <ContentRow
                     key={row.rowId}
                     rowId={row.rowId}
                     selected={selectedRowIds.has(Number(row.rowId))}
-                    onClick={clickFn}
+                    onClick={row.checkboxFn || voidFn}
                     isDisabled={selectionDisabled || false}
                     contentRepository={_metricsByRow}
                 />
             )
         })
-    }, [selectedRowIds, visibleRows, _metricsByRow, selectionDisabled, checkboxClickWrapFn])
+    }, [selectedRowIds, displayRows, _metricsByRow, selectionDisabled])
 
     return (
         <TableContainer style={height !== undefined ? {maxHeight: height} : {}}>
