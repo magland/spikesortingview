@@ -6,16 +6,13 @@ export type RowSelection = {
     lastClickedId?: number
     page?: number
     rowsPerPage?: number
-    visibleRowIndices?: number[]
+    visibleRowIds?: number[]
 }
 
 export const defaultRowSelection = {
     selectedRowIds: new Set<number>(),
     orderedRowIds: [],
 }
-
-// type Modifier = null | 'shift' | 'ctrl'
-
 
 export type RowSelectionState = 'all' | 'none' | 'partial'
 
@@ -34,7 +31,7 @@ export const INITIALIZE_ROWS: RowSelectionActionType = 'INITIALIZE_ROWS'
 export const SET_ROW_ORDER: RowSelectionActionType = 'SET_ROW_ORDER'
 export const SET_VISIBLE_ROWS: RowSelectionActionType = 'SET_VISIBLE_ROWS'
 
-// Not sure this is actually needed...
+// Not sure if this is the best approach...?
 export const COPY_STATE: RowSelectionActionType = 'COPY_STATE'
 
 export type RowSelectionAction = {
@@ -42,7 +39,7 @@ export type RowSelectionAction = {
     incomingSelectedRowIds?: number[]
     targetRow?: number
     newRowOrder?: number[]
-    newVisibleRows?: number[]
+    newVisibleRowIds?: number[]
     pageNumber?: number
     rowsPerPage?: number
 }
@@ -53,11 +50,10 @@ const DEFAULT_ROWS_PER_PAGE = 20
 // https://github.com/magland/sortingview/blob/c71bdc5c095174cbda25866a6748223a715a3792/src/python/sortingview/gui/extensions/unitstable/Units/TableWidget.tsx#L200
 
 export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): RowSelection => {
-    const { selectedRowIds } = s
     const { type, targetRow } = a
     switch (type) { 
         case SET_SELECTION:
-            // TODO: Check that incoming selection all exists within the sorted rows?
+            // TODO: Check that the incoming selection contains only row ids we recognize from the sorted row list?
             return {
                 ...s,
                 selectedRowIds: new Set((a.incomingSelectedRowIds ?? []))
@@ -73,15 +69,10 @@ export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): Row
                 selectedRowIds: new Set([targetRow])
             }
         case TOGGLE_ROW:
-            if (!targetRow) throw new Error(`Attempt to toggle row with unset rowid.`)
-            selectedRowIds.has(targetRow) ? selectedRowIds.delete(targetRow) : selectedRowIds.add(targetRow)
-            return {
-                ...s,
-                selectedRowIds: new Set<number>(selectedRowIds), // shallow copy, to trigger rerender
-                lastClickedId: targetRow
-            }
+            return toggleSelectedRow(s, a)
         case TOGGLE_RANGE:
-            return toggleSelectedRange(s, a)
+            // range selection should default to row toggle if last-clicked was cleared (e.g. by resorting)
+            return s.lastClickedId ? toggleSelectedRange(s, a) : toggleSelectedRow(s, a)
         case TOGGLE_SELECT_ALL:
             return toggleSelectAll(s)
         case DESELECT_ALL:
@@ -105,9 +96,12 @@ export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): Row
         //     break;
         case COPY_STATE:
             return {
-                lastClickedId: targetRow,
                 selectedRowIds: new Set((a.incomingSelectedRowIds ?? [])),
-                orderedRowIds: a.newRowOrder ?? []
+                orderedRowIds: a.newRowOrder ?? [],
+                lastClickedId: targetRow,
+                page: a.pageNumber,
+                rowsPerPage: a.rowsPerPage,
+                visibleRowIds: a.newVisibleRowIds
             }
         default: {
             throw Error(`Invalid mode for row selection reducer: ${type}`)
@@ -115,36 +109,16 @@ export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): Row
     }
 }
 
-export type checkboxClickCurriedDispatch = (rowId: number, evt: React.MouseEvent) => void
-export type rowCheckboxClickHandlerType = (evt: React.MouseEvent) => void
-// export type checkboxDispatchRowIdCurried = (evt: React.MouseEvent, allRowsSorted: number[]) => void
-// export type checkboxRowsCurried = (rowId: number, evt: React.MouseEvent) => void
+type clickCurriedDispatch = (rowId: number, evt: React.MouseEvent) => void
+export type clickHandlerWithCurriedRow = (evt: React.MouseEvent) => void
 
-export const checkboxDispatchCurry = (reducer: React.Dispatch<RowSelectionAction>): checkboxClickCurriedDispatch => {
+export const checkboxDispatchCurry = (reducer: React.Dispatch<RowSelectionAction>): clickCurriedDispatch => {
     return (rowId: number, evt: React.MouseEvent) => { checkboxClick(rowId, reducer, evt) }
 }
 
-export const rowCheckboxClickHandler = (rowId: number, reducer: checkboxClickCurriedDispatch): rowCheckboxClickHandlerType => {
+export const curriedRowClickHandler = (rowId: number, reducer: clickCurriedDispatch): clickHandlerWithCurriedRow => {
     return (evt: React.MouseEvent) => { reducer(rowId, evt) }
 }
-
-// export type curryOneT = (reducer: React.Dispatch<RowSelectionAction>) => checkboxClickCurriedDispatch
-// export type curryTwoT = (rowId: number, dispatch: checkboxClickCurriedDispatch) => void
-// export type intermed = (allRowsSorted: number[], evt: React.MouseEvent) => void
-// export type curryThreeT = (evt: React.MouseEvent, fn: curryTwoT) => void
-
-// // Curry one: add the dispatch. Fn will still need rowId, all rows sorted, and evt.
-// // Curry two: Given curry one, add the row id. Fn will still need all-rows-sorted and evt.
-// // Curry three: here's the snag. Given NOT CURRY TWO, BUT JUST all-rows-sorted, return a fn takes curry-two and evt and applies it.
-// export const curryOne = (reducer: React.Dispatch<RowSelectionAction>): checkboxClickCurriedDispatch => {
-//     return (rowId: number, allRowsSorted: number[], evt: React.MouseEvent) => { checkboxClick(rowId, reducer, allRowsSorted, evt) }
-// }
-// export const curryTwo = (rowId: number, dispatchCurry: checkboxClickCurriedDispatch) => {
-//     return (allRowsSorted: number[], evt: React.MouseEvent) => { dispatchCurry(rowId, allRowsSorted, evt) }
-// }
-// export const curryThree = (allRowsSorted: number[]): (evt: React.MouseEvent, fn: intermed) => void => {
-//     return (evt: React.MouseEvent, fn: intermed) => { fn(allRowsSorted, evt) }
-// }
 
 export const checkboxClick = (rowId: number, reducer: React.Dispatch<RowSelectionAction>, evt: React.MouseEvent) => {
     const action = {
@@ -154,18 +128,36 @@ export const checkboxClick = (rowId: number, reducer: React.Dispatch<RowSelectio
     reducer(action)
 }
 
-export const allRowSelectionState = (s: {selectedRowIds: Set<number>, orderedRowIds: number[], visibleRowIndices?: number[]}): RowSelectionState => {
+export const plotDispatchCurry = (reducer: React.Dispatch<RowSelectionAction>): clickCurriedDispatch => {
+    return (rowId: number, evt: React.MouseEvent) => { plotElementClick(rowId, reducer, evt) }
+}
+
+export const plotElementClick = (rowId: number, reducer: React.Dispatch<RowSelectionAction>, evt: React.MouseEvent) => {
+    const action = {
+        type: evt.shiftKey ? TOGGLE_RANGE :
+            evt.ctrlKey ? TOGGLE_ROW : UNIQUE_SELECT,
+        targetRow: rowId
+    }
+    reducer(action)
+}
+
+export const allRowSelectionState = (s: {selectedRowIds: Set<number>, orderedRowIds: number[], visibleRowIds?: number[]}): RowSelectionState => {
     if (s.selectedRowIds.size === 0) return 'none'
     if (s.selectedRowIds.size === s.orderedRowIds.length) return 'all'
-    if (!s.visibleRowIndices || s.visibleRowIndices.length === 0 || s.selectedRowIds.size !== s.visibleRowIndices.length) return 'partial'
+    if (!s.visibleRowIds || s.visibleRowIds.length === 0 || s.selectedRowIds.size !== s.visibleRowIds.length) return 'partial'
     // Some rows are visible and some are set. So status is 'partial' if those are different sets and 'all' if they're the same set.
-    if (s.visibleRowIndices.some(visibleId => !s.selectedRowIds.has(visibleId))) return 'partial'
+    if (s.visibleRowIds.some(visibleId => !s.selectedRowIds.has(visibleId))) return 'partial'
     return 'all'
 }
 
-export const realizeVisibleRowIndices = (orderedRowIds: number[], visibleRowIndices?: number[]) => {
-    // In the vast majority of cases we can just slice with the visible indices, so maybe do that?
-    return visibleRowIndices ? visibleRowIndices.map(r => orderedRowIds[r]) : orderedRowIds
+const toggleSelectedRow = (s: RowSelection, a: RowSelectionAction): RowSelection => {
+    if (!a.targetRow) throw new Error(`Attempt to toggle row with unset rowid.`)
+    s.selectedRowIds.has(a.targetRow) ? s.selectedRowIds.delete(a.targetRow) : s.selectedRowIds.add(a.targetRow)
+    return {
+        ...s,
+        selectedRowIds: new Set<number>(s.selectedRowIds), // shallow copy, to trigger rerender
+        lastClickedId: a.targetRow
+    }
 }
 
 const toggleSelectedRange = (s: RowSelection, a: RowSelectionAction): RowSelection => {
@@ -185,7 +177,7 @@ const toggleSelectedRange = (s: RowSelection, a: RowSelectionAction): RowSelecti
 
     return {
         ...s,
-        lastClickedId: targetRow,
+        lastClickedId: targetRow, // TODO: Check with client: should a range toggle update the last-selected-row?
         selectedRowIds: new Set<number>(selectedRowIds) // shallow copy to trigger rerender
     }
 }
@@ -194,8 +186,8 @@ const toggleSelectAll = (s: RowSelection): RowSelection => {
     const selectionStatus = allRowSelectionState(s)
     const newSelection = selectionStatus === 'all'
                             ? new Set<number>()
-                            : s.visibleRowIndices && s.visibleRowIndices.length > 0
-                                ? new Set<number>(s.visibleRowIndices)
+                            : s.visibleRowIds && s.visibleRowIds.length > 0
+                                ? new Set<number>(s.visibleRowIds)
                                 : new Set<number>(s.orderedRowIds)
     return {
         ...s,
@@ -213,17 +205,23 @@ const resetRowOrder = (s: RowSelection, a: RowSelectionAction): RowSelection => 
         throw Error("Reordering rows, but the set of rows in the new and old ordering don't match.")
     }
     // If nothing actually changed, return identity. Prevents infinite loops.
-    if (!orderedRowIds.some((r, ii) => r === newRowOrder[ii])) return s
+    if (orderedRowIds.every((r, ii) => r === newRowOrder[ii])) return s
+    // If pagination is active, changing the ordering should change the set of row indices that's visible.
+    const windowStart = (s.rowsPerPage || DEFAULT_ROWS_PER_PAGE) * ((s.page || 1) - 1)
+    const visibleRowIndices = (s.visibleRowIds && s.visibleRowIds.length > 0)
+        ? newRowOrder.slice(windowStart, windowStart + (s.rowsPerPage || DEFAULT_ROWS_PER_PAGE))
+        : undefined
     return {
         ...s,
         orderedRowIds: newRowOrder,
-        lastClickedId: undefined
+        lastClickedId: undefined,
+        visibleRowIds: visibleRowIndices
     }
 }
 
 const setVisibleRows = (s: RowSelection, a: RowSelectionAction): RowSelection => {
     // If visible rows are manually specified, just assume caller knows what they're doing.
-    if (a.newVisibleRows && a.newVisibleRows.length > 0) return { ...s, visibleRowIndices: a.newVisibleRows }
+    if (a.newVisibleRowIds && a.newVisibleRowIds.length > 0) return { ...s, visibleRowIds: a.newVisibleRowIds }
 
     const newWindowSize = a.rowsPerPage || s.rowsPerPage || DEFAULT_ROWS_PER_PAGE
     const newPage = a.pageNumber || s.page || 1
@@ -242,7 +240,7 @@ const setVisibleRows = (s: RowSelection, a: RowSelectionAction): RowSelection =>
         ...s,
         page: realizedStartingPage,
         rowsPerPage: newWindowSize,
-        visibleRowIndices: s.orderedRowIds.slice(windowStart, windowStart + newWindowSize)
+        visibleRowIds: s.orderedRowIds.slice(windowStart, windowStart + newWindowSize)
     }
 }
 
@@ -267,7 +265,9 @@ export const useSelectedUnitIds = () => {
     return {
         selectedUnitIds: rowSelection.selectedRowIds,
         orderedRowIds: rowSelection.orderedRowIds,
-        visibleRowIndices: rowSelection.visibleRowIndices,
+        visibleRowIds: rowSelection.visibleRowIds,
+        page: rowSelection.page,
+        rowsPerPage: rowSelection.rowsPerPage,
         unitIdSelectionDispatch: rowSelectionDispatch
     }
 }

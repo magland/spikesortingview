@@ -83,7 +83,6 @@ const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, un
             plots={plots}
             plotComponent={LiveCrossCorrelogramPlot}
             selectedPlotKeys={undefined}
-            selectionDispatch={undefined}
             numPlotsPerRow={unitIds.size}
         />
     )

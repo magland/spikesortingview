@@ -1,4 +1,4 @@
-import { checkboxDispatchCurry, INITIALIZE_ROWS, rowCheckboxClickHandler, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { checkboxDispatchCurry, curriedRowClickHandler, INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelectionContext';
 import { SortingCuration, useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import colorForUnitId from 'views/common/colorForUnitId';
@@ -12,11 +12,8 @@ type Props = {
 }
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, orderedRowIds, visibleRowIndices, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const {selectedUnitIds, orderedRowIds, visibleRowIds, unitIdSelectionDispatch} = useSelectedUnitIds()
     const wrappedDispatch = useMemo(() => checkboxDispatchCurry(unitIdSelectionDispatch), [unitIdSelectionDispatch])
-    // const setSelectedRowKeys = useCallback((keys: string[]) => {
-    //     setSelectedUnitIds(keys.map(k => (Number(k))))
-    // }, [setSelectedUnitIds])
     const {sortingCuration} = useSortingCuration()
     
     const columns = useMemo(() => {
@@ -62,36 +59,6 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
         return ret
     }, [data.columns, sortingCuration])
 
-    // const rows = useMemo(() => (
-    //     data.rows.sort((r1, r2) => (r1.unitId - r2.unitId)).map(r => {
-    //         const curationLabels = ((sortingCuration?.labelsByUnit || {})[`${r.unitId}`] || [])
-    //         const unitIdData = {
-    //             value: {unitId: r.unitId, mergeGroup: mergeGroupForUnitId(r.unitId, sortingCuration)},
-    //             sortValue: r.unitId
-    //         }
-    //         const rowData: {[key: string]: any} = {
-    //             _unitId: unitIdData,
-    //             _labels: {
-    //                 value: curationLabels,
-    //                 sortValue: curationLabels.join(', ')
-    //             }
-    //         }
-    //         for (let c of data.columns) {
-    //             const text = `${r.values[c.key] !== undefined ? r.values[c.key] : ''}`
-    //             rowData[c.key] = {
-    //                 value: text,
-    //                 sortValue: r.values[c.key]
-    //             }
-    //         }
-    //         return {
-    //             rowId: `${r.unitId}`,
-    //             rowIdNumeric: r.unitId,
-    //             data: rowData,
-    //             // checkboxFn: curryTwo(r.unitId, wrappedDispatch)
-    //             checkboxFn: rowCheckboxClickHandler(r.unitId, wrappedDispatch)
-    //         }
-    //     })
-    // ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
     const rows = useMemo(() => (
         data.rows.map(r => {
             const curationLabels = ((sortingCuration?.labelsByUnit || {})[`${r.unitId}`] || [])
@@ -117,8 +84,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 rowId: `${r.unitId}`,
                 rowIdNumeric: r.unitId,
                 data: rowData,
-                // checkboxFn: curryTwo(r.unitId, wrappedDispatch)
-                checkboxFn: rowCheckboxClickHandler(r.unitId, wrappedDispatch)
+                checkboxFn: curriedRowClickHandler(r.unitId, wrappedDispatch)
             }
         })
     ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
@@ -146,7 +112,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 columns={columns}
                 rows={rowMap}
                 orderedRowIds={orderedRowIds}
-                visibleRowIndices={visibleRowIndices}
+                visibleRowIds={visibleRowIds}
                 selectedRowIds={selectedUnitIds}
                 selectionDispatch={unitIdSelectionDispatch}
                 defaultSortColumnName="unitId"

@@ -1,8 +1,8 @@
 import PlotGrid from 'components/PlotGrid/PlotGrid';
-import { useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { curriedRowClickHandler, INITIALIZE_ROWS, plotDispatchCurry, useSelectedUnitIds } from 'contexts/RowSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
 import colorForUnitId from 'views/common/colorForUnitId';
 import { ToolbarItem } from 'views/common/Toolbars';
@@ -19,15 +19,21 @@ type Props = {
 
 const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) => {
     // const [selectedUnitIds, setSelectedUnitIds] = useState<number[]>([])
-    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const {selectedUnitIds, orderedRowIds, unitIdSelectionDispatch} = useSelectedUnitIds()
 
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
 
-    const plots = useMemo(() => (data.averageWaveforms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(aw => ({
+    useEffect(() => {
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => a - b) })
+    }, [data.averageWaveforms, unitIdSelectionDispatch])
+
+    const wrappedDispatch = useMemo(() => plotDispatchCurry(unitIdSelectionDispatch), [unitIdSelectionDispatch])
+    const plots = useMemo(() => data.averageWaveforms.map(aw => ({
         key: `${aw.unitId}`,
         label: `Unit ${aw.unitId}`,
         labelColor: colorForUnitId(aw.unitId),
+        clickHandler: curriedRowClickHandler(Number(aw.unitId), wrappedDispatch),
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
@@ -40,7 +46,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             width: 120,
             height: 120
         }
-    }))), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor])
+    })), [data.averageWaveforms, wrappedDispatch, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor])
 
     const _handleWaveformToggle = useCallback(() => {
         setWaveformsMode(m => (m === 'geom' ? 'vertical' : 'geom'))
@@ -82,7 +88,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
                     plots={plots}
                     plotComponent={AverageWaveformPlot}
                     selectedPlotKeys={selectedUnitIds}
-                    selectionDispatch={unitIdSelectionDispatch}
+                    orderedPlotIds={orderedRowIds}
                 />
             </VerticalScrollView>
         </Splitter>

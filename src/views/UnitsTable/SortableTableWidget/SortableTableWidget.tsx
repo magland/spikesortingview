@@ -1,7 +1,7 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { Checkbox, Grid, LinearProgress, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@material-ui/core'
-import { allRowSelectionState, DESELECT_ALL, realizeVisibleRowIndices, rowCheckboxClickHandlerType, RowSelectionAction, SET_ROW_ORDER, TOGGLE_SELECT_ALL } from 'contexts/RowSelectionContext'
+import { allRowSelectionState, clickHandlerWithCurriedRow, DESELECT_ALL, RowSelectionAction, SET_ROW_ORDER, TOGGLE_SELECT_ALL } from 'contexts/RowSelectionContext'
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import './SortableTableWidget.css'
 import { useMemoCompare } from './useMemoCompare'
@@ -14,8 +14,7 @@ export interface SortableTableWidgetRow {
         value: any,
         sortValue: any
     }}
-    // checkboxFn?: (evt: React.MouseEvent, allRowsSorted: number[]) => void // TODO: Remove
-    checkboxFn?: rowCheckboxClickHandlerType
+    checkboxFn?: clickHandlerWithCurriedRow
 }
 
 export interface SortableTableWidgetColumn {
@@ -108,10 +107,6 @@ type CheckboxProps = {
 
 const RowCheckbox: FunctionComponent<CheckboxProps> = (props: CheckboxProps) => {
     const { rowId, selected, onClick, isDeselectAll, isDisabled } = props
-    // const handleClick: React.MouseEventHandler<HTMLButtonElement> = useCallback((evt) => {
-    //     const modifier = evt.shiftKey ? 'shift' : null
-    //     onClick(modifier)
-    // }, [onClick])
     return (
         <Checkbox
             checked={selected}
@@ -129,14 +124,13 @@ const RowCheckbox: FunctionComponent<CheckboxProps> = (props: CheckboxProps) => 
 type RowProps = {
     rowId: string,
     selected: boolean,
-    // onClick: (m: Modifier, rowId: string) => void,
-    // handleClick: (m: Modifier) => void,
     onClick: (evt: React.MouseEvent) => void,
     isDisabled: boolean,
     contentRepository: {[key: string]: JSX.Element[]}
 }
 const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
     const {rowId, selected, onClick, isDisabled, contentRepository} = props
+    const content = contentRepository[rowId]
     return <TableRow key={rowId} className={selected ? "selectedRow": ""}>
         <TableCell key="_checkbox">
             <RowCheckbox
@@ -146,23 +140,17 @@ const ContentRow: FunctionComponent<RowProps> = (props: RowProps) => {
                 isDisabled={isDisabled}
             />
         </TableCell>
-        {contentRepository[rowId]}
+        {content}
     </TableRow>
 }
-
-// type RowDict = { [key: number]: SortableTableWidgetRow }
-// type ColDict = { [key: number]: SortableTableWidgetColumn }
 
 interface TableProps {
     selectedRowIds: Set<number>
     selectionDispatch: React.Dispatch<RowSelectionAction>
-    // rows: SortableTableWidgetRow[]
     columns: SortableTableWidgetColumn[]
-    // rows: RowDict
     rows: Map<number, SortableTableWidgetRow>
-    // columns: ColDict
     orderedRowIds: number[]
-    visibleRowIndices?: number[]
+    visibleRowIds?: number[]
     defaultSortColumnName?: string
     height?: number
     selectionDisabled?: boolean
@@ -181,7 +169,8 @@ const interpretSortFields = (fields: string[]): sortFieldEntry[] => {
 
 const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
     // useCheckForChanges('TableWidget', props)
-    const { selectedRowIds, selectionDispatch, rows, columns, orderedRowIds, visibleRowIndices, defaultSortColumnName, height, selectionDisabled } = props
+    const { selectedRowIds, selectionDispatch, rows, columns, orderedRowIds, visibleRowIds, defaultSortColumnName, height, selectionDisabled } = props
+    const visibleRows = useMemo(() => {return visibleRowIds || orderedRowIds}, [visibleRowIds, orderedRowIds])
     const [sortFieldOrder, setSortFieldOrder] = useState<string[]>([])
 
     useEffect(() => {
@@ -195,9 +184,7 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
 
     // TODO: This seems awkward as a useEffect callback...
     // TODO: DOES THIS STATE BELONG IN THE REDUCER AS WELL???
-    // const resort = useMemo(() => {
     useEffect(() => {
-        console.log(`Resorting.`)
         let _draft = Array.from(rows.values())
         sortingRules.forEach(rule => {
             const columnName = rule.columnName
@@ -215,35 +202,15 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
         selectionDispatch({ type: SET_ROW_ORDER, newRowOrder: newSortedRowIds })
     }, [rows, sortingRules, columnForName, selectionDispatch])
 
-    // const sortedRows = useMemo(() => {
-    //     let _draft = [...rows]
-    //     for (const r of sortingRules) {
-    //         const columnName = r.columnName
-    //         const column = columnForName(columnName)
-    //         _draft.sort((a, b) => {
-    //             const dA = (a.data[columnName] || {})
-    //             const dB = (b.data[columnName] || {})
-    //             const valueA = dA.sortValue
-    //             const valueB = dB.sortValue
-    
-    //             return r.sortAscending ? column.sort(valueA, valueB) : column.sort(valueB, valueA)
-    //         })
-    //     }
-    //     return _draft
-    // }, [rows, sortingRules, columnForName])
-
     const displayRows = useMemo(() => {
         if (!rows) return []
-        const visibleIds = realizeVisibleRowIndices(orderedRowIds, visibleRowIndices)
+        const visibleIds = visibleRowIds && visibleRowIds.length > 0 ? visibleRowIds : orderedRowIds
         const realizedRows = visibleIds.map(id => rows.get(id))
         if (realizedRows.some(r => r === undefined)) throw Error('Rows missing from row dict')
         return realizedRows as any as SortableTableWidgetRow[]
-    }, [orderedRowIds, visibleRowIndices, rows])
+    }, [orderedRowIds, visibleRowIds, rows])
 
-    // const visibleRows = useMemo(() => sortedRows.slice(0, displayedRowCount || sortedRows.length), [sortedRows, displayedRowCount])
-    // const allRowIds = useMemo(() => visibleRows.map(r => r.rowId), [visibleRows])
-    // const allRowsSelected = useMemo(() => allRowIds.every(id => selectedRowIds.has(Number(id))), [selectedRowIds, allRowIds])
-    const rowSelectionStatus = useMemo(() => allRowSelectionState({selectedRowIds, orderedRowIds, visibleRowIndices}), [selectedRowIds, orderedRowIds, visibleRowIndices])
+    const rowSelectionStatus = useMemo(() => allRowSelectionState({selectedRowIds, orderedRowIds, visibleRowIds: visibleRows}), [selectedRowIds, orderedRowIds, visibleRows])
     const allRowsSelected = useMemo(() => rowSelectionStatus === 'all', [rowSelectionStatus])
 
     // TODO: THESE TWO THINGS CAN BE SIMPLIFIED MAYBE?
@@ -278,7 +245,7 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
 
     const primaryRule = sortingRules[sortingRules.length - 1]
 
-    const headers = useMemo(() => {
+    const columnHeaders = useMemo(() => {
         return columns.map((c) => ({
             name: c.columnName,
             tooltip: c.tooltip,
@@ -291,20 +258,19 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
 
     const header = useMemo(() => {
         return (<HeaderRow
-            headers={headers}
+            headers={columnHeaders}
             onColumnClick={handleColumnClick}
             onDeselectAll={allRowsSelected ? handleDeselectAll : undefined}
             onSelectAll={allRowsSelected ? undefined : handleSelectAll }
             allRowsSelected={allRowsSelected}
             selectionDisabled={selectionDisabled}
         />)
-    }, [headers, handleColumnClick, allRowsSelected, handleDeselectAll, handleSelectAll, selectionDisabled])
+    }, [columnHeaders, handleColumnClick, allRowsSelected, handleDeselectAll, handleSelectAll, selectionDisabled])
 
     const _metricsByRow = useMemo(() => {
         const contents = Object.assign(
             {},
-            Array.from(rows.values()).map((row) => {
-                // console.log(`Processing row with ID ${row.rowIdNumeric} with data ${JSON.stringify(row.data)}`)
+            ...Array.from(rows.values()).map((row) => {
                 const columnValues = columns.map(column => (
                     <TableCell key={column.columnName}>
                         <div title={column.tooltip}>
@@ -312,53 +278,13 @@ const SortableTableWidget: FunctionComponent<TableProps> = (props) => {
                         </div>
                     </TableCell>
                 ))
-                // console.log(`Returning ${row.rowId} mapped to ${columnValues.length} elements`)
                 return {[row.rowId]: columnValues}
             })
         )
         return contents as any as {[key: string]: JSX.Element[]}
     }, [rows, columns])
 
-    // Trying to pre-build the rendered rows and then update the subset with changes.
-    // ...which doesn't actually work, because a) it's still redoing all of them each time bu
-    // b) the effect hook keeps react from recognizing the change, so the DOM doesn't update.
-    // This achieves the opposite of both our goals, but I'll keep the code for now.
-    // const _rowsByRowId = useMemo(() => {
-    //     console.log(`Rebuilding row set. ${Date.now()}`)
-    //     const contents = Object.assign(
-    //         {},
-    //         ..._rows.map((row) => {
-    //             const rendered = (
-    //                 <ContentRow 
-    //                     rowId={row.rowId}
-    //                     selected={false}
-    //                     onClick={toggleSelectedRowId}
-    //                     isDisabled={selectionDisabled || false}
-    //                     contentRepository={_metricsByRow}
-    //                 />
-    //             )
-    //             return {[row.rowId]: rendered}
-    //         })
-    //     )
-    //     return contents as any as {[key: string]: JSX.Element}
-    // }, [_rows, _metricsByRow, toggleSelectedRowId, selectionDisabled])
-
-    // useEffect(() => {
-    //     selectionDelta.forEach((rowId) => {
-    //         // console.log(`Toggling selection of row ${rowId}`)
-    //         _rowsByRowId[rowId] = <ContentRow
-    //                                 rowId={rowId}
-    //                                 selected={selectedRowsSet.has(rowId)}
-    //                                 onClick={toggleSelectedRowId}
-    //                                 isDisabled={selectionDisabled || false}
-    //                                 contentRepository={_metricsByRow}
-    //         />
-    //     })
-    // }, [_rowsByRowId, selectionDelta, selectedRowsSet, toggleSelectedRowId, selectionDisabled, _metricsByRow])
-
-    // This memoization is not effective, since it's still rebuilding the *entire* list
-    // every time the selections change, instead of just touching the rows whose selection
-    // status changed...
+    // TODO: Is this still rerendering too much/too often?
     const _unitrows = useMemo(() => {
         return displayRows.map((row) => {
             return (

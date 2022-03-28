@@ -37,7 +37,6 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
                 plots={plots}
                 plotComponent={CorrelogramPlot}
                 selectedPlotKeys={selectedUnitIds}
-                selectionDispatch={unitIdSelectionDispatch}
             />
         </div>
     )

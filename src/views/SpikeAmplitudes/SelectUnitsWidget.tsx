@@ -10,6 +10,7 @@ type Props = {
     selectionDisabled?: boolean
 }
 
+// TODO: Make this honor RowSelectionContext ordering & provide access to richer row-selection features?
 const SelectUnitsWidget: FunctionComponent<Props> = ({ unitIds, selectedUnitIds, unitIdSelectionDispatch, selectionDisabled }) => {
     const columns = useMemo(() => ([
         {

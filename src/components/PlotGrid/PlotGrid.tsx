@@ -1,11 +1,12 @@
 import { Grid } from '@material-ui/core';
-import { RowSelectionAction, TOGGLE_ROW, UNIQUE_SELECT } from 'contexts/RowSelectionContext';
-import React, { FunctionComponent, useCallback } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 
 type PGPlot = {
+    // numericId: number,
     key: string,
     label: string,
     labelColor: string,
+    clickHandler?: (evt: React.MouseEvent) => void,
     props: {[key: string]: any}
 }
 
@@ -13,69 +14,85 @@ type Props = {
     plots: PGPlot[]
     plotComponent: React.ComponentType<any>
     selectedPlotKeys?: Set<number>
-    selectionDispatch?: (action: RowSelectionAction) => void
     numPlotsPerRow?: number
+    orderedPlotIds?: number[]
 }
 
-const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotKeys, selectionDispatch, numPlotsPerRow}) => {
+const voidFn = (evt: React.MouseEvent) => {}
+
+type PlotGridRowData = {
+    rowStart: number,
+    maxItems?: number,
+    selectedPlotKeys?: Set<number>
+    plotIds: number[],
+    plotsDict: {[key: number]: JSX.Element}
+}
+const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => {
+    const { rowStart, maxItems, plotIds, selectedPlotKeys, plotsDict } = props
+    const rowEnd = maxItems || plotIds.length
+    const idsThisRow = plotIds.slice(rowStart, rowEnd)
+    return <Grid key={rowStart} container>
+            {
+                idsThisRow.map(id => {
+                    const className = `plotWrapperStyle plot${selectedPlotKeys?.has(id) ? 'S' : 'Uns'}electedStyle`
+                    return (
+                        <Grid key={id} item>
+                            <div className={className}>
+                                {plotsDict[id]}
+                            </div>
+                        </Grid>
+                    )
+                })
+            }
+        </Grid>
+}
+
+const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, orderedPlotIds, selectedPlotKeys, numPlotsPerRow}) => {
     const Component = plotComponent
-    const handlePlotClick = useCallback((event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        if (!selectionDispatch) return
-        if (!selectedPlotKeys) return
-        const key = event.currentTarget.dataset.key
-        if (!key) return
-        if (event.ctrlKey) {
-            selectionDispatch({type: TOGGLE_ROW, targetRow: Number(key)})
-        }
-        else {
-            selectionDispatch({type: UNIQUE_SELECT, targetRow: Number(key)})
-        }
-    }, [selectedPlotKeys, selectionDispatch])
-    const plotRows = numPlotsPerRow === undefined ? [
-        {plots}
-    ] : splitPlotsIntoRows(plots, numPlotsPerRow)
+
+    // Don't rerender the individual plots with every pass
+    const _plotsDict = useMemo(() => {
+        const contents = Object.assign(
+            {},
+            ...plots.map((p) => {
+                const rendered = <div
+                    data-key={p.key}
+                    onClick={p.clickHandler || voidFn}
+                >
+                    <div style={{fontWeight: 'bold', textAlign: 'center'}}>
+                        <span style={{color: p.labelColor}}>{p.label}</span>
+                    </div>
+                    <Component {...p.props} />
+                </div>
+                // return {[p.numericId]: rendered}
+                return {[Number(p.key)]: rendered}
+            })
+        )
+        return contents as any as {[key: number]: JSX.Element}
+    }, [plots, Component])
+    
+    const rowStarts = Array(plots.length).fill(0).map((x, ii) => ii).filter(i => i % (numPlotsPerRow || plots.length) === 0)
+    const plotIds = useMemo(() => {
+        console.log(`Caught reordering of ids, now using ${orderedPlotIds}`)
+        return orderedPlotIds || plots.map(p => Number(p.key))
+    }, [plots, orderedPlotIds])
+        
+
     return (
         <Grid container>
             {
-                plotRows.map((plotRow, jj) => (
-                    <Grid key={jj} container>
-                        {
-                            plotRow.plots.map(plot => (
-                                <Grid key={plot.key} item>
-                                    <div className='plotWrapperStyle'>
-                                        <div
-                                            data-key={plot.key}
-                                            className={selectedPlotKeys?.has(Number(plot.key)) ? 'plotSelectedStyle' : 'plotUnselectedStyle'}
-                                            onClick={handlePlotClick}
-                                        >
-                                            <div style={{fontWeight: 'bold', textAlign: 'center'}}>
-                                                <div style={{color: plot.labelColor}}>{plot.label}</div>
-                                            </div>
-                                            <Component
-                                                {...plot.props}
-                                            />
-                                        </div>
-                                    </div>
-                                </Grid>
-                            ))
-                        }
-                    </Grid>
+                rowStarts.map((start) => (
+                    <PlotRow
+                        rowStart={start}
+                        maxItems={numPlotsPerRow}
+                        plotIds={plotIds}
+                        selectedPlotKeys={selectedPlotKeys}
+                        plotsDict={_plotsDict}
+                    />
                 ))
             }
         </Grid>
     )
-}
-
-const splitPlotsIntoRows = (plots: PGPlot[], numPlotsPerRow: number) => {
-    const ret: {plots: PGPlot[]}[] = []
-    let i = 0
-    while (i < plots.length) {
-        ret.push({
-            plots: plots.slice(i, i + numPlotsPerRow)
-        })
-        i += numPlotsPerRow
-    }
-    return ret
 }
 
 export default PlotGrid
