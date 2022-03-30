@@ -45,7 +45,8 @@ const MultiTimeseriesView: FunctionComponent<Props> = ({data, width, height}) =>
                     <div key={ii}>
                         <ViewWrapper
                             label={panel.label}
-                            figureDataSha1={panel.figureDataSha1}
+                            figureDataSha1={panel.figureDataSha1} // old
+                            figureDataUri={panel.figureDataUri} // new
                             isBottomPanel={ii === (data.panels.length - 1)}
                             width={width}
                             height={Math.floor(unit_height * (panel?.relativeHeight ?? 1))}
