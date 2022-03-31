@@ -161,16 +161,12 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         }]
     }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.discontinuous])
 
-    // TODO: Not used by anything, remove
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
     const content = (
         <TimeScrollView
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
             selectedPanelKeys={emptyPanelSelection}
-            setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             yTickSet={yTickSet}
             width={width}

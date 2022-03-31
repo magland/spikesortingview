@@ -181,16 +181,12 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         }]
     }, [paintPanel])
 
-    // TODO: Not used by anything, remove
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
     const content = (
         <TimeScrollView
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
             selectedPanelKeys={emptyPanelSelection}
-            setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}

@@ -84,16 +84,12 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
         }]
     }, [paintPanel])
 
-    // TODO: Delete, not used by anything
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
     const content = (
         <TimeScrollView
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
             selectedPanelKeys={emptyPanelSelection}
-            setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
