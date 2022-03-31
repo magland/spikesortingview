@@ -1,6 +1,6 @@
 import { MuiThemeProvider } from '@material-ui/core';
 import RecordingSelectionContext, { defaultRecordingSelection, recordingSelectionReducer } from 'contexts/RecordingSelectionContext';
-import RowSelectionContext, { defaultRowSelection, rowSelectionReducer } from 'contexts/RowSelectionContext';
+import RowSelectionContext, { defaultRowSelection, rowSelectionReducer } from 'contexts/RowSelection/RowSelectionContext';
 import { getFigureData, useWindowDimensions } from 'figurl';
 import React, { useEffect, useReducer, useState } from 'react';
 import './localStyles.css';

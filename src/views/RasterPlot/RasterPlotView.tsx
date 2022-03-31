@@ -1,5 +1,5 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
-import { useSelectedUnitIds } from 'contexts/RowSelectionContext'
+import { useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'

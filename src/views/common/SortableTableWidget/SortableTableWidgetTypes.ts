@@ -1,4 +1,5 @@
-import { RowSelectionAction, SortingRule } from 'contexts/RowSelectionContext'
+import { RowSelectionAction } from "contexts/RowSelection/RowSelectionContext"
+import { SortingRule } from "contexts/RowSelection/RowSelectionTypes"
 
 export interface SortableTableWidgetRow {
     rowIdNumeric: number

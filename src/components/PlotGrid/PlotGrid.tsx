@@ -1,5 +1,5 @@
 import { Grid } from '@material-ui/core';
-import { voidClickHandler } from 'contexts/RowSelectionContext';
+import { voidClickHandler } from 'contexts/RowSelection/RowSelectionFunctions';
 import React, { FunctionComponent, useMemo } from 'react';
 
 export type PGPlot = {

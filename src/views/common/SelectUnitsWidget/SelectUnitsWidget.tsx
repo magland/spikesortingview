@@ -1,4 +1,5 @@
-import { RowSelectionAction, SortingRule } from 'contexts/RowSelectionContext';
+import { RowSelectionAction } from 'contexts/RowSelection/RowSelectionContext';
+import { SortingRule } from 'contexts/RowSelection/RowSelectionTypes';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useMemo } from 'react';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'views/common/SortableTableWidget/ColorPatchUnitIdLabel';

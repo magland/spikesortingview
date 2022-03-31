@@ -1,5 +1,5 @@
 import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
-import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';

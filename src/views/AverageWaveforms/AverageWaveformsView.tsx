@@ -1,5 +1,5 @@
 import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
-import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';

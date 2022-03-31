@@ -1,10 +1,10 @@
-import { Table, TableBody, TableCell, TableContainer } from '@material-ui/core'
-import { allRowSelectionState, voidClickHandler } from 'contexts/RowSelectionContext'
-import React, { FunctionComponent, useCallback, useEffect, useMemo } from 'react'
-import './SortableTableWidget.css'
-import SortableTableWidgetContentRow from './SortableTableWidgetContentRow'
-import SortableTableWidgetHeaderRow, { sorterCallbackWrapper } from './SortableTableWidgetHeader'
-import { ColsDict, SortableTableProps, SortableTableWidgetRow } from './SortableTableWidgetTypes'
+import { Table, TableBody, TableCell, TableContainer } from '@material-ui/core';
+import { allRowSelectionState, voidClickHandler } from 'contexts/RowSelection/RowSelectionFunctions';
+import React, { FunctionComponent, useCallback, useEffect, useMemo } from 'react';
+import './SortableTableWidget.css';
+import SortableTableWidgetContentRow from './SortableTableWidgetContentRow';
+import SortableTableWidgetHeaderRow, { sorterCallbackWrapper } from './SortableTableWidgetHeader';
+import { ColsDict, SortableTableProps, SortableTableWidgetRow } from './SortableTableWidgetTypes';
 
 const SortableTableWidget: FunctionComponent<SortableTableProps> = (props) => {
     const { selectedRowIds, selectionDispatch, rows, columns, orderedRowIds, visibleRowIds, primarySortRule, height, selectionDisabled } = props

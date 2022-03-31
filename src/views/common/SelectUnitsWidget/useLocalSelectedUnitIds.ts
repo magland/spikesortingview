@@ -1,5 +1,6 @@
-import { COPY_STATE, defaultRowSelection, getCheckboxClickHandlerGenerator, rowSelectionReducer, useSelectedUnitIds } from "contexts/RowSelectionContext"
-import { useCallback, useEffect, useMemo, useReducer, useState } from "react"
+import { COPY_STATE, defaultRowSelection, rowSelectionReducer, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
+import { getCheckboxClickHandlerGenerator } from 'contexts/RowSelection/RowSelectionFunctions';
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 
 // In practice we freeze the controls when the local selection is being used, but this component could theoretically support a separate selector.
 const useLocalSelectedUnitIds = () => {
