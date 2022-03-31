@@ -6,7 +6,9 @@ export const selectUnique = (s: RowSelection, a: RowSelectionAction): RowSelecti
     if (targetRow === undefined) {
         throw Error(`UNIQUE_SELECT for row selection requires a target row to be set.`)
     }
-    // TODO: Check that the target row even exists?
+    if (!s.orderedRowIds.includes(targetRow)) {
+        throw Error(`Requested row ID ${targetRow} is not present in the ordered row set.`)
+    }
     return {
         ...s,
         lastClickedId: targetRow,
@@ -15,7 +17,9 @@ export const selectUnique = (s: RowSelection, a: RowSelectionAction): RowSelecti
 }
 
 export const setSelectionExplicit = (s: RowSelection, a: RowSelectionAction): RowSelection => {
-    // TODO: Check that the incoming selection contains only row ids we recognize from the sorted row list?
+    if ((a.incomingSelectedRowIds || []).some(rowId => !s.orderedRowIds.includes(rowId))) {
+        throw Error(`Attempt to set a selection including rows that are not in known data.`)
+    }
     return {
         ...s,
         selectedRowIds: new Set((a.incomingSelectedRowIds ?? []))

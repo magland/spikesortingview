@@ -6,7 +6,6 @@ import { getVisibleRowsOnSortUpdate } from "./RowSelectionVisibilityFunctions"
 export const resetRowOrder = (s: RowSelection, a: RowSelectionAction): RowSelection => {
     const { newRowOrder } = a
     const { orderedRowIds } = s
-    // TODO: Ensure consistency of sets between new row order and old one?
     if (!newRowOrder || newRowOrder.length === 0) throw Error('Attempt to reset row ordering to empty set.')
     const oldRows = new Set<number>(orderedRowIds)
     if (oldRows.size > 0 && (newRowOrder.length !== oldRows.size || newRowOrder.some(id => !oldRows.has(id)))) {
