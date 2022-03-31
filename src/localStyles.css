@@ -57,3 +57,8 @@
     border: 3px solid blue;
     background-color: #b5d1ff;
 }
+
+.plotLabelStyle {
+    font-weight: bold;
+    text-align: center;
+}

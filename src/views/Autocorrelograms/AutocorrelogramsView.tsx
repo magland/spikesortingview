@@ -1,7 +1,7 @@
-import PlotGrid from 'components/PlotGrid/PlotGrid';
-import { useSelectedUnitIds } from 'contexts/RowSelectionContext';
-import React, { FunctionComponent, useMemo } from 'react';
-import colorForUnitId from 'views/common/colorForUnitId';
+import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
+import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';
 import CorrelogramPlot from './CorrelogramPlot';
 
@@ -12,11 +12,18 @@ type Props = {
 }
 
 const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
-    const plots = useMemo(() => (data.autocorrelograms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(ac => ({
+    const {selectedUnitIds, orderedRowIds, plotClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
+
+    useEffect(() => {
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.autocorrelograms.map(aw => aw.unitId).sort((a, b) => a - b) })
+    }, [data.autocorrelograms, unitIdSelectionDispatch])
+
+    const plots: PGPlot[] = useMemo(() => (data.autocorrelograms.map(ac => ({
+        numericId: ac.unitId,
         key: `${ac.unitId}`,
         label: `Unit ${ac.unitId}`,
         labelColor: colorForUnitId(ac.unitId),
+        clickHandler: plotClickHandlerGenerator(ac.unitId),
         props: {
             binEdgesSec: ac.binEdgesSec,
             binCounts: ac.binCounts,
@@ -24,7 +31,7 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
             width: 120,
             height: 120
         }
-    }))), [data.autocorrelograms])
+    }))), [data.autocorrelograms, plotClickHandlerGenerator])
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
         height,
@@ -37,6 +44,7 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
                 plots={plots}
                 plotComponent={CorrelogramPlot}
                 selectedPlotKeys={selectedUnitIds}
+                orderedPlotIds={orderedRowIds}
             />
         </div>
     )

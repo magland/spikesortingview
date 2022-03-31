@@ -1,8 +1,9 @@
-import { checkboxDispatchCurry, curriedRowClickHandler, INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelectionContext';
-import { SortingCuration, useSortingCuration } from 'contexts/SortingCurationContext';
+import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelectionContext';
+import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
-import colorForUnitId from 'views/common/colorForUnitId';
-import SortableTableWidget, { SortableTableWidgetColumn, SortableTableWidgetRow } from './SortableTableWidget/SortableTableWidget';
+import { SortableTableWidgetColumn, SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
+import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from '../common/SortableTableWidget/ColorPatchUnitIdLabel';
+import SortableTableWidget from '../common/SortableTableWidget/SortableTableWidget';
 import { UnitsTableViewData } from './UnitsTableViewData';
 
 type Props = {
@@ -12,10 +13,9 @@ type Props = {
 }
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, orderedRowIds, visibleRowIds, unitIdSelectionDispatch} = useSelectedUnitIds()
-    const wrappedDispatch = useMemo(() => checkboxDispatchCurry(unitIdSelectionDispatch), [unitIdSelectionDispatch])
+    const {selectedUnitIds, orderedRowIds, visibleRowIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
     const {sortingCuration} = useSortingCuration()
-    
+
     const columns = useMemo(() => {
         const ret: SortableTableWidgetColumn[] = []
         ret.push({
@@ -23,17 +23,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             label: 'Unit',
             tooltip: 'Unit ID',
             sort: (a: any, b: any) => (a - b),
-            dataElement: (d: any) => (
-                <span>
-                    <div style={{backgroundColor: colorForUnitId(d.unitId), width: 10, height: 10, position: 'relative', display: 'inline-block'}} />
-                    &nbsp;{`${d.unitId}`}
-                    {
-                        ((d.mergeGroup) && (d.mergeGroup.length > 0)) && (
-                            <span key="mergeGroup">{` (${d.mergeGroup.map((id: number) => (`${id}`)).join(", ")})`}</span>
-                        )
-                    }
-                </span>
-            ),
+            dataElement: (d: ColorPatchUnitLabelProps ) => (<ColorPatchUnitIdLabel unitId={d.unitId} mergeGroup={d.mergeGroup} />),
             calculating: false
         })
         if (sortingCuration) {
@@ -46,7 +36,8 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 calculating: false
             })
         }
-        data.columns.forEach(c => {
+        // The filter is rather hacky
+        data.columns.filter(c => c.key !== 'unitId').forEach(c => {
             ret.push({
                 columnName: c.key,
                 label: c.label,
@@ -84,10 +75,10 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 rowId: `${r.unitId}`,
                 rowIdNumeric: r.unitId,
                 data: rowData,
-                checkboxFn: curriedRowClickHandler(r.unitId, wrappedDispatch)
+                checkboxFn: checkboxClickHandlerGenerator(r.unitId)
             }
         })
-    ), [data.rows, data.columns, sortingCuration, wrappedDispatch])
+    ), [data.rows, data.columns, sortingCuration, checkboxClickHandlerGenerator])
 
     useEffect(() => {
         unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => a - b) })
@@ -115,15 +106,10 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 visibleRowIds={visibleRowIds}
                 selectedRowIds={selectedUnitIds}
                 selectionDispatch={unitIdSelectionDispatch}
-                defaultSortColumnName="unitId"
+                primarySortRule={primarySortRule}
             />
         </div>
     )
-}
-
-const mergeGroupForUnitId = (unitId: number, curation?: SortingCuration | undefined) => {
-    const mergeGroups = (curation || {}).mergeGroups || []
-    return mergeGroups.filter(g => (g.includes(unitId)))[0] || null
 }
 
 export default UnitsTableView

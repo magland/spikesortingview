@@ -1,8 +1,9 @@
 import { Grid } from '@material-ui/core';
+import { voidClickHandler } from 'contexts/RowSelectionContext';
 import React, { FunctionComponent, useMemo } from 'react';
 
-type PGPlot = {
-    // numericId: number,
+export type PGPlot = {
+    numericId: number,
     key: string,
     label: string,
     labelColor: string,
@@ -18,8 +19,6 @@ type Props = {
     orderedPlotIds?: number[]
 }
 
-const voidFn = (evt: React.MouseEvent) => {}
-
 type PlotGridRowData = {
     rowStart: number,
     maxItems?: number,
@@ -30,7 +29,7 @@ type PlotGridRowData = {
 const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => {
     const { rowStart, maxItems, plotIds, selectedPlotKeys, plotsDict } = props
     const rowEnd = maxItems || plotIds.length
-    const idsThisRow = plotIds.slice(rowStart, rowEnd)
+    const idsThisRow = plotIds.slice(rowStart, rowStart + rowEnd)
     return <Grid key={rowStart} container>
             {
                 idsThisRow.map(id => {
@@ -51,21 +50,24 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, orderedPlotId
     const Component = plotComponent
 
     // Don't rerender the individual plots with every pass
+    // This code renders the individual components, memoized based on Component type and plot data, and then
+    // loads them into a dictionary mapping the ID to the rendered plot (with label and interactivity function).
+    // TODO: keep items from previous iterations somehow?
     const _plotsDict = useMemo(() => {
         const contents = Object.assign(
             {},
             ...plots.map((p) => {
-                const rendered = <div
-                    data-key={p.key}
-                    onClick={p.clickHandler || voidFn}
-                >
-                    <div style={{fontWeight: 'bold', textAlign: 'center'}}>
-                        <span style={{color: p.labelColor}}>{p.label}</span>
+                const rendered =
+                    <div
+                        data-key={p.key}
+                        onClick={p.clickHandler || voidClickHandler}
+                    >
+                        <div className={'plotLabelStyle'}>
+                            <span style={{color: p.labelColor}}>{p.label}</span>
+                        </div>
+                        <Component {...p.props} />
                     </div>
-                    <Component {...p.props} />
-                </div>
-                // return {[p.numericId]: rendered}
-                return {[Number(p.key)]: rendered}
+                    return {[p.numericId]: rendered}
             })
         )
         return contents as any as {[key: number]: JSX.Element}
@@ -73,16 +75,15 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, orderedPlotId
     
     const rowStarts = Array(plots.length).fill(0).map((x, ii) => ii).filter(i => i % (numPlotsPerRow || plots.length) === 0)
     const plotIds = useMemo(() => {
-        console.log(`Caught reordering of ids, now using ${orderedPlotIds}`)
         return orderedPlotIds || plots.map(p => Number(p.key))
-    }, [plots, orderedPlotIds])
-        
+    }, [plots, orderedPlotIds])        
 
     return (
         <Grid container>
             {
                 rowStarts.map((start) => (
                     <PlotRow
+                        key={`row-${start}`}
                         rowStart={start}
                         maxItems={numPlotsPerRow}
                         plotIds={plotIds}

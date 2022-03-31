@@ -2,7 +2,7 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
-import colorForUnitId from 'views/common/colorForUnitId'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'

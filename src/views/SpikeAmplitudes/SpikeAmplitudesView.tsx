@@ -4,13 +4,13 @@ import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
-import colorForUnitId from 'views/common/colorForUnitId'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
+import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
+import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
 import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
-import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
-import useLocalSelectedUnitIds from './useLocalSelectedUnitIds'
 
 type Props = {
     data: SpikeAmplitudesViewData
@@ -31,7 +31,7 @@ type PanelProps = {
 const panelSpacing = 4
 
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {selectedUnitIds, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
+    const {selectedUnitIds, orderedRowIds, visibleRowIds, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
 
     const allUnitIds = useMemo(() => (
         data.units.map(u => (u.unitId))
@@ -46,6 +46,9 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
             <LockableSelectUnitsWidget
                 unitIds={allUnitIds}
                 selectedUnitIds={selectedUnitIds}
+                orderedRowIds={orderedRowIds}
+                visibleRowIds={visibleRowIds}
+                checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
                 unitIdSelectionDispatch={unitIdSelectionDispatch}
                 locked={selectionLocked}
                 toggleLockStateCallback={toggleSelectionLocked}
