@@ -1,7 +1,7 @@
 import { Grid, Paper } from '@material-ui/core';
+import { DESELECT_ALL, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import { SortingCuration, useSortingCuration } from 'contexts/SortingCurationContext';
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
-import React, { FunctionComponent, useCallback } from 'react';
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import sizeMe, { SizeMeProps } from 'react-sizeme';
 
 type Props = {
@@ -15,7 +15,8 @@ const buttonStyle = {}
 
 const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => {
     const {sortingCuration, sortingCurationDispatch} = useSortingCuration()
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
+    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const selectedUnitIdsList = useMemo(() => [...selectedUnitIds], [selectedUnitIds])
 
     const width = size.width || 300
     const _handleApplyLabel = useCallback(
@@ -23,11 +24,11 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
             if (!sortingCurationDispatch) return
             sortingCurationDispatch({
                 type: 'ADD_UNIT_LABEL',
-                unitId: selectedUnitIds,
+                unitId: selectedUnitIdsList,
                 label
             })
         },
-        [sortingCurationDispatch, selectedUnitIds],
+        [sortingCurationDispatch, selectedUnitIdsList],
     )
 
     const _handleRemoveLabel = useCallback(
@@ -35,30 +36,30 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
             if (!sortingCurationDispatch) return
             sortingCurationDispatch({
                 type: 'REMOVE_UNIT_LABEL',
-                unitId: selectedUnitIds,
+                unitId: selectedUnitIdsList,
                 label
             })
         },
-        [sortingCurationDispatch, selectedUnitIds]
+        [sortingCurationDispatch, selectedUnitIdsList]
     )
 
     const handleMergeSelected = useCallback(() => {
         if (!sortingCurationDispatch) return
         sortingCurationDispatch({
             type: 'MERGE_UNITS',
-            unitIds: selectedUnitIds
+            unitIds: selectedUnitIdsList
         })
-        setSelectedUnitIds([])
-    }, [sortingCurationDispatch, selectedUnitIds, setSelectedUnitIds])
+        unitIdSelectionDispatch({type: DESELECT_ALL})
+    }, [sortingCurationDispatch, selectedUnitIdsList, unitIdSelectionDispatch])
 
     const handleUnmergeSelected = useCallback(() => {
         if (!sortingCurationDispatch) return
         sortingCurationDispatch({
             type: 'UNMERGE_UNITS',
-            unitIds: selectedUnitIds
+            unitIds: selectedUnitIdsList
         })
-        setSelectedUnitIds([])
-    }, [sortingCurationDispatch, selectedUnitIds, setSelectedUnitIds])
+        unitIdSelectionDispatch({type: DESELECT_ALL})
+    }, [sortingCurationDispatch, selectedUnitIdsList, unitIdSelectionDispatch])
 
     // const handleToggleCurationClosed = useCallback(() => {
     //     if (!sortingCuration) return
@@ -88,20 +89,20 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
     const labels = Object.keys(labelCounts).sort()
     const labelRecords: LabelRecord[] = labels.map(label => ({
         label,
-        partial: labelCounts[label] < selectedUnitIds.length ? true : false
+        partial: labelCounts[label] < selectedUnitIds.size ? true : false
     }))
     const paperStyle: React.CSSProperties = {
         marginTop: 25,
         marginBottom: 25,
         backgroundColor: '#f9f9ff'
     }
-    const enableApply = selectedUnitIds.length > 0
+    const enableApply = selectedUnitIds.size > 0
     const standardChoices = ['accept', 'reject', 'noise', 'artifact', 'mua']
     const labelChoices = [...standardChoices, ...(sortingCuration.labelChoices || []).filter(l => (!standardChoices.includes(l)))]
     return (
         <div style={{width, position: 'relative'}}>
             <Paper style={paperStyle} key="selected">
-                Selected units: {selectedUnitIds.join(', ')}
+                Selected units: {selectedUnitIdsList.join(', ')}
             </Paper>
             <Paper style={paperStyle} key="labels">
                 Labels (click to remove):
@@ -127,7 +128,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
                         labelChoices.map(labelChoice => (
                             <Grid item key={labelChoice}>
                                 {
-                                    (((labelCounts[labelChoice] || 0) < selectedUnitIds.length) || (!enableApply)) ? (
+                                    (((labelCounts[labelChoice] || 0) < selectedUnitIds.size) || (!enableApply)) ? (
                                         <button
                                             style={buttonStyle}
                                             disabled={!enableApply || (sortingCuration.isClosed)}
@@ -146,15 +147,15 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
             <Paper style={paperStyle} key="merge">                
                 Merge:
                 {
-                    (selectedUnitIds.length >= 2 && !unitsAreInMergeGroups(selectedUnitIds, sortingCuration)) &&
+                    (selectedUnitIds.size >= 2 && !unitsAreInMergeGroups(selectedUnitIdsList, sortingCuration)) &&
                         <button key="merge" onClick={handleMergeSelected} disabled={sortingCuration.isClosed}>
-                            Merge selected units: {selectedUnitIds.join(', ')}
+                            Merge selected units: {selectedUnitIdsList.join(', ')}
                         </button>
                 }
                 {
-                    (selectedUnitIds.length > 0 && unitsAreInMergeGroups(selectedUnitIds, sortingCuration)) &&
+                    (selectedUnitIds.size > 0 && unitsAreInMergeGroups(selectedUnitIdsList, sortingCuration)) &&
                         <button key="unmerge" onClick={handleUnmergeSelected} disabled={sortingCuration.isClosed}>
-                            Unmerge units: {selectedUnitIds.join(', ')}
+                            Unmerge units: {selectedUnitIdsList.join(', ')}
                         </button>
                 }
             </Paper>

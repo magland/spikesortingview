@@ -3,7 +3,7 @@ import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
-import colorForUnitId from 'views/common/colorForUnitId'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { RawTracesPlotViewData } from './RawTracesPlotViewData'
@@ -112,9 +112,6 @@ const RawTracesPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts
         return pixelPanels
     }, [paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, traces, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor])
 
-    const selectedPanelKeys: string[] = useMemo(() => ([]), [])
-    const setSelectedPanelKeys = useMemo(() => (() => {}), [])
-
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
 
     return visibleTimeStartSeconds === undefined
@@ -124,8 +121,6 @@ const RawTracesPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts
             margins={margins}
             panels={pixelPanels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             optionalActionsAboveDefault={scalingActions}
             width={width}

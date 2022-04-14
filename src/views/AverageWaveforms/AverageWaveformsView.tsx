@@ -1,10 +1,10 @@
-import PlotGrid from 'components/PlotGrid/PlotGrid';
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext';
+import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
+import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
-import colorForUnitId from 'views/common/colorForUnitId';
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
 import { ToolbarItem } from 'views/common/Toolbars';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
@@ -18,20 +18,21 @@ type Props = {
 }
 
 const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) => {
-    // const [selectedUnitIds, setSelectedUnitIds] = useState<number[]>([])
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
-    const selectedPlotKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
-    const setSelectedPlotKeys = useCallback((keys: string[]) => {
-        setSelectedUnitIds(keys.map(k => (Number(k))))
-    }, [setSelectedUnitIds])
+    const {selectedUnitIds, orderedRowIds, plotClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
 
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
 
-    const plots = useMemo(() => (data.averageWaveforms.sort((a1, a2) => (a1.unitId - a2.unitId)).map(aw => ({
+    useEffect(() => {
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => a - b) })
+    }, [data.averageWaveforms, unitIdSelectionDispatch])
+
+    const plots: PGPlot[] = useMemo(() => data.averageWaveforms.map(aw => ({
+        numericId: aw.unitId,
         key: `${aw.unitId}`,
         label: `Unit ${aw.unitId}`,
         labelColor: colorForUnitId(aw.unitId),
+        clickHandler: plotClickHandlerGenerator(aw.unitId),
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
@@ -44,7 +45,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             width: 120,
             height: 120
         }
-    }))), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor])
+    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor, plotClickHandlerGenerator])
 
     const _handleWaveformToggle = useCallback(() => {
         setWaveformsMode(m => (m === 'geom' ? 'vertical' : 'geom'))
@@ -85,8 +86,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
                 <PlotGrid
                     plots={plots}
                     plotComponent={AverageWaveformPlot}
-                    selectedPlotKeys={selectedPlotKeys}
-                    setSelectedPlotKeys={setSelectedPlotKeys}
+                    selectedPlotKeys={selectedUnitIds}
+                    orderedPlotIds={orderedRowIds}
                 />
             </VerticalScrollView>
         </Splitter>

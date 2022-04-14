@@ -1,9 +1,9 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
+import { useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
-import colorForUnitId from 'views/common/colorForUnitId'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import { RasterPlotViewData } from './RasterPlotViewData'
 import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from './TimeScrollView/TimeScrollView'
@@ -23,11 +23,7 @@ type PanelProps = {
 const panelSpacing = 4
 
 const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
-    const selectedPanelKeys = useMemo(() => (selectedUnitIds.map(u => (`${u}`))), [selectedUnitIds])
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {
-        setSelectedUnitIds(keys.map(k => (Number(k))))
-    }, [setSelectedUnitIds])
+    const {selectedUnitIds} = useSelectedUnitIds()
 
     useRecordingSelectionTimeInitialization(data.startTimeSec, data.endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
@@ -83,8 +79,8 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
             margins={margins}
             panels={pixelPanels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
+            selectedPanelKeys={selectedUnitIds}
+            setSelectedPanelKeys={() => {}}
             highlightSpans={data.highlightIntervals}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}

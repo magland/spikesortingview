@@ -1,15 +1,15 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
-import { useSelectedUnitIds } from 'contexts/SortingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import React, { FunctionComponent, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
-import colorForUnitId from 'views/common/colorForUnitId'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
+import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
+import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
 import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
-import LockableSelectUnitsWidget from './LockableSelectUnitsWidget'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
 type Props = {
@@ -30,26 +30,8 @@ type PanelProps = {
 
 const panelSpacing = 4
 
-const useLocalSelectedUnitIds = (locked: boolean) => {
-    const {selectedUnitIds, setSelectedUnitIds} = useSelectedUnitIds()
-    const [localValue, setLocalValue] = useState<number[]>([])
-    useEffect(() => {
-        if (!locked) {
-            setLocalValue(selectedUnitIds)
-        }
-    }, [selectedUnitIds, locked])
-    if (!locked) return {selectedUnitIds, setSelectedUnitIds}
-    else {
-        return {selectedUnitIds: localValue, setSelectedUnitIds: setLocalValue}
-    }
-}
-
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const [selectionLocked, setSelectionLocked] = useState<boolean>(false)
-    const toggleSelectionLocked = useCallback(() => {
-        setSelectionLocked(a => (!a))
-    }, [])
-    const {selectedUnitIds, setSelectedUnitIds} = useLocalSelectedUnitIds(selectionLocked)
+    const {selectedUnitIds, orderedRowIds, visibleRowIds, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
 
     const allUnitIds = useMemo(() => (
         data.units.map(u => (u.unitId))
@@ -64,7 +46,10 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
             <LockableSelectUnitsWidget
                 unitIds={allUnitIds}
                 selectedUnitIds={selectedUnitIds}
-                setSelectedUnitIds={setSelectedUnitIds}
+                orderedRowIds={orderedRowIds}
+                visibleRowIds={visibleRowIds}
+                checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
+                unitIdSelectionDispatch={unitIdSelectionDispatch}
                 locked={selectionLocked}
                 toggleLockStateCallback={toggleSelectionLocked}
             />
@@ -81,7 +66,7 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
 
 type ChildProps = {
     data: SpikeAmplitudesViewData
-    selectedUnitIds: number[]
+    selectedUnitIds: Set<number>
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
@@ -123,7 +108,7 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
 
 
     const series = useMemo(() => (
-        data.units.filter(u => (selectedUnitIds.includes(u.unitId))).map(unit => {
+        data.units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => {
             // we are going to assume that spikeTimesSec is *sorted*!
             // (Unfortunately there is no improvement from doing this.)
             const indices = unit.spikeTimesSec.reduce((array, time, indexInArrays) => {
@@ -188,9 +173,6 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
         }]
     }, [series, pixelTransform])
 
-    const selectedPanelKeys = useMemo(() => ([]), [])
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
 
     const content = series.length > 0 ? (
@@ -198,8 +180,6 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
             optionalActionsAboveDefault={scalingActions}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             yTickSet={yTickSet}

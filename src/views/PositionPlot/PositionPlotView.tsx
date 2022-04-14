@@ -2,7 +2,7 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
-import colorForUnitId from 'views/common/colorForUnitId'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
@@ -27,6 +27,7 @@ type PanelProps = {
 }
 
 const panelSpacing = 4
+const emptyPanelSelection = new Set<number>()
 
 const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
@@ -160,16 +161,12 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         }]
     }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.discontinuous])
 
-    const selectedPanelKeys = useMemo(() => ([]), [])
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
     const content = (
         <TimeScrollView
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
+            selectedPanelKeys={emptyPanelSelection}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             yTickSet={yTickSet}
             width={width}

@@ -1,17 +1,15 @@
 import { FormControlLabel, FormGroup, Typography } from '@material-ui/core';
 import Switch from '@material-ui/core/Switch';
 import React, { Fragment, FunctionComponent } from 'react';
-import SelectUnitsWidget from './SelectUnitsWidget';
+import SelectUnitsWidget, { SelectUnitsWidgetProps } from './SelectUnitsWidget';
 
-type Props = {
-    unitIds: number[]
-    selectedUnitIds: number[]
-    setSelectedUnitIds: (x: number[]) => void
+type LockableSelectUnitsWidgetProps = SelectUnitsWidgetProps & {
     locked: boolean
     toggleLockStateCallback: () => void
 }
 
-const LockableSelectUnitsWidget: FunctionComponent<Props> = ({ unitIds, selectedUnitIds, setSelectedUnitIds, locked, toggleLockStateCallback }) => {
+const LockableSelectUnitsWidget: FunctionComponent<LockableSelectUnitsWidgetProps> = (props: LockableSelectUnitsWidgetProps) => {
+    const { locked, toggleLockStateCallback } = props
     return (
         <Fragment>
             <FormGroup className={"lock-switch"}>
@@ -20,7 +18,10 @@ const LockableSelectUnitsWidget: FunctionComponent<Props> = ({ unitIds, selected
                     label={<Typography variant="caption">Lock selection</Typography>}
                 />
             </FormGroup>
-            <SelectUnitsWidget unitIds={unitIds} selectedUnitIds={selectedUnitIds} setSelectedUnitIds={setSelectedUnitIds} selectionDisabled={locked} />
+            <SelectUnitsWidget
+                {...props}
+                selectionDisabled={locked}
+            />
         </Fragment>
     )
 }

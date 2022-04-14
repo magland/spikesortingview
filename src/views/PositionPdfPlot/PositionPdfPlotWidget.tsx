@@ -61,6 +61,8 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
     }
 }
 
+const emptyPanelSelection = new Set<number>()
+
 const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
@@ -179,16 +181,12 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         }]
     }, [paintPanel])
 
-    const selectedPanelKeys = useMemo(() => ([]), [])
-    const setSelectedPanelKeys = useCallback((keys: string[]) => {}, [])
-
     const content = (
         <TimeScrollView
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
-            selectedPanelKeys={selectedPanelKeys}
-            setSelectedPanelKeys={setSelectedPanelKeys}
+            selectedPanelKeys={emptyPanelSelection}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
