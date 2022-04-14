@@ -1,4 +1,4 @@
-import { TaskStatusView, usePureCalculationTask } from 'figurl';
+import { TaskStatusView, useCalculationTask } from 'figurl';
 import React, { FunctionComponent } from 'react';
 import CorrelogramPlot from 'views/Autocorrelograms/CorrelogramPlot';
 
@@ -11,7 +11,7 @@ type Props = {
 }
 
 const LiveCrossCorrelogramPlot: FunctionComponent<Props> = ({width, height, dataUri, unitId1, unitId2}) => {
-    const {returnValue, task} = usePureCalculationTask<{
+    const {returnValue, task} = useCalculationTask<{
         binEdgesSec: number[],
         binCounts: number[]
     }>(
@@ -20,8 +20,7 @@ const LiveCrossCorrelogramPlot: FunctionComponent<Props> = ({width, height, data
             data_uri: dataUri,
             unit_id1: unitId1,
             unit_id2: unitId2
-        },
-        {}
+        }
     )
     if (!returnValue) {
         return (

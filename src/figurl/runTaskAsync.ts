@@ -1,21 +1,25 @@
 import initiateTask, { Task } from "./initiateTask"
-import { TaskFunctionId, TaskFunctionType, TaskKwargs } from "./viewInterface/kacheryTypes"
+import { TaskType } from "./viewInterface/MessageToChildTypes"
 
-const runTaskAsync = async <ReturnType>(functionId: TaskFunctionId | string, kwargs: TaskKwargs | { [key: string]: any }, functionType: TaskFunctionType, opts: { queryUseCache?: boolean }): Promise<ReturnType> => {
+const runTaskAsync = async <ReturnType>(taskName: string, taskInput: { [key: string]: any }, taskType: TaskType): Promise<ReturnType> => {
   return new Promise((resolve, reject) => {
     let task: Task<ReturnType> | undefined = undefined
     const check = () => {
       if (!task) return
       if (task.status === 'finished') {
         const result = task.result
-        if (functionType === 'action') {
+        if (taskType === 'action') {
           resolve(undefined as any as ReturnType) // sort of a type hack
         }
         else {
           if (result) resolve(result)
           else {
-            if (functionType)
-            reject(new Error('No result even though status is finished'))
+            if (taskType === 'calculation') {
+              reject(new Error('No result even though status is finished'))
+            }
+            else {
+              resolve(undefined as any as ReturnType)
+            }
           }
         }
       }
@@ -24,13 +28,12 @@ const runTaskAsync = async <ReturnType>(functionId: TaskFunctionId | string, kwa
       }
     }
     initiateTask<ReturnType>({
-      functionId,
-      kwargs,
-      functionType,
+      taskName,
+      taskInput,
+      taskType,
       onStatusChanged: () => {
         check()
-      },
-      queryUseCache: opts.queryUseCache
+      }
     }).then(t => {
       if (!t) {
         reject('Unable to create get_timeseries_segment task')

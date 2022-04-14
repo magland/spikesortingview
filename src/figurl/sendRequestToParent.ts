@@ -33,7 +33,7 @@ const sendRequestToParent = async (request: FigurlRequest) => {
         }
         const msg: FigurlRequestMessage = {
             type: 'figurlRequest',
-            figureId: queryParams.figureId,
+            figureId: queryParams.figureId || 'undefined',
             requestId,
             request
         }

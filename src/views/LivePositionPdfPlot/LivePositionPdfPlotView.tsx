@@ -1,4 +1,4 @@
-import { runPureCalculationTaskAsync } from 'figurl'
+import { runCalculationTaskAsync } from 'figurl'
 import React, { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import PositionPdfPlotWidget, { FetchSegmentQuery } from 'views/PositionPdfPlot/PositionPdfPlotWidget'
@@ -14,14 +14,13 @@ type Props = {
 const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const numPositions = data.numPositions
     const fetchSegment = useMemo(() => (async (query: FetchSegmentQuery) => {
-        const ret = await runPureCalculationTaskAsync<number[][]>(
+        const ret = await runCalculationTaskAsync<number[][]>(
             'spikesortingview.fetch_position_pdf_segment.1',
             {
                 pdf_object: data.pdfObject,
                 segment_number: query.segmentNumber,
                 downsample_factor: query.downsampleFactor
-            },
-            {}
+            }
         )
         return ret
     }), [data.pdfObject])

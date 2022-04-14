@@ -1,6 +1,14 @@
-import { ErrorMessage, FeedId, isErrorMessage, isFeedId, isSubfeedHash, isSubfeedMessage, isSubfeedPosition, isTaskId, isTaskStatus, isUserId, SubfeedHash, SubfeedMessage, SubfeedPosition, TaskId, TaskStatus, UserId } from "./kacheryTypes";
 import { FigurlResponse, isFigurlResponse } from "./FigurlRequestTypes";
+import { isFeedId, isJSONObject, isNumber, isUserId, JSONObject, UserId } from "./kacheryTypes";
 import validateObject, { isArrayOf, isEqualTo, isOneOf, isString, optional } from "./validateObject";
+
+export type TaskType = 'calculation' | 'action'
+
+export const isTaskType = (x: any): x is TaskType => (['calculation', 'action'].includes(x))
+
+export type TaskJobStatus = 'waiting' | 'started' | 'error' | 'finished'
+
+export const isTaskJobStatus = (x: any): x is TaskJobStatus => (['waiting', 'started', 'error', 'finished'].includes(x))
 
 /// figurl Response
 
@@ -18,23 +26,21 @@ export const isFigurlResponseMessage = (x: any): x is FigurlResponseMessage => {
     })
 }
 
-// newSubfeedMessages
+// newFeedMessages
 
-export type NewSubfeedMessagesMessage = {
-    type: 'newSubfeedMessages',
-    feedId: FeedId,
-    subfeedHash: SubfeedHash,
-    position: SubfeedPosition,
-    messages: SubfeedMessage[]
+export type NewFeedMessagesMessage = {
+    type: 'newFeedMessages',
+    feedId: string,
+    position: number,
+    messages: JSONObject[]
 }
 
-export const isNewSubfeedMessagesMessage = (x: any): x is NewSubfeedMessagesMessage => {
+export const isNewFeedMessagesMessage = (x: any): x is NewFeedMessagesMessage => {
     return validateObject(x, {
-        type: isEqualTo('newSubfeedMessages'),
+        type: isEqualTo('newFeedMessages'),
         feedId: isFeedId,
-        subfeedHash: isSubfeedHash,
-        position: isSubfeedPosition,
-        messages: isArrayOf(isSubfeedMessage)
+        position: isNumber,
+        messages: isArrayOf(isJSONObject)
     })
 }
 
@@ -42,18 +48,18 @@ export const isNewSubfeedMessagesMessage = (x: any): x is NewSubfeedMessagesMess
 
 export type TaskStatusUpdateMessage = {
     type: 'taskStatusUpdate',
-    taskId: TaskId,
-    status: TaskStatus
-    errorMessage?: ErrorMessage // for status=error
+    taskJobId: string,
+    status: TaskJobStatus
+    errorMessage?: string // for status=error
     returnValue?: any // for status=finished
 }
 
 export const isTaskStatusUpdateMessage = (x: any): x is TaskStatusUpdateMessage => {
     return validateObject(x, {
         type: isEqualTo('taskStatusUpdate'),
-        taskId: isTaskId,
-        status: isTaskStatus,
-        errorMessage: optional(isErrorMessage),
+        taskJobId: isString,
+        status: isTaskJobStatus,
+        errorMessage: optional(isString),
         returnValue: optional(() => (true))
     })
 }
@@ -78,14 +84,14 @@ export const isSetCurrentUserMessage = (x: any): x is SetCurrentUserMessage => {
 
 export type MessageToChild =
     FigurlResponseMessage |
-    NewSubfeedMessagesMessage |
+    NewFeedMessagesMessage |
     TaskStatusUpdateMessage |
     SetCurrentUserMessage
 
 export const isMessageToChild = (x: any): x is MessageToChild => {
     return isOneOf([
         isFigurlResponseMessage,
-        isNewSubfeedMessagesMessage,
+        isNewFeedMessagesMessage,
         isTaskStatusUpdateMessage,
         isSetCurrentUserMessage
     ])(x)

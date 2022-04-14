@@ -1,7 +1,6 @@
 import SortingCurationAction from 'contexts/SortingCurationAction';
 import SortingCurationContext, { sortingCurationReducer } from 'contexts/SortingCurationContext';
-import { initiateTask, useSignedIn, useSubfeedReducer } from 'figurl';
-import runTaskAsync from 'figurl/runTaskAsync';
+import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
 import MountainWorkspace from 'MountainWorkspace/MountainWorkspace';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { MountainLayoutViewData } from './MountainLayoutViewData';
@@ -33,19 +32,19 @@ const MountainLayoutView: FunctionComponent<Props> = ({data, width, height}) => 
         />
     )
     // const [sortingCuration, sortingCurationDispatch] = useReducer(sortingCurationReducer, {})
-    const {state: sortingCuration} = useSubfeedReducer({subfeedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
+    const {state: sortingCuration} = useFeedReducer({feedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
     const {userId, googleIdToken} = useSignedIn()
     const sortingCurationDispatch = useCallback((a: SortingCurationAction) => {
         if (!data.sortingCurationUri) return
         initiateTask({
-          functionId: 'spikesortingview.sorting_curation_action.1',
-          kwargs: {
+          taskName: 'spikesortingview.sorting_curation_action.1',
+          taskInput: {
             sorting_curation_uri: data.sortingCurationUri,
             action: a,
             user_id: userId,
             google_id_token: googleIdToken
           },
-          functionType: 'action',
+          taskType: 'action',
           onStatusChanged: () => {}
         })
         // this might be how we can do offline-first curation (get curationSubfeed from useSubfeedReducerS)
@@ -60,19 +59,20 @@ const MountainLayoutView: FunctionComponent<Props> = ({data, width, height}) => 
         if ((!userId) || (!googleIdToken)) {
             return
         }
-        runTaskAsync<{authorized: boolean}>(
-            'spikesortingview.check_sorting_curation_authorized.1',
-            {
-                sorting_curation_uri: data.sortingCurationUri,
-                user_id: userId,
-                google_id_token: googleIdToken
-            },
-            'query',
-            {queryUseCache: false}
-        ).then((result) => {
-            // yeah, there's a race condition here
-            setCanCurate(result.authorized)
-        })
+        // runTaskAsync<{authorized: boolean}>(
+        //     'spikesortingview.check_sorting_curation_authorized.1',
+        //     {
+        //         sorting_curation_uri: data.sortingCurationUri,
+        //         user_id: userId,
+        //         google_id_token: googleIdToken
+        //     },
+        //     'query',
+        //     {queryUseCache: false}
+        // ).then((result) => {
+        //     // yeah, there's a race condition here
+        //     setCanCurate(result.authorized)
+        // })
+        setCanCurate(true)
     }, [userId, googleIdToken, data.sortingCurationUri])
     if (data.sortingCurationUri) {
         return (

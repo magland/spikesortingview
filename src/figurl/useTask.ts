@@ -1,17 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import initiateTask, { Task } from "./initiateTask"
-import { JSONStringifyDeterministic, TaskFunctionId, TaskFunctionType, TaskKwargs } from "./viewInterface/kacheryTypes"
+import { JSONStringifyDeterministic, TaskKwargs } from "./viewInterface/kacheryTypes"
+import { TaskType } from "./viewInterface/MessageToChildTypes"
 
-const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kwargs: TaskKwargs | {[key: string]: any}, functionType: TaskFunctionType, opts: {queryUseCache?: boolean, queryFallbackToCache?: boolean}): {returnValue?: ReturnType, task?: Task<ReturnType>} => {
+const useTask = <ReturnType>(taskName: string | undefined, taskInput: {[key: string]: any}, taskType: TaskType): {returnValue?: ReturnType, task?: Task<ReturnType>} => {
     const [task, setTask] = useState<Task<ReturnType> | undefined>(undefined)
     const [, setUpdateCode] = useState<number>(0)
     const incrementUpdateCode = useCallback(() => {setUpdateCode(c => (c+1))}, [])
-    const kwargsString = JSONStringifyDeterministic(kwargs)
+    const taskInputString = JSONStringifyDeterministic(taskInput)
     useEffect(() => {
-        if (!functionId) return
+        if (!taskName) return
         let valid = true
         
-        const kwargs2 = JSON.parse(kwargsString) as any as TaskKwargs
+        const taskInput2 = JSON.parse(taskInputString) as any as TaskKwargs
 
         const onStatusChanged = () => {
             if (!valid) return
@@ -19,12 +20,10 @@ const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kw
         }
 
         initiateTask<ReturnType>({
-            functionId,
-            kwargs: kwargs2,
-            functionType,
-            onStatusChanged,
-            queryUseCache: opts.queryUseCache, // check the cache first, but also submit the query
-            queryFallbackToCache: opts.queryFallbackToCache // submit the query, and if that times out, use the cache
+            taskName,
+            taskInput: taskInput2,
+            taskType,
+            onStatusChanged
         }).then(t => {
             setTask(t)
         })
@@ -32,7 +31,7 @@ const useTask = <ReturnType>(functionId: TaskFunctionId | string | undefined, kw
         return () => {
             valid = false
         }
-    }, [functionId, kwargsString, functionType, incrementUpdateCode, opts.queryUseCache, opts.queryFallbackToCache])
+    }, [taskName, taskInputString, taskType, incrementUpdateCode])
     const taskStatus = task ? task.status : undefined
     const returnValue = useMemo(() => {
         if (!task) return undefined
