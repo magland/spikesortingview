@@ -1,7 +1,7 @@
-import { RowSelectionAction } from 'contexts/RowSelection/RowSelectionContext';
+import { INITIALIZE_ROWS, RowSelectionAction } from 'contexts/RowSelection/RowSelectionContext';
 import { SortingRule } from 'contexts/RowSelection/RowSelectionTypes';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'views/common/SortableTableWidget/ColorPatchUnitIdLabel';
 import SortableTableWidget from 'views/common/SortableTableWidget/SortableTableWidget';
 import { SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
@@ -50,6 +50,10 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
             }
         })
     ), [unitIds, sortingCuration, checkboxClickHandlerGenerator])
+
+    useEffect(() => {
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => a - b) })
+    }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
         const draft = new Map<number, SortableTableWidgetRow>()
