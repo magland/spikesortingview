@@ -93,10 +93,6 @@ const makeStep = (raw: number, base: number, scale: number): Step => {
 
 const enumerateScaledSteps = (base: number, datamin: number, datamax: number, stepsize: number, scale: number): Step[] => {
     const stepValues = range(datamin, datamax, stepsize, base)
-    // console.log(`${(stepValues[0] - datamin)/stepsize}`)
-    // if ((stepValues[0] - datamin)/stepsize < 0.33 ) {
-    //     stepValues.shift()
-    // }
     const invariantAboveRange = computeInvariant(datamin, datamax)
     const steps = stepValues.map(v => makeStep(v, invariantAboveRange, scale))
 

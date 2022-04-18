@@ -74,7 +74,7 @@ const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisY
     const printMax = stringMax.substring(0, 5).search(".") === -1 ? 5 : 6
     const stringMin = datamin.toString()
     const printMin = stringMin.substring(0, 5).search(".") === -1 ? 5 : 6
-    context.textBaseline = 'bottom' // WAS BOTTOM
+    context.textBaseline = 'bottom'
     context.fillText(stringMax.substring(0, printMax), labelRightEdge, topMargin)
     context.textBaseline = 'top'
     context.fillText(datamin.toString().substring(0, printMin), labelRightEdge, xAxisYCoordinate)
