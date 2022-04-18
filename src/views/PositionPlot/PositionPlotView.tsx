@@ -3,7 +3,7 @@ import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
-import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
+import useYAxisTicks from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
@@ -127,13 +127,8 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
 
     // TODO: All this computational stuff should probably get pushed to the TimeScrollView...
     const yTicks = useYAxisTicks({ datamin: valueRange.yMin, datamax: valueRange.yMax, pixelHeight: panelHeight })
-    const finalYTicks = useProjectedYAxisTicks(yTicks, pixelTransform)
-    const yTickSet: TickSet = {
-        ticks: finalYTicks,
-        datamin: valueRange.yMin,
-        datamax: valueRange.yMax
-    }
-
+    const yTickSet = useProjectedYAxisTicks(yTicks, pixelTransform)
+    
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         const pixelZero = getYAxisPixelZero(pixelTransform)
         // this could also be done as one matrix multiplication by concatenating the dimensions;

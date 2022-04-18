@@ -7,7 +7,7 @@ import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntr
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
-import useYAxisTicks, { TickSet } from 'views/common/TimeScrollView/YAxisTicks'
+import useYAxisTicks from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
@@ -144,13 +144,8 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
         true
     )
 
-    const yTicks = useYAxisTicks({ datamin: amplitudeRange.yMin, datamax: amplitudeRange.yMax, pixelHeight: panelHeight })
-    const finalYTicks = useProjectedYAxisTicks(yTicks, pixelTransform)
-    const yTickSet: TickSet = {
-        ticks: finalYTicks,
-        datamin: amplitudeRange.yMin,
-        datamax: amplitudeRange.yMax
-    }
+    const yTicks = useYAxisTicks({ datamin: amplitudeRange.yMin, datamax: amplitudeRange.yMax, userSpecifiedZoom: ampScaleFactor, pixelHeight: panelHeight })
+    const yTickSet = useProjectedYAxisTicks(yTicks, pixelTransform)
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         return [{

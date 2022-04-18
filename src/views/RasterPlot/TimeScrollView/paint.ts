@@ -70,11 +70,16 @@ const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisY
     context.fillStyle = 'black'
     context.textAlign = 'right'
     // Range-end labels
-    context.textBaseline = 'bottom'
-    context.fillText(datamax.toFixed(0), labelRightEdge, topMargin)
-    context.textBaseline = 'middle'
-    context.fillText(datamin.toString(), labelRightEdge, xAxisYCoordinate)
+    const stringMax = datamax.toString()
+    const printMax = stringMax.substring(0, 5).search(".") === -1 ? 5 : 6
+    const stringMin = datamin.toString()
+    const printMin = stringMin.substring(0, 5).search(".") === -1 ? 5 : 6
+    context.textBaseline = 'bottom' // WAS BOTTOM
+    context.fillText(stringMax.substring(0, printMax), labelRightEdge, topMargin)
+    context.textBaseline = 'top'
+    context.fillText(datamin.toString().substring(0, printMin), labelRightEdge, xAxisYCoordinate)
 
+    context.textBaseline = 'middle'
     ticks.forEach(tick => {
         if (!tick.pixelValue) return
         const pixelValueWithMargin = tick.pixelValue + topMargin
