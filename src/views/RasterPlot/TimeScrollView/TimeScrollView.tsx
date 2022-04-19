@@ -3,7 +3,7 @@ import { abs, matrix, Matrix, multiply } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { TimeseriesLayoutOpts } from 'View';
-import { Step, TickSet } from 'views/common/TimeScrollView/YAxisTicks';
+import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
 import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
 import { Divider, ToolbarItem } from 'views/common/Toolbars';
 import ViewToolbar from 'views/common/ViewToolbar';
@@ -97,7 +97,7 @@ export const useTimeseriesMargins = (timeseriesLayoutOpts: TimeseriesLayoutOpts 
                 } : {
                     left: 20 + yAxisLeftMargin,
                     right: 20,
-                    top: 0,
+                    top: 10,
                     bottom: hideTimeAxis ? 0 : 40
                 }
         return { ...defaultMargins, ...manualMargins}
@@ -365,15 +365,19 @@ const useTimeTicks = (startTimeSec: number | undefined, endTimeSec: number | und
     }, [startTimeSec, endTimeSec, timeToPixelMatrix, pixelsPerSecond])
 }
 
-export const useProjectedYAxisTicks = (ticks: Step[], transform: Matrix) => {
+export const useProjectedYAxisTicks = (ticks: TickSet, transform: Matrix) => {
     // transform is assumed to be the output of our use2dPanelDataToPixelMatrix
     return useMemo(() => {
+        const _ticks = ticks.ticks
         const augmentedValues = matrix([
-            new Array(ticks.length).fill(0),
-            ticks.map(t => t.dataValue),
-            new Array(ticks.length).fill(1)])
+            new Array(_ticks.length).fill(0),
+            _ticks.map(t => t.dataValue),
+            new Array(_ticks.length).fill(1)])
         const pixelValues = (multiply(transform, augmentedValues).valueOf() as number[][])[1]
-        return ticks.map((t, ii) => {return {...t, pixelValue: pixelValues[ii]}})
+        return {
+            ...ticks,
+            ticks: _ticks.map((t, ii) => {return {...t, pixelValue: pixelValues[ii]}})
+        }
     }, [ticks, transform])
 }
 

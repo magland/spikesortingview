@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 type YAxisProps = {
     datamin?: number
     datamax?: number
+    userSpecifiedZoom?: number
     pixelHeight: number
 }
 
@@ -19,7 +20,7 @@ export type TickSet = {
     datamin: number
 }
 
-const minGridSpacingPx = 26
+const minGridSpacingPx = 23
 const maxGridSpacingPx = 60
 
 const TRUNCATE_UNCHANGED_HIGHER_ORDER_DIGITS = true
@@ -98,11 +99,20 @@ const enumerateScaledSteps = (base: number, datamin: number, datamax: number, st
     return steps
 }
 
+const emptyTickSet = {
+    ticks: [] as any as Step[],
+    datamin: 0,
+    datamax: 0
+}
+
 const useYAxisTicks = (props: YAxisProps) => {
-    const { datamin, datamax, pixelHeight } = props
+    const { datamin, datamax, userSpecifiedZoom, pixelHeight } = props
+    const yZoom = userSpecifiedZoom ?? 1
     return useMemo(() => {
-        if (datamin === undefined || datamax === undefined || datamin === datamax) return []
-        const dataRange = datamax - datamin
+        if (datamin === undefined || datamax === undefined || datamin === datamax) return emptyTickSet
+        const _dataMin = datamin / yZoom
+        const _dataMax = datamax / yZoom
+        const dataRange = _dataMax - _dataMin
     
         const rangeScale = Math.round(Math.log10(dataRange))
         const zoomedRangeScale = 3 - rangeScale // make sure we're counting through the range with whole numbers
@@ -112,15 +122,15 @@ const useYAxisTicks = (props: YAxisProps) => {
         const gridInfo = fitGridLines(minGridLines, maxGridLines, zoomedRange)
         if (gridInfo.step === -1) {
             console.warn(`Error: Unable to compute valid y-axis step size. Suppressing display.`)
-            return []
+            return emptyTickSet
         }
     
         const scaledStep = gridInfo.step * Math.pow(10, gridInfo.scale - zoomedRangeScale)
-        const startFrom = alignWithStepSize(datamin, gridInfo.scale)
-        const steps = enumerateScaledSteps(startFrom, datamin, datamax, scaledStep, gridInfo.scale - zoomedRangeScale)
+        const startFrom = alignWithStepSize(_dataMin, gridInfo.scale)
+        const steps = enumerateScaledSteps(startFrom, _dataMin, _dataMax, scaledStep, gridInfo.scale - zoomedRangeScale)
 
-        return steps
-    }, [datamax, datamin, pixelHeight])
+        return { ticks: steps, datamin: _dataMin, datamax: _dataMax }
+    }, [datamax, datamin, yZoom, pixelHeight])
 }
 
 export default useYAxisTicks
