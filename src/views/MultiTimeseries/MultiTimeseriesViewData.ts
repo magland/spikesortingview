@@ -1,6 +1,6 @@
 import { validateObject } from "figurl"
-import { isSha1Hash, optional, Sha1Hash } from "figurl/viewInterface/kacheryTypes"
-import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isSha1Hash, Sha1Hash } from "figurl/viewInterface/kacheryTypes"
+import { isArrayOf, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
 import { isString } from "vega"
 
 type MTPanelData = {
