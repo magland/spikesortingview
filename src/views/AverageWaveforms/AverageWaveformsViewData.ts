@@ -1,6 +1,5 @@
 import { validateObject } from "figurl"
-import { optional } from "figurl/viewInterface/kacheryTypes"
-import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
 
 type AverageWaveformData = {
     unitId: number

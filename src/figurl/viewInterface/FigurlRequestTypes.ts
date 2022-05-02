@@ -1,7 +1,4 @@
-import { isJSONObject, isString, JSONObject } from "./kacheryTypes"
-import { isArrayOf } from "./kacheryTypes"
-import { isTaskJobStatus, isTaskType, TaskJobStatus, TaskType } from "./MessageToChildTypes"
-import validateObject, { isEqualTo, isOneOf, optional } from "./validateObject"
+import validateObject, { isArrayOf, isEqualTo, isOneOf, isString, optional } from "./validateObject"
 
 // getFigureData
 
