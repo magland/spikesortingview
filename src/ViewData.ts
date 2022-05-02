@@ -1,4 +1,4 @@
-import { isOneOf } from "figurl/viewInterface/kacheryTypes"
+import { isOneOf } from "figurl/viewInterface/validateObject"
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"

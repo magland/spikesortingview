@@ -1,5 +1,5 @@
-import { ErrorMessage, FeedId, isArrayOf, isErrorMessage, isFeedId, isSha1Hash, isSubfeedHash, isSubfeedMessage, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskStatus, Sha1Hash, SubfeedHash, SubfeedMessage, TaskFunctionId, TaskFunctionType, TaskId, TaskStatus } from "./kacheryTypes"
-import validateObject, { isBoolean, isEqualTo, isOneOf, isString, optional } from "./validateObject"
+import { ErrorMessage, FeedId, isErrorMessage, isFeedId, isSha1Hash, isSubfeedHash, isSubfeedMessage, isTaskFunctionId, isTaskFunctionType, isTaskId, isTaskStatus, Sha1Hash, SubfeedHash, SubfeedMessage, TaskFunctionId, TaskFunctionType, TaskId, TaskStatus } from "./kacheryTypes"
+import validateObject, { isArrayOf, isBoolean, isEqualTo, isOneOf, isString, optional } from "./validateObject"
 
 // getFigureData
 

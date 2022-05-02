@@ -1,5 +1,11 @@
 export type ValidateObjectSpec = {[key: string]: ValidateObjectSpec | (Function & ((a: any) => any))}
 
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONObject = { [member: string]: JSONValue };
+export interface JSONArray extends Array<JSONValue> {}
+
+
 // string
 export const isString = (x: any): x is string => {
     return ((x !== null) && (typeof x === 'string'));
@@ -69,6 +75,74 @@ export const isArrayOf = (testFunction: (x: any) => boolean): ((x: any) => boole
         else return false;
     }
 }
+
+// object
+export const isObject = (x: any): x is Object => {
+    return ((x !== null) && (typeof x === 'object'));
+}
+
+// isObjectOf
+export const isObjectOf = (keyTestFunction: (x: any) => boolean, valueTestFunction: (x: any) => boolean): ((x: any) => boolean) => {
+    return (x) => {
+        if (isObject(x)) {
+            for (let k in x) {
+                if (!keyTestFunction(k)) return false;
+                if (!valueTestFunction(x[k])) return false;
+            }
+            return true;
+        }
+        else return false;
+    }
+}
+
+export const isJSONObject = (x: any): x is JSONObject => {
+    if (!isObject(x)) return false
+    return isJSONSerializable(x)
+}
+export const isJSONValue = (x: any): x is JSONValue => {
+    return isJSONSerializable(x)
+}
+export const tryParseJsonObject = (x: string): JSONObject | null => {
+    let a: any
+    try {
+        a = JSON.parse(x)
+    }
+    catch {
+        return null
+    }
+    if (!isJSONObject(a)) return null
+    return a;
+}
+export const isJSONSerializable = (obj: any): boolean => {
+    if (typeof(obj) === 'string') return true
+    if (typeof(obj) === 'number') return true
+    if (!isObject(obj)) return false
+    const isPlainObject = (a: Object) => {
+        return Object.prototype.toString.call(a) === '[object Object]';
+    };
+    const isPlain = (a: any) => {
+      return (a === null) || (typeof a === 'undefined' || typeof a === 'string' || typeof a === 'boolean' || typeof a === 'number' || Array.isArray(a) || isPlainObject(a));
+    }
+    if (!isPlain(obj)) {
+      return false;
+    }
+    for (let property in obj) {
+      if (obj.hasOwnProperty(property)) {
+        if (!isPlain(obj[property])) {
+          return false;
+        }
+        if (obj[property] !== null) {
+            if (typeof obj[property] === "object") {
+                if (!isJSONSerializable(obj[property])) {
+                    return false;
+                }
+            }
+        }
+      }
+    }
+    return true;
+}
+
 
 const validateObject = (x: any, spec: ValidateObjectSpec, opts?: {callback?: (x: string) => any, allowAdditionalFields?: boolean}): boolean => {
     const o = opts || {}
