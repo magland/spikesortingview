@@ -36,7 +36,7 @@ export const allRowSelectionState = (s: {selectedRowIds: Set<number>, orderedRow
 }
 
 export const toggleSelectedRow = (s: RowSelection, a: RowSelectionAction): RowSelection => {
-    if (!a.targetRow) throw new Error(`Attempt to toggle row with unset rowid.`)
+    if (a.targetRow === undefined) throw new Error(`Attempt to toggle row with unset rowid.`)
     s.selectedRowIds.has(a.targetRow) ? s.selectedRowIds.delete(a.targetRow) : s.selectedRowIds.add(a.targetRow)
     return {
         ...s,

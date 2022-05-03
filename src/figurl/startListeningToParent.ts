@@ -77,7 +77,7 @@ const startListeningToParent = () => {
             }
         }
         else {
-            console.log('Unhandled message', e)
+            console.warn('Unhandled message from parent', e)
         }
     })
 }

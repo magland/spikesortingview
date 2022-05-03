@@ -1,6 +1,7 @@
 import SortingCurationAction from 'contexts/SortingCurationAction';
 import SortingCurationContext, { sortingCurationReducer } from 'contexts/SortingCurationContext';
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
+import getMutable from 'figurl/getMutable';
 import MountainWorkspace from 'MountainWorkspace/MountainWorkspace';
 import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { MountainLayoutViewData } from './MountainLayoutViewData';
@@ -59,20 +60,14 @@ const MountainLayoutView: FunctionComponent<Props> = ({data, width, height}) => 
         if ((!userId) || (!googleIdToken)) {
             return
         }
-        // runTaskAsync<{authorized: boolean}>(
-        //     'spikesortingview.check_sorting_curation_authorized.1',
-        //     {
-        //         sorting_curation_uri: data.sortingCurationUri,
-        //         user_id: userId,
-        //         google_id_token: googleIdToken
-        //     },
-        //     'query',
-        //     {queryUseCache: false}
-        // ).then((result) => {
-        //     // yeah, there's a race condition here
-        //     setCanCurate(result.authorized)
-        // })
-        setCanCurate(true)
+        ;(async () => {
+            const a = await getMutable(`sortingview/sortingCurationAuthorizedUsers/${data.sortingCurationUri}`)
+            if (!a) return
+            const authorizedUsers = JSON.parse(a)
+            if (authorizedUsers.includes(userId)) {
+                setCanCurate(true)
+            }
+        })()
     }, [userId, googleIdToken, data.sortingCurationUri])
     if (data.sortingCurationUri) {
         return (

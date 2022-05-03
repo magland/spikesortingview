@@ -77,4 +77,8 @@ export const handleTaskStatusUpdate = (msg: TaskStatusUpdateMessage) => {
     }
 }
 
+export const getAllTasks = () => {
+    return allTasks
+}
+
 export default initiateTask

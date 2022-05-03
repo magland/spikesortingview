@@ -1,8 +1,9 @@
 import sendRequestToParent from "./sendRequestToParent"
 import randomAlphaString from "./util/randomAlphaString"
 import { isSubscribeToFeedResponse, SubscribeToFeedRequest } from "./viewInterface/FigurlRequestTypes"
-import { DurationMsec, JSONObject, MessageCount } from "./viewInterface/kacheryTypes"
+import { DurationMsec, MessageCount } from "./viewInterface/kacheryTypes"
 import { NewFeedMessagesMessage } from "./viewInterface/MessageToChildTypes"
+import { JSONObject } from "./viewInterface/validateObject"
 
 export class Feed {
     #localMessages: JSONObject[] = []

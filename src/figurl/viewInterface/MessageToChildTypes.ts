@@ -1,6 +1,6 @@
 import { FigurlResponse, isFigurlResponse } from "./FigurlRequestTypes";
-import { isFeedId, isJSONObject, isNumber, isUserId, JSONObject, UserId } from "./kacheryTypes";
-import validateObject, { isArrayOf, isEqualTo, isOneOf, isString, optional } from "./validateObject";
+import { isUserId, UserId } from "./kacheryTypes";
+import validateObject, { isArrayOf, isEqualTo, isJSONObject, isNumber, isOneOf, isString, JSONObject, optional } from "./validateObject";
 
 export type TaskType = 'calculation' | 'action'
 
@@ -38,7 +38,7 @@ export type NewFeedMessagesMessage = {
 export const isNewFeedMessagesMessage = (x: any): x is NewFeedMessagesMessage => {
     return validateObject(x, {
         type: isEqualTo('newFeedMessages'),
-        feedId: isFeedId,
+        feedId: isString,
         position: isNumber,
         messages: isArrayOf(isJSONObject)
     })
