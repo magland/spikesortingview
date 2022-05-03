@@ -2,7 +2,7 @@
 
 set -ex
 
-TARGET=gs://figurl/spikesortingview-1
+TARGET=gs://figurl/spikesortingview-2
 
 yarn build
 gsutil -m cp -R ./build/* $TARGET/
