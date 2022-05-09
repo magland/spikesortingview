@@ -1,4 +1,4 @@
-import { isOneOf } from "figurl/viewInterface/validateObject"
+import { isOneOf } from 'figurl/viewInterface/validateObject'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
@@ -15,6 +15,7 @@ import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/Raste
 import { isRawTracesPlotViewData, RawTracesPlotViewData } from "views/RawTracesPlot/RawTracesPlotViewData"
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
+import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
 
 export type ViewData =
@@ -34,7 +35,8 @@ export type ViewData =
     LivePositionPdfPlotViewData |
     EpochsViewData |
     ConsoleViewData |
-    RawTracesPlotViewData
+    RawTracesPlotViewData |
+    TrackAnimationStaticData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -54,6 +56,7 @@ export const isViewData = (x: any): x is ViewData => {
         isLivePositionPdfPlotViewData,
         isEpochsViewData,
         isConsoleViewData,
-        isRawTracesPlotViewData
+        isRawTracesPlotViewData,
+        isTrackAnimationStaticData
     ])(x)
 }
