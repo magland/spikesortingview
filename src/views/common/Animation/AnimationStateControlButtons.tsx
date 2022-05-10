@@ -51,6 +51,7 @@ const AnimationStateControlButtons = <T, >(props: AnimationStateControlButtonsPr
         return isPlaying ? <FontAwesomeIcon icon={faPause} /> : <FontAwesomeIcon icon={faPlay} />
     }, [isPlaying]) 
 
+    // Alternatively, consider the faArrowRightArrowLeft icon, which wouldn't need to be changed and might be more expressive.
     const directionIcon = useMemo(() => {
         return playbackRate > 0 ? <FontAwesomeIcon icon={faStepBackward} /> : <FontAwesomeIcon icon={faStepForward} />
     }, [playbackRate])
@@ -97,12 +98,5 @@ const AnimationStateControlButtons = <T, >(props: AnimationStateControlButtonsPr
         </div>
     )
 }
-
-
-// faAngleUp
-// faAngleDown
-// faArrowRightArrowLeft
-// faBackwardStep, faForwardStep
-// faGripLinesVertical or faPipe
 
 export default AnimationStateControlButtons

@@ -1,7 +1,5 @@
 import React from "react"
 
-// TODO: This belongs somewhere general, make sure this is corrected before this PR is accepted
-
 export type DrawFn<T> = (frame_data: T) => void
 
 export type AnimationState<T> = {
@@ -77,7 +75,7 @@ export const SET_REPLAY_RATE: AnimationStateActionType = 'SET_REPLAY_RATE'
 export const SKIP: AnimationStateActionType = 'SKIP'
 export const TO_END: AnimationStateActionType = 'TO_END'
 
-// TODO: RETHINK THIS
+// TODO: Is this really needed? It really only serves to type the frame data.
 export const makeDefaultState = <T, >(): AnimationState<T> => {
     return {
         frameData: [],
@@ -90,7 +88,8 @@ export const makeDefaultState = <T, >(): AnimationState<T> => {
     }
 }
 
-// This produces the thing you can call that works to tick the clock
+// This produces a function that conforms with the expectations of requestAnimationFrame() and still
+// knows how to continue ticking the state's clock.
 export const curryDispatch = <T, >(dispatch: React.Dispatch<AnimationStateAction<T>>) => {
     const curried = (calltime: number) => {
         const tickAction = {
@@ -161,9 +160,8 @@ const updateFrames = <T, >(s: AnimationState<T>, a: AnimationStateUpdateFrameDat
     if (a.replaceExistingFrames) {
         s.frameData = a.incomingFrames
     } else {
-        // apparently iteratively inserting these is orders of magnitude faster than using the concat function...
-        // That reference is pretty old, I should profile it myself
-        // TODO
+        // apparently iteratively inserting these is orders of magnitude faster than using the concat function,
+        // but the reference is pretty old, so we should consider profiling this
         a.incomingFrames.forEach(frame => s.frameData.push(frame))
     }
     return {...s}
@@ -196,7 +194,6 @@ const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): Animati
     if (((s.currentFrameIndex === s.frameData.length - 1) && s.framesPerTick > 0) || ((s.currentFrameIndex === 0) && s.framesPerTick < 0)) {
         return togglePlayState(s)
     }
-    // QUESTION: RECYCLE THIS STATE INSTEAD? I THINK NO
     return {...s, pendingFrameCode: window.requestAnimationFrame(s.animationDispatchFn)}
 }
 
@@ -204,7 +201,7 @@ const togglePlayState = <T, >(s: AnimationState<T>): AnimationState<T> => {
     if (s.isPlaying) {
         s.pendingFrameCode && window.cancelAnimationFrame(s.pendingFrameCode)
         s.pendingFrameCode = undefined
-        s.lastRenderedTimestamp = undefined // No longer relevant because we aren't timing anything.        
+        s.lastRenderedTimestamp = undefined // The old value doesn't matter, since we can't time anything with it after pause.
     } else {
         if (!s.animationDispatchFn) {
             console.warn('Toggling play state to active, but no dispatch function set up. No-op.')
