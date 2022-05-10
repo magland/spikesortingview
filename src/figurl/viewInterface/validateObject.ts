@@ -5,7 +5,6 @@ export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
 export type JSONObject = { [member: string]: JSONValue };
 export interface JSONArray extends Array<JSONValue> {}
 
-
 // string
 export const isString = (x: any): x is string => {
     return ((x !== null) && (typeof x === 'string'));
@@ -94,6 +93,7 @@ export const isObjectOf = (keyTestFunction: (x: any) => boolean, valueTestFuncti
         else return false;
     }
 }
+
 
 export const isJSONObject = (x: any): x is JSONObject => {
     if (!isObject(x)) return false

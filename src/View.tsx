@@ -15,6 +15,7 @@ import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import RawTracesPlotView from 'views/RawTracesPlot/RawTracesPlotView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
+import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import { ViewData } from './ViewData';
 
@@ -83,8 +84,11 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     else if (data.type === 'RawTracesPlot') {
         return <RawTracesPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
+    else if (data.type === 'TrackAnimation') {
+        return <TrackPositionAnimationView data={data} width={width} height={height} />
+    }
     else {
-        return <div>Unexpected view data</div>
+        return <div>Unsupported view data</div>
     }
 }
 
