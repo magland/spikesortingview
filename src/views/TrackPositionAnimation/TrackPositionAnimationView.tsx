@@ -2,8 +2,8 @@ import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
 import React, { Fragment, FunctionComponent, useEffect, useMemo } from "react"
-import AnimationPlaybackControls from './AnimationPlaybackControls'
-import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from './AnimationStateReducer'
+import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
+import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
 import TPAPositionLayer from './TPAPositionLayer'
 import TPATrackLayer from './TPATrackLayer'
 import { PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
