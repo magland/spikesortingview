@@ -47,7 +47,7 @@ const AnimationPlaybackControls = <T, >(props: AnimationPlaybackControlsProps<T>
 
     return (
         <div
-            style={{position: 'absolute', top: verticalOffset}}
+            style={{position: 'absolute', top: verticalOffset, userSelect: "none"}}
         >
             {ctrlPanelDiv}
             {barLayerDiv}
