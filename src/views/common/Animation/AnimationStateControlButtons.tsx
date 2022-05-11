@@ -20,7 +20,7 @@ const PlaybackRateDropdown = <T, >(props: AnimationStateControlButtonsProps<T>) 
     const { playbackRate, customPlaybackRates, usingRateButtons, dispatch } = props
     const playbackRates = useMemo(() => {
         const c = customPlaybackRates || []
-        return [...defaultPlaybackRates, ...c]
+        return [...new Set([...defaultPlaybackRates, ...c])].sort((a: number, b: number) => a - b)
     }, [customPlaybackRates])
     const playbackRateOptions = useMemo(() => {
         return playbackRates.map(
