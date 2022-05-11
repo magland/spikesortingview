@@ -3,7 +3,7 @@ import AnimationStateControlButtons from './AnimationStateControlButtons'
 import AnimationStatePlaybackBarLayer from './AnimationStatePlaybackBarLayer'
 import { AnimationStateDispatcher } from './AnimationStateReducer'
 
-export type TPAControlsProps<T> = {
+export type AnimationPlaybackControlsProps<T> = {
     width: number
     height: number
     verticalOffset: number
@@ -12,13 +12,15 @@ export type TPAControlsProps<T> = {
     currentFrameIndex: number
     isPlaying: boolean
     playbackRate: number
+    customPlaybackRates?: number[]
+    usingRateButtons?: boolean
 }
 
 // TODO: Allow changing?
 const buttonWidthPx = 280
 
-const AnimationPlaybackControls = <T, >(props: TPAControlsProps<T>) => {
-    const { width, height, verticalOffset, dispatch, isPlaying, totalFrameCount, currentFrameIndex, playbackRate } = props
+const AnimationPlaybackControls = <T, >(props: AnimationPlaybackControlsProps<T>) => {
+    const { width, height, verticalOffset, dispatch, isPlaying, totalFrameCount, currentFrameIndex, playbackRate, usingRateButtons, customPlaybackRates } = props
     const ctrlPanelDiv = useMemo(() => {
         return (<AnimationStateControlButtons
             height={height}
@@ -26,8 +28,10 @@ const AnimationPlaybackControls = <T, >(props: TPAControlsProps<T>) => {
             isPlaying={isPlaying}
             buttonWidthPx={buttonWidthPx}
             playbackRate={playbackRate}
+            customPlaybackRates={customPlaybackRates}
+            usingRateButtons={usingRateButtons}
         />)
-    }, [height, dispatch, isPlaying, playbackRate])
+    }, [height, dispatch, isPlaying, playbackRate, customPlaybackRates, usingRateButtons])
 
     const barLayerDiv = useMemo(() => {
         return (<AnimationStatePlaybackBarLayer<T>
