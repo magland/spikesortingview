@@ -57,7 +57,7 @@ const initialState = makeDefaultState<PositionFrame>()
 
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
-    const { xmin, xmax, ymin, ymax, initialReplayRate } = data
+    const { xmin, xmax, ymin, ymax, initialReplayRate, headDirection } = data
     // Note: to expose this to other components, may wish to elevate to a full context
     const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
     useEffect(() => {
@@ -117,8 +117,15 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     const positions = usePixelPositions(transform, positionSet)
     const positionFrames: PositionFrame[] = useMemo(() => {
         if (positions === undefined) return []
-        return positions.map((p, i) => {return {x: p[0], y: p[1], timestamp: data.timestamps[i] }})
-    }, [positions, data.timestamps])
+        return positions.map((p, i) => {
+            return {
+                x: p[0],
+                y: p[1],
+                timestamp: data.timestamps[i],
+                headDirection: headDirection && headDirection[i]
+            }
+        })
+    }, [positions, data.timestamps, headDirection])
 
     useEffect(() => {
         animationStateDispatch({

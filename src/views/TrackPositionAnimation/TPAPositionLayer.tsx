@@ -1,4 +1,5 @@
 import BaseCanvas from "FigurlCanvas/BaseCanvas"
+import { cos, sin } from "mathjs"
 import { FunctionComponent } from "react"
 import { PositionFrame } from "./TrackPositionAnimationTypes"
 
@@ -15,6 +16,10 @@ type PositionProps = {
 }
 
 const DEFAULT_POSITION_DOT_STYLE = 'rgb(210, 128, 0)'
+const defaultPositionRadius = 10
+const defaultHeadRadius = 18
+const rightAngle = Math.PI/2
+const defaultTrianglePartialRadius = defaultPositionRadius * 1
 
 const draw = (context: CanvasRenderingContext2D, props: PositionProps) => {
     const { bottomMargin, frame, dotStyle } = props
@@ -24,8 +29,26 @@ const draw = (context: CanvasRenderingContext2D, props: PositionProps) => {
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     context.beginPath()
     context.fillStyle = dotStyle || DEFAULT_POSITION_DOT_STYLE
-    context.arc(frame.x, frame.y, 10, 0, 2*Math.PI)
+    context.arc(frame.x, frame.y, defaultPositionRadius, 0, 2*Math.PI)
     context.fill()
+    if (frame.headDirection) {
+        const localHeadDirection = frame.headDirection// + rightAngle
+        const headX = frame.x + defaultHeadRadius * cos(localHeadDirection)
+        const headY = frame.y + defaultHeadRadius * sin(localHeadDirection)
+        const triAX = frame.x + defaultTrianglePartialRadius * cos(localHeadDirection + rightAngle)
+        const triAY = frame.y + defaultTrianglePartialRadius * sin(localHeadDirection + rightAngle)
+        const triBX = frame.x + defaultTrianglePartialRadius * cos(localHeadDirection - rightAngle)
+        const triBY = frame.y + defaultTrianglePartialRadius * sin(localHeadDirection - rightAngle)
+
+        context.beginPath()
+        context.moveTo(headX, headY)
+        context.lineTo(triAX, triAY)
+        context.lineTo(triBX, triBY)
+        context.closePath()
+        // context.lineTo(defaultHeadRadius * cos(frame.headDirection), defaultHeadRadius * sin(frame.headDirection))
+        context.fill()
+    }
+
     if (frame.timestamp) {
         context.fillStyle = 'black'
         context.textAlign = 'center'

@@ -4,6 +4,7 @@ import { isArrayOf, isEqualTo, isNumber, isString, optional } from "figurl/viewI
 export type PositionFrame = {
     x: number
     y: number
+    headDirection?: number
     timestamp?: number
 }
 
@@ -33,6 +34,7 @@ export type PositionFrame = {
  * @member xmax Highest x-value to display, in native units.
  * @member ymin Lowest y-value to display, in native units.
  * @member ymax Highest y-value to display, in native units.
+ * @member headDirection Direction of the subject's head in the xy-plane, in radians.
  * @member initialReplayRate Optional, assumed 1. If set, specifies the initial frames per tick for playback.
  */
 export type TrackAnimationStaticData = {
@@ -48,6 +50,7 @@ export type TrackAnimationStaticData = {
     xmax: number
     ymin: number
     ymax: number
+    headDirection?: number[]
     initialReplayRate?: number
 }
 
@@ -65,6 +68,7 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         xmax: isNumber,
         ymin: isNumber,
         ymax: isNumber,
+        headDirection: optional(isArrayOf(isNumber)),
         initialReplayRate: optional(isNumber)
     })
     if (typeMatch) {
@@ -72,9 +76,11 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         const rangeFail = candidate.xmin >= candidate.xmax || candidate.ymin >= candidate.ymax
         const trackRectsDimensionsFail = candidate.trackBinULCorners.length !== 2 || candidate.trackBinULCorners[0].length !== candidate.trackBinULCorners[1].length
         const positionDimensionsFail = candidate.positions.length !== 2
-        const timestampPositionMismatch = candidate.timestamps.length !== candidate.positions[0].length || candidate.timestamps.length !== candidate.positions[1].length
+        const timesCount = candidate.timestamps.length
+        const timestampPositionMismatch = timesCount !== candidate.positions[0].length || timesCount !== candidate.positions[1].length
+        const headDirectionLengthMismatch = (candidate.headDirection && candidate.headDirection.length > 0 && timesCount !== candidate.headDirection.length)
 
-        return !(rangeFail || trackRectsDimensionsFail || positionDimensionsFail || timestampPositionMismatch)
+        return !(rangeFail || trackRectsDimensionsFail || positionDimensionsFail || timestampPositionMismatch || headDirectionLengthMismatch)
     }
 
     return false
