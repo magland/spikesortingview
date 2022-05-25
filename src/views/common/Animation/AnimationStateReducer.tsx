@@ -9,7 +9,8 @@ export type AnimationState<T> = {
     replayMultiplier: number,
     isPlaying: boolean,
     currentFrameIndex: number,
-    lastRenderedTimestamp: number | undefined,
+    playbackStartedTimestamp: number | undefined,
+    playbackStartedFrameIndex: number,
     pendingFrameCode: number | undefined,
     baseMsPerFrame: number, // the number of ms per frame that will correspond to 1:1 playback, i.e. playback in real-time of the recording.
     animationDispatchFn: ((calltime: number) => void) | undefined
@@ -92,7 +93,8 @@ export const makeDefaultState = <T, >(): AnimationState<T> => {
         replayMultiplier: 1,
         isPlaying: false,
         currentFrameIndex: 0,
-        lastRenderedTimestamp: undefined,
+        playbackStartedTimestamp: undefined,
+        playbackStartedFrameIndex: 0,
         pendingFrameCode: undefined,
         baseMsPerFrame: MS_PER_TICK_60HZ,
         animationDispatchFn: undefined
@@ -134,7 +136,7 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
                 return s
             }
             refreshAnimationCycle(s)
-            return { ...s, baseMsPerFrame: a.baseMsPerFrame }
+            return { ...s, baseMsPerFrame: a.baseMsPerFrame, playbackStartedTimestamp: undefined }
         case SET_REPLAY_RATE:
             // Negative values are allowed and will just play it backwards.
             if (a.newRate === 0) {
@@ -142,7 +144,7 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
                 return s
             }
             refreshAnimationCycle(s)
-            return { ...s, replayMultiplier: a.newRate }
+            return { ...s, replayMultiplier: a.newRate, playbackStartedTimestamp: undefined }
         case SKIP:
             // Currently implemented as a jump of 3 pct, but that's just a placeholder; maybe fixed length (or fixed time) would be better?
             // Thought: This could interact with the replay rate and skip e.g. 5 seconds of playback time under current settings...?
@@ -152,11 +154,11 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
                 : newFrame > (s.frameData.length - 1)
                     ? s.frameData.length : newFrame
             refreshAnimationCycle(s)
-            return {...s}
+            return {...s, playbackStartedTimestamp: undefined}
         case TO_END:
             s.currentFrameIndex = a.backward ? 0 : s.frameData.length - 1
             refreshAnimationCycle(s)
-            return {...s}
+            return {...s, playbackStartedTimestamp: undefined}
         default: {
             throw Error(`Invalid action type for animation state reducer: ${type}`)
         }
@@ -191,21 +193,18 @@ const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): Animati
         console.warn('Attempt to animate, but no dispatch function set. No-op.')
         return s
     }
-
-    if (s.lastRenderedTimestamp) {
-        const elapsedMs = a.now - s.lastRenderedTimestamp
+    if (s.playbackStartedTimestamp) {
+        const elapsedMs = a.now - s.playbackStartedTimestamp
         if (elapsedMs < 0) {
-            console.warn(`Doing animation tick, but elapsed time is somehow negative: ${a.now} - ${s.lastRenderedTimestamp} = ${elapsedMs}`)
+            console.warn(`Doing animation tick, but elapsed time is somehow negative: ${a.now} - ${s.playbackStartedTimestamp} = ${elapsedMs}`)
             return s
         }
-        const rawFramesToAdvance = elapsedMs/s.baseMsPerFrame * s.replayMultiplier
-        const framesToAdvance = s.replayMultiplier > 0 ? Math.floor(rawFramesToAdvance) : Math.ceil(rawFramesToAdvance)
-        s.currentFrameIndex = Math.min((s.frameData.length - 1), s.currentFrameIndex + framesToAdvance)
-        if (framesToAdvance !== 0) {
-            s.lastRenderedTimestamp = a.now
-        }
+        const rawElapsedFrames = elapsedMs/s.baseMsPerFrame * s.replayMultiplier
+        const elapsedFrames = s.replayMultiplier > 0 ? Math.floor(rawElapsedFrames) : Math.ceil(rawElapsedFrames)
+        s.currentFrameIndex = Math.max(0, Math.min((s.frameData.length - 1), s.playbackStartedFrameIndex + elapsedFrames))
     } else {
-        s.lastRenderedTimestamp = a.now
+        s.playbackStartedTimestamp = a.now
+        s.playbackStartedFrameIndex = s.currentFrameIndex
     }
 
     if (((s.currentFrameIndex === s.frameData.length - 1) && s.replayMultiplier > 0) || ((s.currentFrameIndex === 0) && s.replayMultiplier < 0)) {
@@ -218,13 +217,13 @@ const togglePlayState = <T, >(s: AnimationState<T>): AnimationState<T> => {
     if (s.isPlaying) {
         s.pendingFrameCode && window.cancelAnimationFrame(s.pendingFrameCode)
         s.pendingFrameCode = undefined
-        s.lastRenderedTimestamp = undefined // The old value doesn't matter, since we can't time anything with it after pause.
+        s.playbackStartedTimestamp = undefined // The old value doesn't matter, since we can't time anything with it after pause.
+        s.playbackStartedFrameIndex = s.currentFrameIndex
     } else {
         if (!s.animationDispatchFn) {
             console.warn('Toggling play state to active, but no dispatch function set up. No-op.')
             return s
         }
-        console.log(`Base MS per frame: ${s.baseMsPerFrame}`)
         s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
     }
     s.isPlaying = !s.isPlaying
@@ -242,6 +241,10 @@ const setFrame = <T, >(s: AnimationState<T>, a: AnimationStateSetCurrentFrameAct
         s.currentFrameIndex = i
     } else {
         s.currentFrameIndex = Math.min(newIndex, s.frameData.length - 1)
+    }
+    if (s.playbackStartedTimestamp) {
+        s.playbackStartedTimestamp = undefined
+        refreshAnimationCycle(s)
     }
     return {...s}
 }

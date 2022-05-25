@@ -35,7 +35,7 @@ export type PositionFrame = {
  * @member ymin Lowest y-value to display, in native units.
  * @member ymax Highest y-value to display, in native units.
  * @member headDirection Direction of the subject's head in the xy-plane, in radians.
- * @member realTimeReplayRate Optional, assumed 1. If set, specifies the initial frames-per-tick for playback.
+ * @member realTimeReplayRate Optional, assumed 1000/60. If set, specifies the number of milliseconds per frame to achieve real-time playback.
  */
 export type TrackAnimationStaticData = {
     type: 'TrackAnimation'
