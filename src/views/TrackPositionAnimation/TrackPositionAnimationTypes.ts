@@ -35,7 +35,7 @@ export type PositionFrame = {
  * @member ymin Lowest y-value to display, in native units.
  * @member ymax Highest y-value to display, in native units.
  * @member headDirection Direction of the subject's head in the xy-plane, in radians.
- * @member initialReplayRate Optional, assumed 1. If set, specifies the initial frames per tick for playback.
+ * @member realTimeReplayRate Optional, assumed 1. If set, specifies the initial frames-per-tick for playback.
  */
 export type TrackAnimationStaticData = {
     type: 'TrackAnimation'
@@ -51,7 +51,7 @@ export type TrackAnimationStaticData = {
     ymin: number
     ymax: number
     headDirection?: number[]
-    initialReplayRate?: number
+    realTimeReplayRateMs?: number
 }
 
 export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticData => {
@@ -69,7 +69,7 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         ymin: isNumber,
         ymax: isNumber,
         headDirection: optional(isArrayOf(isNumber)),
-        initialReplayRate: optional(isNumber)
+        realTimeReplayRateMs: optional(isNumber)
     })
     if (typeMatch) {
         const candidate = x as TrackAnimationStaticData

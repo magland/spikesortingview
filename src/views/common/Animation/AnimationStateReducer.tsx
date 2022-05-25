@@ -1,20 +1,23 @@
 import React from "react"
 
+const MS_PER_TICK_60HZ = 1000/60
+
 export type DrawFn<T> = (frame_data: T) => void
 
 export type AnimationState<T> = {
     frameData: T[],
-    framesPerTick: number,
+    replayMultiplier: number,
     isPlaying: boolean,
     currentFrameIndex: number,
     lastRenderedTimestamp: number | undefined,
     pendingFrameCode: number | undefined,
+    baseMsPerFrame: number, // the number of ms per frame that will correspond to 1:1 playback, i.e. playback in real-time of the recording.
     animationDispatchFn: ((calltime: number) => void) | undefined
 }
 
 export type AnimationStateDispatcher<T> = React.Dispatch<AnimationStateAction<T>>
 
-export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'TICK' | 'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SET_REPLAY_RATE' | 'SKIP' | 'TO_END'
+export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'TICK' | 'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SET_BASE_MS_PER_FRAME' | 'SET_REPLAY_RATE' | 'SKIP' | 'TO_END'
 
 export type AnimationStateAction<T> =
     AnimationStateSetDispatchAction |
@@ -22,6 +25,7 @@ export type AnimationStateAction<T> =
     AnimationStateTickAction |
     AnimationStateTogglePlaybackAction |
     AnimationStateSetCurrentFrameAction |
+    AnimationStateSetBaseMsPerFrameAction |
     AnimationStateSetReplayRateAction |
     AnimationStateSkipAction |
     AnimationStateToEndAction
@@ -51,6 +55,11 @@ export type AnimationStateSetCurrentFrameAction = {
     newIndex: number
 }
 
+export type AnimationStateSetBaseMsPerFrameAction = {
+    type: 'SET_BASE_MS_PER_FRAME',
+    baseMsPerFrame: number
+}
+
 export type AnimationStateSetReplayRateAction = {
     type: 'SET_REPLAY_RATE',
     newRate: number
@@ -71,6 +80,7 @@ export const UPDATE_FRAME_DATA: AnimationStateActionType = 'UPDATE_FRAME_DATA'
 export const TICK: AnimationStateActionType = 'TICK'
 export const TOGGLE_PLAYBACK: AnimationStateActionType = 'TOGGLE_PLAYBACK'
 export const SET_CURRENT_FRAME: AnimationStateActionType = 'SET_CURRENT_FRAME'
+export const SET_BASE_MS_PER_FRAME: AnimationStateActionType = 'SET_BASE_MS_PER_FRAME'
 export const SET_REPLAY_RATE: AnimationStateActionType = 'SET_REPLAY_RATE'
 export const SKIP: AnimationStateActionType = 'SKIP'
 export const TO_END: AnimationStateActionType = 'TO_END'
@@ -79,11 +89,12 @@ export const TO_END: AnimationStateActionType = 'TO_END'
 export const makeDefaultState = <T, >(): AnimationState<T> => {
     return {
         frameData: [],
-        framesPerTick: 1,
+        replayMultiplier: 1,
         isPlaying: false,
         currentFrameIndex: 0,
         lastRenderedTimestamp: undefined,
         pendingFrameCode: undefined,
+        baseMsPerFrame: MS_PER_TICK_60HZ,
         animationDispatchFn: undefined
     }
 }
@@ -117,6 +128,13 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
             return togglePlayState(s)
         case SET_CURRENT_FRAME:
             return setFrame(s, a)
+        case SET_BASE_MS_PER_FRAME:
+            if (a.baseMsPerFrame === 0) {
+                console.warn('Attempt to set ms-per-frame to 0.')
+                return s
+            }
+            refreshAnimationCycle(s)
+            return { ...s, baseMsPerFrame: a.baseMsPerFrame }
         case SET_REPLAY_RATE:
             // Negative values are allowed and will just play it backwards.
             if (a.newRate === 0) {
@@ -124,7 +142,7 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
                 return s
             }
             refreshAnimationCycle(s)
-            return { ...s, framesPerTick: a.newRate }
+            return { ...s, replayMultiplier: a.newRate }
         case SKIP:
             // Currently implemented as a jump of 3 pct, but that's just a placeholder; maybe fixed length (or fixed time) would be better?
             // Thought: This could interact with the replay rate and skip e.g. 5 seconds of playback time under current settings...?
@@ -168,7 +186,6 @@ const updateFrames = <T, >(s: AnimationState<T>, a: AnimationStateUpdateFrameDat
 }
 
 
-const MS_PER_TICK = 1000/60
 const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): AnimationState<T> => {
     if (s.animationDispatchFn === undefined) {
         console.warn('Attempt to animate, but no dispatch function set. No-op.')
@@ -181,8 +198,8 @@ const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): Animati
             console.warn(`Doing animation tick, but elapsed time is somehow negative: ${a.now} - ${s.lastRenderedTimestamp} = ${elapsedMs}`)
             return s
         }
-        const rawFramesToAdvance = elapsedMs/MS_PER_TICK * s.framesPerTick
-        const framesToAdvance = s.framesPerTick > 0 ? Math.floor(rawFramesToAdvance) : Math.ceil(rawFramesToAdvance)
+        const rawFramesToAdvance = elapsedMs/s.baseMsPerFrame * s.replayMultiplier
+        const framesToAdvance = s.replayMultiplier > 0 ? Math.floor(rawFramesToAdvance) : Math.ceil(rawFramesToAdvance)
         s.currentFrameIndex = Math.min((s.frameData.length - 1), s.currentFrameIndex + framesToAdvance)
         if (framesToAdvance !== 0) {
             s.lastRenderedTimestamp = a.now
@@ -191,7 +208,7 @@ const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): Animati
         s.lastRenderedTimestamp = a.now
     }
 
-    if (((s.currentFrameIndex === s.frameData.length - 1) && s.framesPerTick > 0) || ((s.currentFrameIndex === 0) && s.framesPerTick < 0)) {
+    if (((s.currentFrameIndex === s.frameData.length - 1) && s.replayMultiplier > 0) || ((s.currentFrameIndex === 0) && s.replayMultiplier < 0)) {
         return togglePlayState(s)
     }
     return {...s, pendingFrameCode: window.requestAnimationFrame(s.animationDispatchFn)}
@@ -207,6 +224,7 @@ const togglePlayState = <T, >(s: AnimationState<T>): AnimationState<T> => {
             console.warn('Toggling play state to active, but no dispatch function set up. No-op.')
             return s
         }
+        console.log(`Base MS per frame: ${s.baseMsPerFrame}`)
         s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
     }
     s.isPlaying = !s.isPlaying
