@@ -57,7 +57,7 @@ const initialState = makeDefaultState<PositionFrame>()
 
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
-    const { xmin, xmax, ymin, ymax, initialReplayRate, headDirection } = data
+    const { xmin, xmax, ymin, ymax, realTimeReplayRateMs, headDirection } = data
     // Note: to expose this to other components, may wish to elevate to a full context
     const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
     useEffect(() => {
@@ -69,13 +69,13 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
         })
     }, [animationStateDispatch])
     useEffect(() => {
-        if (initialReplayRate && initialReplayRate !== 0) {
+        if (realTimeReplayRateMs && realTimeReplayRateMs !== 0) {
             animationStateDispatch({
-                type: 'SET_REPLAY_RATE',
-                newRate: initialReplayRate
+                type: 'SET_BASE_MS_PER_FRAME',
+                baseMsPerFrame: realTimeReplayRateMs
             })
         }
-    })
+    }, [realTimeReplayRateMs])
 
     const drawHeight = height - controlsHeight
 
@@ -160,9 +160,9 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             totalFrameCount={animationState.frameData.length}
             currentFrameIndex={animationState.currentFrameIndex}
             isPlaying={animationState.isPlaying}
-            playbackRate={animationState.framesPerTick}
+            playbackRate={animationState.replayMultiplier}
         />
-    }, [width, drawHeight, animationState.frameData.length, animationState.currentFrameIndex, animationState.isPlaying, animationState.framesPerTick])
+    }, [width, drawHeight, animationState.frameData.length, animationState.currentFrameIndex, animationState.isPlaying, animationState.replayMultiplier])
  
     return (
     <Fragment>
