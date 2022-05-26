@@ -34,7 +34,7 @@ def main():
         ]
     }
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-1', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-3', data=data)
     url = F.url(label='test_composite')
     print(url)
 

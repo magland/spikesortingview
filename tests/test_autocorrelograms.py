@@ -10,7 +10,7 @@ def main():
     S = sv.LabboxEphysSortingExtractor.from_memory(sorting, serialize=True)
 
     data = test_autocorrelograms(recording=recording, sorting=sorting)
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-1', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-3', data=data)
     url = F.url(label='test_autocorrelograms')
     print(url)
 
