@@ -1,5 +1,5 @@
 import { validateObject } from "figurl"
-import { isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
 
 export type LivePositionPdfPlotViewData = {
     type: 'LivePositionPdfPlot'
@@ -10,6 +10,8 @@ export type LivePositionPdfPlotViewData = {
     numPositions: number
     segmentSize: number
     multiscaleFactor: number
+    linearPositions: number[]
+    linearPositionRange: [number, number]
 }
 
 export const isLivePositionPdfPlotViewData = (x: any): x is LivePositionPdfPlotViewData => {
@@ -21,6 +23,8 @@ export const isLivePositionPdfPlotViewData = (x: any): x is LivePositionPdfPlotV
         samplingFrequency: isNumber,
         numPositions: isNumber,
         segmentSize: isNumber,
-        multiscaleFactor: isNumber
+        multiscaleFactor: isNumber,
+        linearPositions: optional(() => (true)),
+        linearPositionRange: optional(() => (true))
     }, {allowAdditionalFields: true})
 }

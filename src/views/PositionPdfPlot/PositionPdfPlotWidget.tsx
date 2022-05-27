@@ -1,6 +1,7 @@
+import { Checkbox } from '@material-ui/core'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
@@ -19,6 +20,8 @@ type Props = {
     endTimeSec: number
     samplingFrequency: number
     numPositions: number
+    linearPositions?: number[]
+    linearPositionRange?: [number, number]
     segmentSize: number
     multiscaleFactor: number
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
@@ -63,11 +66,12 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
 
 const emptyPanelSelection = new Set<number>()
 
-const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
+const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, linearPositions, linearPositionRange, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
     const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions, segmentSize, multiscaleFactor)
+    const [showLinearPositionsOverlay, setShowLinearPositionsOverlay] = useState<boolean>(false)
 
     const {visibleValues, t1, t2} = useMemo(() => {
         if (!visibleTimeStartSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
@@ -86,6 +90,15 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         const t2 = startTimeSec + j2 * downsampleFactor / samplingFrequency
         return {visibleValues, t1, t2}
     }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency, width])
+
+    const visibleLinearPositions: number[] | undefined = useMemo(() => {
+        if (!linearPositions) return undefined
+        if (!visibleTimeStartSeconds) return undefined
+        if (!visibleTimeEndSeconds) return undefined
+        const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
+        const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
+        return linearPositions.slice(i1, i2)
+    }, [dataModel.numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds])
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
@@ -154,23 +167,21 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         context.drawImage(canvas, pixelTimes[0], 0)
         context.restore()
 
-        // context.fillStyle = 'green'
-        // context.fillRect(pixelTimes[0] + 100, 0 + 100, pixelTimes[1] - pixelTimes[0] - 200, panelHeight - 200)
-        // for (let i = 0; i < pixelTimes.length; i++) {
-        //     const deltaPixelTime = (i + 1 < pixelTimes.length) ? (pixelTimes[i + 1] - pixelTimes[i]) : (pixelTimes[i] - pixelTimes[i - 1])
-        //     for (let j = 0; j < pixelPositions.length; j++) {
-        //         const deltaPixelPosition = (j + 1 < pixelPositions.length) ? (pixelPositions[j] - pixelPositions[j + 1]) : (pixelPositions[j - 1] - pixelPositions[j])
-        //         const v = (visibleValues[i][j] - minValue) / (maxValue - minValue)
-        //         const color = colorForValue(v)
-        //         const x0 = pixelTimes[i]
-        //         const y0 = pixelPositions[j] - deltaPixelPosition - 1
-        //         const w0 = deltaPixelTime + 1
-        //         const h0 = deltaPixelPosition + 1
-        //         context.fillStyle = color
-        //         context.fillRect(x0, y0, w0, h0)
-        //     }
-        // }
-    }, [pixelTimes, panelHeight, imageData])
+        if ((showLinearPositionsOverlay) && (visibleLinearPositions) && (linearPositionRange)) {
+            context.strokeStyle = 'white'
+            context.beginPath()
+            for (let i = 0; i < visibleLinearPositions.length; i++) {
+                const aa = visibleLinearPositions[i]
+                const bb = 1 - (aa - linearPositionRange[0]) / (linearPositionRange[1] - linearPositionRange[0])
+                const cc = bb * panelHeight
+                const dd = i / visibleLinearPositions.length
+                const ee = dd * panelWidth
+                if (i === 0) context.moveTo(ee, cc)
+                else context.lineTo(ee, cc)
+            }
+            context.stroke()
+        }
+    }, [pixelTimes, panelWidth, panelHeight, imageData, visibleLinearPositions, linearPositionRange, showLinearPositionsOverlay])
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         return [{
@@ -180,19 +191,30 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
             paint: paintPanel
         }]
     }, [paintPanel])
+    
+    const height2 = linearPositions ? height - 50 : height
 
-    const content = (
-        <TimeScrollView
-            margins={margins}
-            panels={panels}
-            panelSpacing={panelSpacing}
-            selectedPanelKeys={emptyPanelSelection}
-            timeseriesLayoutOpts={timeseriesLayoutOpts}
-            width={width}
-            height={height}
-        />
+    return (
+        <div>
+            <TimeScrollView
+                margins={margins}
+                panels={panels}
+                panelSpacing={panelSpacing}
+                selectedPanelKeys={emptyPanelSelection}
+                timeseriesLayoutOpts={timeseriesLayoutOpts}
+                width={width}
+                height={height2}
+            />
+            {
+                linearPositions && (
+                    <span>
+                        <Checkbox checked={showLinearPositionsOverlay} onClick={() => {setShowLinearPositionsOverlay(a => (!a))}} />
+                        Show actual position overlay
+                    </span>
+                )
+            }
+        </div>
     )
-    return content
 }
 
 export const allocate2d = (N1: number, N2: number, value: number | undefined) => {
