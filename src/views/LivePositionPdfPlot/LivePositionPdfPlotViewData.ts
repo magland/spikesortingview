@@ -11,7 +11,6 @@ export type LivePositionPdfPlotViewData = {
     segmentSize: number
     multiscaleFactor: number
     linearPositions: number[]
-    linearPositionRange: [number, number]
 }
 
 export const isLivePositionPdfPlotViewData = (x: any): x is LivePositionPdfPlotViewData => {
@@ -24,7 +23,6 @@ export const isLivePositionPdfPlotViewData = (x: any): x is LivePositionPdfPlotV
         numPositions: isNumber,
         segmentSize: isNumber,
         multiscaleFactor: isNumber,
-        linearPositions: optional(() => (true)),
-        linearPositionRange: optional(() => (true))
+        linearPositions: optional(() => (true))
     }, {allowAdditionalFields: true})
 }

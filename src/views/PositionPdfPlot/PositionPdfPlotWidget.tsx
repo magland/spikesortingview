@@ -21,7 +21,6 @@ type Props = {
     samplingFrequency: number
     numPositions: number
     linearPositions?: number[]
-    linearPositionRange?: [number, number]
     segmentSize: number
     multiscaleFactor: number
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
@@ -66,30 +65,38 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
 
 const emptyPanelSelection = new Set<number>()
 
-const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, linearPositions, linearPositionRange, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
+const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, linearPositions, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
     const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions, segmentSize, multiscaleFactor)
     const [showLinearPositionsOverlay, setShowLinearPositionsOverlay] = useState<boolean>(false)
 
-    const {visibleValues, t1, t2} = useMemo(() => {
-        if (!visibleTimeStartSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
-        if (!visibleTimeEndSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
+    const {downsampleFactor, i1, i2} = useMemo(() => {
+        if (!visibleTimeStartSeconds) return {downsampleFactor: 1, i1: 0, i2: 0}
+        if (!visibleTimeEndSeconds) return {downsampleFactor: 1, i1: 0, i2: 0}
         const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
         const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
-        if (i2 <= i1) return {visibleValues: undefined, t1: 0, t2: 0}
-        let downsampleFactor = 1
+        let downsampleFactor: number = 1
         while ((i2 - i1) / (downsampleFactor * dataModel.multiscaleFactor) > width) {
             downsampleFactor *= dataModel.multiscaleFactor
         }
+        return {downsampleFactor, i1, i2}
+    }, [dataModel, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds, width])
+
+    const {visibleValues, t1, t2} = useMemo(() => {
+        if (!visibleTimeStartSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
+        if (!visibleTimeEndSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
+        
+        if (i2 <= i1) return {visibleValues: undefined, t1: 0, t2: 0}
+        
         const j1 = Math.floor(i1 / downsampleFactor)
         const j2 = Math.ceil(i2 / downsampleFactor)
         const visibleValues = dataModel.get(j1, j2, downsampleFactor)
         const t1 = startTimeSec + j1 * downsampleFactor / samplingFrequency
         const t2 = startTimeSec + j2 * downsampleFactor / samplingFrequency
         return {visibleValues, t1, t2}
-    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency, width])
+    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency, downsampleFactor, i1, i2])
 
     const visibleLinearPositions: number[] | undefined = useMemo(() => {
         if (!linearPositions) return undefined
@@ -97,6 +104,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         if (!visibleTimeEndSeconds) return undefined
         const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
         const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
+        console.log('--- i1, i2', i1, i2)
         return linearPositions.slice(i1, i2)
     }, [dataModel.numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds])
 
@@ -154,6 +162,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
 
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
         if (!imageData) return
+        console.log('---', visibleLinearPositions?.slice(0, 15))
         // Draw scaled version of image
         // See: https://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
         const canvas = document.createElement('canvas')
@@ -162,26 +171,20 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         const c = canvas.getContext('2d')
         if (!c) return
         c.putImageData(imageData, 0, 0)
+        if ((showLinearPositionsOverlay) && (visibleLinearPositions)) {
+            c.fillStyle = 'white'
+            c.strokeStyle = 'white'
+            for (let i = 0; i < visibleLinearPositions.length; i++) {
+                const xx = i / downsampleFactor
+                const yy = imageData.height - 1 - visibleLinearPositions[i]
+                c.fillRect(xx - 0.5, yy - 0.5, 1, 1)
+            }
+        }
         context.save()
         context.scale((pixelTimes[1] - pixelTimes[0]) / imageData.width, panelHeight / imageData.height)
         context.drawImage(canvas, pixelTimes[0], 0)
         context.restore()
-
-        if ((showLinearPositionsOverlay) && (visibleLinearPositions) && (linearPositionRange)) {
-            context.strokeStyle = 'white'
-            context.beginPath()
-            for (let i = 0; i < visibleLinearPositions.length; i++) {
-                const aa = visibleLinearPositions[i]
-                const bb = 1 - (aa - linearPositionRange[0]) / (linearPositionRange[1] - linearPositionRange[0])
-                const cc = bb * panelHeight
-                const dd = i / visibleLinearPositions.length
-                const ee = dd * panelWidth
-                if (i === 0) context.moveTo(ee, cc)
-                else context.lineTo(ee, cc)
-            }
-            context.stroke()
-        }
-    }, [pixelTimes, panelWidth, panelHeight, imageData, visibleLinearPositions, linearPositionRange, showLinearPositionsOverlay])
+    }, [pixelTimes, panelHeight, imageData, visibleLinearPositions, showLinearPositionsOverlay, downsampleFactor])
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         return [{

@@ -12,7 +12,7 @@ def main():
 
     data = test_units_table(recording=R, sorting=S)
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-3', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-4', data=data)
     url = F.url(label='test_units_table')
     print(url)
 

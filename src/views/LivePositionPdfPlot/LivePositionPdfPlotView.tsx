@@ -34,7 +34,6 @@ const LivePositionPdfPlotView: FunctionComponent<Props> = ({data, timeseriesLayo
             multiscaleFactor={data.multiscaleFactor}
             numPositions={numPositions}
             linearPositions={data.linearPositions}
-            linearPositionRange={data.linearPositionRange}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}
             height={height}
