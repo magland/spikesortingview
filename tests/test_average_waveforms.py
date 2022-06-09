@@ -13,7 +13,7 @@ def main():
 
     data = test_average_waveforms(recording=R, sorting=S)
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-3', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-4', data=data)
     url = F.url(label='test_average_waveforms')
     print(url)
 
