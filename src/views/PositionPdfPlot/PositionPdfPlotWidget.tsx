@@ -104,7 +104,6 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         if (!visibleTimeEndSeconds) return undefined
         const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
         const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
-        console.log('--- i1, i2', i1, i2)
         return linearPositions.slice(i1, i2)
     }, [dataModel.numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds])
 
@@ -162,7 +161,6 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
 
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
         if (!imageData) return
-        console.log('---', visibleLinearPositions?.slice(0, 15))
         // Draw scaled version of image
         // See: https://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
         const canvas = document.createElement('canvas')
@@ -177,7 +175,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
             for (let i = 0; i < visibleLinearPositions.length; i++) {
                 const xx = i / downsampleFactor
                 const yy = imageData.height - 1 - visibleLinearPositions[i]
-                c.fillRect(xx - 0.5, yy - 0.5, 1, 1)
+                c.fillRect(xx - 0.5, yy + 0.5, 1, 1)
             }
         }
         context.save()
