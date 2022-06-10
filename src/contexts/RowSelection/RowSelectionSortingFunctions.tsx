@@ -7,7 +7,7 @@ export const resetRowOrder = (s: RowSelection, a: RowSelectionAction): RowSelect
     const { newRowOrder } = a
     const { orderedRowIds } = s
     if (!newRowOrder || newRowOrder.length === 0) throw Error('Attempt to reset row ordering to empty set.')
-    const oldRows = new Set<number>(orderedRowIds)
+    const oldRows = new Set<number | string>(orderedRowIds)
     if (oldRows.size > 0 && (newRowOrder.length !== oldRows.size || newRowOrder.some(id => !oldRows.has(id)))) {
         throw Error("Reordering rows, but the set of rows in the new and old ordering don't match.")
     }

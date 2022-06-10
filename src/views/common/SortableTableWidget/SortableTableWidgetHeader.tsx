@@ -32,8 +32,8 @@ const SortCaret = (ascending?: boolean) => (
         : <FontAwesomeIcon icon={faCaretDown} />
 )
 
-type RowSorterCallback = (colsMap: ColsDict) => (rules: SortingRule[]) => number[]
-export const sorterCallbackWrapper = (rowsMap: RowsDict, colsMap: ColsDict): (rules: SortingRule[]) => number[] => {
+type RowSorterCallback = (colsMap: ColsDict) => (rules: SortingRule[]) => (number | string)[]
+export const sorterCallbackWrapper = (rowsMap: RowsDict, colsMap: ColsDict): (rules: SortingRule[]) => (number | string)[] => {
     return (rules: SortingRule[]) => sortRows(rowsMap, colsMap, rules)
 }
 const sortRows = (rowsMap: RowsDict, colsMap: ColsDict, rules: SortingRule[]) => {

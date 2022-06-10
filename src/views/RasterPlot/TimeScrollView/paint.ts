@@ -45,7 +45,7 @@ export const paintSpanHighlights = (context: CanvasRenderingContext2D, props: TS
 }
 
 
-export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': Set<number>}) => {
+export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': Set<number | string>}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
     const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, yTickSet, timeTicks, hideTimeAxis} = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
@@ -107,7 +107,7 @@ const paintTimeTicks = (context: CanvasRenderingContext2D, timeTicks: TimeTick[]
     })
 }
 
-const paintPanelHighlights = (context: CanvasRenderingContext2D, panels: TimeScrollViewPanel<any>[], selectedPanelKeys: Set<number>, topMargin: number, width: number, perPanelOffset: number, panelHeight: number) => {
+const paintPanelHighlights = (context: CanvasRenderingContext2D, panels: TimeScrollViewPanel<any>[], selectedPanelKeys: Set<number | string>, topMargin: number, width: number, perPanelOffset: number, panelHeight: number) => {
     if (!selectedPanelKeys || selectedPanelKeys.size === 0) return
     context.fillStyle = highlightedRowFillStyle
     panels.forEach((panel, ii) => {

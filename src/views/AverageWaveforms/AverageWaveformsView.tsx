@@ -24,14 +24,14 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => a - b) })
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [data.averageWaveforms, unitIdSelectionDispatch])
 
     const plots: PGPlot[] = useMemo(() => data.averageWaveforms.map(aw => ({
         numericId: aw.unitId,
         key: `${aw.unitId}`,
         label: `Unit ${aw.unitId}`,
-        labelColor: colorForUnitId(aw.unitId),
+        labelColor: colorForUnitId(idToNum(aw.unitId)),
         clickHandler: plotClickHandlerGenerator(aw.unitId),
         props: {
             channelIds: aw.channelIds,
@@ -102,5 +102,19 @@ const subtractChannelMeans = (waveform: number[][]) => {
 }
 
 const computeMean = (ary: number[]) => ary.length > 0 ? mean(ary) : 0
+
+export const idToNum = (a: any): number => {
+    if (typeof(a) === 'number') return a
+    else if (typeof(a) === 'string') {
+        if (a.startsWith('#')) return idToNum(a.slice(1))
+        try {
+            return parseFloat(a)
+        }
+        catch {
+            return 0
+        }
+    }
+    else return 0
+}
 
 export default AverageWaveformsView

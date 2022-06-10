@@ -3,7 +3,7 @@ import { voidClickHandler } from 'contexts/RowSelection/RowSelectionFunctions';
 import React, { FunctionComponent, useMemo } from 'react';
 
 export type PGPlot = {
-    numericId: number,
+    numericId: number | string,
     key: string,
     label: string,
     labelColor: string,
@@ -14,17 +14,17 @@ export type PGPlot = {
 type Props = {
     plots: PGPlot[]
     plotComponent: React.ComponentType<any>
-    selectedPlotKeys?: Set<number>
+    selectedPlotKeys?: Set<number | string>
     numPlotsPerRow?: number
-    orderedPlotIds?: number[]
+    orderedPlotIds?: (number | string)[]
 }
 
 type PlotGridRowData = {
     rowStart: number,
     maxItems?: number,
-    selectedPlotKeys?: Set<number>
-    plotIds: number[],
-    plotsDict: {[key: number]: JSX.Element}
+    selectedPlotKeys?: Set<number | string>
+    plotIds: (number | string)[],
+    plotsDict: {[key: number | string]: JSX.Element}
 }
 const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => {
     const { rowStart, maxItems, plotIds, selectedPlotKeys, plotsDict } = props

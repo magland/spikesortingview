@@ -26,7 +26,7 @@ export const setSelectionExplicit = (s: RowSelection, a: RowSelectionAction): Ro
     }
 }
 
-export const allRowSelectionState = (s: {selectedRowIds: Set<number>, orderedRowIds: number[], visibleRowIds?: number[]}): RowSelectionState => {
+export const allRowSelectionState = (s: {selectedRowIds: Set<number | string>, orderedRowIds: (number | string)[], visibleRowIds?: (number | string)[]}): RowSelectionState => {
     if (s.selectedRowIds.size === 0) return 'none'
     if (s.selectedRowIds.size === s.orderedRowIds.length) return 'all'
     if (!s.visibleRowIds || s.visibleRowIds.length === 0 || s.selectedRowIds.size !== s.visibleRowIds.length) return 'partial'
@@ -40,7 +40,7 @@ export const toggleSelectedRow = (s: RowSelection, a: RowSelectionAction): RowSe
     s.selectedRowIds.has(a.targetRow) ? s.selectedRowIds.delete(a.targetRow) : s.selectedRowIds.add(a.targetRow)
     return {
         ...s,
-        selectedRowIds: new Set<number>(s.selectedRowIds), // shallow copy, to trigger rerender
+        selectedRowIds: new Set<number | string>(s.selectedRowIds), // shallow copy, to trigger rerender
         lastClickedId: a.targetRow
     }
 }
@@ -63,7 +63,7 @@ export const toggleSelectedRange = (s: RowSelection, a: RowSelectionAction): Row
     return {
         ...s,
         lastClickedId: targetRow, // TODO: Check with client: should a range toggle update the last-selected-row?
-        selectedRowIds: new Set<number>(selectedRowIds) // shallow copy to trigger rerender
+        selectedRowIds: new Set<number | string>(selectedRowIds) // shallow copy to trigger rerender
     }
 }
 
@@ -72,8 +72,8 @@ export const toggleSelectAll = (s: RowSelection): RowSelection => {
     const newSelection = selectionStatus === 'all'
                             ? new Set<number>()
                             : s.visibleRowIds && s.visibleRowIds.length > 0
-                                ? new Set<number>(s.visibleRowIds)
-                                : new Set<number>(s.orderedRowIds)
+                                ? new Set<number | string>(s.visibleRowIds)
+                                : new Set<number | string>(s.orderedRowIds)
     return {
         ...s,
         selectedRowIds: newSelection
@@ -81,14 +81,14 @@ export const toggleSelectAll = (s: RowSelection): RowSelection => {
 }
 
 export const getCheckboxClickHandlerGenerator = (reducer: React.Dispatch<RowSelectionAction>) => {
-    return (rowId: number) => (evt: React.MouseEvent) => { checkboxClick(rowId, reducer, evt) }
+    return (rowId: number | string) => (evt: React.MouseEvent) => { checkboxClick(rowId, reducer, evt) }
 }
 
 export const getPlotClickHandlerGenerator = (reducer: React.Dispatch<RowSelectionAction>) => {
-    return (rowId: number) => (evt: React.MouseEvent) => { plotElementClick(rowId, reducer, evt) }
+    return (rowId: number | string) => (evt: React.MouseEvent) => { plotElementClick(rowId, reducer, evt) }
 }
 
-export const checkboxClick = (rowId: number, reducer: React.Dispatch<RowSelectionAction>, evt: React.MouseEvent) => {
+export const checkboxClick = (rowId: number | string, reducer: React.Dispatch<RowSelectionAction>, evt: React.MouseEvent) => {
     const action = {
         type: evt.shiftKey ? TOGGLE_RANGE : TOGGLE_ROW,
         targetRow: rowId,
@@ -96,7 +96,7 @@ export const checkboxClick = (rowId: number, reducer: React.Dispatch<RowSelectio
     reducer(action)
 }
 
-export const plotElementClick = (rowId: number, reducer: React.Dispatch<RowSelectionAction>, evt: React.MouseEvent) => {
+export const plotElementClick = (rowId: number | string, reducer: React.Dispatch<RowSelectionAction>, evt: React.MouseEvent) => {
     const action = {
         type: evt.shiftKey ? TOGGLE_RANGE :
             evt.ctrlKey ? TOGGLE_ROW : UNIQUE_SELECT,

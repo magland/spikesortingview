@@ -2,24 +2,24 @@ import { SortingCuration } from "./SortingCurationContext"
 
 export interface AddUnitLabelCurationAction {
     type: 'ADD_UNIT_LABEL'
-    unitId: number | number[]
+    unitId: number | string | (number | string)[]
     label: string
 }
 
 export interface RemoveUnitLabelCurationAction {
     type: 'REMOVE_UNIT_LABEL'
-    unitId: number | number[]
+    unitId: number | string | (number | string)[]
     label: string
 }
 
 export interface MergeUnitsCurationAction {
     type: 'MERGE_UNITS'
-    unitIds: number[]
+    unitIds: (number | string)[]
 }
 
 export interface UnmergeUnitsCurationAction {
     type: 'UNMERGE_UNITS'
-    unitIds: number[]
+    unitIds: (number | string)[]
 }
 
 export interface SetCurationCurationAction {

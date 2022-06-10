@@ -48,7 +48,7 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     margins?: Margins
     panels: TimeScrollViewPanel<T>[]
     panelSpacing: number
-    selectedPanelKeys?: Set<number>
+    selectedPanelKeys?: Set<number | string>
     setSelectedPanelKeys?: (keys: string[]) => void // TODO: Update to current methods; at present nobody is actually using this
     highlightSpans?: HighlightIntervalSet[]
     optionalActionsAboveDefault?: ToolbarItem[]
@@ -381,7 +381,7 @@ export const useProjectedYAxisTicks = (ticks: TickSet, transform: Matrix) => {
     }, [ticks, transform])
 }
 
-const emptyPanelSelection = new Set<number>()
+const emptyPanelSelection = new Set<number | string>()
 
 // Unfortunately, you can't nest generic type declarations here: so while this is properly a
 // FunctionComponent<TimeScrollViewPanel<T>>, there just isn't a way to do that syntactically

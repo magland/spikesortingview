@@ -27,7 +27,7 @@ export const setVisibleRows = (s: RowSelection, a: RowSelectionAction): RowSelec
     }
 }
 
-export const getVisibleRowsOnSortUpdate = (s: RowSelection, newOrder: number[]) => {
+export const getVisibleRowsOnSortUpdate = (s: RowSelection, newOrder: (number | string)[]) => {
     const windowStart = (s.rowsPerPage || DEFAULT_ROWS_PER_PAGE) * ((s.page || 1) - 1)
     return (s.visibleRowIds && s.visibleRowIds.length > 0)
         ? newOrder.slice(windowStart, windowStart + (s.rowsPerPage || DEFAULT_ROWS_PER_PAGE))

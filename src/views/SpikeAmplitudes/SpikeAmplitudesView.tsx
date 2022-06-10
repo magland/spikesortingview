@@ -66,7 +66,7 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
 
 type ChildProps = {
     data: SpikeAmplitudesViewData
-    selectedUnitIds: Set<number>
+    selectedUnitIds: Set<number | string>
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number

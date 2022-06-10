@@ -152,7 +152,7 @@ const rectifyElements = (elements?: any[] | null): ToolbarElement[] => {
 const ViewToolbar: FunctionComponent<Props> = (props) => {
     const rectifiedControls = useMemo(() => rectifyElements(props.customActions), [props.customActions])
     const renderedControls = useMemo(() =>
-        rectifiedControls.map((e) => <ToolbarItem {...e} useHorizontalLayout={props.useHorizontalLayout} />),
+        rectifiedControls.map((e, ii) => <ToolbarItem key={ii} {...e} useHorizontalLayout={props.useHorizontalLayout} />),
         [rectifiedControls, props.useHorizontalLayout])
 
     // NOTE: It's the parent's responsibility to make sure the width/height/top properties are set in a way that makes sense

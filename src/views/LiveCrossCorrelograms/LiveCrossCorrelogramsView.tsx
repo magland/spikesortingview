@@ -1,6 +1,7 @@
 import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import { FunctionComponent, useMemo } from 'react';
+import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
 import LiveCrossCorrelogramPlot from './LiveCrossCorrelogramPlot';
@@ -47,7 +48,7 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
 
 type ChildProps = {
     data: LiveCrossCorrelogramsViewData
-    unitIds: Set<number>
+    unitIds: Set<number | string>
     width: number
     height: number
     listLengthScaler: number
@@ -66,7 +67,7 @@ const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, un
             unitIds.forEach(unitId2 => {
                 plots.push({
                     // unique id invariant to number of units selected
-                    numericId: unitId1 * listLengthScaler + unitId2,
+                    numericId: idToNum(unitId1) * listLengthScaler + idToNum(unitId2),
                     key: `${unitId1}-${unitId2}`,
                     label: `Unit ${unitId1}/${unitId2}`,
                     labelColor: 'black',
@@ -91,7 +92,7 @@ const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, un
     }
     // The IDs of the plots in this case do not correspond to the IDs of the units, so we must provide
     // our own list of sorted IDs.
-    const orderedIds = plots.map(p => p.numericId).sort((a, b) => a - b)
+    const orderedIds = plots.map(p => p.numericId).sort((a, b) => idToNum(a) - idToNum(b))
     return (
         <PlotGrid
             plots={plots}

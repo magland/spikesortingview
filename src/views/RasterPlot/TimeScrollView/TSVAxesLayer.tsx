@@ -10,7 +10,7 @@ export type TSVAxesLayerProps<T extends {[key: string]: any}> = {
     timeTicks: TimeTick[]
     yTickSet?: TickSet
     margins: {left: number, right: number, top: number, bottom: number}
-    selectedPanelKeys: Set<number>
+    selectedPanelKeys: Set<number | string>
     panelHeight: number
     perPanelOffset: number
     hideTimeAxis?: boolean

@@ -171,7 +171,7 @@ const MWCurationControl: FunctionComponent<Props & SizeMeProps> = ({ size }) => 
     )
 }
 
-const unitsAreInMergeGroups = (unitIds: number[], sortingCuration: SortingCuration) => {
+const unitsAreInMergeGroups = (unitIds: (number | string)[], sortingCuration: SortingCuration) => {
     const mg = sortingCuration.mergeGroups || []
     const all = mg.reduce((prev, g) => [...prev, ...g], []) // all units in merge groups
     for (let unitId of unitIds) {

@@ -2,7 +2,7 @@ import { RowSelectionAction } from "contexts/RowSelection/RowSelectionContext"
 import { SortingRule } from "contexts/RowSelection/RowSelectionTypes"
 
 export interface SortableTableWidgetRow {
-    rowIdNumeric: number
+    rowIdNumeric: number | string
     rowId: string
     data: {[key: string]: {
         value: any,
@@ -20,16 +20,16 @@ export interface SortableTableWidgetColumn {
     calculating?: boolean
 }
 
-export type RowsDict = Map<number, SortableTableWidgetRow>
+export type RowsDict = Map<number | string, SortableTableWidgetRow>
 export type ColsDict = Map<string, SortableTableWidgetColumn>
 
 export interface SortableTableProps {
-    selectedRowIds: Set<number>
+    selectedRowIds: Set<number | string>
     selectionDispatch: React.Dispatch<RowSelectionAction>
     columns: SortableTableWidgetColumn[]
     rows: RowsDict
-    orderedRowIds: number[]
-    visibleRowIds?: number[]
+    orderedRowIds: (number | string)[]
+    visibleRowIds?: (number | string)[]
     primarySortRule?: SortingRule
     height?: number
     selectionDisabled?: boolean

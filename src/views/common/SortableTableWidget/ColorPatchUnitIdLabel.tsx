@@ -24,7 +24,7 @@ const ColorPatchUnitIdLabel: FunctionComponent<ColorPatchUnitLabelProps> = (prop
     </span>
 }
 
-export const mergeGroupForUnitId = (unitId: number, curation?: SortingCuration | undefined) => {
+export const mergeGroupForUnitId = (unitId: number | string, curation?: SortingCuration | undefined) => {
     const mergeGroups = (curation || {}).mergeGroups || []
     return mergeGroups.filter(g => (g.includes(unitId)))[0] || null
 }

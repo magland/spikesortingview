@@ -27,7 +27,7 @@ type PanelProps = {
 }
 
 const panelSpacing = 4
-const emptyPanelSelection = new Set<number>()
+const emptyPanelSelection = new Set<number | string>()
 
 const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()

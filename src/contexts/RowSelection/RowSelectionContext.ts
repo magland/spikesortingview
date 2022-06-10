@@ -5,21 +5,21 @@ import { SortingCallback, SortingRule } from "./RowSelectionTypes"
 import { setVisibleRows } from "./RowSelectionVisibilityFunctions"
 
 export type RowSelection = {
-    selectedRowIds: Set<number>,
-    orderedRowIds: number[]
-    lastClickedId?: number
+    selectedRowIds: Set<number | string>,
+    orderedRowIds: (number | string)[]
+    lastClickedId?: number | string
     page?: number
     rowsPerPage?: number
-    visibleRowIds?: number[]
+    visibleRowIds?: (number | string)[]
     sortRules?: SortingRule[]
 }
 
 export type RowSelectionAction = {
     type: RowSelectionActionType
-    incomingSelectedRowIds?: number[]
-    targetRow?: number
-    newRowOrder?: number[]
-    newVisibleRowIds?: number[]
+    incomingSelectedRowIds?: (number | string)[]
+    targetRow?: number | string
+    newRowOrder?: (number | string)[]
+    newVisibleRowIds?: (number | string)[]
     pageNumber?: number
     rowsPerPage?: number
     newSortField?: string
@@ -54,7 +54,7 @@ export const COPY_STATE: RowSelectionActionType = 'COPY_STATE'
 
 
 export const defaultRowSelection = {
-    selectedRowIds: new Set<number>(),
+    selectedRowIds: new Set<number | string>(),
     orderedRowIds: [],
 }
 
@@ -65,7 +65,7 @@ export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): Row
             if (s.orderedRowIds.length > 0) return s
             if (a.newRowOrder && a.newRowOrder.length > 1) {
                 return {
-                    selectedRowIds: new Set<number>(),
+                    selectedRowIds: new Set<number | string>(),
                     orderedRowIds: a.newRowOrder
                 }
             }
@@ -82,7 +82,7 @@ export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): Row
         case TOGGLE_SELECT_ALL:
             return toggleSelectAll(s)
         case DESELECT_ALL:
-            return { ...s, selectedRowIds: new Set<number>() }
+            return { ...s, selectedRowIds: new Set<number | string>() }
         case SET_ROW_ORDER:
             return resetRowOrder(s, a)
         case UPDATE_SORT_FIELDS:

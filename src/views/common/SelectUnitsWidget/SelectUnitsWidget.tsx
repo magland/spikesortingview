@@ -2,19 +2,20 @@ import { INITIALIZE_ROWS, RowSelectionAction } from 'contexts/RowSelection/RowSe
 import { SortingRule } from 'contexts/RowSelection/RowSelectionTypes';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
+import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'views/common/SortableTableWidget/ColorPatchUnitIdLabel';
 import SortableTableWidget from 'views/common/SortableTableWidget/SortableTableWidget';
 import { SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
 
 
 export type SelectUnitsWidgetProps = {
-    unitIds: number[]
-    selectedUnitIds: Set<number>,
-    orderedRowIds: number[],
-    visibleRowIds?: number[],
+    unitIds: (number | string)[]
+    selectedUnitIds: Set<number | string>,
+    orderedRowIds: (number | string)[],
+    visibleRowIds?: (number | string)[],
     primarySortRule?: SortingRule,
     unitIdSelectionDispatch: (action: RowSelectionAction) => void,
-    checkboxClickHandlerGenerator: (rowId: number) => (evt: React.MouseEvent) => void
+    checkboxClickHandlerGenerator: (rowId: number | string) => (evt: React.MouseEvent) => void
     selectionDisabled?: boolean
 }
 
@@ -52,11 +53,11 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
     ), [unitIds, sortingCuration, checkboxClickHandlerGenerator])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => a - b) })
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
-        const draft = new Map<number, SortableTableWidgetRow>()
+        const draft = new Map<number | string, SortableTableWidgetRow>()
         rows.forEach(r => draft.set(r.rowIdNumeric, r))
         return draft
     }, [rows])

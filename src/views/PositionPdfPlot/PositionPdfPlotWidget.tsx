@@ -63,7 +63,7 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
     }
 }
 
-const emptyPanelSelection = new Set<number>()
+const emptyPanelSelection = new Set<number | string>()
 
 const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, linearPositions, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)

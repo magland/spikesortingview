@@ -4,7 +4,7 @@ import SortingCurationAction from "./SortingCurationAction"
 export type SortingCuration = {
     labelsByUnit?: {[key: string]: string[]}
     labelChoices?: string[]
-    mergeGroups?: (number[])[]
+    mergeGroups?: ((number | string)[])[]
     isClosed?: boolean
 }
 
@@ -24,7 +24,7 @@ export const sortingCurationReducer = (state: SortingCuration, action: SortingCu
         return { ...state, isClosed: false }
     }
     else if (action.type === 'ADD_UNIT_LABEL') {
-        const uids: number[] = typeof(action.unitId) === 'object' ? action.unitId : [action.unitId]
+        const uids: (number | string)[] = typeof(action.unitId) === 'object' ? action.unitId : [action.unitId]
         const newLabelsByUnit = {...(state.labelsByUnit || {})}
         let somethingChanged = false
         for (let uid of uids) {
@@ -43,7 +43,7 @@ export const sortingCurationReducer = (state: SortingCuration, action: SortingCu
         else return state
     }
     else if (action.type === 'REMOVE_UNIT_LABEL') {
-        const uids: number[] = typeof(action.unitId) === 'object' ? action.unitId : [action.unitId]
+        const uids: (number | string)[] = typeof(action.unitId) === 'object' ? action.unitId : [action.unitId]
         const newLabelsByUnit = {...(state.labelsByUnit || {})}
         let somethingChanged = false
         for (let uid of uids) {
@@ -86,14 +86,14 @@ export const useSortingCuration = () => {
     return c
 }
 
-const intersection = (a: number[], b: number[]) => (
+const intersection = (a: (number | string)[], b: (number | string)[]) => (
     a.filter(x => (b.includes(x)))
 )
-const union = (a: number[], b: number[]) => (
+const union = (a: (number | string)[], b: (number | string)[]) => (
     [...a, ...b.filter(x => (!a.includes(x)))].sort()
 )
 
-const simplifyMergeGroups = (mg: (number[])[]): (number[])[] => {
+const simplifyMergeGroups = (mg: ((number | string)[])[]): ((number | string)[])[] => {
     const newMergeGroups = mg.map(g => [...g]) // make a copy
     let somethingChanged = true
     while (somethingChanged) {

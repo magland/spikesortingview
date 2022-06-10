@@ -1,17 +1,17 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isEqualTo, isNumber, isOneOf, isString, optional } from "figurl/viewInterface/validateObject"
 
 type AverageWaveformData = {
-    unitId: number
-    channelIds: number[]
+    unitId: number | string
+    channelIds: (number | string)[]
     waveform: number[][]
     waveformStdDev?: number[][]
 }
 
 export const isAverageWaveformData = (x: any): x is AverageWaveformData => {
     return validateObject(x, {
-        unitId: isNumber,
-        channelIds: isArrayOf(isNumber),
+        unitId: isOneOf([isNumber, isString]),
+        channelIds: isArrayOf(isOneOf([isNumber, isString])),
         waveform: () => (true),
         waveformStdDev: optional(() => (true))
     }, {allowAdditionalFields: true})

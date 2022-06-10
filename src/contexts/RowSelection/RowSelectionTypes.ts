@@ -3,4 +3,4 @@ export type SortingRule = {
     sortAscending: boolean
 }
 
-export type SortingCallback = (rules: SortingRule[]) => number[]
+export type SortingCallback = (rules: SortingRule[]) => (number | string)[]
