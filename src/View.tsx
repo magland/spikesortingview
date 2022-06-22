@@ -13,6 +13,7 @@ import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
 import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import RawTracesPlotView from 'views/RawTracesPlot/RawTracesPlotView';
+import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
 import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
@@ -86,6 +87,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'TrackAnimation') {
         return <TrackPositionAnimationView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'SortingLayout') {
+        return <SortingLayoutView data={data} width={width} height={height} />
     }
     else {
         return <div>Unsupported view data</div>

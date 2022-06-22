@@ -1,20 +1,24 @@
+# 6/22/22
+# https://figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://7c9145f98635b6cf5a4e0fc55b20b9849d8902cc&label=test_autocorrelograms
+
 import sortingview as sv
-import spikeextractors as se
+import spikeinterface as si
+import spikeinterface.extractors as se
 import figurl as fig
 from helpers.compute_correlogram_data import compute_correlogram_data
 
 def main():
-    recording, sorting = se.example_datasets.toy_example(K=12, duration=300, seed=0)
+    recording, sorting = se.toy_example(num_units=12, duration=300, seed=0)
 
-    R = sv.LabboxEphysRecordingExtractor.from_memory(recording, serialize=True, serialize_dtype='float32')
-    S = sv.LabboxEphysSortingExtractor.from_memory(sorting, serialize=True)
+    R = sv.copy_recording_extractor(recording, serialize_dtype='float32')
+    S = sv.copy_sorting_extractor(sorting)
 
-    data = test_autocorrelograms(recording=recording, sorting=sorting)
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-4', data=data)
+    data = test_autocorrelograms(recording=R, sorting=S)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
     url = F.url(label='test_autocorrelograms')
     print(url)
 
-def test_autocorrelograms(*, recording: sv.LabboxEphysRecordingExtractor, sorting: sv.LabboxEphysSortingExtractor):
+def test_autocorrelograms(*, recording: si.BaseRecording, sorting: si.BaseSorting):
     autocorrelograms = []
     for unit_id in sorting.get_unit_ids():
         a = compute_correlogram_data(sorting=sorting, unit_id1=unit_id, unit_id2=None, window_size_msec=50, bin_size_msec=1)

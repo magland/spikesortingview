@@ -1,22 +1,25 @@
+# 6/22/22
+# https://www.figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://594b8d6f70c7a054fa3b7a295ffba40fb93f31b1&label=test_raster_plot
+
 import numpy as np
-import kachery_client as kc
 import sortingview as sv
-import spikeextractors as se
+import spikeinterface as si
+import spikeinterface.extractors as se
 import figurl as fig
 
 def main():
-    recording, sorting = se.example_datasets.toy_example(K=12, duration=300, seed=0)
+    recording, sorting = se.toy_example(num_units=12, duration=300, seed=0)
 
-    R = sv.LabboxEphysRecordingExtractor.from_memory(recording, serialize=True, serialize_dtype='float32')
-    S = sv.LabboxEphysSortingExtractor.from_memory(sorting, serialize=True)
+    R = sv.copy_recording_extractor(recording, serialize_dtype='float32')
+    S = sv.copy_sorting_extractor(sorting)
 
     data = test_raster_plot(recording=R, sorting=S)
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-4', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
     url = F.url(label='test_raster_plot')
     print(url)
 
-def test_raster_plot(*, recording: sv.LabboxEphysRecordingExtractor, sorting: sv.LabboxEphysSortingExtractor):
+def test_raster_plot(*, recording: si.BaseRecording, sorting: si.BaseSorting):
     plots = []
     for unit_id in sorting.get_unit_ids():
         spike_times_sec = np.array(sorting.get_unit_spike_train(unit_id=unit_id)) / sorting.get_sampling_frequency()
