@@ -16,7 +16,7 @@ type ItemPosition = {
     height: number
 }
 
-const computeSizes = (
+export const computeSizes = (
     totalSize: number,
     itemCount: number,
     itemProperties: {
