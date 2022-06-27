@@ -32,6 +32,7 @@ const panelSpacing = 4
 
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {selectedUnitIds, orderedRowIds, visibleRowIds, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
+    console.log('SpikeAmplitudesView', data)
 
     const allUnitIds = useMemo(() => (
         data.units.map(u => (u.unitId))

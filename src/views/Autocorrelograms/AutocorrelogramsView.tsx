@@ -12,6 +12,7 @@ type Props = {
 }
 
 const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) => {
+    console.log('AutocorrelogramsView', data)
     const {selectedUnitIds, orderedRowIds, plotClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
 
     useEffect(() => {

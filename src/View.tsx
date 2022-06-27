@@ -92,7 +92,8 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <SortingLayoutView data={data} width={width} height={height} />
     }
     else {
-        return <div>Unsupported view data</div>
+        console.warn('Unsupported view data', data)
+        return <div>Unsupported view data: {data['type']}</div>
     }
 }
 
