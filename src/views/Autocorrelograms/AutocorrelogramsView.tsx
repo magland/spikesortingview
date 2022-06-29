@@ -34,7 +34,7 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
             height: 120
         }
     }))), [data.autocorrelograms, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds])
-    const bottomToolbarHeight = 35
+    const bottomToolbarHeight = 30
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
         height: height - bottomToolbarHeight,
@@ -51,7 +51,7 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
                     orderedPlotIds={orderedRowIds}
                 />
             </div>
-            <div style={{position: 'absolute', top: height - bottomToolbarHeight}}>
+            <div style={{position: 'absolute', top: height - bottomToolbarHeight, height: bottomToolbarHeight, overflow: 'hidden'}}>
                 <UnitsTableBottomToolbar
                     options={toolbarOptions}
                     setOptions={setToolbarOptions}

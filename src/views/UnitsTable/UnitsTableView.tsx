@@ -104,11 +104,11 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
         return draft
     }, [rows])
 
-    const toolbarHeight = 35
+    const bottomToolbarHeight = 30
 
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
-        height: height - toolbarHeight,
+        height: height - bottomToolbarHeight,
         top: 0,
         position: 'relative',
         overflowY: 'auto'
@@ -128,7 +128,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                     hideSelectionColumn={toolbarOptions.onlyShowSelected}
                 />
             </div>
-            <div style={{position: 'absolute', top: height - toolbarHeight, height: toolbarHeight}}>
+            <div style={{position: 'absolute', top: height - bottomToolbarHeight, height: bottomToolbarHeight, overflow: 'hidden'}}>
                 <UnitsTableBottomToolbar
                     options={toolbarOptions}
                     setOptions={setToolbarOptions}

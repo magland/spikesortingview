@@ -71,7 +71,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         return actions
     }, [waveformsMode, _handleWaveformToggle, ampScaleFactor])
     
-    const bottomToolbarHeight = 35
+    const bottomToolbarHeight = 30
 
     const TOOLBAR_WIDTH = 36 // hard-coded for now
     return (
@@ -96,7 +96,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
                     />
                 </VerticalScrollView>
             </Splitter>
-            <div style={{position: 'absolute', top: height - bottomToolbarHeight}}>
+            <div style={{position: 'absolute', top: height - bottomToolbarHeight, height: bottomToolbarHeight, overflow: 'hidden'}}>
                 <UnitsTableBottomToolbar
                     options={toolbarOptions}
                     setOptions={setToolbarOptions}

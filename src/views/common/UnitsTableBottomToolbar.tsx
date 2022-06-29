@@ -18,7 +18,7 @@ const UnitsTableBottomToolbar: FunctionComponent<Props> = ({options, setOptions}
                 checked={options.onlyShowSelected}
                 onClick={() => {setOptions({...options, onlyShowSelected: !options.onlyShowSelected})}}
             />
-            <span style={{position: 'relative', top: 2}}>only show selected</span>
+            <span style={{position: 'relative', top: 2, overflow: 'hidden'}}>only show selected</span>
         </div>
     )
 }
