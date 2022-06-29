@@ -15,6 +15,7 @@ type HeaderRowProps = {
     rowSorterCallback: RowSorterCallback
     selectionDispatch: React.Dispatch<RowSelectionAction>
     selectionDisabled?: boolean
+    hideSelectionColumn?: boolean
 }
 
 type ColumnHeaderInfo = {
@@ -75,7 +76,7 @@ const mapColumnsToHeaderInfo = (columns: SortableTableWidgetColumn[], primarySor
 }
 
 const SortableTableWidgetHeaderRow: FunctionComponent<HeaderRowProps> = (props) => {
-    const { columns, selectionDispatch, primarySortRule, allRowSelectionStatus, rowSorterCallback, selectionDisabled } = props
+    const { columns, selectionDispatch, primarySortRule, allRowSelectionStatus, rowSorterCallback, selectionDisabled, hideSelectionColumn } = props
     const columnsMap = useMemo(() => getColumnNameDict(columns), [columns])
     const columnHeaders = useMemo(() => mapColumnsToHeaderInfo(columns, primarySortRule), [columns, primarySortRule])
 
@@ -126,15 +127,17 @@ const SortableTableWidgetHeaderRow: FunctionComponent<HeaderRowProps> = (props) 
         <TableHead>
             <TableRow>
                 {
-                    <TableCell key="_checkbox" width="30px">
-                        <SortableTableWidgetCheckbox 
-                            rowId={'all'}
-                            selected={allRowSelectionStatus === 'all'}
-                            onClick={toggleSelectAllCallback}
-                            isIndeterminate={allRowSelectionStatus === 'partial'}
-                            isDisabled={selectionDisabled}
-                        />
-                    </TableCell>
+                    !hideSelectionColumn && (
+                        <TableCell key="_checkbox" width="30px">
+                            <SortableTableWidgetCheckbox 
+                                rowId={'all'}
+                                selected={allRowSelectionStatus === 'all'}
+                                onClick={toggleSelectAllCallback}
+                                isIndeterminate={allRowSelectionStatus === 'partial'}
+                                isDisabled={selectionDisabled}
+                            />
+                        </TableCell>
+                    )
                 }
                 {_renderedHeaders}
             </TableRow>

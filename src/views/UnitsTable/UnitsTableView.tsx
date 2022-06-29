@@ -1,7 +1,8 @@
 import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
-import React, { FunctionComponent, useEffect, useMemo } from 'react';
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { SortableTableWidgetColumn, SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
+import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from '../common/SortableTableWidget/ColorPatchUnitIdLabel';
 import SortableTableWidget from '../common/SortableTableWidget/SortableTableWidget';
 import { UnitsTableViewData } from './UnitsTableViewData';
@@ -13,8 +14,21 @@ type Props = {
 }
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
+    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(defaultUnitsTableBottomToolbarOptions)
     const {selectedUnitIds, orderedRowIds, visibleRowIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
     const {sortingCuration} = useSortingCuration()
+
+    const visibleRowIds2 = useMemo(() => (
+        toolbarOptions.onlyShowSelected ? (
+            visibleRowIds ? (
+                visibleRowIds.filter(id => (selectedUnitIds.has(id)))
+            ) : (
+                [...selectedUnitIds]
+            )
+        ) : (
+            visibleRowIds
+        )
+    ), [visibleRowIds, selectedUnitIds, toolbarOptions.onlyShowSelected])
 
     const columns = useMemo(() => {
         const ret: SortableTableWidgetColumn[] = []
@@ -75,10 +89,10 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 rowId: `${r.unitId}`,
                 rowIdNumeric: r.unitId,
                 data: rowData,
-                checkboxFn: checkboxClickHandlerGenerator(r.unitId)
+                checkboxFn: !toolbarOptions.onlyShowSelected ? checkboxClickHandlerGenerator(r.unitId) : undefined
             }
         })
-    ), [data.rows, data.columns, sortingCuration, checkboxClickHandlerGenerator])
+    ), [data.rows, data.columns, sortingCuration, checkboxClickHandlerGenerator, toolbarOptions.onlyShowSelected])
 
     useEffect(() => {
         unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => a - b) })
@@ -90,24 +104,36 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
         return draft
     }, [rows])
 
+    const toolbarHeight = 35
+
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
-        height,
+        height: height - toolbarHeight,
+        top: 0,
         position: 'relative',
         overflowY: 'auto'
     }), [width, height])
 
     return (
-        <div style={divStyle}>
-            <SortableTableWidget
-                columns={columns}
-                rows={rowMap}
-                orderedRowIds={orderedRowIds}
-                visibleRowIds={visibleRowIds}
-                selectedRowIds={selectedUnitIds}
-                selectionDispatch={unitIdSelectionDispatch}
-                primarySortRule={primarySortRule}
-            />
+        <div>
+            <div style={divStyle}>
+                <SortableTableWidget
+                    columns={columns}
+                    rows={rowMap}
+                    orderedRowIds={orderedRowIds}
+                    visibleRowIds={visibleRowIds2}
+                    selectedRowIds={selectedUnitIds}
+                    selectionDispatch={unitIdSelectionDispatch}
+                    primarySortRule={primarySortRule}
+                    hideSelectionColumn={toolbarOptions.onlyShowSelected}
+                />
+            </div>
+            <div style={{position: 'absolute', top: height - toolbarHeight, height: toolbarHeight}}>
+                <UnitsTableBottomToolbar
+                    options={toolbarOptions}
+                    setOptions={setToolbarOptions}
+                />
+            </div>
         </div>
     )
 }

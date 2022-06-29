@@ -33,4 +33,5 @@ export interface SortableTableProps {
     primarySortRule?: SortingRule
     height?: number
     selectionDisabled?: boolean
+    hideSelectionColumn?: boolean
 }

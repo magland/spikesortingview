@@ -6,6 +6,7 @@ import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } f
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
 import { ToolbarItem } from 'views/common/Toolbars';
+import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
 import AverageWaveformPlot from './AverageWaveformPlot';
@@ -18,6 +19,7 @@ type Props = {
 }
 
 const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) => {
+    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(defaultUnitsTableBottomToolbarOptions)
     const {selectedUnitIds, orderedRowIds, plotClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
 
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
@@ -27,12 +29,12 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [data.averageWaveforms, unitIdSelectionDispatch])
 
-    const plots: PGPlot[] = useMemo(() => data.averageWaveforms.map(aw => ({
+    const plots: PGPlot[] = useMemo(() => data.averageWaveforms.filter(a => (toolbarOptions.onlyShowSelected ? (selectedUnitIds.has(a.unitId)) : true)).map(aw => ({
         numericId: aw.unitId,
         key: `${aw.unitId}`,
         label: `Unit ${aw.unitId}`,
         labelColor: colorForUnitId(idToNum(aw.unitId)),
-        clickHandler: plotClickHandlerGenerator(aw.unitId),
+        clickHandler: !toolbarOptions.onlyShowSelected ? plotClickHandlerGenerator(aw.unitId) : undefined,
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
@@ -45,7 +47,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             width: 120,
             height: 120
         }
-    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor, plotClickHandlerGenerator])
+    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds])
 
     const _handleWaveformToggle = useCallback(() => {
         setWaveformsMode(m => (m === 'geom' ? 'vertical' : 'geom'))
@@ -69,28 +71,38 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         return actions
     }, [waveformsMode, _handleWaveformToggle, ampScaleFactor])
     
+    const bottomToolbarHeight = 35
+
     const TOOLBAR_WIDTH = 36 // hard-coded for now
     return (
-        <Splitter
-            width={width}
-            height={height}
-            initialPosition={TOOLBAR_WIDTH}
-            adjustable={false}
-        >
-            <ViewToolbar
-                width={TOOLBAR_WIDTH}
-                height={height}
-                customActions={scalingActions}
-            />
-            <VerticalScrollView width={0} height={0}>
-                <PlotGrid
-                    plots={plots}
-                    plotComponent={AverageWaveformPlot}
-                    selectedPlotKeys={selectedUnitIds}
-                    orderedPlotIds={orderedRowIds}
+        <div>
+            <Splitter
+                width={width}
+                height={height - bottomToolbarHeight}
+                initialPosition={TOOLBAR_WIDTH}
+                adjustable={false}
+            >
+                <ViewToolbar
+                    width={TOOLBAR_WIDTH}
+                    height={height}
+                    customActions={scalingActions}
                 />
-            </VerticalScrollView>
-        </Splitter>
+                <VerticalScrollView width={0} height={0}>
+                    <PlotGrid
+                        plots={plots}
+                        plotComponent={AverageWaveformPlot}
+                        selectedPlotKeys={!toolbarOptions.onlyShowSelected ? selectedUnitIds : undefined}
+                        orderedPlotIds={orderedRowIds}
+                    />
+                </VerticalScrollView>
+            </Splitter>
+            <div style={{position: 'absolute', top: height - bottomToolbarHeight}}>
+                <UnitsTableBottomToolbar
+                    options={toolbarOptions}
+                    setOptions={setToolbarOptions}
+                />
+            </div>
+        </div>
     )
 }
 

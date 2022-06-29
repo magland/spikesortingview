@@ -20,6 +20,7 @@ export const SortableTableWidgetCheckbox: FunctionComponent<CheckboxProps> = (pr
             className={'SortableTableCheckbox'}
             title={`${selected ? 'Deselect' : 'Select'} ${rowId}` }
             disabled={isDisabled}
+            size="small"
         />
     )
 }

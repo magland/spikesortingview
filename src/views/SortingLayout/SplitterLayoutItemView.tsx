@@ -50,9 +50,10 @@ const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, wi
             initialPosition={initialSplitterPosition}
         >
             {
-                items.map((item) => {
+                items.map((item, ii) => {
                     return (
                         <LayoutItemView
+                            key={ii}
                             layoutItem={item}
                             views={views}
                             width={0} // filled in by splitter
