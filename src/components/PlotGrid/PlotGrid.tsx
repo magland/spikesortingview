@@ -32,7 +32,7 @@ const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => 
     const idsThisRow = plotIds.slice(rowStart, rowStart + rowEnd)
     return <Grid key={rowStart} container>
             {
-                idsThisRow.map(id => {
+                idsThisRow.filter(id => (plotsDict[id])).map(id => {
                     const className = `plotWrapperStyle plot${selectedPlotKeys?.has(id) ? 'S' : 'Uns'}electedStyle`
                     return (
                         <Grid key={id} item>
