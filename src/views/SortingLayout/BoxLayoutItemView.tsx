@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo } from "react"
+import React, { FunctionComponent, useMemo } from "react"
 import LayoutItemView from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 
@@ -17,7 +17,7 @@ type ItemPosition = {
 }
 
 export const computeSizes = (
-    totalSize: number,
+    totalSize: number | undefined,  // undefined means we're using a scrollbar
     itemCount: number,
     itemProperties: {
         minSize?: number, maxSize?: number, stretch?: number
@@ -27,33 +27,35 @@ export const computeSizes = (
         itemProperties.push({})
     }
     let ret: number[] = []
-    let remainingSize = totalSize
+    let remainingSize = totalSize || 0
     for (let x of itemProperties) {
         ret.push(x.minSize || 0)
         remainingSize -= x.minSize || 0
     }
-    while (remainingSize > 1e-3) {
-        let totalStretch = 0
-        for (let x of itemProperties) {
-            totalStretch += x.stretch ? x.stretch : 1
-        }
-        if (totalStretch === 0) break
-        const remainingSize0 = remainingSize
-        let somethingChanged = false
-        for (let i = 0; i < itemProperties.length; i++) {
-            const s = ret[i]
-            const str = itemProperties[i].stretch
-            let newS = s + remainingSize0 * (str ? str : 1) / totalStretch
-            if (itemProperties[i].maxSize !== undefined) {
-                newS = Math.min(newS, itemProperties[i].maxSize || 0)
+    if (totalSize !== undefined) {
+        while (remainingSize > 1e-3) {
+            let totalStretch = 0
+            for (let x of itemProperties) {
+                totalStretch += x.stretch ? x.stretch : 1
             }
-            if (newS > s) {
-                ret[i] = newS
-                remainingSize -= (newS - s)
-                somethingChanged = true
+            if (totalStretch === 0) break
+            const remainingSize0 = remainingSize
+            let somethingChanged = false
+            for (let i = 0; i < itemProperties.length; i++) {
+                const s = ret[i]
+                const str = itemProperties[i].stretch
+                let newS = s + remainingSize0 * (str ? str : 1) / totalStretch
+                if (itemProperties[i].maxSize !== undefined) {
+                    newS = Math.min(newS, itemProperties[i].maxSize || 0)
+                }
+                if (newS > s) {
+                    ret[i] = newS
+                    remainingSize -= (newS - s)
+                    somethingChanged = true
+                }
             }
+            if (!somethingChanged) break
         }
-        if (!somethingChanged) break
     }
     return ret
 }
@@ -63,11 +65,11 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, 
     if (layoutItem.type !== 'Box') {
         throw Error('Unexpected')
     }
-    const {direction, items, itemProperties} = layoutItem
+    const {direction, scrollbar, items, itemProperties} = layoutItem
     const itemPositions: ItemPosition[] = useMemo(() => {
         if (direction === 'horizontal') {
             const ret: ItemPosition[] = []
-            const itemWidths = computeSizes(width, items.length, itemProperties || [])
+            const itemWidths = computeSizes(!scrollbar ? width : undefined, items.length, itemProperties || [])
             let x = 0
             for (let i=0; i<items.length; i++) {
                 ret.push({
@@ -82,7 +84,7 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, 
         }
         else {
             const ret: ItemPosition[] = []
-            const itemHeights = computeSizes(height, items.length, itemProperties || [])
+            const itemHeights = computeSizes(!scrollbar ? height : undefined, items.length, itemProperties || [])
             let y = 0
             for (let i=0; i<items.length; i++) {
                 ret.push({
@@ -95,10 +97,34 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, 
             }
             return ret
         }
-    }, [direction, items, width, height, itemProperties])
+    }, [direction, items, width, height, itemProperties, scrollbar])
+
+    const divStyle: React.CSSProperties = useMemo(() => {
+        const ret: React.CSSProperties = {
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width,
+            height
+        }
+        if (scrollbar) {
+            if (direction === 'horizontal') {
+                ret.overflowX = 'auto'
+                ret.overflowY = 'hidden'
+            }
+            else if (direction === 'vertical') {
+                ret.overflowY = 'auto'
+                ret.overflowX = 'hidden'
+            }
+        }
+        else {
+            ret.overflow = 'hidden'
+        }
+        return ret
+    }, [scrollbar, width, height, direction])
 
     return (
-        <div style={{position: 'absolute', left: 0, top: 0, width, height}}>
+        <div style={divStyle}>
             {
                 items.map((item, i) => {
                     const p = itemPositions[i]

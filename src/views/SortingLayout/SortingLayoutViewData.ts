@@ -1,10 +1,11 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber, isOneOf, optional } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, optional } from "figurl/viewInterface/validateObject"
 import { isString } from "vega"
 
 export type LayoutItem = {
     type: 'Box'
     direction: 'horizontal' | 'vertical'
+    scrollbar?: boolean
     items: LayoutItem[]
     itemProperties?: {
         minSize?: number
@@ -30,6 +31,7 @@ const isLayoutItem = (x: any): x is LayoutItem => {
         (y: any) => (validateObject(y, {
             type: isEqualTo('Box'),
             direction: isOneOf(['horizontal', 'vertical'].map(s => (isEqualTo(s)))),
+            scrollbar: optional(isBoolean),
             items: isArrayOf(isLayoutItem),
             itemProperties: optional(isArrayOf(z => (validateObject(z, {
                 minSize: optional(isNumber),
