@@ -53,6 +53,8 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
     const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
 
+    const maxPointsPerUnit = 3000
+
     const pixelPanels = useMemo(() => (data.plots.sort((p1, p2) => (p1.unitId - p2.unitId)).map(plot => {
         const filteredSpikes = plot.spikeTimesSec.filter(t => (visibleTimeStartSeconds !== undefined) && (visibleTimeStartSeconds <= t) && (visibleTimeEndSeconds !== undefined) && (t <= visibleTimeEndSeconds))
         const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
@@ -60,13 +62,14 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
         // augmentedSpikesMatrix is a 2 x n matrix; each col vector is [time, 1]. The multiplication below gives an
         // n x 1 matrix (n = number of spikes). valueOf() yields the data as a simple array.
         const pixelSpikes = multiply(timeToPixelMatrix, augmentedSpikesMatrix).valueOf() as number[]
+        const pixelSpikes2 = subsampleIfNeeded(pixelSpikes, maxPointsPerUnit)
 
         return {
             key: `${plot.unitId}`,
             label: `${plot.unitId}`,
             props: {
                 color: colorForUnitId(plot.unitId),
-                pixelSpikes: pixelSpikes
+                pixelSpikes: pixelSpikes2
             },
             paint: paintPanel
         }
@@ -87,6 +90,19 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
             height={height}
         />
     )
+}
+
+const subsampleIfNeeded = (x: number[], maxNum: number) => {
+    if (x.length <= maxNum) {
+        return x
+    }
+    const ret: number[] = []
+    const incr = x.length / maxNum
+    for (let i = 0; i < maxNum; i ++) {
+        const j = Math.floor(i * incr)
+        ret.push(x[j])
+    }
+    return ret
 }
 
 export default RasterPlotView

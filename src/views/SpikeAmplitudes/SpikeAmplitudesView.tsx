@@ -107,6 +107,7 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
+    const maxNumPointsPerUnit = 5000
 
     const series = useMemo(() => (
         data.units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => {
@@ -121,10 +122,11 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
 
             const filteredTimes = unit.spikeTimesSec.slice(bottomIndex, topIndex)
             const filteredAmplitudes = unit.spikeAmplitudes.slice(bottomIndex, topIndex)
+            const {times, amplitudes} = subsampleTimesAmplitudesIfNeeded(filteredTimes, filteredAmplitudes, maxNumPointsPerUnit)
             return {
                 unitId: unit.unitId,
-                times: filteredTimes,
-                amplitudes: filteredAmplitudes
+                times,
+                amplitudes
             }
         })
     ), [data.units, visibleTimeStartSeconds, visibleTimeEndSeconds, selectedUnitIds])
@@ -186,6 +188,21 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
         <div>You must select one or more units.</div>
     )
     return content
+}
+
+const subsampleTimesAmplitudesIfNeeded = (x: number[], y: number[], maxNum: number) => {
+    if (x.length <= maxNum) {
+        return {times: x, amplitudes: y}
+    }
+    const times: number[] = []
+    const amplitudes: number[] = []
+    const incr = x.length / maxNum
+    for (let i = 0; i < maxNum; i ++) {
+        const j = Math.floor(i * incr)
+        times.push(x[j])
+        amplitudes.push(y[j])
+    }
+    return {times, amplitudes}
 }
 
 const min = (a: number[]) => {

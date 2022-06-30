@@ -59,7 +59,7 @@ const SortableTableWidget: FunctionComponent<SortableTableProps> = (props) => {
                 <SortableTableWidgetContentRow
                     key={row.rowId}
                     rowId={row.rowId}
-                    selected={selectedRowIds.has(Number(row.rowId))}
+                    selected={selectedRowIds.has(row.rowId)}
                     onClick={!hideSelectionColumn ? (row.checkboxFn || voidClickHandler) : undefined}
                     isDisabled={selectionDisabled || false}
                     contentRepository={_contentFieldsByRow}
