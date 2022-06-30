@@ -6,6 +6,12 @@ import { getSpikeAmplitudeNormalizationFactor } from './waveformLogic'
 import WaveformPlot, { WaveformColors, WaveformPoint } from './WaveformPlot'
 
 
+export type WaveformOpts = {
+    colors?: WaveformColors
+    waveformWidth: number
+    showChannelIds: boolean
+}
+
 export type WaveformWidgetProps = {
     waveform?: number[][]
     waveformStdDev?: number[][]
@@ -18,10 +24,7 @@ export type WaveformWidgetProps = {
     showLabels?: boolean
     noiseLevel: number
     samplingFrequency: number
-    waveformOpts: {
-        colors?: WaveformColors
-        waveformWidth: number
-    }
+    waveformOpts: WaveformOpts
 }
 
 const electrodeColors: ElectrodeColors = {
@@ -45,15 +48,15 @@ const defaultElectrodeOpts = {
     showLabels: false
 }
 
-export const defaultWaveformOpts = {
+export const defaultWaveformOpts: WaveformOpts = {
     colors: waveformColors,
-    waveformWidth: 2
+    waveformWidth: 2,
+    showChannelIds: true
 }
 
 // TODO: FIX AVG WAVEFORM NUMPY VIEW
 // TODO: FIX SNIPPET BOX
 const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
-    const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
     const colors = props.colors ?? defaultElectrodeOpts.colors
     const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
     const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
@@ -66,12 +69,12 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         height={height}
         layoutMode={layoutMode}
         colors={colors}
-        showLabels={showLabels}      // Would we ever not want to show labels for this?
+        showLabels={waveformOpts.showChannelIds}      // Would we ever not want to show labels for this?
         // offsetLabels={true}  // this isn't appropriate for a waveform view--it mislabels the electrodes
         // maxElectrodePixelRadius={defaultMaxPixelRadius}
         maxElectrodePixelRadius={maxElectrodePixelRadius}
         disableSelection={true}      // ??
-    />, [electrodes, width, height, layoutMode, colors, showLabels])
+    />, [electrodes, width, height, layoutMode, colors, waveformOpts.showChannelIds])
 
     // TODO: Don't do this twice, work it out differently
     const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius)
@@ -107,7 +110,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     
     // TODO: THIS LOGIC PROBABLY SHOULDN'T BE REPEATED HERE AND IN THE ELECTRODE GEOMETRY PAINT FUNCTION
     const oneElectrodeHeight = layoutMode === 'geom' ? pixelRadius * 2 : height / electrodes.length
-    const oneElectrodeWidth = layoutMode === 'geom' ? pixelRadius * 2 : width - xMargin - (showLabels ? 2*pixelRadius : 0)
+    const oneElectrodeWidth = layoutMode === 'geom' ? pixelRadius * 2 : width - xMargin - (waveformOpts.showChannelIds ? 2*pixelRadius : 0)
     const waveformPlot = <WaveformPlot
         electrodes={convertedElectrodes}
         waveformPoints={baseWaveformPoints}

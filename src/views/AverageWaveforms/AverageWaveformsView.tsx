@@ -2,7 +2,7 @@ import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
@@ -25,12 +25,14 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
 
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
+    const [showWaveformStdev, setShowWaveformStdev] = useState<boolean>(true)
+    const [showChannelIds, setShowChannelIds] = useState<boolean>(true)
 
     useEffect(() => {
         unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [data.averageWaveforms, unitIdSelectionDispatch])
 
-    const [plotBoxScaleFactor, setPlotBoxScaleFactor] = useState<number>(1)
+    const [plotBoxScaleFactor, setPlotBoxScaleFactor] = useState<number>(2)
 
     const plots: PGPlot[] = useMemo(() => data.averageWaveforms.filter(a => (toolbarOptions.onlyShowSelected ? (selectedUnitIds.has(a.unitId)) : true)).map(aw => ({
         numericId: aw.unitId,
@@ -41,65 +43,68 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         props: {
             channelIds: aw.channelIds,
             waveform: subtractChannelMeans(aw.waveform),
-            waveformStdDev: aw.waveformStdDev,
+            waveformStdDev: showWaveformStdev ? aw.waveformStdDev : undefined,
             layoutMode: waveformsMode,
             channelLocations: data.channelLocations,
             samplingFrequency: data.samplingFrequency,
             noiseLevel: data.noiseLevel,
             ampScaleFactor,
             waveformColor: colorForUnitId(idToNum(aw.unitId)),
+            showChannelIds,
             width: 120 * plotBoxScaleFactor,
             height: 120 * plotBoxScaleFactor
         }
-    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor])
+    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds])
 
-    const _handleWaveformToggle = useCallback(() => {
-        setWaveformsMode(m => (m === 'geom' ? 'vertical' : 'geom'))
-    }, [])
-    
     const customToolbarActions = useMemo(() => {
         const amplitudeScaleToolbarEntries = AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor})
-        const hideElectrodeGeometryAction: ToolbarItem = {
+        const showElectrodeGeometryAction: ToolbarItem = {
             type: 'toggle',
             subtype: 'checkbox',
-            callback: _handleWaveformToggle,
-            title: waveformsMode === 'geom' ? 'Hide electrode geometry' : 'Show electrode geometry',
+            callback: () => setWaveformsMode(m => (m === 'geom' ? 'vertical' : 'geom')),
+            title: 'Show electrode geometry',
             selected: waveformsMode === 'geom'
         }
-        const _handleUpdateBoxSize = (dir: 'increase' | 'decrease') => (() => {
-            if (dir === 'increase') {
-                setPlotBoxScaleFactor(s => (s * 1.3))
-            }
-            else if (dir === 'decrease') {
-                setPlotBoxScaleFactor(s => (s / 1.3))
-            }
-        })
         const boxSizeActions: ToolbarItem[] = [
             {
                 type: 'button',
-                callback: _handleUpdateBoxSize('increase'),
+                callback: () => setPlotBoxScaleFactor(s => (s * 1.3)),
                 title: 'Increase box size',
                 icon: <FaPlus />
             },
             {
                 type: 'button',
-                callback: _handleUpdateBoxSize('decrease'),
+                callback: () => setPlotBoxScaleFactor(s => (s / 1.3)),
                 title: 'Decrease box size',
                 icon: <FaMinus />
             }
         ]
+        const showWaveformStdevAction: ToolbarItem = {
+            type: 'toggle',
+            subtype: 'checkbox',
+            callback: () => setShowWaveformStdev(a => (!a)),
+            title: 'Show waveform stdev',
+            selected: showWaveformStdev === true
+        }
+        const showChannelIdsAction: ToolbarItem = {
+            type: 'toggle',
+            subtype: 'checkbox',
+            callback: () => setShowChannelIds(a => (!a)),
+            title: 'Show channel IDs',
+            selected: showChannelIds === true
+        }
         return [
             ...amplitudeScaleToolbarEntries,
-            {
-                type: 'divider'
-            },
-            hideElectrodeGeometryAction,
-            {
-                type: 'divider'
-            },
-            ...boxSizeActions
+            {type: 'divider'},
+            showElectrodeGeometryAction,
+            {type: 'divider'},
+            ...boxSizeActions,
+            {type: 'divider'},
+            showWaveformStdevAction,
+            {type: 'divider'},
+            showChannelIdsAction
         ]
-    }, [waveformsMode, _handleWaveformToggle, ampScaleFactor])
+    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds])
     
     const bottomToolbarHeight = 30
 
