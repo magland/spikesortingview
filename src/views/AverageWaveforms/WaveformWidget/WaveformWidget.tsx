@@ -1,5 +1,5 @@
 import { FunctionComponent, useMemo } from 'react'
-import ElectrodeGeometry, { defaultMaxPixelRadius, Electrode, LayoutMode } from './sharedDrawnComponents/ElectrodeGeometry'
+import ElectrodeGeometry, { Electrode, LayoutMode } from './sharedDrawnComponents/ElectrodeGeometry'
 import { computeElectrodeLocations, xMargin as xMarginDefault } from './sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeColors } from './sharedDrawnComponents/electrodeGeometryPainting'
 import { getSpikeAmplitudeNormalizationFactor } from './waveformLogic'
@@ -22,7 +22,6 @@ export type WaveformWidgetProps = {
         colors?: WaveformColors
         waveformWidth: number
     }
-    waveformColor: string
 }
 
 const electrodeColors: ElectrodeColors = {
@@ -57,7 +56,9 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
     const colors = props.colors ?? defaultElectrodeOpts.colors
     const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
-    const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height, waveformColor} = props
+    const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
+
+    const maxElectrodePixelRadius = 1000
 
     const geometry = useMemo(() => <ElectrodeGeometry
         electrodes={electrodes}
@@ -67,12 +68,13 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         colors={colors}
         showLabels={showLabels}      // Would we ever not want to show labels for this?
         // offsetLabels={true}  // this isn't appropriate for a waveform view--it mislabels the electrodes
-        maxElectrodePixelRadius={defaultMaxPixelRadius}
+        // maxElectrodePixelRadius={defaultMaxPixelRadius}
+        maxElectrodePixelRadius={maxElectrodePixelRadius}
         disableSelection={true}      // ??
     />, [electrodes, width, height, layoutMode, colors, showLabels])
 
     // TODO: Don't do this twice, work it out differently
-    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, defaultMaxPixelRadius)
+    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius)
     const xMargin = xMarginBase || xMarginDefault
 
     // Spikes are defined as being some factor greater than the baseline noise.
@@ -118,7 +120,6 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         width={width}
         height={height}
         layoutMode={layoutMode}
-        color={waveformColor}
     />
 
     return (

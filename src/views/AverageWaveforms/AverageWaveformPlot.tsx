@@ -1,5 +1,6 @@
 import React, { FunctionComponent, useMemo } from 'react';
 import WaveformWidget from './WaveformWidget/WaveformWidget';
+import {WaveformColors} from './WaveformWidget/WaveformPlot'
 
 type Props = {
     channelIds: number[]
@@ -15,7 +16,7 @@ type Props = {
     height: number
 }
 
-const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, noiseLevel, ampScaleFactor, width, height, waveformColor}) => {
+const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, noiseLevel, ampScaleFactor, waveformColor, width, height}) => {
     const electrodes = useMemo(() => {
         const locs = channelLocations || {}
         return channelIds.map(channelId => ({
@@ -25,7 +26,15 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             y: locs[`${channelId}`] ? locs[`${channelId}`][1] : 0
         }))
     }, [channelIds, channelLocations])
-    const waveformOpts = useMemo(() => ({waveformWidth: 1}), [])
+    const waveformOpts = useMemo(() => {
+        const waveformColors: WaveformColors = {
+            base: waveformColor
+        }
+        return {
+            waveformWidth: 2,
+            colors: waveformColors
+        }
+    }, [waveformColor])
     return (
         <WaveformWidget
             waveform={waveform}
@@ -39,7 +48,6 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             noiseLevel={noiseLevel}
             samplingFrequency={samplingFrequency}
             waveformOpts={waveformOpts}
-            waveformColor={waveformColor}
         />
     )
 }
