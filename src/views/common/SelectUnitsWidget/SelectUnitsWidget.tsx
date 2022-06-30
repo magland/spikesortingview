@@ -44,8 +44,7 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
                 _unitId: unitIdData
             }
             return {
-                rowId: `${id}`,
-                rowIdNumeric: id,
+                rowId: id,
                 data: rowData,
                 checkboxFn: checkboxClickHandlerGenerator(id)
             }
@@ -53,12 +52,12 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
     ), [unitIds, sortingCuration, checkboxClickHandlerGenerator])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowId).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
         const draft = new Map<number | string, SortableTableWidgetRow>()
-        rows.forEach(r => draft.set(r.rowIdNumeric, r))
+        rows.forEach(r => draft.set(r.rowId, r))
         return draft
     }, [rows])
 

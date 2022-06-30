@@ -3,7 +3,7 @@ import React, { FunctionComponent } from 'react'
 import './SortableTableWidget.css'
 
 type CheckboxProps = {
-    rowId: string,
+    rowId: string | number,
     selected: boolean,
     onClick: (evt: React.MouseEvent) => void,
     isIndeterminate?: boolean,

@@ -55,7 +55,7 @@ const sortRows = (rowsMap: RowsDict, colsMap: ColsDict, rules: SortingRule[]) =>
             })
         }
     })
-    return _draft.map(row => row.rowIdNumeric)
+    return _draft.map(row => row.rowId)
 }
 
 const getColumnNameDict = (columns: SortableTableWidgetColumn[]): Map<string, SortableTableWidgetColumn> => {

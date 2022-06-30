@@ -4,7 +4,7 @@ import './SortableTableWidget.css'
 import SortableTableWidgetCheckbox from './SortableTableWidgetCheckbox'
 
 type RowProps = {
-    rowId: string,
+    rowId: string | number,
     selected: boolean,
     onClick?: (evt: React.MouseEvent) => void,
     isDisabled: boolean,

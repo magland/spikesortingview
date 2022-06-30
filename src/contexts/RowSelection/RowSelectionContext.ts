@@ -55,7 +55,7 @@ export const COPY_STATE: RowSelectionActionType = 'COPY_STATE'
 
 export const defaultRowSelection = {
     selectedRowIds: new Set<number | string>(),
-    orderedRowIds: [],
+    orderedRowIds: []
 }
 
 export const rowSelectionReducer = (s: RowSelection, a: RowSelectionAction): RowSelection => {

@@ -2,8 +2,7 @@ import { RowSelectionAction } from "contexts/RowSelection/RowSelectionContext"
 import { SortingRule } from "contexts/RowSelection/RowSelectionTypes"
 
 export interface SortableTableWidgetRow {
-    rowIdNumeric: number | string
-    rowId: string
+    rowId: string | number
     data: {[key: string]: {
         value: any,
         sortValue: any
