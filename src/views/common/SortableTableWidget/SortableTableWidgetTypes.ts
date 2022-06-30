@@ -1,5 +1,5 @@
-import { RowSelectionAction } from "contexts/RowSelection/RowSelectionContext"
-import { SortingRule } from "contexts/RowSelection/RowSelectionTypes"
+import { UnitSelectionAction } from "contexts/UnitSelection/UnitSelectionContext"
+import { SortingRule } from "contexts/UnitSelection/UnitSelectionTypes"
 
 export interface SortableTableWidgetRow {
     rowId: string | number
@@ -23,12 +23,12 @@ export type RowsDict = Map<number | string, SortableTableWidgetRow>
 export type ColsDict = Map<string, SortableTableWidgetColumn>
 
 export interface SortableTableProps {
-    selectedRowIds: Set<number | string>
-    selectionDispatch: React.Dispatch<RowSelectionAction>
+    selectedUnitIds: Set<number | string>
+    selectionDispatch: React.Dispatch<UnitSelectionAction>
     columns: SortableTableWidgetColumn[]
     rows: RowsDict
-    orderedRowIds: (number | string)[]
-    visibleRowIds?: (number | string)[]
+    orderedUnitIds: (number | string)[]
+    visibleUnitIds?: (number | string)[]
     primarySortRule?: SortingRule
     height?: number
     selectionDisabled?: boolean

@@ -1,8 +1,8 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grid, LinearProgress, TableCell, TableHead, TableRow } from '@material-ui/core';
-import { RowSelectionAction, RowSelectionState, TOGGLE_SELECT_ALL, UPDATE_SORT_FIELDS } from 'contexts/RowSelection/RowSelectionContext';
-import { SortingRule } from 'contexts/RowSelection/RowSelectionTypes';
+import { UnitSelectionAction, UnitSelectionState, TOGGLE_SELECT_ALL, UPDATE_SORT_FIELDS } from 'contexts/UnitSelection/UnitSelectionContext';
+import { SortingRule } from 'contexts/UnitSelection/UnitSelectionTypes';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import './SortableTableWidget.css';
 import SortableTableWidgetCheckbox from './SortableTableWidgetCheckbox';
@@ -11,9 +11,9 @@ import { ColsDict, RowsDict, SortableTableWidgetColumn } from './SortableTableWi
 type HeaderRowProps = {
     columns: SortableTableWidgetColumn[]
     primarySortRule?: SortingRule
-    allRowSelectionStatus: RowSelectionState
+    allUnitSelectionStatus: UnitSelectionState
     rowSorterCallback: RowSorterCallback
-    selectionDispatch: React.Dispatch<RowSelectionAction>
+    selectionDispatch: React.Dispatch<UnitSelectionAction>
     selectionDisabled?: boolean
     hideSelectionColumn?: boolean
 }
@@ -76,7 +76,7 @@ const mapColumnsToHeaderInfo = (columns: SortableTableWidgetColumn[], primarySor
 }
 
 const SortableTableWidgetHeaderRow: FunctionComponent<HeaderRowProps> = (props) => {
-    const { columns, selectionDispatch, primarySortRule, allRowSelectionStatus, rowSorterCallback, selectionDisabled, hideSelectionColumn } = props
+    const { columns, selectionDispatch, primarySortRule, allUnitSelectionStatus, rowSorterCallback, selectionDisabled, hideSelectionColumn } = props
     const columnsMap = useMemo(() => getColumnNameDict(columns), [columns])
     const columnHeaders = useMemo(() => mapColumnsToHeaderInfo(columns, primarySortRule), [columns, primarySortRule])
 
@@ -131,9 +131,9 @@ const SortableTableWidgetHeaderRow: FunctionComponent<HeaderRowProps> = (props) 
                         <TableCell key="_checkbox" width="30px">
                             <SortableTableWidgetCheckbox 
                                 rowId={'all'}
-                                selected={allRowSelectionStatus === 'all'}
+                                selected={allUnitSelectionStatus === 'all'}
                                 onClick={toggleSelectAllCallback}
-                                isIndeterminate={allRowSelectionStatus === 'partial'}
+                                isIndeterminate={allUnitSelectionStatus === 'partial'}
                                 isDisabled={selectionDisabled}
                             />
                         </TableCell>

@@ -1,6 +1,6 @@
 import { MuiThemeProvider } from '@material-ui/core';
 import RecordingSelectionContext, { defaultRecordingSelection, recordingSelectionReducer } from 'contexts/RecordingSelectionContext';
-import RowSelectionContext, { defaultRowSelection, rowSelectionReducer } from 'contexts/RowSelection/RowSelectionContext';
+import UnitSelectionContext, { defaultUnitSelection, unitSelectionReducer } from 'contexts/UnitSelection/UnitSelectionContext';
 import { getFigureData, useWindowDimensions } from 'figurl';
 import React, { useEffect, useReducer, useState } from 'react';
 import './localStyles.css';
@@ -13,7 +13,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState<string>()
   const {width, height} = useWindowDimensions()
 
-  const [rowSelection, rowSelectionDispatch] = useReducer(rowSelectionReducer, defaultRowSelection)
+  const [unitSelection, unitSelectionDispatch] = useReducer(unitSelectionReducer, defaultUnitSelection)
   const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
 
   useEffect(() => {
@@ -41,13 +41,13 @@ function App() {
   return (
     <MuiThemeProvider theme={theme}>
       <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
-        <RowSelectionContext.Provider value={{rowSelection, rowSelectionDispatch}}>
+        <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
             <View
             data={data}
             width={width - 10}
             height={height - 5}
             />
-        </RowSelectionContext.Provider>
+        </UnitSelectionContext.Provider>
       </RecordingSelectionContext.Provider>
     </MuiThemeProvider>
   )

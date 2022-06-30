@@ -9,7 +9,7 @@ def compute_correlogram_data(*, sorting: si.BaseSorting, unit_id1: int, unit_id2
     num_bins_half = int((num_bins + 1) / 2)
     bin_edges_msec = np.array((np.arange(num_bins + 1) - num_bins / 2) * bin_size_msec, dtype=np.float32)
     bin_counts = np.zeros((num_bins,), dtype=np.int32)
-    if unit_id2 is None:
+    if unit_id2 is None or unit_id1 == unit_id2:
         # autocorrelogram
         offset = 1
         while True:
@@ -43,9 +43,9 @@ def compute_correlogram_data(*, sorting: si.BaseSorting, unit_id1: int, unit_id2
             deltas22_msec = deltas_msec[(all_labels[offset:] == 2) & (all_labels[:-offset] == 2)]
 
             deltas12_msec = deltas12_msec[deltas12_msec <= bin_edges_msec[-1]]
-            deltas21_msec = deltas21_msec[deltas12_msec <= bin_edges_msec[-1]]
-            deltas11_msec = deltas11_msec[deltas12_msec <= bin_edges_msec[-1]]
-            deltas22_msec = deltas22_msec[deltas12_msec <= bin_edges_msec[-1]]
+            deltas21_msec = deltas21_msec[deltas21_msec <= bin_edges_msec[-1]]
+            deltas11_msec = deltas11_msec[deltas11_msec <= bin_edges_msec[-1]]
+            deltas22_msec = deltas22_msec[deltas22_msec <= bin_edges_msec[-1]]
 
             if (len(deltas12_msec) + len(deltas21_msec) + len(deltas11_msec) + len(deltas22_msec)) == 0: break
             

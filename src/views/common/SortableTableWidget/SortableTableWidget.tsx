@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableContainer } from '@material-ui/core';
-import { allRowSelectionState, voidClickHandler } from 'contexts/RowSelection/RowSelectionFunctions';
+import { allUnitSelectionState, voidClickHandler } from 'contexts/UnitSelection/UnitSelectionFunctions';
 import { FunctionComponent, useCallback, useEffect, useMemo } from 'react';
 import './SortableTableWidget.css';
 import SortableTableWidgetContentRow from './SortableTableWidgetContentRow';
@@ -7,26 +7,26 @@ import SortableTableWidgetHeaderRow, { sorterCallbackWrapper } from './SortableT
 import { ColsDict, SortableTableProps, SortableTableWidgetRow } from './SortableTableWidgetTypes';
 
 const SortableTableWidget: FunctionComponent<SortableTableProps> = (props) => {
-    const { selectedRowIds, selectionDispatch, rows, columns, orderedRowIds, visibleRowIds, primarySortRule, height, selectionDisabled, hideSelectionColumn } = props
-    const _visibleRowIds = useMemo(() => {return visibleRowIds && visibleRowIds.length > 0 ? visibleRowIds : orderedRowIds}, [visibleRowIds, orderedRowIds])
-    const allRowSelectionStatus = useMemo(() => allRowSelectionState({selectedRowIds, orderedRowIds, visibleRowIds: _visibleRowIds}), [selectedRowIds, orderedRowIds, _visibleRowIds])
+    const { selectedUnitIds, selectionDispatch, rows, columns, orderedUnitIds, visibleUnitIds, primarySortRule, height, selectionDisabled, hideSelectionColumn } = props
+    const _visibleUnitIds = useMemo(() => {return visibleUnitIds && visibleUnitIds.length > 0 ? visibleUnitIds : orderedUnitIds}, [visibleUnitIds, orderedUnitIds])
+    const allUnitSelectionStatus = useMemo(() => allUnitSelectionState({selectedUnitIds, orderedUnitIds, visibleUnitIds: _visibleUnitIds}), [selectedUnitIds, orderedUnitIds, _visibleUnitIds])
     const rowSorter = useCallback((colsDict: ColsDict) => sorterCallbackWrapper(rows, colsDict), [rows])
 
     useEffect(() => {
-        if (_visibleRowIds.some(id => !rows.has(id))) throw Error('Rows missing from row dict')
-    }, [rows, _visibleRowIds])
+        if (_visibleUnitIds.some(id => !rows.has(id))) throw Error('Rows missing from row dict')
+    }, [rows, _visibleUnitIds])
 
     const header = useMemo(() => {
         return (<SortableTableWidgetHeaderRow
             columns={columns}
             primarySortRule={primarySortRule}
-            allRowSelectionStatus={allRowSelectionStatus}
+            allUnitSelectionStatus={allUnitSelectionStatus}
             rowSorterCallback={rowSorter}
             selectionDispatch={selectionDispatch}
             selectionDisabled={selectionDisabled}
             hideSelectionColumn={hideSelectionColumn}
         />)
-    }, [columns, primarySortRule, allRowSelectionStatus, rowSorter, selectionDispatch, selectionDisabled, hideSelectionColumn])
+    }, [columns, primarySortRule, allUnitSelectionStatus, rowSorter, selectionDispatch, selectionDisabled, hideSelectionColumn])
 
     const _contentFieldsByRow = useMemo(() => {
         const contentDict: {[key: string]: JSX.Element[]} = {}
@@ -47,10 +47,10 @@ const SortableTableWidget: FunctionComponent<SortableTableProps> = (props) => {
     // even though it should make no difference. It's probably all in my head, but I'm leaving it.
     const visibleRows = useMemo(() => {
         if (!rows) return []
-        const realizedRows = _visibleRowIds.map(id => rows.get(id))
+        const realizedRows = _visibleUnitIds.map(id => rows.get(id))
         if (realizedRows.some(r => r === undefined)) throw Error('Rows missing from row dict')
         return realizedRows as any as SortableTableWidgetRow[]
-    }, [_visibleRowIds, rows])
+    }, [_visibleUnitIds, rows])
 
     // TODO: Is this still rerendering too much/too often?
     const _projectedRows = useMemo(() => {
@@ -59,14 +59,14 @@ const SortableTableWidget: FunctionComponent<SortableTableProps> = (props) => {
                 <SortableTableWidgetContentRow
                     key={row.rowId}
                     rowId={row.rowId}
-                    selected={selectedRowIds.has(row.rowId)}
+                    selected={selectedUnitIds.has(row.rowId)}
                     onClick={!hideSelectionColumn ? (row.checkboxFn || voidClickHandler) : undefined}
                     isDisabled={selectionDisabled || false}
                     contentRepository={_contentFieldsByRow}
                 />
             )
         })
-    }, [selectedRowIds, visibleRows,_contentFieldsByRow, selectionDisabled, hideSelectionColumn])
+    }, [selectedUnitIds, visibleRows,_contentFieldsByRow, selectionDisabled, hideSelectionColumn])
 
     return (
         <TableContainer style={height !== undefined ? {maxHeight: height} : {}}>

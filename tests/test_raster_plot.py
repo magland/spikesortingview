@@ -1,5 +1,5 @@
 # 6/22/22
-# https://www.figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://594b8d6f70c7a054fa3b7a295ffba40fb93f31b1&label=test_raster_plot
+# https://www.figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://594b8d6f70c7a054fa3b7a295ffba40fb93f31b1&label=test_raster_plot
 
 import numpy as np
 import sortingview as sv
@@ -15,7 +15,7 @@ def main():
 
     data = test_raster_plot(recording=R, sorting=S)
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-6', data=data)
     url = F.url(label='test_raster_plot')
     print(url)
 

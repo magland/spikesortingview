@@ -1,5 +1,5 @@
 # 6/22/22
-# https://www.figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://51b4ddfadc15b4bd27ba15593426d41896a654ec&label=test_units_table
+# https://www.figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://51b4ddfadc15b4bd27ba15593426d41896a654ec&label=test_units_table
 
 import sortingview as sv
 import spikeinterface as si
@@ -14,7 +14,7 @@ def main():
 
     data = test_units_table(recording=R, sorting=S)
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-6', data=data)
     url = F.url(label='test_units_table')
     print(url)
 

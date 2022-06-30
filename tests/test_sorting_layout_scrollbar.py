@@ -1,5 +1,5 @@
 # 6/29/22
-# https://figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://84f25294106eab70538358e9021166379abda4df&label=test%20sorting%20layout%20scrollbar
+# https://figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://84f25294106eab70538358e9021166379abda4df&label=test%20sorting%20layout%20scrollbar
 
 import kachery_cloud as kcl
 import sortingview as sv
@@ -100,7 +100,7 @@ def main():
         ]
     }
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-6', data=data)
     url = F.url(label='test sorting layout scrollbar')
     print(url)
 

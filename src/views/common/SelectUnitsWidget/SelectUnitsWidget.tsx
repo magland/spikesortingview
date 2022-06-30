@@ -1,5 +1,5 @@
-import { INITIALIZE_ROWS, RowSelectionAction } from 'contexts/RowSelection/RowSelectionContext';
-import { SortingRule } from 'contexts/RowSelection/RowSelectionTypes';
+import { INITIALIZE_UNITS, UnitSelectionAction } from 'contexts/UnitSelection/UnitSelectionContext';
+import { SortingRule } from 'contexts/UnitSelection/UnitSelectionTypes';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
@@ -11,16 +11,16 @@ import { SortableTableWidgetRow } from 'views/common/SortableTableWidget/Sortabl
 export type SelectUnitsWidgetProps = {
     unitIds: (number | string)[]
     selectedUnitIds: Set<number | string>,
-    orderedRowIds: (number | string)[],
-    visibleRowIds?: (number | string)[],
+    orderedUnitIds: (number | string)[],
+    visibleUnitIds?: (number | string)[],
     primarySortRule?: SortingRule,
-    unitIdSelectionDispatch: (action: RowSelectionAction) => void,
+    unitIdSelectionDispatch: (action: UnitSelectionAction) => void,
     checkboxClickHandlerGenerator: (rowId: number | string) => (evt: React.MouseEvent) => void
     selectionDisabled?: boolean
 }
 
 const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: SelectUnitsWidgetProps) => {
-    const { unitIds, orderedRowIds, visibleRowIds, selectedUnitIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionDisabled }  = props
+    const { unitIds, orderedUnitIds, visibleUnitIds, selectedUnitIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionDisabled }  = props
     const {sortingCuration} = useSortingCuration()
 
     const columns = useMemo(() => ([
@@ -28,7 +28,7 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
             columnName: '_unitId',
             label: 'Unit',
             tooltip: 'Unit ID',
-            sort: (a: any, b: any) => (a - b),
+            sort: (a: any, b: any) => (idToNum(a) - idToNum(b)),
             dataElement: (d: ColorPatchUnitLabelProps) => (<ColorPatchUnitIdLabel unitId={d.unitId} mergeGroup={d.mergeGroup}/>),
             calculating: false
         }
@@ -52,7 +52,7 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
     ), [unitIds, sortingCuration, checkboxClickHandlerGenerator])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowId).sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: rows.map(r => r.rowId).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
@@ -63,12 +63,12 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
 
     return (
         <SortableTableWidget
-            selectedRowIds={selectedUnitIds}
+            selectedUnitIds={selectedUnitIds}
             selectionDispatch={unitIdSelectionDispatch}
             columns={columns}
             rows={rowMap}
-            orderedRowIds={orderedRowIds}
-            visibleRowIds={visibleRowIds}
+            orderedUnitIds={orderedUnitIds}
+            visibleUnitIds={visibleUnitIds}
             selectionDisabled={selectionDisabled}
             primarySortRule={primarySortRule}
         />

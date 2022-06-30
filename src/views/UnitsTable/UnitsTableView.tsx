@@ -1,4 +1,4 @@
-import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
+import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
@@ -16,20 +16,20 @@ type Props = {
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(defaultUnitsTableBottomToolbarOptions)
-    const {selectedUnitIds, orderedRowIds, visibleRowIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const {selectedUnitIds, orderedUnitIds, visibleUnitIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
     const {sortingCuration} = useSortingCuration()
 
-    const visibleRowIds2 = useMemo(() => (
+    const visibleUnitIds2 = useMemo(() => (
         toolbarOptions.onlyShowSelected ? (
-            visibleRowIds ? (
-                visibleRowIds.filter(id => (selectedUnitIds.has(id)))
+            visibleUnitIds ? (
+                visibleUnitIds.filter(id => (selectedUnitIds.has(id)))
             ) : (
                 [...selectedUnitIds]
             )
         ) : (
-            visibleRowIds
+            visibleUnitIds
         )
-    ), [visibleRowIds, selectedUnitIds, toolbarOptions.onlyShowSelected])
+    ), [visibleUnitIds, selectedUnitIds, toolbarOptions.onlyShowSelected])
 
     const columns = useMemo(() => {
         const ret: SortableTableWidgetColumn[] = []
@@ -37,7 +37,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
             columnName: '_unitId',
             label: 'Unit',
             tooltip: 'Unit ID',
-            sort: (a: any, b: any) => (a - b),
+            sort: (a: any, b: any) => (idToNum(a) - idToNum(b)),
             dataElement: (d: ColorPatchUnitLabelProps ) => (<ColorPatchUnitIdLabel unitId={d.unitId} mergeGroup={d.mergeGroup} />),
             calculating: false
         })
@@ -95,7 +95,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     ), [data.rows, data.columns, sortingCuration, checkboxClickHandlerGenerator, toolbarOptions.onlyShowSelected])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => (r.rowId)).sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: rows.map(r => (r.rowId)).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
@@ -120,9 +120,9 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 <SortableTableWidget
                     columns={columns}
                     rows={rowMap}
-                    orderedRowIds={orderedRowIds}
-                    visibleRowIds={visibleRowIds2}
-                    selectedRowIds={selectedUnitIds}
+                    orderedUnitIds={orderedUnitIds}
+                    visibleUnitIds={visibleUnitIds2}
+                    selectedUnitIds={selectedUnitIds}
                     selectionDispatch={unitIdSelectionDispatch}
                     primarySortRule={primarySortRule}
                     hideSelectionColumn={toolbarOptions.onlyShowSelected}

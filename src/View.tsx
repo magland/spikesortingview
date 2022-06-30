@@ -3,6 +3,7 @@ import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import ConsoleView from 'views/Console/ConsoleView';
+import CrossCorrelogramsView from 'views/CrossCorrelograms/CrossCorrelogramsView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
 import EpochsView from 'views/Epochs/EpochsView';
 import LiveCrossCorrelogramsView from 'views/LiveCrossCorrelograms/LiveCrossCorrelogramsView';
@@ -90,6 +91,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'SortingLayout') {
         return <SortingLayoutView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'CrossCorrelograms') {
+        return <CrossCorrelogramsView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)

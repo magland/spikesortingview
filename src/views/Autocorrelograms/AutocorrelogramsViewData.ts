@@ -1,15 +1,15 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isEqualTo, isNumber, isOneOf, isString } from "figurl/viewInterface/validateObject"
 
 type AutocorrelogramData = {
-    unitId: number
+    unitId: number | string
     binEdgesSec: number[]
     binCounts: number[]
 }
 
 export const isAutocorrelogramData = (x: any): x is AutocorrelogramData => {
     return validateObject(x, {
-        unitId: isNumber,
+        unitId: isOneOf([isNumber, isString]),
         binEdgesSec: isArrayOf(isNumber),
         binCounts: isArrayOf(isNumber)
     },)

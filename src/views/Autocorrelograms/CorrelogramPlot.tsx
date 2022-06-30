@@ -3,8 +3,8 @@ import BarPlot, { BarPlotBar } from '../common/BarPlot/BarPlot';
 import { BarPlotTick } from '../common/BarPlot/BarPlotMainLayer';
 
 type Props = {
-    binEdgesSec: number[],
-    binCounts: number[]
+    binEdgesSec: number[] | undefined,
+    binCounts: number[] | undefined
     color: string
     width: number
     height: number
@@ -28,9 +28,9 @@ const determineTickLocationsMsec = (xMin: number, xMax: number): number[] => {
 
 const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, color, width, height}) => {
     const bars: BarPlotBar[] = useMemo(() => (
-        binCounts.map((count, ii) => {
-            const xStart = binEdgesSec[ii] * 1000
-            const xEnd = binEdgesSec[ii + 1] * 1000
+        (binCounts || []).map((count, ii) => {
+            const xStart = (binEdgesSec || [])[ii] * 1000
+            const xEnd = (binEdgesSec || [])[ii + 1] * 1000
             return {
                 xStart,
                 xEnd,
@@ -40,7 +40,11 @@ const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, colo
         })
     ), [binCounts, binEdgesSec])
     const {xMin, xMax} = useMemo(() => (
-        {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
+        bars.length > 0 ? (
+            {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
+        ) : (
+            {xMin: 0, xMax: 1}
+        )
     ), [bars])
     const ticks: BarPlotTick[] = useMemo(() => {
         const tickLocations = determineTickLocationsMsec(xMin, xMax)
@@ -50,14 +54,20 @@ const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, colo
         }))
     }, [xMin, xMax])
     return (
-        <BarPlot
-            bars={bars}
-            color={color}
-            ticks={ticks}
-            width={width}
-            height={height}
-            xLabel="dt (msec)"
-        />
+        binCounts ? (
+            <BarPlot
+                bars={bars}
+                color={color}
+                ticks={ticks}
+                width={width}
+                height={height}
+                xLabel="dt (msec)"
+            />
+        ) : (
+            <div
+                style={{position: 'relative', width, height, color: 'orange'}}
+            />
+        )
     )
 }
 

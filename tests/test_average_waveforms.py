@@ -1,5 +1,5 @@
 # 6/22/22
-# https://www.figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://5ce2e975ad7b28103c0ea1e833e228e15bcfc289&label=test_average_waveforms
+# https://www.figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://5ce2e975ad7b28103c0ea1e833e228e15bcfc289&label=test_average_waveforms
 
 from typing import Tuple
 import numpy as np
@@ -16,7 +16,7 @@ def main():
 
     data = test_average_waveforms(recording=R, sorting=S)
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-6', data=data)
     url = F.url(label='test_average_waveforms')
     print(url)
 

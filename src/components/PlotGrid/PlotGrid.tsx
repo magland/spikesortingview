@@ -1,10 +1,10 @@
 import { Grid } from '@material-ui/core';
-import { voidClickHandler } from 'contexts/RowSelection/RowSelectionFunctions';
+import { voidClickHandler } from 'contexts/UnitSelection/UnitSelectionFunctions';
 import React, { FunctionComponent, useMemo } from 'react';
 
 export type PGPlot = {
-    numericId: number | string,
-    key: string,
+    key: string | number,
+    unitId: string | number,
     label: string,
     labelColor: string,
     clickHandler?: (evt: React.MouseEvent) => void,
@@ -16,7 +16,6 @@ type Props = {
     plotComponent: React.ComponentType<any>
     selectedPlotKeys?: Set<number | string>
     numPlotsPerRow?: number
-    orderedPlotIds?: (number | string)[]
 }
 
 type PlotGridRowData = {
@@ -46,7 +45,7 @@ const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => 
         </Grid>
 }
 
-const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, orderedPlotIds, selectedPlotKeys, numPlotsPerRow}) => {
+const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotKeys, numPlotsPerRow}) => {
     const Component = plotComponent
 
     // Don't rerender the individual plots with every pass
@@ -63,11 +62,11 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, orderedPlotId
                         onClick={p.clickHandler || voidClickHandler}
                     >
                         <div className={'plotLabelStyle'}>
-                            <span style={{color: p.labelColor}}>{p.label}</span>
+                            <span style={{color: p.labelColor}}>{p.label || <span>&nbsp;</span>}</span>
                         </div>
                         <Component {...p.props} />
                     </div>
-                    return {[p.numericId]: rendered}
+                    return {[p.key]: rendered}
             })
         )
         return contents as any as {[key: number]: JSX.Element}
@@ -75,8 +74,8 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, orderedPlotId
     
     const rowStarts = Array(plots.length).fill(0).map((x, ii) => ii).filter(i => i % (numPlotsPerRow || plots.length) === 0)
     const plotIds = useMemo(() => {
-        return orderedPlotIds || plots.map(p => Number(p.key))
-    }, [plots, orderedPlotIds])        
+        return plots.map(p => p.key)
+    }, [plots])
 
     return (
         <Grid container>

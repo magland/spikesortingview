@@ -1,11 +1,12 @@
-# 6/23/22
-# https://www.figurl.org/f?v=gs://figurl/spikesortingview-5&d=sha1://c5543a1baa4fb925af22baed2325ac1a0706ae67&label=test%20sorting%20layout
+# 6/30/22
+# https://figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://bd266713b70287d057a8896c38368823641d9098&label=test%20sorting%20layout
 
 import kachery_cloud as kcl
 import sortingview as sv
 import spikeinterface.extractors as se
 import figurl as fig
 from test_autocorrelograms import test_autocorrelograms
+from test_cross_correlograms import test_cross_correlograms
 from test_raster_plot import test_raster_plot
 from test_average_waveforms import test_average_waveforms
 from test_units_table import test_units_table
@@ -16,10 +17,11 @@ def main():
     R = sv.copy_recording_extractor(recording, serialize_dtype='float32')
     S = sv.copy_sorting_extractor(sorting)
 
-    data1 = test_units_table(recording=R, sorting=S)
-    data2 = test_raster_plot(recording=R, sorting=S)
-    data3 = test_autocorrelograms(recording=R, sorting=S)
-    data4 = test_average_waveforms(recording=R, sorting=S)
+    data0 = test_units_table(recording=R, sorting=S)
+    data1 = test_raster_plot(recording=R, sorting=S)
+    data2 = test_autocorrelograms(recording=R, sorting=S)
+    data3 = test_average_waveforms(recording=R, sorting=S)
+    data4 = test_cross_correlograms(recording=R, sorting=S)
 
     data = {
         'type': 'SortingLayout',
@@ -44,9 +46,11 @@ def main():
                     'direction': 'horizontal',
                     'items': [
                         {'type': 'View', 'viewId': '2'},
+                        {'type': 'View', 'viewId': '4'},
                         {'type': 'View', 'viewId': '3'}
                     ],
                     'itemProperties': [
+                        {'stretch': 1},
                         {'stretch': 1},
                         {'stretch': 1}
                     ]
@@ -59,11 +63,11 @@ def main():
                 'type': data0['type'],
                 'dataUri': _upload_data_and_return_uri(data0)
             }
-            for i, data0 in enumerate([data1, data2, data3, data4])
+            for i, data0 in enumerate([data0, data1, data2, data3, data4])
         ]
     }
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-5', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-6', data=data)
     url = F.url(label='test sorting layout')
     print(url)
 

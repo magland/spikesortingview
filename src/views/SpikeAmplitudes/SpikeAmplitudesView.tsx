@@ -31,7 +31,7 @@ type PanelProps = {
 const panelSpacing = 4
 
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {selectedUnitIds, orderedRowIds, visibleRowIds, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
+    const {selectedUnitIds, orderedUnitIds, visibleUnitIds, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
     console.log('SpikeAmplitudesView', data)
 
     const allUnitIds = useMemo(() => (
@@ -47,8 +47,8 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
             <LockableSelectUnitsWidget
                 unitIds={allUnitIds}
                 selectedUnitIds={selectedUnitIds}
-                orderedRowIds={orderedRowIds}
-                visibleRowIds={visibleRowIds}
+                orderedUnitIds={orderedUnitIds}
+                visibleUnitIds={visibleUnitIds}
                 checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
                 unitIdSelectionDispatch={unitIdSelectionDispatch}
                 locked={selectionLocked}

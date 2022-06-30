@@ -14,9 +14,13 @@ type Props = {
 }
 
 const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) => {
-    const {selectedUnitIds, orderedRowIds, visibleRowIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
+    const {selectedUnitIds, orderedUnitIds, visibleUnitIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
 
     const listLengthScaler = useMemo(() => Math.pow(10, Math.ceil(Math.log10(data.unitIds.length))), [data.unitIds])
+
+    const unitIds = useMemo(() => (
+        [...selectedUnitIds].sort((a, b) => (idToNum(a) - idToNum(b)))
+    ), [selectedUnitIds])
 
     return (
         <Splitter
@@ -27,8 +31,8 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
             <LockableSelectUnitsWidget
                 unitIds={data.unitIds}
                 selectedUnitIds={selectedUnitIds}
-                orderedRowIds={orderedRowIds}
-                visibleRowIds={visibleRowIds}
+                orderedUnitIds={orderedUnitIds}
+                visibleUnitIds={visibleUnitIds}
                 primarySortRule={primarySortRule}
                 checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
                 unitIdSelectionDispatch={unitIdSelectionDispatch}
@@ -39,7 +43,7 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
                 data={data}
                 width={0} // filled in by splitter
                 height={0} // filled in by splitter
-                unitIds={selectedUnitIds}
+                unitIds={unitIds}
                 listLengthScaler={listLengthScaler}
             />
         </Splitter>
@@ -48,7 +52,7 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
 
 type ChildProps = {
     data: LiveCrossCorrelogramsViewData
-    unitIds: Set<number | string>
+    unitIds: (number | string)[]
     width: number
     height: number
     listLengthScaler: number
@@ -56,19 +60,18 @@ type ChildProps = {
 
 const maxNumUnits = 6
 
-const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, unitIds, width, height, listLengthScaler}) => {
+const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, unitIds, height}) => {
     const plots = useMemo(() => {
-        if (unitIds.size > maxNumUnits) return []
-        const plotHeight = height / unitIds.size - 30
+        if (unitIds.length > maxNumUnits) return []
+        const plotHeight = height / unitIds.length - 30
         const plotWidth = plotHeight
         const plots: PGPlot[] = []
 
         unitIds.forEach(unitId1 => {
             unitIds.forEach(unitId2 => {
                 plots.push({
-                    // unique id invariant to number of units selected
-                    numericId: idToNum(unitId1) * listLengthScaler + idToNum(unitId2),
                     key: `${unitId1}-${unitId2}`,
+                    unitId: unitId1,
                     label: `Unit ${unitId1}/${unitId2}`,
                     labelColor: 'black',
                     props: {
@@ -82,24 +85,20 @@ const LiveCrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, un
             })
         })
         return plots
-    }, [unitIds, listLengthScaler, data.dataUri, height])
+    }, [unitIds, data.dataUri, height])
 
-    if (unitIds.size === 0) {
+    if (unitIds.length === 0) {
         return <div>Select at least one unit.</div>
     }
-    if (unitIds.size > maxNumUnits) {
+    if (unitIds.length > maxNumUnits) {
         return <div>Select at most {maxNumUnits} units.</div>
     }
-    // The IDs of the plots in this case do not correspond to the IDs of the units, so we must provide
-    // our own list of sorted IDs.
-    const orderedIds = plots.map(p => p.numericId).sort((a, b) => idToNum(a) - idToNum(b))
     return (
         <PlotGrid
             plots={plots}
             plotComponent={LiveCrossCorrelogramPlot}
             selectedPlotKeys={undefined}
-            numPlotsPerRow={unitIds.size}
-            orderedPlotIds={orderedIds}
+            numPlotsPerRow={unitIds.length}
         />
     )
 }

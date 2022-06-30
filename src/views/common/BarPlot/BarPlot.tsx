@@ -23,7 +23,11 @@ export type Margins = {
 
 const BarPlot: FunctionComponent<Props> = ({bars, color, ticks, xLabel, width, height}) => {
     const {xMin, xMax} = useMemo(() => (
-        {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
+        bars.length > 0 ? (
+            {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
+        ) : (
+            {xMin: 0, xMax: 1}
+        )
     ), [bars])
     const yMax = useMemo(() => (
         Math.max(...bars.map(b => (b.height)))
