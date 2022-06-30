@@ -44,6 +44,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             samplingFrequency: data.samplingFrequency,
             noiseLevel: data.noiseLevel,
             ampScaleFactor,
+            waveformColor: colorForUnitId(idToNum(aw.unitId)),
             width: 120,
             height: 120
         }

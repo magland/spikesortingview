@@ -22,6 +22,7 @@ export type WaveformWidgetProps = {
         colors?: WaveformColors
         waveformWidth: number
     }
+    waveformColor: string
 }
 
 const electrodeColors: ElectrodeColors = {
@@ -56,7 +57,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const showLabels = props.showLabels ?? defaultElectrodeOpts.showLabels
     const colors = props.colors ?? defaultElectrodeOpts.colors
     const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
-    const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
+    const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height, waveformColor} = props
 
     const geometry = useMemo(() => <ElectrodeGeometry
         electrodes={electrodes}
@@ -117,6 +118,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         width={width}
         height={height}
         layoutMode={layoutMode}
+        color={waveformColor}
     />
 
     return (

@@ -1,6 +1,7 @@
 import { INITIALIZE_ROWS, useSelectedUnitIds } from 'contexts/RowSelection/RowSelectionContext';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import { SortableTableWidgetColumn, SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
 import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from '../common/SortableTableWidget/ColorPatchUnitIdLabel';
@@ -86,8 +87,7 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
                 }
             }
             return {
-                rowId: `${r.unitId}`,
-                rowIdNumeric: r.unitId,
+                rowId: r.unitId,
                 data: rowData,
                 checkboxFn: !toolbarOptions.onlyShowSelected ? checkboxClickHandlerGenerator(r.unitId) : undefined
             }
@@ -95,12 +95,12 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
     ), [data.rows, data.columns, sortingCuration, checkboxClickHandlerGenerator, toolbarOptions.onlyShowSelected])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => r.rowIdNumeric).sort((a, b) => a - b) })
+        unitIdSelectionDispatch({ type: INITIALIZE_ROWS, newRowOrder: rows.map(r => (r.rowId)).sort((a, b) => idToNum(a) - idToNum(b)) })
     }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
-        const draft = new Map<number, SortableTableWidgetRow>()
-        rows.forEach(r => draft.set(r.rowIdNumeric, r))
+        const draft = new Map<number | string, SortableTableWidgetRow>()
+        rows.forEach(r => draft.set(r.rowId, r))
         return draft
     }, [rows])
 

@@ -10,11 +10,12 @@ type Props = {
     samplingFrequency: number
     noiseLevel: number
     ampScaleFactor: number
+    waveformColor: string
     width: number
     height: number
 }
 
-const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, noiseLevel, ampScaleFactor, width, height}) => {
+const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, noiseLevel, ampScaleFactor, width, height, waveformColor}) => {
     const electrodes = useMemo(() => {
         const locs = channelLocations || {}
         return channelIds.map(channelId => ({
@@ -38,6 +39,7 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             noiseLevel={noiseLevel}
             samplingFrequency={samplingFrequency}
             waveformOpts={waveformOpts}
+            waveformColor={waveformColor}
         />
     )
 }
