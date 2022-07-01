@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactElement, useState } from 'react';
+import React, { FunctionComponent, ReactElement, useEffect, useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
 interface Props {
@@ -21,6 +21,14 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
     const {width, height, initialPosition, onChange, adjustable=true, positionFromRight=false} = props
 
     const [gripPosition, setGripPosition] = useState<number>(initialPosition)
+    useEffect(() => {
+        if (gripPosition > width - 4) {
+            setGripPosition(width - 4)
+        }
+        else if ((gripPosition < 4) && (width > 20)) {
+            setGripPosition(4)
+        }
+    }, [gripPosition, width])
 
     // See: https://stackoverflow.com/questions/63603902/finddomnode-is-deprecated-in-strictmode-finddomnode-was-passed-an-instance-of-d
     // const draggableNodeRef = React.useRef(null)

@@ -1,5 +1,5 @@
 # 7/1/22
-# https://figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://97ca5e3021cef722846a2dbc9c86680089a70b07&label=test%20sorting%20layout
+# https://figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://93f48815960c4a5c23a0c1c3712d7b0eeb2b185b&label=test%20sorting%20layout
 
 import kachery_cloud as kcl
 import sortingview as sv
@@ -42,6 +42,10 @@ def main():
                             'items': [
                                 {'type': 'View', 'viewId': '1'},
                                 {'type': 'View', 'viewId': '5'}
+                            ],
+                            'itemProperties': [
+                                {'stretch': 3},
+                                {'stretch': 1}
                             ]
                         },
                     ],

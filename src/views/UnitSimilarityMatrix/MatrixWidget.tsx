@@ -43,7 +43,7 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
                 if ((selectedUnitIds.has(u1)) && (selectedUnitIds.has(u2))) {
                     const col2 = colorForValue(matrix[i1][i2], true)
                     ctxt.strokeStyle = col2
-                    const w = 3
+                    const w = x2 - x1 >= 10 ? 3 : x2 - x1 >= 6 ? 2 : x2 - x1 >= 4 ? 1 : 0
                     ctxt.lineWidth = w
                     ctxt.strokeRect(x1, y1, x2 - x1 - w, y2 - y1 - w)
                 }
