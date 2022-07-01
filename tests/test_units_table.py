@@ -46,7 +46,7 @@ def test_units_table(*, recording: si.BaseRecording, sorting: si.BaseSorting):
                 'numEvents': len(spike_train),
                 'firingRateHz': len(spike_train) / (recording.get_num_frames() / recording.get_sampling_frequency())
             }
-        }) 
+        })
     data = {
         'type': 'UnitsTable',
         'columns': columns,

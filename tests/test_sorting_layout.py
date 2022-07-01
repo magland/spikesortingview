@@ -1,5 +1,5 @@
-# 6/30/22
-# https://figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://bd266713b70287d057a8896c38368823641d9098&label=test%20sorting%20layout
+# 7/1/22
+# https://figurl.org/f?v=gs://figurl/spikesortingview-6&d=sha1://97ca5e3021cef722846a2dbc9c86680089a70b07&label=test%20sorting%20layout
 
 import kachery_cloud as kcl
 import sortingview as sv
@@ -10,6 +10,7 @@ from test_cross_correlograms import test_cross_correlograms
 from test_raster_plot import test_raster_plot
 from test_average_waveforms import test_average_waveforms
 from test_units_table import test_units_table
+from test_unit_similarity_matrix import test_unit_unit_similarity_matrix
 
 def main():
     recording, sorting = se.toy_example(num_units=12, duration=300, seed=0)
@@ -22,6 +23,7 @@ def main():
     data2 = test_autocorrelograms(recording=R, sorting=S)
     data3 = test_average_waveforms(recording=R, sorting=S)
     data4 = test_cross_correlograms(recording=R, sorting=S)
+    data5 = test_unit_unit_similarity_matrix(recording=R, sorting=S)
 
     data = {
         'type': 'SortingLayout',
@@ -34,7 +36,14 @@ def main():
                     'direction': 'horizontal',
                     'items': [
                         {'type': 'View', 'viewId': '0'},
-                        {'type': 'View', 'viewId': '1'}
+                        {
+                            'type': 'Splitter',
+                            'direction': 'horizontal',
+                            'items': [
+                                {'type': 'View', 'viewId': '1'},
+                                {'type': 'View', 'viewId': '5'}
+                            ]
+                        },
                     ],
                     'itemProperties': [
                         {'minSize': 100, 'stretch': 1},
@@ -63,7 +72,7 @@ def main():
                 'type': data0['type'],
                 'dataUri': _upload_data_and_return_uri(data0)
             }
-            for i, data0 in enumerate([data0, data1, data2, data3, data4])
+            for i, data0 in enumerate([data0, data1, data2, data3, data4, data5])
         ]
     }
 
