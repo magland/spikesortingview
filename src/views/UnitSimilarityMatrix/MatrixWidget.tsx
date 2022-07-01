@@ -1,5 +1,6 @@
 import BaseCanvas from "FigurlCanvas/BaseCanvas";
-import { FunctionComponent, useCallback, useMemo } from "react";
+import { FunctionComponent, useCallback, useMemo, useState } from "react";
+import { AffineTransform, applyAffineTransform, applyAffineTransformInv, createAffineTransform, identityAffineTransform, inverseAffineTransform, multAffineTransforms } from "./AffineTransform";
 
 type Props = {
     unitIds: (number | string)[]
@@ -11,6 +12,7 @@ type Props = {
 }
 
 const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSetSelectedUnitIds, matrix, width, height}) => {
+    const [affineTransform, setAffineTransform] = useState<AffineTransform>(identityAffineTransform)
     // const indsForIds = useMemo(() => {
     //     const indsForIds: { [k: number | string]: number } = {}
     //     unitIds.forEach((id, i) => {
@@ -21,18 +23,22 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
     const size = Math.min(width, height)
     const offsetX = (width - size) / 2
     const offsetY = (height - size) / 2
-    const indToPixel = useMemo(() => (o: {i1: number, i2: number}) => ({
-        x: offsetX + o.i1 / unitIds.length * size,
-        y: offsetY + o.i2 / unitIds.length * size
-    }), [unitIds.length, size, offsetX, offsetY])
-    const pixelToInd = useMemo(() => (o: {x: number, y: number}) => {
-        const i1 = Math.floor((o.x - offsetX) / size * unitIds.length)
-        const i2 =Math.floor((o.y - offsetY) / size * unitIds.length)
+    const indToPixel = useMemo(() => (o: {i1: number, i2: number}) => (
+        applyAffineTransform(affineTransform, {
+            x: offsetX + o.i1 / unitIds.length * size,
+            y: offsetY + o.i2 / unitIds.length * size
+        })
+    ), [unitIds.length, size, offsetX, offsetY, affineTransform])
+    const pixelToInd = useMemo(() => (p: {x: number, y: number}) => {
+        const p2 = applyAffineTransformInv(affineTransform, p)
+        const i1 = Math.floor((p2.x - offsetX) / size * unitIds.length)
+        const i2 =Math.floor((p2.y - offsetY) / size * unitIds.length)
         return (
             (0 <= i1) && (i1 < unitIds.length) && (0 <= i2) && (i2 < unitIds.length)
         ) ? {i1, i2} : undefined
-    }, [unitIds.length, size, offsetX, offsetY])
+    }, [unitIds.length, size, offsetX, offsetY, affineTransform])
     const paint = useCallback((ctxt: CanvasRenderingContext2D) => {
+        ctxt.clearRect(0, 0, width, height)
         unitIds.forEach((u1, i1) => {
             unitIds.forEach((u2, i2) => {
                 const {x: x1, y: y1} = indToPixel({i1, i2})
@@ -49,7 +55,7 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
                 }
             })
         })
-    }, [indToPixel, matrix, unitIds, selectedUnitIds])
+    }, [indToPixel, matrix, unitIds, selectedUnitIds, width, height])
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         const boundingRect = e.currentTarget.getBoundingClientRect()
         const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
@@ -57,10 +63,36 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
         if (!ind) return
         onSetSelectedUnitIds([unitIds[ind.i1], unitIds[ind.i2]])
     }, [onSetSelectedUnitIds, unitIds, pixelToInd])
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        const boundingRect = e.currentTarget.getBoundingClientRect()
+        const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
+        const deltaY = e.deltaY
+        const scaleFactor = 1.3
+        let X = createAffineTransform([
+            [scaleFactor, 0, (1 - scaleFactor) * point.x],
+            [0, scaleFactor, (1 - scaleFactor) * point.y]
+        ])
+        if (deltaY > 0) X = inverseAffineTransform(X)
+        let newTransform = multAffineTransforms(
+            X,
+            affineTransform
+        )
+        // test to see if we should snap back to identity
+        const p00 = applyAffineTransform(newTransform, indToPixel({i1: 0, i2: 0}))
+        const p11 = applyAffineTransform(newTransform, indToPixel({i1: unitIds.length, i2: unitIds.length}))
+        if ((0 <= p00.x) && (p00.x < width) && (0 <= p00.y) && (p00.y < height)) {
+            if ((0 <= p11.x) && (p11.x < width) && (0 <= p11.y) && (p11.y < height)) {
+                newTransform = identityAffineTransform
+            }
+        }
+
+        setAffineTransform(newTransform)
+    }, [affineTransform, height, indToPixel, unitIds.length, width])
     return (
         <div
             style={{width, height, position: 'relative'}}
             onMouseDown={handleMouseDown}
+            onWheel={handleWheel}
         >
             <BaseCanvas
                 width={width}

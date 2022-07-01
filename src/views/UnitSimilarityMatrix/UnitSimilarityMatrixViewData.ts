@@ -5,8 +5,8 @@ export type UnitSimilarityMatrixViewData = {
     type: 'UnitSimilarityMatrix'
     unitIds: (number | string)[]
     similarityScores: {
-        unitId1: number,
-        unitId2: number,
+        unitId1: number | string,
+        unitId2: number | string,
         similarity: number
     }[]
 }
@@ -16,8 +16,8 @@ export const isUnitSimilarityMatrixViewData = (x: any): x is UnitSimilarityMatri
         type: isEqualTo('UnitSimilarityMatrix'),
         unitIds: isArrayOf(isOneOf([isNumber, isString])),
         similarityScores: isArrayOf(y=> (validateObject(y, {
-            unitId1: isNumber,
-            unitId2: isNumber,
+            unitId1: isOneOf([isNumber, isString]),
+            unitId2: isOneOf([isNumber, isString]),
             similarity: isNumber
         })))
     })

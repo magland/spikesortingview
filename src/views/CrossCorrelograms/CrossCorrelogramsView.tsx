@@ -14,6 +14,8 @@ type Props = {
     height: number
 }
 
+const MAX_UNITS_SELECTED = 10
+
 const CrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) => {
     const {selectedUnitIds, orderedUnitIds, visibleUnitIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
 
@@ -54,13 +56,19 @@ const CrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) 
                 locked={selectionLocked}
                 toggleLockStateCallback={toggleSelectionLocked}
             />
-            <CrossCorrelogramsViewChild
-                data={data}
-                width={0} // filled in by splitter
-                height={0} // filled in by splitter
-                unitIds={unitIds}
-                listLengthScaler={listLengthScaler}
-            />
+            {
+                unitIds.length > MAX_UNITS_SELECTED ? (
+                    <div>Not showing cross-correlogram matrix. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>
+                ) : (
+                    <CrossCorrelogramsViewChild
+                        data={data}
+                        width={0} // filled in by splitter
+                        height={0} // filled in by splitter
+                        unitIds={unitIds}
+                        listLengthScaler={listLengthScaler}
+                    />
+                )
+            }
         </Splitter>
     )
 }
