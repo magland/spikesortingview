@@ -15,7 +15,9 @@ type Props = {
 }
 
 const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
-    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(defaultUnitsTableBottomToolbarOptions)
+    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(
+        {...defaultUnitsTableBottomToolbarOptions, onlyShowSelected: false}
+    )
     const {selectedUnitIds, orderedUnitIds, visibleUnitIds, primarySortRule, checkboxClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
     const {sortingCuration} = useSortingCuration()
 

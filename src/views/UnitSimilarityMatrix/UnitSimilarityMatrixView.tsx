@@ -1,6 +1,7 @@
 import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext'
-import { FunctionComponent, useCallback, useEffect, useMemo } from 'react'
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
+import BottomToolbar from './BottomToolbar'
 import MatrixWidget from './MatrixWidget'
 import { UnitSimilarityMatrixViewData } from './UnitSimilarityMatrixViewData'
 
@@ -10,8 +11,17 @@ type Props = {
     height: number
 }
 
+const defaultRange: [number, number] = [0, 1]
+
+export type HoveredInfo = {
+    unitId1: number | string
+    unitId2: number | string
+    value: number | undefined
+}
+
 const UnitSimilarityMatrixView: FunctionComponent<Props> = ({ data, width, height }) => {
     const { selectedUnitIds, visibleUnitIds, unitIdSelectionDispatch } = useSelectedUnitIds()
+    const [hoveredInfo, setHoveredInfo] = useState<HoveredInfo | undefined>(undefined)
 
     useEffect(() => {
         unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: data.unitIds.sort((a, b) => idToNum(a) - idToNum(b))})
@@ -47,15 +57,23 @@ const UnitSimilarityMatrixView: FunctionComponent<Props> = ({ data, width, heigh
         })
     }, [unitIdSelectionDispatch])
 
+    const bottomToolbarHeight = 30
     return (
-        <MatrixWidget
-            unitIds={unitIds2}
-            selectedUnitIds={selectedUnitIds}
-            onSetSelectedUnitIds={handleSetSelectedUnitIds}
-            matrix={matrix}
-            width={width}
-            height={height}
-        />
+        <div>
+            <MatrixWidget
+                unitIds={unitIds2}
+                selectedUnitIds={selectedUnitIds}
+                onSetSelectedUnitIds={handleSetSelectedUnitIds}
+                matrix={matrix}
+                range={data.range || defaultRange}
+                setHoveredInfo={setHoveredInfo}
+                width={width}
+                height={height - bottomToolbarHeight}
+            />
+            <BottomToolbar
+                hoveredInfo={hoveredInfo}
+            />
+        </div>
     )
 }
 

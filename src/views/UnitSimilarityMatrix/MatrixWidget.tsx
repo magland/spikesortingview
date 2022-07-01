@@ -7,11 +7,13 @@ type Props = {
     selectedUnitIds: Set<string | number>
     onSetSelectedUnitIds: (x: (string | number)[]) => void
     matrix: number[][]
+    range: [number, number]
+    setHoveredInfo: (o: {unitId1: number | string, unitId2: number | string, value: number | undefined} | undefined) => void
     width: number
     height: number
 }
 
-const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSetSelectedUnitIds, matrix, width, height}) => {
+const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSetSelectedUnitIds, matrix, range, setHoveredInfo, width, height}) => {
     const [affineTransform, setAffineTransform] = useState<AffineTransform>(identityAffineTransform)
     // const indsForIds = useMemo(() => {
     //     const indsForIds: { [k: number | string]: number } = {}
@@ -43,11 +45,11 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
             unitIds.forEach((u2, i2) => {
                 const {x: x1, y: y1} = indToPixel({i1, i2})
                 const {x: x2, y: y2} = indToPixel({i1: i1 + 1, i2: i2 + 1})
-                const col = colorForValue(matrix[i1][i2])
+                const col = colorForValue(matrix[i1][i2], range, false)
                 ctxt.fillStyle = col
                 ctxt.fillRect(x1, y1, x2 - x1, y2 - y1)
                 if ((selectedUnitIds.has(u1)) && (selectedUnitIds.has(u2))) {
-                    const col2 = colorForValue(matrix[i1][i2], true)
+                    const col2 = colorForValue(matrix[i1][i2], range, true)
                     ctxt.strokeStyle = col2
                     const w = x2 - x1 >= 10 ? 3 : x2 - x1 >= 6 ? 2 : x2 - x1 >= 4 ? 1 : 0
                     ctxt.lineWidth = w
@@ -55,14 +57,29 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
                 }
             })
         })
-    }, [indToPixel, matrix, unitIds, selectedUnitIds, width, height])
+    }, [indToPixel, matrix, unitIds, selectedUnitIds, width, height, range])
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         const boundingRect = e.currentTarget.getBoundingClientRect()
         const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
         const ind = pixelToInd(point)
-        if (!ind) return
-        onSetSelectedUnitIds([unitIds[ind.i1], unitIds[ind.i2]])
+        if (ind) {
+            onSetSelectedUnitIds([unitIds[ind.i1], unitIds[ind.i2]])
+        }
     }, [onSetSelectedUnitIds, unitIds, pixelToInd])
+    const handleMouseMove = useCallback((e: React.MouseEvent) => {
+        const boundingRect = e.currentTarget.getBoundingClientRect()
+        const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
+        const ind = pixelToInd(point)
+        if (ind) {
+            setHoveredInfo({unitId1: unitIds[ind.i1], unitId2: unitIds[ind.i2], value: matrix[ind.i1][ind.i2]})
+        }
+        else {
+            setHoveredInfo(undefined)
+        }
+    }, [pixelToInd, matrix, setHoveredInfo, unitIds])
+    const handleMouseLeave = useCallback((e: React.MouseEvent) => {
+        setHoveredInfo(undefined)
+    }, [setHoveredInfo])
     const handleWheel = useCallback((e: React.WheelEvent) => {
         const boundingRect = e.currentTarget.getBoundingClientRect()
         const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
@@ -93,6 +110,8 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
             style={{width, height, position: 'relative'}}
             onMouseDown={handleMouseDown}
             onWheel={handleWheel}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
         >
             <BaseCanvas
                 width={width}
@@ -104,11 +123,11 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
     )
 }
 
-const colorForValue = (v: number, highlight?: boolean) => {
+const colorForValue = (v: number, range: [number, number], highlight?: boolean) => {
     if (isNaN(v)) {
         return `rgb(50, 20, 0)`
     }
-    const a = Math.min(255, Math.max(0, Math.floor(v * 255)))
+    const a = Math.min(255, Math.max(0, Math.floor((v - range[0]) / (range[1] - range[0]) * 255)))
     const b = Math.min(255, Math.max(0, 255 - a - 30))
     return !highlight ? `rgb(${a}, ${a}, ${a})` : `rgb(${b}, ${b}, 255)`
 }

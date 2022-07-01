@@ -4,7 +4,9 @@ import { FunctionComponent } from "react"
 export type UnitsTableBottomToolbarOptions = {
     onlyShowSelected: boolean
 }
-export const defaultUnitsTableBottomToolbarOptions: UnitsTableBottomToolbarOptions = {onlyShowSelected: false}
+export const defaultUnitsTableBottomToolbarOptions: UnitsTableBottomToolbarOptions = {
+    onlyShowSelected: true
+}
 
 type Props = {
     options: UnitsTableBottomToolbarOptions
