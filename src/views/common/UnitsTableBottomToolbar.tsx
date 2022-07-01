@@ -5,7 +5,7 @@ export type UnitsTableBottomToolbarOptions = {
     onlyShowSelected: boolean
 }
 export const defaultUnitsTableBottomToolbarOptions: UnitsTableBottomToolbarOptions = {
-    onlyShowSelected: true
+    onlyShowSelected: false
 }
 
 type Props = {

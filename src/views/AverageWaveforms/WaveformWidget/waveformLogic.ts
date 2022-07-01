@@ -5,9 +5,13 @@ export const defaultSpikeToNoiseRatio = 10
 // (By default the threshold multiple is 10.)
 // This function returns a coefficient that normalizes an amplitude reading so that levels of 1 or higher
 // indicate a spike.
-export const getSpikeAmplitudeNormalizationFactor = (noiseLevel: number, spikeToNoiseRatio?: number) => {
-    const spikeNoiseRatio = spikeToNoiseRatio || defaultSpikeToNoiseRatio
-    const noise = noiseLevel || 1
+// export const getSpikeAmplitudeNormalizationFactor = (noiseLevel: number, spikeToNoiseRatio?: number) => {
+//     const spikeNoiseRatio = spikeToNoiseRatio || defaultSpikeToNoiseRatio
+//     const noise = noiseLevel || 1
 
-    return (1 / noise) / spikeNoiseRatio
+//     return (1 / noise) / spikeNoiseRatio
+// }
+
+export const getSpikeAmplitudeNormalizationFactor = (peakAmplitude: number) => {
+    return 1 / peakAmplitude
 }

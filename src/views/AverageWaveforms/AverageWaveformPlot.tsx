@@ -9,7 +9,7 @@ type Props = {
     layoutMode: 'geom' | 'vertical'
     channelLocations?: {[key: string]: number[]}
     samplingFrequency: number
-    noiseLevel: number
+    peakAmplitude: number
     ampScaleFactor: number
     waveformColor: string
     showChannelIds: boolean
@@ -17,7 +17,7 @@ type Props = {
     height: number
 }
 
-const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, noiseLevel, ampScaleFactor, waveformColor, showChannelIds, width, height}) => {
+const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, waveformColor, showChannelIds, width, height}) => {
     const electrodes = useMemo(() => {
         const locs = channelLocations || {}
         return channelIds.map(channelId => ({
@@ -47,7 +47,7 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             width={width}
             height={height}
             showLabels={true} // for now
-            noiseLevel={noiseLevel}
+            peakAmplitude={peakAmplitude}
             samplingFrequency={samplingFrequency}
             waveformOpts={waveformOpts}
         />

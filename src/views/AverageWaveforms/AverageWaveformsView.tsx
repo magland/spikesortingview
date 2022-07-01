@@ -34,6 +34,19 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
 
     const [plotBoxScaleFactor, setPlotBoxScaleFactor] = useState<number>(2)
 
+    const peakAmplitude = useMemo(() => {
+        let ret = 0
+        data.averageWaveforms.forEach(x => {
+            x.waveform.forEach(y => {
+                y.forEach(z => {
+                    const abs = Math.abs(z)
+                    if (abs > ret) ret = abs
+                })
+            })
+        })
+        return ret
+    }, [data.averageWaveforms])
+
     const plots: PGPlot[] = useMemo(() => data.averageWaveforms.filter(a => (toolbarOptions.onlyShowSelected ? (selectedUnitIds.has(a.unitId)) : true)).map(aw => ({
         unitId: aw.unitId,
         key: aw.unitId,
@@ -47,14 +60,14 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             layoutMode: waveformsMode,
             channelLocations: data.channelLocations,
             samplingFrequency: data.samplingFrequency,
-            noiseLevel: data.noiseLevel,
+            peakAmplitude,
             ampScaleFactor,
             waveformColor: colorForUnitId(idToNum(aw.unitId)),
             showChannelIds,
             width: 120 * plotBoxScaleFactor,
             height: 120 * plotBoxScaleFactor
         }
-    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, data.noiseLevel, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds])
+    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds])
 
     const plots2: PGPlot[] = useMemo(() => {
         if (orderedUnitIds) {

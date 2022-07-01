@@ -22,7 +22,7 @@ export type WaveformWidgetProps = {
     height: number
     colors?: ElectrodeColors
     showLabels?: boolean
-    noiseLevel: number
+    peakAmplitude: number
     samplingFrequency: number
     waveformOpts: WaveformOpts
 }
@@ -81,7 +81,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const xMargin = xMarginBase || xMarginDefault
 
     // Spikes are defined as being some factor greater than the baseline noise.
-    const amplitudeNormalizationFactor = useMemo(() => getSpikeAmplitudeNormalizationFactor(props.noiseLevel), [props.noiseLevel])
+    const amplitudeNormalizationFactor = useMemo(() => getSpikeAmplitudeNormalizationFactor(props.peakAmplitude), [props.peakAmplitude])
     const yScaleFactor = useMemo(() => (userSpecifiedAmplitudeScaling * amplitudeNormalizationFactor), [userSpecifiedAmplitudeScaling, amplitudeNormalizationFactor])
 
     // 'waveforms' is a list of lists of points. There's one outer list per channel (so far so good).

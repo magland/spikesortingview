@@ -21,7 +21,7 @@ export type AverageWaveformsViewData = {
     type: 'AverageWaveforms'
     averageWaveforms: AverageWaveformData[]
     samplingFrequency: number
-    noiseLevel: number
+    noiseLevel?: number
     channelLocations?: {[key: string]: number[]}
 }
 
@@ -30,7 +30,7 @@ export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewDat
         type: isEqualTo('AverageWaveforms'),
         averageWaveforms: isArrayOf(isAverageWaveformData),
         samplingFrequency: isNumber,
-        noiseLevel: isNumber,
+        noiseLevel: optional(isNumber),
         channelLocations: optional(() => (true))
     }, {allowAdditionalFields: true})
 }
