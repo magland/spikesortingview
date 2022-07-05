@@ -3,7 +3,7 @@ import { isSha1Hash, Sha1Hash } from "figurl/viewInterface/kacheryTypes"
 import { isArrayOf, isEqualTo, optional } from "figurl/viewInterface/validateObject"
 import { isString } from "vega"
 
-type MLViewData = {
+export type MLViewData = {
     label: string
     type: string
     figureDataSha1?: Sha1Hash // old
@@ -22,6 +22,7 @@ const isMLViewData = (x: any): x is MLViewData => {
 export type MountainLayoutViewData = {
     type: 'MountainLayout'
     views: MLViewData[]
+    controls?: MLViewData[]
     sortingCurationUri?: string
 }
 
@@ -29,6 +30,7 @@ export const isMountainLayoutViewData = (x: any): x is MountainLayoutViewData =>
     return validateObject(x, {
         type: isEqualTo('MountainLayout'),
         views: isArrayOf(isMLViewData),
+        controls: optional(isArrayOf(isMLViewData)),
         sortingCurationUri: optional(isString)
     }, {allowAdditionalFields: true})
 }

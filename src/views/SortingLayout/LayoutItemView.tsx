@@ -1,6 +1,7 @@
 import { FunctionComponent } from "react"
 import BoxLayoutItemView from "./BoxLayoutItemView"
 import IndividualLayoutItemView from "./IndividualLayoutItemView"
+import MountainLayoutItemView from "./MountainLayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 import SplitterLayoutItemView from "./SplitterLayoutItemView"
 
@@ -22,6 +23,13 @@ const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, hei
             />
         ) : layoutItem.type === 'Splitter' ? (
             <SplitterLayoutItemView
+                layoutItem={layoutItem}
+                views={views}
+                width={width}
+                height={height}
+            />
+        ) : layoutItem.type === 'Mountain' ? (
+            <MountainLayoutItemView
                 layoutItem={layoutItem}
                 views={views}
                 width={width}

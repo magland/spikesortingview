@@ -12,13 +12,15 @@ import MWCurationControl from './MWCurationControl';
 type Props = {
     viewPlugins: MWViewPlugin[]
     viewProps: {[key: string]: any}
+    hideCurationControl?: boolean
+    controlViewPlugins: MWViewPlugin[]
     width: number
     height: number
 }
 
 const initialLeftPanelWidth = 320
 
-const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins, viewProps}) => {
+const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins, viewProps, hideCurationControl, controlViewPlugins}) => {
     const [openViews, openViewsDispatch] = useReducer(openViewsReducer, [])
 
     const launchIcon = <span style={{color: 'gray'}}><OpenInBrowserIcon /></span>
@@ -63,9 +65,23 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
                 </Expandable>
 
                 {/* Curation */}
-                <Expandable icon={launchIcon} label="Curation" defaultExpanded={true} unmountOnExit={false}>
-                    <MWCurationControl />
-                </Expandable>
+                {
+                    !hideCurationControl && (
+                        <Expandable icon={launchIcon} label="Curation" defaultExpanded={true} unmountOnExit={false}>
+                            <MWCurationControl />
+                        </Expandable>
+                    )
+                }
+
+                {
+                    controlViewPlugins.map(v => (
+                        <Expandable key={v.name} icon={launchIcon} label={v.label} defaultExpanded={true} unmountOnExit={false}>
+                            <MWViewWrapper
+                                viewPlugin={v}
+                            />
+                        </Expandable>
+                    ))
+                }
             </div>
             <MWViewContainer
                 onViewClosed={handleViewClosed}
@@ -85,6 +101,18 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
                 }
             </MWViewContainer>
         </Splitter>
+    )
+}
+
+type WrapperProps = {
+    viewPlugin: MWViewPlugin
+}
+
+const MWViewWrapper: FunctionComponent<WrapperProps> = ({ viewPlugin }) => {
+    const p = viewPlugin
+    const Component = p.component
+    return (
+        <Component {...(p.additionalProps || {})} />
     )
 }
 

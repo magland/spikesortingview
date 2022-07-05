@@ -14,6 +14,7 @@ import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/Positi
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isRawTracesPlotViewData, RawTracesPlotViewData } from "views/RawTracesPlot/RawTracesPlotViewData"
+import { isSortingCurationViewData, SortingCurationViewData } from 'views/SortingCuration/SortingCurationViewData'
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
@@ -42,7 +43,8 @@ export type ViewData =
     TrackAnimationStaticData |
     SortingLayoutViewData |
     CrossCorrelogramsViewData |
-    UnitSimilarityMatrixViewData
+    UnitSimilarityMatrixViewData |
+    SortingCurationViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -66,6 +68,7 @@ export const isViewData = (x: any): x is ViewData => {
         isTrackAnimationStaticData,
         isSortingLayoutViewData,
         isCrossCorrelogramsViewData,
-        isUnitSimilarityMatrixViewData
+        isUnitSimilarityMatrixViewData,
+        isSortingCurationViewData
     ])(x)
 }

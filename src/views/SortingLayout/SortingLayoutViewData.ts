@@ -22,11 +22,18 @@ export type LayoutItem = {
         stretch?: number    
     }[]
 } | {
+    type: 'Mountain'
+    items: LayoutItem[]
+    itemProperties: {
+        label: string
+        isControl?: boolean
+    }[]
+} | {
     type: 'View'
     viewId: string
 }
 
-const isLayoutItem = (x: any): x is LayoutItem => {
+export const isLayoutItem = (x: any): x is LayoutItem => {
     return isOneOf([
         (y: any) => (validateObject(y, {
             type: isEqualTo('Box'),
@@ -50,6 +57,14 @@ const isLayoutItem = (x: any): x is LayoutItem => {
             }))))
         })),
         (y: any) => (validateObject(y, {
+            type: isEqualTo('Mountain'),
+            items: isArrayOf(isLayoutItem),
+            itemProperties: isArrayOf(z => (validateObject(z, {
+                label: isString,
+                isControl: optional(isBoolean)
+            })))
+        })),
+        (y: any) => (validateObject(y, {
             type: isEqualTo('View'),
             viewId: isString
         }))
@@ -66,6 +81,7 @@ export type SortingLayoutViewData = {
     type: 'SortingLayout'
     views: SLView[]
     layout: LayoutItem
+    sortingCurationUri?: string
 }
 
 export const isSortingLayoutViewData = (x: any): x is SortingLayoutViewData => {
@@ -76,6 +92,7 @@ export const isSortingLayoutViewData = (x: any): x is SortingLayoutViewData => {
             type: isString,
             dataUri: isString
         }))),
-        layout: isLayoutItem
+        layout: isLayoutItem,
+        sortingCurationUri: optional(isString)
     })
 }

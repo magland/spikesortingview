@@ -9,11 +9,12 @@ import ViewWrapper from './ViewWrapper';
 
 type Props = {
     data: MountainLayoutViewData
+    hideCurationControl?: boolean
     width: number
     height: number
 }
 
-const MountainLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
+const MountainLayoutView: FunctionComponent<Props> = ({data, hideCurationControl, width, height}) => {
     const viewPlugins = useMemo(() => (
         data.views.map((view, ii) => ({
             name: `view-${ii}`,
@@ -23,11 +24,22 @@ const MountainLayoutView: FunctionComponent<Props> = ({data, width, height}) => 
             additionalProps: {figureDataSha1: view.figureDataSha1, figureDataUri: view.figureDataUri}
         }))
     ), [data.views])
+    const controlViewPlugins = useMemo(() => (
+        (data.controls || []).map((view, ii) => ({
+            name: `control-${ii}`,
+            label: view.label,
+            component: ViewWrapper,
+            singleton: true,
+            additionalProps: {figureDataSha1: view.figureDataSha1, figureDataUri: view.figureDataUri}
+        }))
+    ), [data.controls])
     const viewProps = useMemo(() => ({}), [])
     const content = (
         <MountainWorkspace
             viewPlugins={viewPlugins}
             viewProps={viewProps}
+            hideCurationControl={hideCurationControl}
+            controlViewPlugins={controlViewPlugins}
             width={width}
             height={height}
         />

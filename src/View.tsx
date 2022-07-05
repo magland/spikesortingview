@@ -14,6 +14,7 @@ import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
 import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import RawTracesPlotView from 'views/RawTracesPlot/RawTracesPlotView';
+import SortingCurationView from 'views/SortingCuration/SortingCurationView';
 import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
@@ -98,6 +99,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'UnitSimilarityMatrix') {
         return <UnitSimilarityMatrixView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'SortingCuration') {
+        return <SortingCurationView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
