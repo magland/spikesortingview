@@ -100,7 +100,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
     }, [data.crossCorrelograms, unitIds])
 
     const plots: PGPlot[] = useMemo(() => {
-        const plotHeight = height / unitIds.length - 30
+        const plotHeight = Math.min(width / unitIds.length - 30, height / unitIds.length - 30)
         const plotWidth = plotHeight
         return crossCorrelogramsSorted.map((cc, ii) => ({
             key: `${ii}`,
@@ -116,7 +116,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
                 height: plotHeight
             }
         }))
-    }, [crossCorrelogramsSorted, height, unitIds])
+    }, [crossCorrelogramsSorted, height, width, unitIds])
 
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
