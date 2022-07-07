@@ -101,9 +101,22 @@ const computeDataToPixelTransformVerticalLayout = (width: number, height: number
 // NOTE: for vertical layout, radius is 1/(n+1) in dataspace.
 // pixelradius is thus (canvas height less vertical margins) / n+1 (where n = # of electrodes).
 const convertElectrodesToPixelSpaceVerticalLayout = (electrodes: Electrode[], transform: TransformationMatrix): PixelSpaceElectrode[] => {
-    // for vertical layout, we ignore any actual location information and just distribute the electrodes evenly over a column.
+    // for vertical layout, we ignore any actual location information (except for sorting) and just distribute the electrodes evenly over a column.
     // Do that here by resetting the processed electrode geometry into the assigned points.
-    const points = electrodes.map((e, ii) => [0.5, (0.5 + ii)/(1 + electrodes.length)])
+
+    // Sort by y position in the geom layout
+    // and define the points and pixel space points
+    const sortedElectrodeInds = electrodes.map((e, ind) => ({e, ind})).sort((a, b) => (-a.e.y + b.e.y)).map((a) => (a.ind))
+    const points: ([number, number])[] = []
+    for (let i = 0; i < electrodes.length; i++) {
+        points.push([0, 0])
+    }
+    for (let i = 0; i < sortedElectrodeInds.length; i++) {
+        const ind = sortedElectrodeInds[i]
+        points[ind] = [0.5, (0.5 + i)/(1 + electrodes.length)]
+    }
+    // const points = electrodesSorted
+    //     .map((e, ii) => [0.5, (0.5 + ii)/(1 + electrodes.length)])
     const pixelspacePoints = transformPoints(transform, points)
 
     return electrodes.map((e, ii) =>  {
