@@ -1,6 +1,7 @@
 import { Grid } from '@material-ui/core';
 import { voidClickHandler } from 'contexts/UnitSelection/UnitSelectionFunctions';
 import React, { FunctionComponent, useMemo } from 'react';
+import ReactVisibilitySensor from 'react-visibility-sensor';
 
 export type PGPlot = {
     key: string | number,
@@ -64,7 +65,16 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
                         <div className={'plotLabelStyle'}>
                             <span style={{color: p.labelColor}}>{p.label || <span>&nbsp;</span>}</span>
                         </div>
-                        <Component {...p.props} />
+                        <ReactVisibilitySensor partialVisibility={true}>
+                            {({isVisible}) => (
+                                isVisible ? (
+                                    <Component {...p.props} />
+                                ) : (
+                                    <div style={{position: 'relative', width: p.props.width, height: p.props.height}}>Not visible</div>
+                                )
+                            )}
+                        </ReactVisibilitySensor>
+                        
                     </div>
                     return {[p.key]: rendered}
             })
