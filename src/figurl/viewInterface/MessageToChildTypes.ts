@@ -80,19 +80,39 @@ export const isSetCurrentUserMessage = (x: any): x is SetCurrentUserMessage => {
     })
 }
 
+// fileDownloadProgress
+
+export type FileDownloadProgressMessage = {
+    type: 'fileDownloadProgress'
+    uri: string
+    loaded: number
+    total: number
+}
+
+export const isFileDownloadProgressMessage = (x: any): x is FileDownloadProgressMessage => {
+    return validateObject(x, {
+        type: isEqualTo('fileDownloadProgress'),
+        uri: isString,
+        loaded: isNumber,
+        total: isNumber
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 export type MessageToChild =
     FigurlResponseMessage |
     NewFeedMessagesMessage |
     TaskStatusUpdateMessage |
-    SetCurrentUserMessage
+    SetCurrentUserMessage |
+    FileDownloadProgressMessage
 
 export const isMessageToChild = (x: any): x is MessageToChild => {
     return isOneOf([
         isFigurlResponseMessage,
         isNewFeedMessagesMessage,
         isTaskStatusUpdateMessage,
-        isSetCurrentUserMessage
+        isSetCurrentUserMessage,
+        isFileDownloadProgressMessage
     ])(x)
 }

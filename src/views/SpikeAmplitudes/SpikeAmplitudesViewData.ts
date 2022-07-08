@@ -1,5 +1,5 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
 
 type SAUnitData = {
     unitId: number
@@ -20,6 +20,7 @@ export type SpikeAmplitudesViewData = {
     startTimeSec: number
     endTimeSec: number
     units: SAUnitData[]
+    hideUnitSelector?: boolean
 }
 
 export const isSpikeAmplitudesViewData = (x: any): x is SpikeAmplitudesViewData => {
@@ -27,6 +28,7 @@ export const isSpikeAmplitudesViewData = (x: any): x is SpikeAmplitudesViewData 
         type: isEqualTo('SpikeAmplitudes'),
         startTimeSec: isNumber,
         endTimeSec: isNumber,
-        units: isArrayOf(isSAUnitData)
+        units: isArrayOf(isSAUnitData),
+        hideUnitSelector: optional(isBoolean)
     })
 }

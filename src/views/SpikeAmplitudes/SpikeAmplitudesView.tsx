@@ -29,10 +29,10 @@ type PanelProps = {
 }
 
 const panelSpacing = 4
+const MAX_UNITS_SELECTED = 10
 
 const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {selectedUnitIds, orderedUnitIds, visibleUnitIds, checkboxClickHandlerGenerator, unitIdSelectionDispatch, selectionLocked, toggleSelectionLocked} = useLocalSelectedUnitIds()
-    console.log('SpikeAmplitudesView', data)
 
     const allUnitIds = useMemo(() => (
         data.units.map(u => (u.unitId))
@@ -44,23 +44,35 @@ const SpikeAmplitudesView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
             height={height}
             initialPosition={200}
         >
-            <LockableSelectUnitsWidget
-                unitIds={allUnitIds}
-                selectedUnitIds={selectedUnitIds}
-                orderedUnitIds={orderedUnitIds}
-                visibleUnitIds={visibleUnitIds}
-                checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
-                unitIdSelectionDispatch={unitIdSelectionDispatch}
-                locked={selectionLocked}
-                toggleLockStateCallback={toggleSelectionLocked}
-            />
-            <SpikeAmplitudesViewChild
-                data={data}
-                timeseriesLayoutOpts={{...timeseriesLayoutOpts, useYAxis: true }}
-                width={0} // filled in by splitter
-                height={0} // filled in by splitter
-                selectedUnitIds={selectedUnitIds}
-            />
+            {
+                !data.hideUnitSelector && (
+                    <LockableSelectUnitsWidget
+                        unitIds={allUnitIds}
+                        selectedUnitIds={selectedUnitIds}
+                        orderedUnitIds={orderedUnitIds}
+                        visibleUnitIds={visibleUnitIds}
+                        checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
+                        unitIdSelectionDispatch={unitIdSelectionDispatch}
+                        locked={selectionLocked}
+                        toggleLockStateCallback={toggleSelectionLocked}
+                    />
+                )
+            }
+            {
+                selectedUnitIds.size > MAX_UNITS_SELECTED ? (
+                    <div>Not showing spike amplitudes. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>
+                ) : selectedUnitIds.size === 0 ? (
+                    <div>Select one or more units to view spike amplitudes.</div>
+                ) : (
+                    <SpikeAmplitudesViewChild
+                        data={data}
+                        timeseriesLayoutOpts={{...timeseriesLayoutOpts, useYAxis: true }}
+                        width={0} // filled in by splitter
+                        height={0} // filled in by splitter
+                        selectedUnitIds={selectedUnitIds}
+                    />
+                )
+            }
         </Splitter>
     )
 }

@@ -1,6 +1,7 @@
 import { useFileData } from "figurl/getFileData";
-import { FunctionComponent } from "react";
+import { FunctionComponent, useEffect, useState } from "react";
 import View from 'View';
+import ProgressComponent from "../common/ProgressComponent";
 import { LayoutItem, SLView } from "./SortingLayoutViewData";
 
 type Props = {
@@ -18,13 +19,24 @@ const IndividualLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, 
     const view = views.filter(v => (v.viewId === viewId))[0]
     if (!view) throw Error(`View not found ${viewId}`)
 
-    const { fileData: figureData, errorMessage } = useFileData(view.dataUri)
+    const { fileData: figureData, progress, errorMessage } = useFileData(view.dataUri)
+    const [progressValue, setProgressValue] = useState<{loaded: number, total: number} | undefined>(undefined)
+    useEffect(() => {
+        progress.onProgress(({loaded, total}) => {
+            setProgressValue({loaded, total})
+        })
+    }, [progress])
 
     if (!figureData) {
         return (
             <div style={{ width, height }}>
                 {
-                    errorMessage ? errorMessage : 'Waiting for data'
+                    errorMessage ? errorMessage : (
+                        <ProgressComponent
+                            loaded={progressValue?.loaded}
+                            total={progressValue?.total}
+                        />
+                    )
                 }
             </div>
         )

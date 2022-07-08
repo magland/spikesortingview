@@ -1,6 +1,6 @@
-import getFileData from 'figurl/getFileData';
+import { useFileData } from 'figurl/getFileData';
 import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import React, { FunctionComponent, useMemo } from 'react';
 import View, { TimeseriesLayoutOpts } from 'View';
 import './MultiTimeseriesView.css';
 
@@ -11,24 +11,6 @@ type Props = {
     isBottomPanel: boolean
     width: number
     height: number
-}
-
-const useFileData = (sha1OrUri: string) => {
-    const [fileData, setFileData] = useState<any>()
-    const [errorMessage, setErrorMessage] = useState<string>()
-
-    useEffect(() => {
-        setFileData(undefined)
-        setErrorMessage(undefined)
-        getFileData(sha1OrUri).then((data: any) => {
-            setFileData(data)
-        }).catch(err => {
-            setErrorMessage(`Error getting file data`)
-            console.error(`Error getting file data`, err)
-        })
-    }, [sha1OrUri])
-
-    return {fileData, errorMessage}
 }
 
 const ViewWrapper: FunctionComponent<Props> = ({ label, figureDataSha1, figureDataUri, isBottomPanel, width, height }) => {
@@ -57,7 +39,7 @@ const ViewWrapper: FunctionComponent<Props> = ({ label, figureDataSha1, figureDa
     ) : (
         <div style={{ width: contentWidth, height }}>
             {
-                errorMessage ? errorMessage : 'Waiting for data'
+                errorMessage ? errorMessage : 'Waiting for data (3)'
             }
         </div>
     )

@@ -1,5 +1,5 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
 
 export type CrossCorrelogramData = {
     unitId1: number
@@ -20,11 +20,13 @@ export const isCrossCorrelogramData = (x: any): x is CrossCorrelogramData => {
 export type CrossCorrelogramsViewData = {
     type: 'CrossCorrelograms'
     crossCorrelograms: CrossCorrelogramData[]
+    hideUnitSelector?: boolean
 }
 
 export const isCrossCorrelogramsViewData = (x: any): x is CrossCorrelogramsViewData => {
     return validateObject(x, {
         type: isEqualTo('CrossCorrelograms'),
-        crossCorrelograms: isArrayOf(isCrossCorrelogramData)
+        crossCorrelograms: isArrayOf(isCrossCorrelogramData),
+        hideUnitSelector: optional(isBoolean)
     })
 }

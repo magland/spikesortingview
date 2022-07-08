@@ -36,16 +36,24 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
 
     if (!props.children) throw Error('Unexpected: no props.children')
 
-    let child1: ReactElement
-    let child2: ReactElement | null
+    let child1: ReactElement | null | undefined
+    let child2: ReactElement | null | undefined
     if (!Array.isArray(props.children)) {
         child1 = props.children as any as ReactElement
         child2 = null
     }
     else {
         const children = props.children.filter(c => (c !== undefined))
-        child1 = children[0] as any as ReactElement
+        child1 = children[0] as any as ReactElement || null
         child2 = (children[1] as any as ReactElement) || null
+    }
+    if (!child1) {
+        child1 = child2
+        child2 = null
+    }
+
+    if (!child1) {
+        throw Error('Splitter must have at least one child.')
     }
 
     if (!child2) {

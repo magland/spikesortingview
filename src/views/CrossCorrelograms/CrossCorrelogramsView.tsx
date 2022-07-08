@@ -39,35 +39,44 @@ const CrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) 
 
     const listLengthScaler = useMemo(() => Math.pow(10, Math.ceil(Math.log10(unitIds.length))), [unitIds])
 
+    const content = (
+        unitIds.length > MAX_UNITS_SELECTED ? (
+            <div>Not showing cross-correlogram matrix. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>
+        ) : unitIds.length === 0 ? (
+            <div>Select one or more units to view cross-correlograms.</div>
+        ) : (
+            <CrossCorrelogramsViewChild
+                data={data}
+                width={0} // filled in by splitter
+                height={0} // filled in by splitter
+                unitIds={unitIds}
+                listLengthScaler={listLengthScaler}
+            />
+        )
+    )
+
     return (
         <Splitter
             width={width}
             height={height}
             initialPosition={200}
         >
-            <LockableSelectUnitsWidget
-                unitIds={allIds}
-                selectedUnitIds={selectedUnitIds}
-                orderedUnitIds={orderedUnitIds}
-                visibleUnitIds={visibleUnitIds}
-                primarySortRule={primarySortRule}
-                checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
-                unitIdSelectionDispatch={unitIdSelectionDispatch}
-                locked={selectionLocked}
-                toggleLockStateCallback={toggleSelectionLocked}
-            />
             {
-                unitIds.length > MAX_UNITS_SELECTED ? (
-                    <div>Not showing cross-correlogram matrix. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>
-                ) : (
-                    <CrossCorrelogramsViewChild
-                        data={data}
-                        width={0} // filled in by splitter
-                        height={0} // filled in by splitter
-                        unitIds={unitIds}
-                        listLengthScaler={listLengthScaler}
-                    />
-                )
+                !data.hideUnitSelector &&
+                <LockableSelectUnitsWidget
+                    unitIds={allIds}
+                    selectedUnitIds={selectedUnitIds}
+                    orderedUnitIds={orderedUnitIds}
+                    visibleUnitIds={visibleUnitIds}
+                    primarySortRule={primarySortRule}
+                    checkboxClickHandlerGenerator={checkboxClickHandlerGenerator}
+                    unitIdSelectionDispatch={unitIdSelectionDispatch}
+                    locked={selectionLocked}
+                    toggleLockStateCallback={toggleSelectionLocked}
+                />
+            }
+            {
+                content
             }
         </Splitter>
     )
