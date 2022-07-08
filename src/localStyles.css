@@ -61,4 +61,6 @@
 .plotLabelStyle {
     font-weight: bold;
     text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
 }

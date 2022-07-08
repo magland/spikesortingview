@@ -114,7 +114,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
         return crossCorrelogramsSorted.map((cc, ii) => ({
             key: `${ii}`,
             unitId: cc ? cc.unitId1 : 0,
-            label: cc ? `Unit ${cc.unitId1}/${cc.unitId2}` : '',
+            label: cc ? (plotWidth > 80 ? `Unit ${cc.unitId1}/${cc.unitId2}` : `${cc.unitId1}/${cc.unitId2}`) : '',
             labelColor: 'black',
             clickHandler: undefined,
             props: {
