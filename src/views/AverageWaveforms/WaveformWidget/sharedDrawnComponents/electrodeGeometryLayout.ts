@@ -178,10 +178,10 @@ const computeDataToPixelTransform = (width: number, height: number, scaleFactor:
     //    the drawing-space width or the maximum pixel radius.
     const xrow = [ scaleFactor, 0, xMarginFinal - electrodeLayoutBoundingBox.xmin * scaleFactor ]
     const yrow = [0, -scaleFactor, (height + scaleFactor * (electrodeLayoutBoundingBox.ymin + electrodeLayoutBoundingBox.ymax)) / 2 ]
-    return [xrow, yrow, [0, 0, 1]]
+    return [xrow, yrow, [0, 0, 1]] as TransformationMatrix
 }
 
-const normalizeElectrodeLocations = (width: number, height: number, electrodes: Electrode[]): Electrode[] => {
+const normalizeElectrodeLocations = (width: number, height: number, electrodes: Electrode[]): {electrodes: Electrode[], rotated: boolean} => {
     const canvasAspectRatio = (width - xMargin * 2) / (height - yMargin * 2)
     const _electrodes = replaceEmptyLocationsWithDefaultLayout(electrodes)
     const {boxAspect: boxAspectRatio} = getElectrodesAspectRatio(_electrodes)
@@ -189,11 +189,11 @@ const normalizeElectrodeLocations = (width: number, height: number, electrodes: 
         // Aspect ratios (W/H) < 1 are portrait mode. > 1 are landscape.
         // If either source or target is a square, or if the canvas & native-space aspect ratios match,
         // then we don't need to do anything.
-        return electrodes
+        return {electrodes, rotated: false}
     }
     // If the orientations don't match, we'll rotate the electrode set 90 degrees around the origin, which
     // is accomplished by setting new-x = old-y and new-y = negative old-x.
-    return electrodes.map((e) => ({...e, x: e.y, y: -e.x}))
+    return {electrodes: electrodes.map((e) => ({...e, x: e.y, y: -e.x})), rotated: true}
 
     // We could also rotate around the center of the bounding box. We dono't actually need to, since the
     // conversion to pixelspace is indifferent to translations of the source data set.
@@ -258,15 +258,22 @@ export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: num
             pixelRadius: pixelRadius
         }
     }
-    const normalizedElectrodes = normalizeElectrodeLocations(canvasWidth, canvasHeight, electrodes)
+    const {electrodes: normalizedElectrodes, rotated} = normalizeElectrodeLocations(canvasWidth, canvasHeight, electrodes)
     const nativeRadius = computeRadiusDataSpace(normalizedElectrodes)
 
     const nativeBoundingBox = getElectrodeSetBoundingBox(normalizedElectrodes, nativeRadius)
     const scaleFactor = getScalingFactor(canvasWidth, canvasHeight, nativeRadius, maxElectrodePixelRadius, nativeBoundingBox)
     const pixelRadius = nativeRadius * scaleFactor
-    const transform = computeDataToPixelTransform(canvasWidth, canvasHeight, scaleFactor, nativeBoundingBox)
+    let transform = computeDataToPixelTransform(canvasWidth, canvasHeight, scaleFactor, nativeBoundingBox)
     const xMarginFinal = (canvasWidth - getWidth(nativeBoundingBox) * scaleFactor) / 2
     const convertedElectrodes = convertElectrodesToPixelSpace(normalizedElectrodes, transform, pixelRadius)
+    if (rotated) {
+        transform = [
+            [-transform[0][1], transform[0][0], transform[0][2]],
+            [-transform[1][1], transform[1][0], transform[1][2]],
+            [-transform[2][1], transform[2][0], transform[2][2]]
+        ]
+    }
 
     return {
         transform: transform,

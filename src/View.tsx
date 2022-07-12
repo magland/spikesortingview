@@ -19,6 +19,7 @@ import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SummaryView from 'views/Summary/SummaryView';
 import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
+import UnitLocationsView from 'views/UnitLocations/UnitLocationsView';
 import UnitSimilarityMatrixView from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import { ViewData } from './ViewData';
@@ -102,6 +103,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'SortingCuration') {
         return <SortingCurationView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'UnitLocations') {
+        return <UnitLocationsView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)

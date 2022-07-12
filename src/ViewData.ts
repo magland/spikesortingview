@@ -19,6 +19,7 @@ import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLay
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
+import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
 import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixViewData'
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
 
@@ -44,7 +45,8 @@ export type ViewData =
     SortingLayoutViewData |
     CrossCorrelogramsViewData |
     UnitSimilarityMatrixViewData |
-    SortingCurationViewData
+    SortingCurationViewData |
+    UnitLocationsViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -69,6 +71,7 @@ export const isViewData = (x: any): x is ViewData => {
         isSortingLayoutViewData,
         isCrossCorrelogramsViewData,
         isUnitSimilarityMatrixViewData,
-        isSortingCurationViewData
+        isSortingCurationViewData,
+        isUnitLocationsViewData
     ])(x)
 }
