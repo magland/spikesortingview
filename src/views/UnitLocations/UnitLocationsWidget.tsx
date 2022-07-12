@@ -1,8 +1,11 @@
 import { useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
+import { useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
 import { transformPoint } from 'FigurlCanvas/Geometry'
 import { useCallback, useMemo } from 'react'
+import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
 import { computeElectrodeLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import { defaultColors, ElectrodeColors } from '../AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryPainting'
 
 export const defaultMaxPixelRadius = 25
@@ -49,6 +52,7 @@ const drawData = {}
 const UnitLocationsWidget = (props: WidgetProps) => {
     const { width, height, electrodes, units } = props
     const { selectedElectrodeIds } = useSelectedElectrodes()
+    const { selectedUnitIds } = useSelectedUnitIds()
 
     const maxElectrodePixelRadius = props.maxElectrodePixelRadius || defaultElectrodeLayerProps.maxElectrodePixelRadius
     const colors = props.colors ?? defaultColors
@@ -127,8 +131,8 @@ const UnitLocationsWidget = (props: WidgetProps) => {
 
     const paintUnits = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
         const rad = 10
-        const drawUnit = (x: number, y: number) => {
-            ctxt.fillStyle = 'white'
+        const drawUnit = (x: number, y: number, color: string) => {
+            ctxt.fillStyle = color
             ctxt.strokeStyle = 'black'
             ctxt.beginPath()
             ctxt.ellipse(x, y, rad, rad, 0, 0, circle)
@@ -137,9 +141,12 @@ const UnitLocationsWidget = (props: WidgetProps) => {
         }
         for (let unit of units) {
             const pt = transformPoint(transform, [unit.x, unit.y])
-            drawUnit(pt[0], pt[1])
+            const col = selectedUnitIds.size === 0 || selectedUnitIds.has(unit.unitId) ? (
+                colorForUnitId(idToNum(unit.unitId))
+            ) : 'rgb(220, 220, 220)'
+            drawUnit(pt[0], pt[1], col)
         }
-    }, [transform, units])
+    }, [transform, units, selectedUnitIds])
 
     const electrodeGeometryCanvas = useMemo(() => {
         return <BaseCanvas 
