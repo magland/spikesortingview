@@ -4,12 +4,12 @@ import { matrix, Matrix, multiply, transpose } from 'mathjs'
 import React, { Fragment, FunctionComponent, useEffect, useMemo } from "react"
 import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
 import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
+import TPADecodedPositionLayer, { ValidColorMap } from './TPADecodedPositionLayer'
 import TPAPositionLayer from './TPAPositionLayer'
 import TPATrackLayer from './TPATrackLayer'
-import { PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
+import { DecodedPositionData, DecodedPositionFrame, PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
 
 // TODO: Implement streaming / live view
-// TODO: Could create a version of this with an arbitrary array of position information streams
 
 export type TrackPositionAnimationProps = {
     data: TrackAnimationStaticData
@@ -52,34 +52,78 @@ const usePixelPositions = (transform: Matrix, points: number[][]) => {
     }, [transform, points])
 }
 
-type TPAReducer = React.Reducer<AnimationState<PositionFrame>, AnimationStateAction<PositionFrame>>
-const initialState = makeDefaultState<PositionFrame>()
+const useFrames = (
+    positions: number[][],
+    decodedData: DecodedPositionData,
+    transform: Matrix,
+    headDirection: number[] | undefined,
+    timestampStart: number | undefined,
+    timestamps: number[],
+    trackBins: number[][]
+    ) => {
+    const positionSet = useMemo(() => {
+        return positions
+    }, [positions])
 
-const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
-    const { data, width, height } = props
-    const { xmin, xmax, ymin, ymax, realTimeReplayRateMs, headDirection } = data
-    // Note: to expose this to other components, may wish to elevate to a full context
-    const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
-    useEffect(() => {
-        if (!animationStateDispatch) return
-        const aniDispatch = curryDispatch(animationStateDispatch)
-        animationStateDispatch({
-            type: 'SET_DISPATCH',
-            animationDispatchFn: aniDispatch
-        })
-    }, [animationStateDispatch])
-    useEffect(() => {
-        if (realTimeReplayRateMs && realTimeReplayRateMs !== 0) {
-            animationStateDispatch({
-                type: 'SET_BASE_MS_PER_FRAME',
-                baseMsPerFrame: realTimeReplayRateMs
-            })
+    const probabilityFrames = useProbabilityFrames(trackBins, decodedData)
+    const pixelPositions = usePixelPositions(transform, positionSet)
+    const positionFrames = usePositionFrames(pixelPositions, timestampStart, timestamps, headDirection, probabilityFrames)
+
+    return positionFrames
+}
+
+const useProbabilityFrames = (trackBinPixels: number[][], decodedData: DecodedPositionData) => {
+    const { frameBounds, values, locations } = decodedData
+    return useMemo(() => {
+        if (! frameBounds || !values || !locations || frameBounds.length === 0) {
+            return []
         }
-    }, [realTimeReplayRateMs])
+        let frameStart = 0
+        return frameBounds.map((nObservations) => {
+            const valueSlice = values.slice(frameStart, frameStart + nObservations)
+            const binSlice = locations.slice(frameStart, frameStart + nObservations)
+            const pixelBins = binSlice.map(b => trackBinPixels[b + 1]) // TODO: This is a shim; see if you can find the root problem. I think we're still wrong.
+            frameStart += nObservations
+            return { location_rects_px: pixelBins, values: valueSlice }
+        })
+    }, [frameBounds, trackBinPixels, values, locations])
+}
 
-    const drawHeight = height - controlsHeight
+const usePositionFrames = (positions: number[][] | undefined, timestampStart: number | undefined, timestamps: number[], headDirection: number[] | undefined, decodedData: DecodedPositionFrame[] | undefined): PositionFrame[] => {
+    return useMemo(() => {
+        if (positions === undefined) return []
+        return positions.map((p, i) => {
+            return {
+                x: p[0],
+                y: p[1],
+                timestamp: timestamps[i] + (timestampStart || 0),
+                headDirection: headDirection && headDirection[i],
+                decodedPositionFrame: decodedData && decodedData[i]
+            }
+        })
+    }, [positions, timestampStart, timestamps, headDirection, decodedData])
+}
 
-    // We call the final-margin computation manually so we know the bottom margin for timestamp display.
+const setupAnimationStateDispatchFn = (animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>) => {
+    if (!animationStateDispatch) return
+    const aniDispatch = curryDispatch(animationStateDispatch)
+    animationStateDispatch({
+        type: 'SET_DISPATCH',
+        animationDispatchFn: aniDispatch
+    })
+}
+
+const setupReplayRate = (realTimeReplayRateMs: number | undefined, animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>) => {
+    if (realTimeReplayRateMs && realTimeReplayRateMs !== 0) {
+        animationStateDispatch({
+            type: 'SET_BASE_MS_PER_FRAME',
+            baseMsPerFrame: realTimeReplayRateMs
+        })
+    }
+}
+
+const useDrawingSpace = (width: number, drawHeight: number, xmax: number, xmin: number, ymax: number, ymin: number) => {
+    // We call the final-margin computation manually because we need to track margins for timestamp display
     const finalMargins = useAspectTrimming({
         pixelWidth: width,
         pixelHeight: drawHeight,
@@ -95,64 +139,87 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             margins: finalMargins,
             xmin, xmax, ymin, ymax,
             invertY: true,
-            preserveDataAspect: false // don't recompute the final margins--we did it manually
+            preserveDataAspect: false // don't recompute the final margins--we already did it manually
         }
     }, [width, drawHeight, xmin, xmax, ymin, ymax, finalMargins])
     const transform = use2DTransformationMatrix(matrixProps)
-    const trackBins = useTrackBinPixelDimensions(transform, data.trackBinULCorners, data.trackBinWidth, data.trackBinHeight)
 
-    const trackLayer = useMemo(() => {
-        return <TPATrackLayer
-            width={width}
-            height={drawHeight}
-            trackBucketRectanglesPx={trackBins}
-        />
-    }, [width, drawHeight, trackBins])
+    return { finalMargins, transform }
+}
+
+type TPAReducer = React.Reducer<AnimationState<PositionFrame>, AnimationStateAction<PositionFrame>>
+const initialState = makeDefaultState<PositionFrame>()
+
+const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
+    const { data, width, height } = props
+    const { xmin, xmax, ymin, ymax, realTimeReplayRateMs, headDirection, decodedProbabilityFrameBounds, decodedProbabilityLocations, decodedProbabilityValues } = data
+    // Note: to expose timestamp to other components, may need to elevate to a full context
+    const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
+    useEffect(() => setupAnimationStateDispatchFn(animationStateDispatch), [animationStateDispatch])
+    useEffect(() => setupReplayRate(realTimeReplayRateMs, animationStateDispatch), [realTimeReplayRateMs, animationStateDispatch])
+    const drawHeight = height - controlsHeight
+    const { finalMargins, transform } = useDrawingSpace(width, drawHeight, xmax, xmin, ymax, ymin)
+    const trackBins = useTrackBinPixelDimensions(transform, data.trackBinULCorners, data.trackBinWidth, data.trackBinHeight)
+    // useEffect(() => {
+    //     trackBins.forEach((v, i) => {
+    //         console.log(`${i}: ${v}`)
+    //     })
+    // }, [trackBins])
 
     // TODO: Implement support for appending to position data (for a live/streaming context)
-    const positionSet = useMemo(() => {
-        return data.positions
-    }, [data.positions])
-
-    const positions = usePixelPositions(transform, positionSet)
-    const positionFrames: PositionFrame[] = useMemo(() => {
-        if (positions === undefined) return []
-        return positions.map((p, i) => {
-            return {
-                x: p[0],
-                y: p[1],
-                timestamp: data.timestamps[i],
-                headDirection: headDirection && headDirection[i]
-            }
-        })
-    }, [positions, data.timestamps, headDirection])
+    // TODO: Standardize on the embedded-object, remove support for the decodedProbability__ elements.
+    const decodedData: DecodedPositionData = useMemo(() => {
+        return data.decodedData ? data.decodedData :
+        {
+            frameBounds: decodedProbabilityFrameBounds,
+            locations: decodedProbabilityLocations,
+            values: decodedProbabilityValues
+        }
+    }, [decodedProbabilityFrameBounds, decodedProbabilityLocations, decodedProbabilityValues, data.decodedData])
+    const dataFrames = useFrames(data.positions, decodedData, transform, headDirection, data.timestampStart, data.timestamps, trackBins)
 
     useEffect(() => {
         animationStateDispatch({
             type: 'UPDATE_FRAME_DATA',
-            incomingFrames: positionFrames,
+            incomingFrames: dataFrames,
             replaceExistingFrames: true
         })
-    }, [positionFrames])
+    }, [dataFrames])
 
-    // TODO: Implement support for optional additional position streams (e.g. DecodedPosition)
+    const currentProbabilityFrame = useMemo(() => {
+        // console.log(`Frame Index: ${animationState.currentFrameIndex} data: ${JSON.stringify(dataFrames[animationState.currentFrameIndex].decodedPositionFrame)}`)
+        return {
+            frame: dataFrames[animationState.currentFrameIndex].decodedPositionFrame,
+            colorMap: 'plasma' as any as ValidColorMap // TODO: This is ugly, should be configured once, not on a per-frame basis
+        }
+    }, [animationState.currentFrameIndex, dataFrames])
 
-    const frameData = useMemo(() => {
+    const currentPositionFrame = useMemo(() => {
         return {
             bottomMargin: finalMargins.bottom,
             frame: animationState.frameData[animationState.currentFrameIndex],
         }
     }, [animationState.currentFrameIndex, animationState.frameData, finalMargins.bottom])
 
-    const positionLayer = useMemo(() => {
-        return <TPAPositionLayer
+    const trackLayer = useMemo(() => <TPATrackLayer
             width={width}
             height={drawHeight}
-            drawData={frameData}
-        />
-    }, [width, drawHeight, frameData])
-    const controlLayer = useMemo(() => {
-        return <AnimationPlaybackControls
+            trackBucketRectanglesPx={trackBins}
+        />, [width, drawHeight, trackBins])
+
+    const probabilityLayer = useMemo(() => <TPADecodedPositionLayer
+            width={width}
+            height={drawHeight}
+            drawData={currentProbabilityFrame}
+        />, [width, drawHeight, currentProbabilityFrame])
+
+    const positionLayer = useMemo(() => <TPAPositionLayer
+            width={width}
+            height={drawHeight}
+            drawData={currentPositionFrame}
+        />, [width, drawHeight, currentPositionFrame])
+
+    const controlLayer = useMemo(() => <AnimationPlaybackControls
             width={width}
             height={controlsHeight}
             verticalOffset={drawHeight}
@@ -161,17 +228,18 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             currentFrameIndex={animationState.currentFrameIndex}
             isPlaying={animationState.isPlaying}
             playbackRate={animationState.replayMultiplier}
-        />
-    }, [width, drawHeight, animationState.frameData.length, animationState.currentFrameIndex, animationState.isPlaying, animationState.replayMultiplier])
+        />, [width, drawHeight, animationState.frameData.length, animationState.currentFrameIndex, animationState.isPlaying, animationState.replayMultiplier])
  
     return (
-    <Fragment>
-        <div>
-            {trackLayer}
-            {positionLayer}
-            {controlLayer}
-        </div>
-    </Fragment>)
+        <Fragment>
+            <div>
+                {trackLayer}
+                {probabilityLayer}
+                {positionLayer}
+                {controlLayer}
+            </div>
+        </Fragment>
+    )
 }
 
 export default TrackPositionAnimationView

@@ -6,6 +6,12 @@ export type PositionFrame = {
     y: number
     headDirection?: number
     timestamp?: number
+    decodedPositionFrame?: DecodedPositionFrame
+}
+
+export type DecodedPositionFrame = {
+    location_rects_px: number[][]
+    values: number[]
 }
 
 // TODO: These two types may be combined as the streaming/live view is implemented.
@@ -23,6 +29,9 @@ export type PositionFrame = {
  * @member trackBinULCorners The upper-left corner of each tile in the constituent track,
  * represented as an array of x-coordinates and an array of y-coordinates (i.e. number[2][:]).
  * These are in the native units of the source data.
+ * @member timestampStart If set, this is the value of the first timestamp, with the timestamps
+ * array representing elapsed time since the start of the recording. (This fixes resolution issues
+ * related to representing timestamps as floats rather than doubles.)
  * @member timestamps Array of (float) timestamps which should align with the position list.
  * The animal should be observed at position (positions[0][t], positions[1][t]) at time
  * timestamps[t].
@@ -35,14 +44,21 @@ export type PositionFrame = {
  * @member ymin Lowest y-value to display, in native units.
  * @member ymax Highest y-value to display, in native units.
  * @member headDirection Direction of the subject's head in the xy-plane, in radians.
+ * @member decodedData The frame-bounds, values, locations representation of decoded position data, as an object.
+ * @member decodedProbabilityValues Decoded probability records (range 0-255)
+ * @member decodedProbabilityLocations Map of decoded probability records to the track bins described by trackBinULCorners.
+ * @member decodedProbabilityFrameBounds Count of decoded probability records for each timestamp. decodedProbabilityFrameBounds.length should equal
+ * totalRecordingFrameLength, and the probabilities recorded for frame x should begin at position sum(decodedProbabilityFrameBounds[0:x-1]) in the
+ * decodedProbabilityValues and decodedProbabilityLocations lists.
  * @member realTimeReplayRate Optional, assumed 1000/60. If set, specifies the number of milliseconds per frame to achieve real-time playback.
  */
 export type TrackAnimationStaticData = {
     type: 'TrackAnimation'
     trackBinWidth: number
     trackBinHeight: number
-    trackBinULCorners: number[][]
+    trackBinULCorners: number[][] // TODO: try either [number[], number[]] or ([number, number])[]
     totalRecordingFrameLength: number
+    timestampStart?: number
     timestamps: number[]
     positions: number[][]
     decodedPositions?: number[][]
@@ -51,7 +67,17 @@ export type TrackAnimationStaticData = {
     ymin: number
     ymax: number
     headDirection?: number[]
+    decodedData?: DecodedPositionData
+    decodedProbabilityValues?: number[]
+    decodedProbabilityLocations?: number[]
+    decodedProbabilityFrameBounds?: number[]
     realTimeReplayRateMs?: number
+}
+
+export type DecodedPositionData = {
+    values: number[] | undefined
+    locations: number[] | undefined
+    frameBounds: number[] | undefined
 }
 
 export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticData => {
@@ -61,13 +87,18 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         trackBinHeight: isNumber,
         trackBinULCorners: isArrayOf(isArrayOf(isNumber)),
         totalRecordingFrameLength: isNumber,
+        timestampStart: optional(isNumber),
         timestamps: isArrayOf(isNumber),
-        positions: isArrayOf(isArrayOf(isNumber)),
+        positions: isArrayOf(isArrayOf(isNumber)), // alternative: assume inner is correct
         decodedPositions: optional(isArrayOf(isArrayOf(isNumber))),
         xmin: isNumber,
         xmax: isNumber,
         ymin: isNumber,
         ymax: isNumber,
+        decodedData: optional(isDecodedPositionData),
+        decodedProbabilityValues: optional(isArrayOf(isNumber)),
+        decodedProbabilityLocations: optional(isArrayOf(isNumber)),
+        decodedProbabilityFrameBounds: optional(isArrayOf(isNumber)),
         headDirection: optional(isArrayOf(isNumber)),
         realTimeReplayRateMs: optional(isNumber)
     })
@@ -79,8 +110,31 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         const timesCount = candidate.timestamps.length
         const timestampPositionMismatch = timesCount !== candidate.positions[0].length || timesCount !== candidate.positions[1].length
         const headDirectionLengthMismatch = (candidate.headDirection && candidate.headDirection.length > 0 && timesCount !== candidate.headDirection.length)
+        const decodedProbabilityFrameBoundsMatchesOverallFrameLength = (!x.decodedProbabilityFrameBounds) || (x.decodedProbabilityFrameBounds.length === x.totalRecordingFrameLength)
+        // TODO: Remove individual 'decodedProbability' values, which have inadequate data-consistency checking, and standardize on the object
+        const decodedDataFrameCountMatchesPositionData = !(candidate.decodedData) || !(candidate.decodedData.frameBounds) || candidate.decodedData.frameBounds.length === timesCount
 
-        return !(rangeFail || trackRectsDimensionsFail || positionDimensionsFail || timestampPositionMismatch || headDirectionLengthMismatch)
+        return !(rangeFail || trackRectsDimensionsFail || positionDimensionsFail || timestampPositionMismatch || headDirectionLengthMismatch
+                    || !decodedProbabilityFrameBoundsMatchesOverallFrameLength || !decodedDataFrameCountMatchesPositionData)
+    }
+
+    return false
+}
+
+export const isDecodedPositionData = (x: any): x is DecodedPositionData => {
+    const typeMatch = validateObject(x, {
+        values: optional(isArrayOf(isNumber)),
+        locations: optional(isArrayOf(isNumber)),
+        frameBounds: optional(isArrayOf(isNumber))
+    })
+    if (!x.values && !x.locations && !x.frameBounds) return true // an empty object is a valid one for right now
+    if (typeMatch) {
+        // data integrity checks
+        const candidate = x as DecodedPositionData
+        if (!candidate.values || !candidate.locations || !candidate.frameBounds) return false // if any list is defined, all must be defined
+        const valuesLocationsLengthsMatch = candidate.values.length === candidate.locations.length
+        const frameBoundsAccountForAllValues = candidate.values.length === candidate.frameBounds.reduce((sum, item) => sum + item, 0)
+        return valuesLocationsLengthsMatch && frameBoundsAccountForAllValues
     }
 
     return false
