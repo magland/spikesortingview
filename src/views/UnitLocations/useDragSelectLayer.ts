@@ -1,9 +1,8 @@
-import { COMPUTE_DRAG, DragAction, dragReducer, END_DRAG, getDragActionFromEvent, RESET_DRAG } from "FigurlCanvas/DragCanvas"
-import { Vec2 } from "FigurlCanvas/Geometry"
-import { useCallback, useMemo, useReducer, useRef } from "react"
+import { Vec2, Vec4 } from "FigurlCanvas/Geometry"
+import { useCallback, useReducer } from "react"
 import dragSelectReducer from "./dragSelectReducer"
 
-const useDragSelectLayer = (width: number, height: number) => {
+const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r: Vec4, o: {ctrlKey: boolean}) => void, handleClickPoint: (p: Vec2, o: {ctrlKey: boolean}) => void) => {
     const [dragSelectState, dragSelectStateDispatch] = useReducer(dragSelectReducer, {})
     const onMouseMove = useCallback((e: React.MouseEvent) => {
         dragSelectStateDispatch({
@@ -20,15 +19,26 @@ const useDragSelectLayer = (width: number, height: number) => {
     }, [])
 
     const onMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        if ((dragSelectState.isActive) && (dragSelectState.dragRect)) {
+            handleSelectRect(dragSelectState.dragRect, {ctrlKey: e.ctrlKey})
+        }
+        if (!dragSelectState.isActive) {
+            handleClickPoint(getEventPoint(e), {ctrlKey: e.ctrlKey})
+        }
         dragSelectStateDispatch({
             type: 'DRAG_MOUSE_UP',
             point: getEventPoint(e)
         })
-    }, [])
+    }, [dragSelectState, handleSelectRect, handleClickPoint])
 
-    const paintDragSelectLayer = useCallback(() => {
-
-    }, [])
+    const paintDragSelectLayer = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
+        ctxt.clearRect(0, 0, width, height)
+        if ((dragSelectState.isActive) && (dragSelectState.dragRect)) {
+            const rect = dragSelectState.dragRect
+            ctxt.fillStyle = defaultDragStyle
+            ctxt.fillRect(rect[0], rect[1], rect[2], rect[3])
+        }
+    }, [width, height, dragSelectState])
 
     return {
         dragSelectState,
@@ -38,6 +48,8 @@ const useDragSelectLayer = (width: number, height: number) => {
         paintDragSelectLayer
     }
 }
+
+const defaultDragStyle = 'rgba(196, 196, 196, 0.5)'
 
 const getEventPoint = (e: React.MouseEvent) => {
     const boundingRect = e.currentTarget.getBoundingClientRect()

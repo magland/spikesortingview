@@ -1,6 +1,4 @@
-import { DragAction, dragReducer, DragState } from "FigurlCanvas/DragCanvas"
-import { pointSpanToRegion, Vec2, Vec4 } from "FigurlCanvas/Geometry"
-import { getDraggedElectrodeIds } from "views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout"
+import { Vec2, Vec4 } from "FigurlCanvas/Geometry"
 
 export type DragSelectState = {
     isActive?: boolean,  // whether we are in an active dragging state
@@ -26,7 +24,7 @@ export const dragSelectReducer = (state: DragSelectState, action: DragSelectActi
         const { point } = action
         return {
             ...state,
-            isActive: true,
+            isActive: false,
             dragAnchor: point,
             dragRect: undefined
         }
@@ -38,16 +36,28 @@ export const dragSelectReducer = (state: DragSelectState, action: DragSelectActi
             dragRect: undefined
         }
     } else if (action.type === 'DRAG_MOUSE_MOVE') {
-        if (!state.isActive) return state
         if (!state.dragAnchor) return state
-        return {
-            ...state,
-            dragRect: [
-                Math.min(state.dragAnchor[0], action.point[0]),
-                Math.min(state.dragAnchor[1], action.point[1]),
-                Math.abs(state.dragAnchor[0] - action.point[0]),
-                Math.abs(state.dragAnchor[1] - action.point[1])
-            ]
+        const newDragRect = [
+            Math.min(state.dragAnchor[0], action.point[0]),
+            Math.min(state.dragAnchor[1], action.point[1]),
+            Math.abs(state.dragAnchor[0] - action.point[0]),
+            Math.abs(state.dragAnchor[1] - action.point[1])
+        ]
+        if (state.isActive) {
+            return {
+                ...state,
+                dragRect: newDragRect
+            }
+        }
+        else if ((newDragRect[2] >= 10) || (newDragRect[3] >= 10)) {
+            return {
+                ...state,
+                isActive: true,
+                dragRect: newDragRect
+            }
+        }
+        else {
+            return state
         }
     } else if (action.type === 'DRAG_MOUSE_LEAVE') {
         return {

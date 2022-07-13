@@ -1,7 +1,7 @@
 import { useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { transformPoint } from 'FigurlCanvas/Geometry'
+import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'FigurlCanvas/Geometry'
 import { useCallback, useMemo } from 'react'
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
 import { computeElectrodeLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
@@ -50,10 +50,12 @@ const defaultElectrodeLayerProps = {
 
 const emptyDrawData = {}
 
+const markerRadius = 8
+
 const UnitLocationsWidget = (props: WidgetProps) => {
     const { width, height, electrodes, units } = props
     const { selectedElectrodeIds } = useSelectedElectrodes()
-    const { selectedUnitIds } = useSelectedUnitIds()
+    const { selectedUnitIds, unitIdSelectionDispatch } = useSelectedUnitIds()
 
     const maxElectrodePixelRadius = props.maxElectrodePixelRadius || defaultElectrodeLayerProps.maxElectrodePixelRadius
     const colors = props.colors ?? defaultColors
@@ -131,12 +133,11 @@ const UnitLocationsWidget = (props: WidgetProps) => {
     }, [colors, offsetLabels, pixelElectrodes, pixelRadius, selectedElectrodeIds, showLabels])
 
     const paintUnits = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
-        const rad = 10
         const drawUnit = (x: number, y: number, color: string) => {
             ctxt.fillStyle = color
             ctxt.strokeStyle = 'black'
             ctxt.beginPath()
-            ctxt.ellipse(x, y, rad, rad, 0, 0, circle)
+            ctxt.ellipse(x, y, markerRadius, markerRadius, 0, 0, circle)
             ctxt.fill()
             ctxt.stroke()
         }
@@ -167,7 +168,59 @@ const UnitLocationsWidget = (props: WidgetProps) => {
         />
     }, [width, height, paintUnits])
 
-    const {dragSelectState, onMouseMove, onMouseDown, onMouseUp, paintDragSelectLayer} = useDragSelectLayer(width, height)
+    const handleSelectRect = useCallback((r: Vec4, {ctrlKey}: {ctrlKey: boolean}) => {
+        const ids: (number | string)[] = []
+        for (let unit of units) {
+            const pt = transformPoint(transform, [unit.x, unit.y])
+            if (rectangularRegionsIntersect(rectangularRegion([pt[0] - markerRadius, pt[1] - markerRadius, markerRadius * 2, markerRadius * 2]), rectangularRegion(r))) {
+                ids.push(unit.unitId)
+            }
+        }
+        if (ctrlKey) {
+            for (let id of ids) {
+                unitIdSelectionDispatch({
+                    type: 'TOGGLE_UNIT',
+                    targetUnit: id
+                })
+            }
+        }
+        else {
+            unitIdSelectionDispatch({
+                type: 'SET_SELECTION',
+                incomingSelectedUnitIds: ids
+            })
+        }
+    }, [transform, unitIdSelectionDispatch, units])
+
+    const handleClickPoint = useCallback((x: Vec2, {ctrlKey}: {ctrlKey: boolean}) => {
+        let somethingFound = false
+        for (let unit of units) {
+            const pt = transformPoint(transform, [unit.x, unit.y])
+            if (pointInRect(x, rectangularRegion([pt[0] - markerRadius, pt[1] - markerRadius, markerRadius * 2, markerRadius * 2]))) {
+                somethingFound = true
+                if (ctrlKey) {
+                    unitIdSelectionDispatch({
+                        type: 'TOGGLE_UNIT',
+                        targetUnit: unit.unitId
+                    })
+                }
+                else {
+                    unitIdSelectionDispatch({
+                        type: 'SET_SELECTION',
+                        incomingSelectedUnitIds: [unit.unitId]
+                    })
+                }
+            }
+        }
+        if (!somethingFound) {
+            unitIdSelectionDispatch({
+                type: 'SET_SELECTION',
+                incomingSelectedUnitIds: []
+            })
+        }
+    }, [transform, unitIdSelectionDispatch, units])
+
+    const {onMouseMove, onMouseDown, onMouseUp, paintDragSelectLayer} = useDragSelectLayer(width, height, handleSelectRect, handleClickPoint)
     const dragSelectCanvas = useMemo(() => {
         return <BaseCanvas 
             width={width}
@@ -184,11 +237,20 @@ const UnitLocationsWidget = (props: WidgetProps) => {
             onMouseUp={onMouseUp}
             onMouseDown={onMouseDown}
         >
-            {dragSelectCanvas}
             {electrodeGeometryCanvas}
             {unitsCanvas}
+            {dragSelectCanvas}
         </div>
     )
+}
+
+const rectangularRegion = (r: Vec4): RectangularRegion => {
+    return {
+        xmin: r[0],
+        ymin: r[1],
+        xmax: r[0] + r[2],
+        ymax: r[1] + r[3]
+    }
 }
 
 export default UnitLocationsWidget
