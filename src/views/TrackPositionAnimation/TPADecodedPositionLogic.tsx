@@ -26,7 +26,7 @@ type DecodedProbabilityCorners = {
     nativeYUlCorner: number[]
 }
 const useUniqueDecodedUlLocations = (decodedData: DecodedPositionData | undefined): DecodedProbabilityCorners => {
-    const { locations, uniqueLocations, xcount, xwidth, xmin, ycount, ywidth, ymin } = decodedData ? decodedData : nullDecodedData
+    const { locations, uniqueLocations, xcount, xwidth, xmin, ywidth, ymin } = decodedData ? decodedData : nullDecodedData
     const mappedUlCorners = useMemo(() => {
         const uSet = uniqueLocations ? uniqueLocations : new Set(locations).values()
         const sortedLocations = [...uSet].sort()
@@ -79,7 +79,6 @@ export const useProbabilityFrames = (decodedData: DecodedPositionData | undefine
 
 export const getDecodedPositionFramePx = (linearFrame: DecodedPositionFrame | undefined, decodedLocationsMap: DecodedProbabilityLocationsMap): DecodedPositionFramePx | undefined => {
     const pixelLocations = linearFrame ? linearFrame.linearLocations.map((l) => decodedLocationsMap[l]) : []
-    // console.log(`frame # ${animationState.currentFrameIndex}\nLinear pairs: ${linearFrame?.linearLocations} vs ${linearFrame?.values}`)
     const finalFrame = linearFrame
         ? {
             locationRectsPx: pixelLocations,

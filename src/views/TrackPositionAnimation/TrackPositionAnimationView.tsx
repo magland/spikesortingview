@@ -34,7 +34,9 @@ export const computeTrackBinPixelDimensions = (transform: Matrix, trackRectPoint
     const converted = multiply(transform, all).valueOf() as any as number[][]
     const trackRectPixelWidth = converted[0].shift() as number
     const trackRectPixelHeight = (flippedY ? -1 : 1) * (converted[1].shift() as number)
-    const rects = transpose(converted).map(pt => { return [...pt, trackRectPixelWidth, trackRectPixelHeight] })
+    // Ensure that there are some actual columns in the resulting matrix: otherwise the transpose will fatally fail
+    const perPointView = converted[0].length === 0 ? [] : transpose(converted)
+    const rects = perPointView.map(pt => { return [...pt, trackRectPixelWidth, trackRectPixelHeight] })
     return rects
 }
 
