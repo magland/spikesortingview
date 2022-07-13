@@ -104,7 +104,6 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         const timestampPositionMismatch = timesCount !== candidate.positions[0].length || timesCount !== candidate.positions[1].length
         const headDirectionLengthMismatch = (candidate.headDirection && candidate.headDirection.length > 0 && timesCount !== candidate.headDirection.length)
         const decodedProbabilityFrameBoundsMatchesOverallFrameLength = (!x.decodedProbabilityFrameBounds) || (x.decodedProbabilityFrameBounds.length === x.totalRecordingFrameLength)
-        // TODO: Remove individual 'decodedProbability' values, which have inadequate data-consistency checking, and standardize on the object
         const decodedDataFrameCountMatchesPositionData = !(candidate.decodedData) || !(candidate.decodedData.frameBounds) || candidate.decodedData.frameBounds.length === timesCount
 
         return !(rangeFail || trackRectsDimensionsFail || positionDimensionsFail || timestampPositionMismatch || headDirectionLengthMismatch
