@@ -40,6 +40,7 @@ interface WidgetProps {
     showLabels?: boolean
     maxElectrodePixelRadius?: number
     offsetLabels?: boolean
+    disableAutoRotate?: boolean
 }
 
 const defaultElectrodeLayerProps = {
@@ -53,7 +54,7 @@ const emptyDrawData = {}
 const markerRadius = 8
 
 const UnitLocationsWidget = (props: WidgetProps) => {
-    const { width, height, electrodes, units } = props
+    const { width, height, electrodes, units, disableAutoRotate } = props
     const { selectedElectrodeIds } = useSelectedElectrodes()
     const { selectedUnitIds, unitIdSelectionDispatch } = useSelectedUnitIds()
 
@@ -63,8 +64,8 @@ const UnitLocationsWidget = (props: WidgetProps) => {
     const offsetLabels = props.offsetLabels ?? false
 
     const { convertedElectrodes: pixelElectrodes, pixelRadius, transform } = useMemo(() => (
-        computeElectrodeLocations(width, height, electrodes, 'geom', maxElectrodePixelRadius)
-    ), [electrodes, height, maxElectrodePixelRadius, width])
+        computeElectrodeLocations(width, height, electrodes, 'geom', maxElectrodePixelRadius, {disableAutoRotate})
+    ), [electrodes, height, maxElectrodePixelRadius, width, disableAutoRotate])
 
     const paintElectrodes = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
         // set up fills
@@ -133,6 +134,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
     }, [colors, offsetLabels, pixelElectrodes, pixelRadius, selectedElectrodeIds, showLabels])
 
     const paintUnits = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
+        ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
         const drawUnit = (x: number, y: number, color: string) => {
             ctxt.fillStyle = color
             ctxt.strokeStyle = 'black'

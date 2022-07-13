@@ -77,7 +77,7 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     />, [electrodes, width, height, layoutMode, colors, waveformOpts.showChannelIds])
 
     // TODO: Don't do this twice, work it out differently
-    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius)
+    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius, {})
     const xMargin = xMarginBase || xMarginDefault
 
     // Spikes are defined as being some factor greater than the baseline noise.

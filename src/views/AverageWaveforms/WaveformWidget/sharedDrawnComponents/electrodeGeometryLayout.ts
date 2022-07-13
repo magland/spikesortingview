@@ -181,11 +181,11 @@ const computeDataToPixelTransform = (width: number, height: number, scaleFactor:
     return [xrow, yrow, [0, 0, 1]] as TransformationMatrix
 }
 
-const normalizeElectrodeLocations = (width: number, height: number, electrodes: Electrode[]): {electrodes: Electrode[], rotated: boolean} => {
+const normalizeElectrodeLocations = (width: number, height: number, electrodes: Electrode[], opts: {disableAutoRotate?: boolean}={}): {electrodes: Electrode[], rotated: boolean} => {
     const canvasAspectRatio = (width - xMargin * 2) / (height - yMargin * 2)
     const _electrodes = replaceEmptyLocationsWithDefaultLayout(electrodes)
     const {boxAspect: boxAspectRatio} = getElectrodesAspectRatio(_electrodes)
-    if (boxAspectRatio === 1 || canvasAspectRatio === 1 || (boxAspectRatio > 1) === (canvasAspectRatio > 1)) {
+    if (opts.disableAutoRotate || boxAspectRatio === 1 || canvasAspectRatio === 1 || (boxAspectRatio > 1) === (canvasAspectRatio > 1)) {
         // Aspect ratios (W/H) < 1 are portrait mode. > 1 are landscape.
         // If either source or target is a square, or if the canvas & native-space aspect ratios match,
         // then we don't need to do anything.
@@ -247,7 +247,7 @@ export const getDraggedElectrodeIds = (electrodes: PixelSpaceElectrode[], dragRe
 }
 
 // Consumer cares about overall transform, electrode pixel locations, and pixel radius. That's all. Oh and I guess the x-margin for vertical mode.
-export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: number, electrodes: Electrode[], mode: 'geom' | 'vertical' = 'geom', maxElectrodePixelRadius: number = defaultMaxPixelRadius) => {
+export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: number, electrodes: Electrode[], mode: 'geom' | 'vertical' = 'geom', maxElectrodePixelRadius: number = defaultMaxPixelRadius, opts: {disableAutoRotate?: boolean}) => {
     if (mode === 'vertical') {
         const transform = computeDataToPixelTransformVerticalLayout(canvasWidth, canvasHeight)
         const convertedElectrodes = convertElectrodesToPixelSpaceVerticalLayout(electrodes, transform)
@@ -258,7 +258,7 @@ export const computeElectrodeLocations = (canvasWidth: number, canvasHeight: num
             pixelRadius: pixelRadius
         }
     }
-    const {electrodes: normalizedElectrodes, rotated} = normalizeElectrodeLocations(canvasWidth, canvasHeight, electrodes)
+    const {electrodes: normalizedElectrodes, rotated} = normalizeElectrodeLocations(canvasWidth, canvasHeight, electrodes, {disableAutoRotate: opts.disableAutoRotate})
     const nativeRadius = computeRadiusDataSpace(normalizedElectrodes)
 
     const nativeBoundingBox = getElectrodeSetBoundingBox(normalizedElectrodes, nativeRadius)

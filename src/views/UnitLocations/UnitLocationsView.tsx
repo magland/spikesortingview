@@ -21,6 +21,7 @@ const UnitLocationsView: FunctionComponent<UnitLocationsViewProps> = (props: Uni
             height={height}
             electrodes={electrodes}
             units={data.units}
+            disableAutoRotate={data.disableAutoRotate}
         />
     )
 }
