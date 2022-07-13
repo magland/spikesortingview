@@ -4,6 +4,7 @@ import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import CorrelogramPlot from 'views/Autocorrelograms/CorrelogramPlot';
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
+import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
 import { CrossCorrelogramData, CrossCorrelogramsViewData } from './CrossCorrelogramsViewData';
@@ -120,7 +121,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
             props: {
                 binEdgesSec: cc ? cc.binEdgesSec: undefined,
                 binCounts: cc ? cc.binCounts : undefined,
-                color: 'gray',
+                color: cc?.unitId1 === cc?.unitId2 ? colorForUnitId(idToNum(cc?.unitId1)) : 'gray',
                 width: plotWidth,
                 height: plotHeight
             }
