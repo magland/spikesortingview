@@ -22,6 +22,7 @@ import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositi
 import UnitLocationsView from 'views/UnitLocations/UnitLocationsView';
 import UnitSimilarityMatrixView from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView';
+import MarkdownView from 'views/Markdown/MarkdownView';
 import { ViewData } from './ViewData';
 
 export type TimeseriesLayoutOpts = {
@@ -106,6 +107,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'UnitLocations') {
         return <UnitLocationsView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'Markdown') {
+        return <MarkdownView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)

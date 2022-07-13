@@ -8,6 +8,7 @@ import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/El
 import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
 import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "views/LivePositionPdfPlot/LivePositionPdfPlotViewData"
+import { isMarkdownViewData, MarkdownViewData } from 'views/Markdown/MarkdownView'
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "views/MultiTimeseries/MultiTimeseriesViewData"
 import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
@@ -46,7 +47,8 @@ export type ViewData =
     CrossCorrelogramsViewData |
     UnitSimilarityMatrixViewData |
     SortingCurationViewData |
-    UnitLocationsViewData
+    UnitLocationsViewData |
+    MarkdownViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -72,6 +74,7 @@ export const isViewData = (x: any): x is ViewData => {
         isCrossCorrelogramsViewData,
         isUnitSimilarityMatrixViewData,
         isSortingCurationViewData,
-        isUnitLocationsViewData
+        isUnitLocationsViewData,
+        isMarkdownViewData
     ])(x)
 }
