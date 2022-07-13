@@ -29,6 +29,12 @@ export type LayoutItem = {
         isControl?: boolean
     }[]
 } | {
+    type: 'TabLayout'
+    items: LayoutItem[]
+    itemProperties: {
+        label: string
+    }[]
+} | {
     type: 'View'
     viewId: string
 }
@@ -62,6 +68,13 @@ export const isLayoutItem = (x: any): x is LayoutItem => {
             itemProperties: isArrayOf(z => (validateObject(z, {
                 label: isString,
                 isControl: optional(isBoolean)
+            })))
+        })),
+        (y: any) => (validateObject(y, {
+            type: isEqualTo('TabLayout'),
+            items: isArrayOf(isLayoutItem),
+            itemProperties: isArrayOf(z => (validateObject(z, {
+                label: isString
             })))
         })),
         (y: any) => (validateObject(y, {

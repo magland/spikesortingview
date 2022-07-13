@@ -4,6 +4,7 @@ import IndividualLayoutItemView from "./IndividualLayoutItemView"
 import MountainLayoutItemView from "./MountainLayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 import SplitterLayoutItemView from "./SplitterLayoutItemView"
+import TabLayoutItemView from "./TabLayoutItemView"
 
 type Props = {
     layoutItem: LayoutItem
@@ -30,6 +31,13 @@ const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, hei
             />
         ) : layoutItem.type === 'Mountain' ? (
             <MountainLayoutItemView
+                layoutItem={layoutItem}
+                views={views}
+                width={width}
+                height={height}
+            />
+        ) : layoutItem.type === 'TabLayout' ? (
+            <TabLayoutItemView
                 layoutItem={layoutItem}
                 views={views}
                 width={width}
