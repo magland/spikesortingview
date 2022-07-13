@@ -1,5 +1,6 @@
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, useMemo, useState } from 'react'
 import { computeElectrodesFromIdsAndLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
+import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar'
 import { UnitLocationsViewData } from './UnitLocationsViewData'
 import UnitLocationsWidget from './UnitLocationsWidget'
 
@@ -12,17 +13,40 @@ type UnitLocationsViewProps = {
 const UnitLocationsView: FunctionComponent<UnitLocationsViewProps> = (props: UnitLocationsViewProps) => {
     const { data, width, height } = props
 
+    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(
+        {...defaultUnitsTableBottomToolbarOptions, onlyShowSelected: false}
+    )
+    const bottomToolbarHeight = 30
+
     const channelIds = Object.keys(data.channelLocations)
     const electrodes = computeElectrodesFromIdsAndLocations(channelIds, data.channelLocations)
 
+    const divStyle: React.CSSProperties = useMemo(() => ({
+        width: width - 20, // leave room for the scrollbar
+        height: height - bottomToolbarHeight,
+        top: 0,
+        position: 'absolute'
+    }), [width, height])
+
     return (
-        <UnitLocationsWidget
-            width={width}
-            height={height}
-            electrodes={electrodes}
-            units={data.units}
-            disableAutoRotate={data.disableAutoRotate}
-        />
+        <div>
+            <div style={divStyle}>
+                <UnitLocationsWidget
+                    width={width - 20}
+                    height={height - bottomToolbarHeight}
+                    electrodes={electrodes}
+                    units={data.units}
+                    disableAutoRotate={data.disableAutoRotate}
+                    onlyShowSelected={toolbarOptions.onlyShowSelected}
+                />
+            </div>
+            <div style={{position: 'absolute', top: height - bottomToolbarHeight, height: bottomToolbarHeight, overflow: 'hidden'}}>
+                <UnitsTableBottomToolbar
+                    options={toolbarOptions}
+                    setOptions={setToolbarOptions}
+                />
+            </div>
+        </div>
     )
 }
 

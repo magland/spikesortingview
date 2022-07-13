@@ -41,6 +41,7 @@ interface WidgetProps {
     maxElectrodePixelRadius?: number
     offsetLabels?: boolean
     disableAutoRotate?: boolean
+    onlyShowSelected?: boolean
 }
 
 const defaultElectrodeLayerProps = {
@@ -54,9 +55,20 @@ const emptyDrawData = {}
 const markerRadius = 8
 
 const UnitLocationsWidget = (props: WidgetProps) => {
-    const { width, height, electrodes, units, disableAutoRotate } = props
+    const { width, height, electrodes, units, disableAutoRotate, onlyShowSelected } = props
     const { selectedElectrodeIds } = useSelectedElectrodes()
     const { selectedUnitIds, unitIdSelectionDispatch } = useSelectedUnitIds()
+
+    const selectedUnitIdsSet = useMemo(() => (new Set([...selectedUnitIds])), [selectedUnitIds])
+
+    const filteredUnits = units.filter(u => (
+        onlyShowSelected ? selectedUnitIdsSet.has(u.unitId) : true
+    )).sort((u1, u2) => {
+        // sort so that selected units are on top
+        if ((selectedUnitIdsSet.has(u1.unitId)) && (!selectedUnitIdsSet.has(u2.unitId))) return 1
+        if ((!selectedUnitIdsSet.has(u1.unitId)) && (selectedUnitIdsSet.has(u2.unitId))) return -1
+        return idToNum(u1.unitId) - idToNum(u2.unitId)
+    })
 
     const maxElectrodePixelRadius = props.maxElectrodePixelRadius || defaultElectrodeLayerProps.maxElectrodePixelRadius
     const colors = props.colors ?? defaultColors
@@ -143,14 +155,14 @@ const UnitLocationsWidget = (props: WidgetProps) => {
             ctxt.fill()
             ctxt.stroke()
         }
-        for (let unit of units) {
+        for (let unit of filteredUnits) {
             const pt = transformPoint(transform, [unit.x, unit.y])
             const col = selectedUnitIds.size === 0 || selectedUnitIds.has(unit.unitId) ? (
                 colorForUnitId(idToNum(unit.unitId))
             ) : 'rgb(220, 220, 220)'
             drawUnit(pt[0], pt[1], col)
         }
-    }, [transform, units, selectedUnitIds])
+    }, [transform, filteredUnits, selectedUnitIds])
 
     const electrodeGeometryCanvas = useMemo(() => {
         return <BaseCanvas 
@@ -172,7 +184,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
 
     const handleSelectRect = useCallback((r: Vec4, {ctrlKey}: {ctrlKey: boolean}) => {
         const ids: (number | string)[] = []
-        for (let unit of units) {
+        for (let unit of filteredUnits) {
             const pt = transformPoint(transform, [unit.x, unit.y])
             if (rectangularRegionsIntersect(rectangularRegion([pt[0] - markerRadius, pt[1] - markerRadius, markerRadius * 2, markerRadius * 2]), rectangularRegion(r))) {
                 ids.push(unit.unitId)
@@ -192,11 +204,11 @@ const UnitLocationsWidget = (props: WidgetProps) => {
                 incomingSelectedUnitIds: ids
             })
         }
-    }, [transform, unitIdSelectionDispatch, units])
+    }, [transform, unitIdSelectionDispatch, filteredUnits])
 
     const handleClickPoint = useCallback((x: Vec2, {ctrlKey}: {ctrlKey: boolean}) => {
         let somethingFound = false
-        for (let unit of units) {
+        for (let unit of filteredUnits) {
             const pt = transformPoint(transform, [unit.x, unit.y])
             if (pointInRect(x, rectangularRegion([pt[0] - markerRadius, pt[1] - markerRadius, markerRadius * 2, markerRadius * 2]))) {
                 somethingFound = true
@@ -220,7 +232,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
                 incomingSelectedUnitIds: []
             })
         }
-    }, [transform, unitIdSelectionDispatch, units])
+    }, [transform, unitIdSelectionDispatch, filteredUnits])
 
     const {onMouseMove, onMouseDown, onMouseUp, paintDragSelectLayer} = useDragSelectLayer(width, height, handleSelectRect, handleClickPoint)
     const dragSelectCanvas = useMemo(() => {
