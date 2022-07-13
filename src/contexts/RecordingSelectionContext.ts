@@ -6,7 +6,7 @@ export type RecordingSelection = {
     focusTimeSeconds?: number
     visibleTimeStartSeconds?: number
     visibleTimeEndSeconds?: number
-    selectedElectrodeIds: number[]
+    selectedElectrodeIds: (number | string)[]
 }
 
 export const defaultRecordingSelection: RecordingSelection = {
@@ -144,7 +144,7 @@ export const useTimeFocus = () => {
 
 export const useSelectedElectrodes = () => {
     const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
-    const setSelectedElectrodeIds = useCallback((ids: number[]) => {
+    const setSelectedElectrodeIds = useCallback((ids: (number | string)[]) => {
         recordingSelectionDispatch({
             type: 'setSelectedElectrodeIds',
             selectedIds: ids
@@ -190,7 +190,7 @@ type SetFocusTimeRecordingSelectionAction = {
 
 type SetSelectedElectrodeIdsRecordingSelectionAction = {
     type: 'setSelectedElectrodeIds',
-    selectedIds: number[]
+    selectedIds: (number | string)[]
 }
 
 export type RecordingSelectionAction = InitializeRecordingSelectionTimesAction  | PanRecordingSelectionAction
@@ -329,7 +329,7 @@ const setFocusTime = (state: RecordingSelection, action: SetFocusTimeRecordingSe
 
 const setSelectedElectrodeIds = (state: RecordingSelection, action: SetSelectedElectrodeIdsRecordingSelectionAction): RecordingSelection => {
     if (action.selectedIds.length === state.selectedElectrodeIds.length) {
-        const currentSet = new Set<number>(state.selectedElectrodeIds)
+        const currentSet = new Set<(number | string)>(state.selectedElectrodeIds)
         if (action.selectedIds.every(id => currentSet.has(id))) {
             return state
         }

@@ -6,9 +6,9 @@ import { computeElectrodeLocations, getDraggedElectrodeIds, getElectrodeAtPoint,
 export interface ElectrodeGeometryState {
     convertedElectrodes: PixelSpaceElectrode[],
     pixelRadius: number,
-    draggedElectrodeIds: number[],
-    hoveredElectrodeId?: number,
-    pendingSelectedElectrodeIds: number[],
+    draggedElectrodeIds: (number | string)[],
+    hoveredElectrodeId?: (number | string),
+    pendingSelectedElectrodeIds: (number | string)[],
     xMarginWidth: number,
     dragState: DragState
 }
@@ -45,7 +45,7 @@ type UpdateClickElectrodeGeometryAction = {
     point: Vec2,
     shift?: boolean,
     ctrl?: boolean,
-    selectedElectrodeIds: number[]
+    selectedElectrodeIds: (number | string)[]
 }
 
 export type ElectrodeGeometryAction = InitializeElectrodesElectrodeGeometryAction | UpdateSelectionsElectrodeGeometryAction | 

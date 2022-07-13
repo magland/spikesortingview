@@ -11,7 +11,8 @@ type UnitLocationsViewProps = {
 
 const UnitLocationsView: FunctionComponent<UnitLocationsViewProps> = (props: UnitLocationsViewProps) => {
     const { data, width, height } = props
-    const channelIds = Object.keys(data.channelLocations).map(id => parseInt(id))
+
+    const channelIds = Object.keys(data.channelLocations)
     const electrodes = computeElectrodesFromIdsAndLocations(channelIds, data.channelLocations)
 
     return (

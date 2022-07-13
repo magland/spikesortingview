@@ -79,7 +79,7 @@ export const dragReducer = (state: DragState, action: DragAction): DragState => 
                     }
                     : state
         default: {
-            throw Error('Invalid mode for drag reducer.')
+            throw Error(`Invalid mode for drag reducer: ${type}`)
         }
     }
 }

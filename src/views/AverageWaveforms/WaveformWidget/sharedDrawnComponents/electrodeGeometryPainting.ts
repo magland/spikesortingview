@@ -28,9 +28,9 @@ export const defaultColors: ElectrodeColors = {
 
 export type PaintProps = {
     pixelElectrodes: PixelSpaceElectrode[]
-    selectedElectrodeIds: number[]
-    hoveredElectrodeId?: number
-    draggedElectrodeIds: number[]
+    selectedElectrodeIds: (number | string)[]
+    hoveredElectrodeId?: (number | string)
+    draggedElectrodeIds: (number | string)[]
     pixelRadius: number
     showLabels: boolean
     offsetLabels: boolean

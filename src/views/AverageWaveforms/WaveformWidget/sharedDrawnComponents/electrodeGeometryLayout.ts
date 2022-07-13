@@ -7,7 +7,7 @@ import { getArrayMax, getArrayMin } from "./utility"
 export const xMargin = 10
 const yMargin = 10
 
-export const computeElectrodesFromIdsAndLocations = (ids: number[], channelLocations?: {[key: string]: number[]}): Electrode[] => {
+export const computeElectrodesFromIdsAndLocations = (ids: (number | string)[], channelLocations?: {[key: string]: number[]}): Electrode[] => {
     const locs = channelLocations || {}
     if (channelLocations &&
         (Object.keys(locs).length !== ids.length
@@ -234,7 +234,7 @@ export const getElectrodeAtPoint = (electrodes: PixelSpaceElectrode[], pixelRadi
     return undefined
 }
 
-export const getDraggedElectrodeIds = (electrodes: PixelSpaceElectrode[], dragRect: RectangularRegion, pixelRadius: number): number[] => {
+export const getDraggedElectrodeIds = (electrodes: PixelSpaceElectrode[], dragRect: RectangularRegion, pixelRadius: number): (number | string)[] => {
     // Rather than computing boundingboxes for each electrode, let's just expand the selection region by the
     // known pixel radius & check the electrode centers that are within the expanded selection box.
     const xmin = dragRect.xmin - pixelRadius

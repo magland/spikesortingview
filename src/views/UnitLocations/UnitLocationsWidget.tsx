@@ -7,12 +7,13 @@ import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
 import { computeElectrodeLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import { defaultColors, ElectrodeColors } from '../AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryPainting'
+import useDragSelectLayer from './useDragSelectLayer'
 
 export const defaultMaxPixelRadius = 25
 const circle = 2 * Math.PI
 
 export type Electrode = {
-    id: number
+    id: (number | string)
     label: string
     x: number
     y: number
@@ -47,7 +48,7 @@ const defaultElectrodeLayerProps = {
 }
 
 
-const drawData = {}
+const emptyDrawData = {}
 
 const UnitLocationsWidget = (props: WidgetProps) => {
     const { width, height, electrodes, units } = props
@@ -153,7 +154,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
             width={width}
             height={height}
             draw={paintElectrodes}
-            drawData={drawData}
+            drawData={emptyDrawData}
         />
     }, [width, height, paintElectrodes])
 
@@ -162,12 +163,28 @@ const UnitLocationsWidget = (props: WidgetProps) => {
             width={width}
             height={height}
             draw={paintUnits}
-            drawData={drawData}
+            drawData={emptyDrawData}
         />
     }, [width, height, paintUnits])
 
+    const {dragSelectState, onMouseMove, onMouseDown, onMouseUp, paintDragSelectLayer} = useDragSelectLayer(width, height)
+    const dragSelectCanvas = useMemo(() => {
+        return <BaseCanvas 
+            width={width}
+            height={height}
+            draw={paintDragSelectLayer}
+            drawData={emptyDrawData}
+        />
+    }, [width, height, paintDragSelectLayer])
+
     return (
-        <div style={{width, height, position: 'relative'}}>
+        <div
+            style={{width, height, position: 'relative'}}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseDown={onMouseDown}
+        >
+            {dragSelectCanvas}
             {electrodeGeometryCanvas}
             {unitsCanvas}
         </div>

@@ -12,7 +12,7 @@ const USE_SVG = false
 export const defaultMaxPixelRadius = 25
 
 export type Electrode = {
-    id: number
+    id: number | string
     label: string
     x: number
     y: number
