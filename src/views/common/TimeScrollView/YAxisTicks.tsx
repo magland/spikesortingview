@@ -32,22 +32,30 @@ const range = (min: number, max: number, step: number, base: number) => {
         .filter(x => x > min)
 }
 
-const fitGridLines = (minGridLines: number, maxGridLines: number, range: number, scale: number = 0): {step: number, scale: number} => {
-    const steps = [1, 2, 5]
-    const realizedScale = Math.pow(10, scale)
-    const results = steps.map((s) => {
-        const fit = range/(s * realizedScale)
-        if (fit > minGridLines && fit < maxGridLines) {
-            return {step: s, scale: scale}
+const fitGridLines = (minGridLines: number, maxGridLines: number, range: number): {step: number, scale: number} => {
+    let scale = 0
+    while (true) {
+        const steps = [1, 2, 5]
+        const realizedScale = Math.pow(10, scale)
+        const results = steps.map((s) => {
+            const fit = range/(s * realizedScale)
+            if (fit > minGridLines && fit < maxGridLines) {
+                return {step: s, scale: scale}
+            }
+            // this means the step size is too big. This shouldn't really happen without finding an acceptable step size first,
+            // but we'll check for it later just in case.
+            if (fit < minGridLines) { return {step: -1, scale: -1} }
+            return {step: 0, scale: 0}
+        })
+        const a = results.find(r => r.step > 0)
+        if (a) return a
+        const b = results.find(r => r.step === -1)
+        if (b) return b
+        scale = scale + 1
+        if (scale > 10) {
+            return {step: 1, scale: 0}
         }
-        // this means the step size is too big. This shouldn't really happen without finding an acceptable step size first,
-        // but we'll check for it later just in case.
-        if (fit < minGridLines) { return {step: -1, scale: -1} }
-        return {step: 0, scale: 0}
-    })
-    return results.find(r => r.step > 0)
-        ?? results.find(r => r.step === -1)
-        ?? fitGridLines(minGridLines, maxGridLines, range, scale + 1)
+    }
 }
 
 const computeInvariant = (min: number, max: number) => {

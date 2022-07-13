@@ -19,9 +19,6 @@ const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, wi
     if (items.length !== 2) {
         throw Error('Number of items must be 2 for a Splitter layout item')
     }
-    if (direction !== 'horizontal') {
-        throw Error(`Splitter direction not yet supported: ${direction}`)
-    }
     const itemPositions: number[] = useMemo(() => {
         let itemSizes: number[]
         if (direction === 'horizontal') {
@@ -48,6 +45,7 @@ const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, wi
             width={width}
             height={height}
             initialPosition={initialSplitterPosition}
+            direction={direction}
         >
             {
                 items.map((item, ii) => {

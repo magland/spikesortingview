@@ -11,6 +11,7 @@ interface Props {
     gripInnerThickness?: number
     gripMargin?: number
     adjustable?: boolean
+    direction?: 'horizontal' | 'vertical'
 }
 
 const defaultGripThickness = 10
@@ -18,14 +19,17 @@ const defaultGripInnerThickness = 4
 const defaultGripMargin = 2
 
 const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = React.forwardRef((props, ref) => {
-    const {width, height, initialPosition, onChange, adjustable=true, positionFromRight=false} = props
+    const {width, height, initialPosition, onChange, adjustable=true, positionFromRight=false, direction='horizontal'} = props
+
+    const size1 = direction === 'horizontal' ? width : height
+    const size2 = direction === 'horizontal' ? height : width
 
     const [gripPosition, setGripPosition] = useState<number>(initialPosition)
     useEffect(() => {
-        if (gripPosition > width - 4) {
-            setGripPosition(width - 4)
+        if (gripPosition > size1 - 4) {
+            setGripPosition(size1 - 4)
         }
-        else if ((gripPosition < 4) && (width > 20)) {
+        else if ((gripPosition < 4) && (size1 > 20)) {
             setGripPosition(4)
         }
     }, [gripPosition, width])
@@ -60,86 +64,87 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
         return <child1.type {...child1.props} width={width} height={height} />
     }
 
-    const gripPositionFromLeft = positionFromRight ? width - gripPosition : gripPosition
+    const gripPositionFromLeft = positionFromRight ? size1 - gripPosition : gripPosition
 
     const gripThickness = adjustable ? (props.gripThickness ?? defaultGripThickness) : 0
     const gripInnerThickness = adjustable ? (props.gripInnerThickness ?? defaultGripInnerThickness) : 0
     const gripMargin = adjustable ? (props.gripMargin ?? defaultGripMargin) : 0
-    const width1 = gripPositionFromLeft - gripThickness / 2 - gripMargin
-    const width2 = width - width1 - gripThickness - 2 * gripMargin
+    const size1A = gripPositionFromLeft - gripThickness / 2 - gripMargin
+    const size1B = size1 - size1A - gripThickness - 2 * gripMargin
 
     let style0: React.CSSProperties = {
         top: 0,
         left: 0,
         width: width,
-        height: height
+        height: height,
+        overflow: 'hidden'
     };
     let style1: React.CSSProperties = {
         left: 0,
         top: 0,
-        width: width1,
-        height: height,
+        width: direction === 'horizontal' ? size1A : width,
+        height: direction === 'horizontal' ? height : size1A,
         zIndex: 0,
-        overflowY: 'auto',
-        overflowX: 'hidden'
+        overflowY: direction === 'horizontal' ? 'auto' : 'hidden',
+        overflowX: direction === 'horizontal' ? 'hidden' : 'auto'
     };
     let style2: React.CSSProperties = {
-        left: width1 + gripThickness + 2 * gripMargin,
-        top: 0,
-        width: width2,
-        height: height,
+        left: direction === 'horizontal' ? size1A + gripThickness + 2 * gripMargin : 0,
+        top: direction === 'horizontal' ? 0 : size1A + gripThickness + 2 * gripMargin,
+        width: direction === 'horizontal' ? size1B : width,
+        height: direction === 'horizontal' ? height : size1B,
         zIndex: 0,
-        overflowY: 'auto',
-        overflowX: 'hidden'
+        overflowY: direction === 'horizontal' ? 'auto' : 'hidden',
+        overflowX: direction === 'horizontal' ? 'hidden' : 'auto'
     };
     let styleGripOuter: React.CSSProperties = {
         left: 0,
         top: 0,
-        width: gripThickness + 2 * gripMargin,
-        height: height,
+        width: direction === 'horizontal' ? gripThickness + 2 * gripMargin : width,
+        height: direction === 'horizontal' ? height : gripThickness + 2 * gripMargin,
         backgroundColor: 'transparent',
-        cursor: 'col-resize',
+        cursor: direction === 'horizontal' ? 'col-resize' : 'row-resize',
         zIndex: 9998
     };
     let styleGrip: React.CSSProperties = {
-        left: gripMargin,
-        top: 0,
-        width: gripThickness,
-        height: height,
+        left: direction === 'horizontal' ? gripMargin : 0,
+        top: direction === 'horizontal' ? 0 : gripMargin,
+        width: direction === 'horizontal' ? gripThickness : width,
+        height: direction === 'horizontal' ? height : gripThickness,
         background: 'rgb(230, 230, 230)',
-        cursor: 'col-resize'
+        cursor: direction === 'horizontal' ? 'col-resize' : 'row-resize'
     };
     let styleGripInner: React.CSSProperties = {
-        top: 0,
-        left: (gripThickness - gripInnerThickness) / 2,
-        width: gripInnerThickness,
-        height: height,
+        top: direction === 'horizontal' ? 0 : (gripThickness - gripInnerThickness) / 2,
+        left: direction === 'horizontal' ? (gripThickness - gripInnerThickness) / 2 : 0,
+        width: direction === 'horizontal' ? gripInnerThickness : width,
+        height: direction === 'horizontal' ? height : gripInnerThickness,
         background: 'gray',
-        cursor: 'col-resize'
+        cursor: direction === 'horizontal' ? 'col-resize' : 'row-resize'
     };
     const _handleGripDrag = (evt: DraggableEvent, ui: DraggableData) => {
     }
     const _handleGripDragStop = (evt: DraggableEvent, ui: DraggableData) => {
-        const newGripPositionFromLeft = ui.x;
+        const newGripPositionFromLeft = direction === 'horizontal' ? ui.x : ui.y;
         if (newGripPositionFromLeft === gripPositionFromLeft) {
             return;
         }
-        const newGripPosition = positionFromRight ? width - newGripPositionFromLeft : newGripPositionFromLeft
+        const newGripPosition = positionFromRight ? size1 - newGripPositionFromLeft : newGripPositionFromLeft
         setGripPosition(newGripPosition)
         onChange && onChange(newGripPosition)
     }
     return (
         <div className="splitter" style={{...style0, position: 'relative'}}>
             <div key="child1" style={{...style1, position: 'absolute'}} className="SplitterChild">
-                <child1.type {...child1.props} width={width1} height={height} />
+                <child1.type {...child1.props} width={direction === 'horizontal' ? size1A : width} height={direction === 'horizontal' ? height : size1A} />
             </div>
             {
                 adjustable && (
                     <Draggable
                         // nodeRef={draggableNodeRef} // this was actually causing an error with Draggable
                         key="drag"
-                        position={{ x: gripPositionFromLeft - gripThickness / 2 - gripMargin, y: 0 }}
-                        axis="x"
+                        position={{ x: direction === 'horizontal' ? gripPositionFromLeft - gripThickness / 2 - gripMargin : 0, y: direction === 'horizontal' ? 0 : gripPositionFromLeft - gripThickness / 2 - gripMargin }}
+                        axis={direction === 'horizontal' ? "x" : "y"}
                         onDrag={(evt: DraggableEvent, ui: DraggableData) => _handleGripDrag(evt, ui)}
                         onStop={(evt: DraggableEvent, ui: DraggableData) => _handleGripDragStop(evt, ui)}
                     >
@@ -153,7 +158,7 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
             }
 
             <div key="child2" style={{...style2, position: 'absolute'}} className="SplitterChild">
-                <child2.type ref={ref} {...child2.props} width={width2} height={height} />
+                <child2.type ref={ref} {...child2.props} width={direction === 'horizontal' ? size1B : width} height={direction === 'horizontal' ? height : size1B} />
             </div>
         </div>
     )
