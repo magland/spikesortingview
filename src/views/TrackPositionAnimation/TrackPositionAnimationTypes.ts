@@ -10,7 +10,12 @@ export type PositionFrame = {
 }
 
 export type DecodedPositionFrame = {
-    location_rects_px: number[][]
+    linearLocations: number[]
+    values: number[]
+}
+
+export type DecodedPositionFramePx = {
+    locationRectsPx: number[][]
     values: number[]
 }
 
@@ -68,16 +73,7 @@ export type TrackAnimationStaticData = {
     ymax: number
     headDirection?: number[]
     decodedData?: DecodedPositionData
-    decodedProbabilityValues?: number[]
-    decodedProbabilityLocations?: number[]
-    decodedProbabilityFrameBounds?: number[]
     realTimeReplayRateMs?: number
-}
-
-export type DecodedPositionData = {
-    values: number[] | undefined
-    locations: number[] | undefined
-    frameBounds: number[] | undefined
 }
 
 export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticData => {
@@ -96,9 +92,6 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
         ymin: isNumber,
         ymax: isNumber,
         decodedData: optional(isDecodedPositionData),
-        decodedProbabilityValues: optional(isArrayOf(isNumber)),
-        decodedProbabilityLocations: optional(isArrayOf(isNumber)),
-        decodedProbabilityFrameBounds: optional(isArrayOf(isNumber)),
         headDirection: optional(isArrayOf(isNumber)),
         realTimeReplayRateMs: optional(isNumber)
     })
@@ -121,8 +114,30 @@ export const isTrackAnimationStaticData = (x: any): x is TrackAnimationStaticDat
     return false
 }
 
+export type DecodedPositionData = {
+    type: 'DecodedPositionData'
+    xmin: number
+    xwidth: number
+    xcount: number
+    ymin: number
+    ywidth: number
+    ycount: number
+    uniqueLocations?: number[]
+    values: number[]
+    locations: number[]
+    frameBounds: number[]
+}
+
 export const isDecodedPositionData = (x: any): x is DecodedPositionData => {
     const typeMatch = validateObject(x, {
+        type: isEqualTo('DecodedPositionData'),
+        xmin: isNumber,
+        xwidth: isNumber,
+        xcount: isNumber,
+        ymin: isNumber,
+        ywidth: isNumber,
+        ycount: isNumber,
+        uniqueLocations: optional(isArrayOf(isNumber)),
         values: optional(isArrayOf(isNumber)),
         locations: optional(isArrayOf(isNumber)),
         frameBounds: optional(isArrayOf(isNumber))
