@@ -5,6 +5,7 @@ import React, { Fragment, FunctionComponent, useEffect, useMemo } from "react"
 import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
 import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
 import TPADecodedPositionLayer, { ValidColorMap } from './TPADecodedPositionLayer'
+import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
 import TPATrackLayer from './TPATrackLayer'
 import { DecodedPositionData, DecodedPositionFrame, PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
@@ -26,7 +27,7 @@ const defaultMargins: Margins = {
     bottom: 40
 }
 
-const computeTrackBinPixelDimensions = (transform: Matrix, trackRectPoints: number[][], trackRectWidth: number, trackRectHeight: number) => {
+export const computeTrackBinPixelDimensions = (transform: Matrix, trackRectPoints: number[][], trackRectWidth: number, trackRectHeight: number) => {
     const flippedY = (transform.valueOf() as number[][])[1][1] < 0 ? true : false
     const sourcePoints = [trackRectPoints[0], trackRectPoints[1], new Array(trackRectPoints[0].length).fill(1)]
     const all = matrix([[trackRectWidth, ...sourcePoints[0]], [trackRectHeight, ...sourcePoints[1]], [0, ...sourcePoints[2]]])
@@ -70,79 +71,6 @@ const useFrames = (
     const positionFrames = usePositionFrames(pixelPositions, timestampStart, timestamps, headDirection, probabilityFrames)
 
     return positionFrames
-}
-
-const nullDecodedData: DecodedPositionData = {
-    type: 'DecodedPositionData',
-    xmin: 0,
-    xwidth: 0,
-    xcount: 0,
-    ymin: 0,
-    ywidth: 0,
-    ycount: 0,
-    uniqueLocations: undefined,
-    frameBounds: [],
-    values: [],
-    locations: []
-}
-
-type DecodedProbabilityLocationsMap = {
-    [linearLocation: number]: number[]
-}
-type DecodedProbabilityCorners = {
-    linearizedValue: number[]
-    nativeXUlCorner: number[]
-    nativeYUlCorner: number[]
-}
-const useUniqueDecodedUlLocations = (decodedData: DecodedPositionData | undefined): DecodedProbabilityCorners => {
-    const { locations, uniqueLocations, xcount, xwidth, xmin, ycount, ywidth, ymin } = decodedData ? decodedData : nullDecodedData
-    const mappedUlCorners = useMemo(() => {
-        const uSet = uniqueLocations ? uniqueLocations : new Set(locations).values()
-        const sortedLocations = [...uSet].sort()
-        const nativeXs = sortedLocations.map(l => l % xcount)
-        const nativeYs = sortedLocations.map(l => Math.floor(l / xcount))
-
-        const centerToULCornerMatrix = matrix([[xwidth,    0  , -xwidth/2 + xmin],
-                                               [  0   , ywidth,  ywidth/2 + ymin]])
-        const augmentedNativeCenters = matrix([nativeXs, nativeYs, new Array(nativeYs.length).fill(1)])
-        const nativeUlPoints = multiply(centerToULCornerMatrix, augmentedNativeCenters).valueOf() as number[][]
-        return {
-            linearizedValue: sortedLocations,
-            nativeXUlCorner: nativeUlPoints[0],
-            nativeYUlCorner: nativeUlPoints[1]
-        }
-    }, [locations, uniqueLocations, xcount, xwidth, xmin, ywidth, ymin])
-
-    return mappedUlCorners
-}
-const useProbabilityLocationsMap = (transform: Matrix, decodedData: DecodedPositionData | undefined): DecodedProbabilityLocationsMap => {
-    const { xwidth, ywidth } = decodedData ? decodedData : nullDecodedData
-    const uniqueNativeLocations = useUniqueDecodedUlLocations(decodedData)
-    const linearPositionMap = useMemo(() => {
-        const pixelRects = computeTrackBinPixelDimensions(transform, [uniqueNativeLocations.nativeXUlCorner, uniqueNativeLocations.nativeYUlCorner], xwidth, ywidth)
-        const the_dict: DecodedProbabilityLocationsMap = {}
-        uniqueNativeLocations.linearizedValue.forEach((linearizedValue, index) => {
-            the_dict[linearizedValue] = pixelRects[index]
-        })
-        return the_dict
-    }, [transform, uniqueNativeLocations, xwidth, ywidth])
-    return linearPositionMap
-}
-
-const useProbabilityFrames = (decodedData: DecodedPositionData | undefined): DecodedPositionFrame[] => {
-    const { frameBounds, values, locations } = decodedData ? decodedData : nullDecodedData
-
-    const frames = useMemo(() => {
-        let frameStart = 0
-        return frameBounds.map((nObservations) => {
-            const valueSlice = values.slice(frameStart, frameStart + nObservations)
-            const locationSlice = locations.slice(frameStart, frameStart + nObservations)
-            frameStart += nObservations
-            return { linearLocations: locationSlice, values: valueSlice }
-        })
-    }, [locations, values, frameBounds])
-
-    return frames
 }
 
 const usePositionFrames = (positions: number[][] | undefined, timestampStart: number | undefined, timestamps: number[], headDirection: number[] | undefined, decodedData: DecodedPositionFrame[] | undefined): PositionFrame[] => {
@@ -234,14 +162,7 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
 
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = dataFrames[animationState.currentFrameIndex].decodedPositionFrame
-        const pixelLocations = linearFrame ? linearFrame.linearLocations.map((l) => decodedLocationsMap[l]) : []
-//        console.log(`frame # ${animationState.currentFrameIndex}\nLinear pairs: ${linearFrame?.linearLocations} vs ${linearFrame?.values}`)
-        const finalFrame = linearFrame
-            ? {
-                locationRectsPx: pixelLocations,
-                values: linearFrame.values
-            }
-            : undefined
+        const finalFrame = getDecodedPositionFramePx(linearFrame, decodedLocationsMap)
         return {
             frame: finalFrame,
             colorMap: 'plasma' as any as ValidColorMap // TODO: This is ugly, should be configured once, not on a per-frame basis
