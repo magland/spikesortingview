@@ -28,11 +28,13 @@ const baseGreen = 168
 const valuesRange = Array.from({length: 255}, (_, i) => i)
 // We have a pretty small number of actual possible values, so just precompute the styles.
 const stylesMap = {
-    'inferno': valuesRange.map(i => inferno(i/255)),
-    'magma': valuesRange.map(i => magma(i/255)),
+    // 'inferno': valuesRange.map(i => inferno(i/255)),
+    'inferno': valuesRange.map(i => inferno(Math.min(i/125, 1))),
+    // 'magma': valuesRange.map(i => magma(i/255)),
+    'magma': valuesRange.map(i => magma(Math.min(i/125, 1))),
     // 'plasma': valuesRange.map(i => plasma(i/255)),
     'plasma': valuesRange.map(i => plasma(Math.min(i/125, 1))),
-//    'viridis': valuesRange.map(i => viridis(i/255)),
+    // 'viridis': valuesRange.map(i => viridis(i/255)),
     'viridis': valuesRange.map(i =>  viridis(Math.min(i/125, 1))),
     'base': valuesRange.map((i) => `rgba(${baseRed}, ${baseBlue}, ${baseGreen}, ${i/5})`)
 }
