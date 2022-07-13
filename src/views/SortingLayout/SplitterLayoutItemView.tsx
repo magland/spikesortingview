@@ -39,7 +39,6 @@ const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, wi
     const initialSplitterPosition: number = itemPositions[1]
 
     // Todo, we need to enforce min/max sizes
-    // Todo, we need a vertical splitter
     return (
         <Splitter
             width={width}

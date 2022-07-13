@@ -2,6 +2,7 @@ import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import { useCallback, useRef } from 'react';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
@@ -27,6 +28,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
     const [showWaveformStdev, setShowWaveformStdev] = useState<boolean>(true)
     const [showChannelIds, setShowChannelIds] = useState<boolean>(true)
+
+    const divRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b)) })
@@ -125,12 +128,35 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             showChannelIdsAction
         ]
     }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds])
-    
+
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        if (!e.shiftKey) return
+        if (e.deltaY < 0) {
+            setAmpScaleFactor(s => (s * 1.3))
+        }
+        else {
+            setAmpScaleFactor(s => (s / 1.3))
+        }
+        return false // don't scroll
+    }, [])
+
+    useEffect(() => {
+        if (!divRef.current) return
+        divRef.current.addEventListener('wheel', (e: WheelEvent) => {
+            if (e.shiftKey) {
+                e.preventDefault()
+            }
+        })
+    }, [divRef])
+
     const bottomToolbarHeight = 30
 
     const TOOLBAR_WIDTH = 36 // hard-coded for now
     return (
-        <div>
+        <div
+            onWheel={handleWheel}
+            ref={divRef}
+        >
             <Splitter
                 width={width}
                 height={height - bottomToolbarHeight}

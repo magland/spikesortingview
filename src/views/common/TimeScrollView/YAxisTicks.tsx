@@ -37,16 +37,17 @@ const fitGridLines = (minGridLines: number, maxGridLines: number, range: number)
     while (true) {
         const steps = [1, 2, 5]
         const realizedScale = Math.pow(10, scale)
-        const results = steps.map((s) => {
+        const results: {step: number, scale: number}[] = []
+        for (let s of steps) {
             const fit = range/(s * realizedScale)
             if (fit > minGridLines && fit < maxGridLines) {
-                return {step: s, scale: scale}
+                results.push({step: s, scale: scale})
             }
             // this means the step size is too big. This shouldn't really happen without finding an acceptable step size first,
             // but we'll check for it later just in case.
             if (fit < minGridLines) { return {step: -1, scale: -1} }
-            return {step: 0, scale: 0}
-        })
+            results.push({step: 0, scale: 0})
+        }
         const a = results.find(r => r.step > 0)
         if (a) return a
         const b = results.find(r => r.step === -1)

@@ -18,7 +18,7 @@ const AmplitudeScaleToolbarEntries = (props: AmplitudeScaleToolbarProps): Toolba
         {
             type: 'button',
             callback: _handleScaleAmplitudeUp,
-            title: 'Scale amplitude up [up arrow]',
+            title: 'Scale amplitude up [shift + mouse wheel]',
             icon: <FaArrowUp />,
             keyCode: 38
         },
@@ -31,7 +31,7 @@ const AmplitudeScaleToolbarEntries = (props: AmplitudeScaleToolbarProps): Toolba
         {
             type: 'button',
             callback: _handleScaleAmplitudeDown,
-            title: 'Scale amplitude down [down arrow]',
+            title: 'Scale amplitude down [shift + mouse wheel]',
             icon: <FaArrowDown />,
             keyCode: 40
         },

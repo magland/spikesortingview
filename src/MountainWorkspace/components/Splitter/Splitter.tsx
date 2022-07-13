@@ -22,7 +22,7 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
     const {width, height, initialPosition, onChange, adjustable=true, positionFromRight=false, direction='horizontal'} = props
 
     const size1 = direction === 'horizontal' ? width : height
-    const size2 = direction === 'horizontal' ? height : width
+    // const size2 = direction === 'horizontal' ? height : width
 
     const [gripPosition, setGripPosition] = useState<number>(initialPosition)
     useEffect(() => {
@@ -32,7 +32,7 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
         else if ((gripPosition < 4) && (size1 > 20)) {
             setGripPosition(4)
         }
-    }, [gripPosition, width])
+    }, [gripPosition, width, size1])
 
     // See: https://stackoverflow.com/questions/63603902/finddomnode-is-deprecated-in-strictmode-finddomnode-was-passed-an-instance-of-d
     // const draggableNodeRef = React.useRef(null)
