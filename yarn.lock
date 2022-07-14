@@ -10646,6 +10646,11 @@ saxes@^5.0.0:
   dependencies:
     xmlchars "^2.2.0"
 
+scale-color-perceptual@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/scale-color-perceptual/-/scale-color-perceptual-1.1.2.tgz#370fb1aa1fc48261d3048f34edfe6155fb0a52d5"
+  integrity sha512-xuadE0xPnV+maBOLTl4ZcN0tGeBiU8ucRlLTIv74t/9dMEr3tiCAW+WfHePZ/JI3d452+kPvNmW6i3ty15iiIw==
+
 scheduler@^0.20.2:
   version "0.20.2"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.20.2.tgz#4baee39436e34aa93b4874bddcbf0fe8b8b50e91"

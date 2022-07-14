@@ -47,6 +47,32 @@ type ControlsDrawData = {
     isPlaying: boolean
 }
 
+const useDebouncedWheelHandler = (dispatch: AnimationStateDispatcher<any>, isPlaying: boolean) => {
+    const wheelCount = useRef<number>(0)
+    const useFineWheel = useRef<boolean>(false)
+    const wheelDebounceRequest = useRef<number | undefined>(undefined)
+    const debounceWheel = useCallback(() => {
+        if (wheelDebounceRequest.current) {
+            if (wheelCount.current !== 0 && !isPlaying) {
+                dispatch({type: 'SKIP', backward: wheelCount.current < 0, fineSteps: Math.abs(wheelCount.current), frameByFrame: useFineWheel.current})
+            }
+            useFineWheel.current = false
+            wheelCount.current = 0
+            wheelDebounceRequest.current = undefined
+        }
+    }, [dispatch, isPlaying])
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        if (e.deltaY === 0 || isPlaying) return
+        useFineWheel.current = e.shiftKey
+        wheelCount.current += (e.deltaY > 0 ? 1 : -1)
+        if (!wheelDebounceRequest.current) {
+            wheelDebounceRequest.current = window.requestAnimationFrame(debounceWheel)
+        }
+    }, [debounceWheel, isPlaying])
+
+    return handleWheel
+}
+
 // Again, there's no neat way to annotate a FunctionComponent<T> where <T> itself takes a generic type.
 // However, the parser can figure out that this is a FunctionComponent, so we just let it infer that
 // and annotate the type of the underlying frame set.
@@ -66,6 +92,8 @@ const AnimationStatePlaybackBarLayer = <T, >(props: AnimationStatePlaybackBarLay
         }
         return undefined
     }, [barAreaVCenter, drawData.barWidth, totalFrameCount])
+
+    const handleWheel = useDebouncedWheelHandler(dispatch, isPlaying)
 
     const getEventPoint = useCallback((e: React.MouseEvent) => {
         const boundingRect = e.currentTarget.getBoundingClientRect()
@@ -102,6 +130,7 @@ const AnimationStatePlaybackBarLayer = <T, >(props: AnimationStatePlaybackBarLay
         draggingXRef.current = undefined
     }, [dispatch, isPlaying])
 
+    // TODO: Break drag debounce stuff into a more self-contained hook?
     const dragTargetFrameRef = useRef<number | undefined>(undefined)
     const nextDebounceRequest = useRef<number | undefined>(undefined)
     const debounceSetFrame = useCallback(() => {
@@ -135,6 +164,7 @@ const AnimationStatePlaybackBarLayer = <T, >(props: AnimationStatePlaybackBarLay
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
+            onWheel={handleWheel}
         >
             <BaseCanvas<ControlsDrawData>
                 width={width - buttonPanelOffset}

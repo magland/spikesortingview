@@ -1,3 +1,5 @@
+type SupportedArrayType = Float32Array | Int32Array | Int16Array | Int8Array | Uint32Array | Uint16Array | Uint8Array
+
 const deserializeReturnValue = (x: any): any => {
     if (!x) return x
     else if (typeof (x) === 'object') {
@@ -9,17 +11,23 @@ const deserializeReturnValue = (x: any): any => {
             const dtype = x.dtype as string
             const data_b64 = x.data_b64 as string
             const dataBuffer = _base64ToArrayBuffer(data_b64)
-            if (dtype === 'float32') {
-                return applyShape(new Float32Array(dataBuffer), shape)
-            }
-            else if (dtype === 'int32') {
-                return applyShape(new Int32Array(dataBuffer), shape)
-            }
-            else if (dtype === 'int16') {
-                return applyShape(new Int16Array(dataBuffer), shape)
-            }
-            else {
-                throw Error(`Datatype not yet implemented for ndarray: ${dtype}`)
+            switch (dtype) {
+                case 'float32':
+                    return applyShape(new Float32Array(dataBuffer), shape)
+                case 'int32':
+                    return applyShape(new Int32Array(dataBuffer), shape)
+                case 'int16':
+                    return applyShape(new Int16Array(dataBuffer), shape)
+                case 'int8':
+                    return applyShape(new Int8Array(dataBuffer), shape)
+                case 'uint32':
+                    return applyShape(new Uint32Array(dataBuffer), shape)
+                case 'uint16':
+                    return applyShape(new Uint16Array(dataBuffer), shape)
+                case 'uint8':
+                    return applyShape(new Uint8Array(dataBuffer), shape)
+                default:
+                    throw Error(`Datatype not yet implemented for ndarray: ${dtype}`)
             }
         }
         else {
@@ -33,7 +41,7 @@ const deserializeReturnValue = (x: any): any => {
     else return x
 }
 
-const applyShape = (x: Float32Array | Int32Array | Int16Array, shape: number[]): number[] | number[][] | number[][][] | number[][][][] | number[][][][][] => {
+const applyShape = (x: SupportedArrayType, shape: number[]): number[] | number[][] | number[][][] | number[][][][] | number[][][][][] => {
     if (shape.length === 1) {
         if (shape[0] !== x.length) throw Error('Unexpected length of array')
         return Array.from(x)

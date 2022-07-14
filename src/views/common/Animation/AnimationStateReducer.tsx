@@ -69,6 +69,8 @@ export type AnimationStateSetReplayRateAction = {
 export type AnimationStateSkipAction = {
     type: 'SKIP'
     backward?: boolean
+    fineSteps?: number
+    frameByFrame?: boolean
 }
 
 export type AnimationStateToEndAction = {
@@ -146,15 +148,7 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
             refreshAnimationCycle(s)
             return { ...s, replayMultiplier: a.newRate, playbackStartedTimestamp: undefined }
         case SKIP:
-            // Currently implemented as a jump of 3 pct, but that's just a placeholder; maybe fixed length (or fixed time) would be better?
-            // Thought: This could interact with the replay rate and skip e.g. 5 seconds of playback time under current settings...?
-            const newFrame = s.currentFrameIndex + (Math.floor(s.frameData.length * .03) * (a.backward ? -1 : 1))
-            s.currentFrameIndex = newFrame < 0
-                ? 0
-                : newFrame > (s.frameData.length - 1)
-                    ? s.frameData.length : newFrame
-            refreshAnimationCycle(s)
-            return {...s, playbackStartedTimestamp: undefined}
+            return doSkip(s, a)
         case TO_END:
             s.currentFrameIndex = a.backward ? 0 : s.frameData.length - 1
             refreshAnimationCycle(s)
@@ -247,6 +241,46 @@ const setFrame = <T, >(s: AnimationState<T>, a: AnimationStateSetCurrentFrameAct
         refreshAnimationCycle(s)
     }
     return {...s}
+}
+
+const msPerFineSkip = 100
+const minStepSize = 1
+const coarseStepSizePct = 0.03
+/**
+ * Skip forward/backward by a defined amount controlled by the skip action parameters and the playback speed.
+ * This is controlled by `AnimationStateSkipAction.fineSteps`:
+ * - When `fineSteps` is unset, *coarse* skip is used. This is currently a jump of 3%
+ * of the total recording length (but consider making it 5 sec of current playback speed).
+ * - When `fineSteps` is set, *fine* skip is used. The step rate is:
+ *    - if `AnimationStateSkipAction.frameByFrame` is true, then each step is one frame.
+ *    - Otherwise, each step is 1/10 of a second of playback at the current speed (min 1 frame).
+ *   The per-step skip rate is multiplied by the numer of fine steps requested (for debouncing mouse wheel controls).
+ * - If `fineSteps` is a 0 value, the function returns the input state (a no-op).
+ * @param s Current animation state
+ * @param a Skip action
+ * @returns Updated animation state.
+ */
+const doSkip = <T, >(s: AnimationState<T>, a: AnimationStateSkipAction): AnimationState<T> => {
+    const { backward, fineSteps, frameByFrame } = a
+
+    if (fineSteps !== undefined && fineSteps === 0) {
+        // No steps requested. No-op: return identity.
+        return s
+    }
+    const frameSkipCount = fineSteps
+        ? fineSteps * (frameByFrame
+                        ? minStepSize
+                        : (Math.max((Math.round(s.replayMultiplier * msPerFineSkip/s.baseMsPerFrame)), minStepSize)))
+        : (Math.floor(s.frameData.length * coarseStepSizePct))
+
+    const newFrame = s.currentFrameIndex + (frameSkipCount * (backward ? -1 : 1))
+
+    s.currentFrameIndex = newFrame < 0
+        ? 0
+        : newFrame > (s.frameData.length - 1)
+            ? s.frameData.length : newFrame
+    refreshAnimationCycle(s)
+    return {...s, playbackStartedTimestamp: undefined}
 }
 
 export default AnimationStateReducer
