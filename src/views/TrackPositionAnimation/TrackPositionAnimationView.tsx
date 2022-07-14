@@ -138,7 +138,9 @@ const initialState = makeDefaultState<PositionFrame>()
 
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
-    const { xmin, xmax, ymin, ymax, realTimeReplayRateMs, headDirection } = data
+    const { xmin, xmax, ymin, ymax, headDirection, samplingFrequencyHz } = data
+    const realTimeReplayRateMs = samplingFrequencyHz !== undefined ? 1000 / samplingFrequencyHz : undefined
+
     // Note: to expose timestamp to other components, may need to elevate to a full context
     const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
     useEffect(() => setupAnimationStateDispatchFn(animationStateDispatch), [animationStateDispatch])

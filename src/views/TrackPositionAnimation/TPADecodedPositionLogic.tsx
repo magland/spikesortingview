@@ -6,10 +6,10 @@ import { computeTrackBinPixelDimensions } from "./TrackPositionAnimationView";
 const nullDecodedData: DecodedPositionData = {
     type: 'DecodedPositionData',
     xmin: 0,
-    xwidth: 0,
+    binWidth: 0,
     xcount: 0,
     ymin: 0,
-    ywidth: 0,
+    binHeight: 0,
     ycount: 0,
     uniqueLocations: undefined,
     frameBounds: [],
@@ -26,15 +26,15 @@ type DecodedProbabilityCorners = {
     nativeYUlCorner: number[]
 }
 const useUniqueDecodedUlLocations = (decodedData: DecodedPositionData | undefined): DecodedProbabilityCorners => {
-    const { locations, uniqueLocations, xcount, xwidth, xmin, ywidth, ymin } = decodedData ? decodedData : nullDecodedData
+    const { locations, uniqueLocations, xcount, binWidth, xmin, binHeight, ymin } = decodedData ? decodedData : nullDecodedData
     const mappedUlCorners = useMemo(() => {
         const uSet = uniqueLocations ? uniqueLocations : new Set(locations).values()
         const sortedLocations = [...uSet].sort()
         const nativeXs = sortedLocations.map(l => l % xcount)
         const nativeYs = sortedLocations.map(l => Math.floor(l / xcount))
 
-        const centerToULCornerMatrix = matrix([[xwidth,    0  , -xwidth/2 + xmin],
-                                               [  0   , ywidth,  ywidth/2 + ymin]])
+        const centerToULCornerMatrix = matrix([[binWidth,    0  , -binWidth/2 + xmin],
+                                               [  0   , binHeight,  binHeight/2 + ymin]])
         const augmentedNativeCenters = matrix([nativeXs, nativeYs, new Array(nativeYs.length).fill(1)])
         const nativeUlPoints = multiply(centerToULCornerMatrix, augmentedNativeCenters).valueOf() as number[][]
         return {
@@ -42,22 +42,22 @@ const useUniqueDecodedUlLocations = (decodedData: DecodedPositionData | undefine
             nativeXUlCorner: nativeUlPoints[0],
             nativeYUlCorner: nativeUlPoints[1]
         }
-    }, [locations, uniqueLocations, xcount, xwidth, xmin, ywidth, ymin])
+    }, [locations, uniqueLocations, xcount, binWidth, xmin, binHeight, ymin])
 
     return mappedUlCorners
 }
 
 export const useProbabilityLocationsMap = (transform: Matrix, decodedData: DecodedPositionData | undefined): DecodedProbabilityLocationsMap => {
-    const { xwidth, ywidth } = decodedData ? decodedData : nullDecodedData
+    const { binWidth, binHeight } = decodedData ? decodedData : nullDecodedData
     const uniqueNativeLocations = useUniqueDecodedUlLocations(decodedData)
     const linearPositionMap = useMemo(() => {
-        const pixelRects = computeTrackBinPixelDimensions(transform, [uniqueNativeLocations.nativeXUlCorner, uniqueNativeLocations.nativeYUlCorner], xwidth, ywidth)
+        const pixelRects = computeTrackBinPixelDimensions(transform, [uniqueNativeLocations.nativeXUlCorner, uniqueNativeLocations.nativeYUlCorner], binWidth, binHeight)
         const the_dict: DecodedProbabilityLocationsMap = {}
         uniqueNativeLocations.linearizedValue.forEach((linearizedValue, index) => {
             the_dict[linearizedValue] = pixelRects[index]
         })
         return the_dict
-    }, [transform, uniqueNativeLocations, xwidth, ywidth])
+    }, [transform, uniqueNativeLocations, binWidth, binHeight])
     return linearPositionMap
 }
 
