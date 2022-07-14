@@ -1,5 +1,5 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber, isOneOf, isString, optional } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "figurl/viewInterface/validateObject"
 
 type AverageWaveformData = {
     unitId: number | string
@@ -17,12 +17,29 @@ export const isAverageWaveformData = (x: any): x is AverageWaveformData => {
     }, {allowAdditionalFields: true})
 }
 
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣤⣶⣶⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣾⠟⠋⠁⠀⠀⠀⠀⠀⠙⠻⣷⣄⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⢀⣴⠟⢻⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢷⡄⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⣠⡞⠁⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⠀⣄⠀⠀
+// ⠀⠀⠀⠀⠀⣴⠋⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡟⢠⣿⡆⠀
+// ⠀⠀⠀⢀⣾⣧⣤⠤⠶⠾⣿⣦⣄⣀⠀⠀⠀⠀⠀⠀⣀⣠⡴⠞⠋⣠⣿⠟⠀⠀
+// ⠀⠀⠀⣼⠟⠁⠀⠀⠀⠀⠀⠈⠙⠻⢿⣿⣿⣿⠿⠛⠋⣁⣤⣶⡿⠟⠁⠀⠀⠀
+// ⠀⠀⣼⡇⠀⠀⠀⠀⠀⠀⠀⠀⣠⡾⠟⢉⣁⣤⣶⠾⠟⠋⠉⠀⠀⠀⠀⠀⠀⠀
+// ⠀⢠⣿⠀⢠⣾⣿⡆⠀⠀⣠⡾⠋⣠⣴⡿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⢸⣿⠀⠘⠛⠛⠁⣠⣾⠏⢀⣾⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠈⣿⡄⠀⠀⣠⣾⠟⢁⣴⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠈⠻⠿⠿⠛⢁⣴⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠚⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+
 export type AverageWaveformsViewData = {
     type: 'AverageWaveforms'
     averageWaveforms: AverageWaveformData[]
     samplingFrequency: number
     noiseLevel?: number
     channelLocations?: {[key: string]: number[]}
+    showFiletMignon?: boolean
 }
 
 export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewData => {
@@ -31,6 +48,7 @@ export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewDat
         averageWaveforms: isArrayOf(isAverageWaveformData),
         samplingFrequency: isNumber,
         noiseLevel: optional(isNumber),
-        channelLocations: optional(() => (true))
+        channelLocations: optional(() => (true)),
+        showFiletMignon: optional(isBoolean)
     }, {allowAdditionalFields: true})
 }

@@ -29,6 +29,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [showWaveformStdev, setShowWaveformStdev] = useState<boolean>(true)
     const [showChannelIds, setShowChannelIds] = useState<boolean>(true)
 
+    const {showFiletMignon} = data
+
     const divRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
@@ -67,10 +69,11 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             ampScaleFactor,
             waveformColor: colorForUnitId(idToNum(aw.unitId)),
             showChannelIds,
-            width: 120 * plotBoxScaleFactor,
-            height: 120 * plotBoxScaleFactor
+            width: 120 * plotBoxScaleFactor + (showFiletMignon ? (120 * plotBoxScaleFactor / 4) : 0),
+            height: 120 * plotBoxScaleFactor,
+            showFiletMignon
         }
-    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds])
+    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds, showFiletMignon])
 
     const plots2: PGPlot[] = useMemo(() => {
         if (orderedUnitIds) {

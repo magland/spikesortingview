@@ -16,7 +16,7 @@ export type ElectrodeColors = {
 export const defaultColors: ElectrodeColors = {
     border: 'rgb(30, 30, 30)',
     base: 'rgb(0, 0, 255)',
-    selected: 'rgb(196, 196, 128)',
+    selected: 'rgb(50, 200, 50)',
     hover: 'rgb(128, 128, 255)',
     selectedHover: 'rgb(200, 200, 196)',
     dragged: 'rgb(0, 0, 196)',
@@ -129,12 +129,12 @@ const paintGeometryView = (ctxt: CanvasRenderingContext2D, props: PaintProps) =>
     })
 
     // Draw borders
-    ctxt.strokeStyle = defaultColors.border
-    pixelElectrodes.forEach(e => {
-        ctxt.beginPath()
-        ctxt.ellipse(e.pixelX, e.pixelY, pixelRadius, pixelRadius, 0, 0, circle)
-        ctxt.stroke()
-    })
+    // ctxt.strokeStyle = colors.border
+    // pixelElectrodes.forEach(e => {
+    //     ctxt.beginPath()
+    //     ctxt.ellipse(e.pixelX, e.pixelY, pixelRadius, pixelRadius, 0, 0, circle)
+    //     ctxt.stroke()
+    // })
 
     // draw electrode labels
     if (useLabels) {
