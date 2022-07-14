@@ -1,12 +1,15 @@
 import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import { INITIALIZE_UNITS } from 'contexts/UnitSelection/UnitSelectionContext';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
-import React, { FunctionComponent, useEffect, useMemo } from 'react';
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import CorrelogramPlot from 'views/Autocorrelograms/CorrelogramPlot';
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
+import { ToolbarItem } from 'views/common/Toolbars';
+import VerticalScrollView from 'views/common/VerticalScrollView';
+import ViewToolbar from 'views/common/ViewToolbar';
 import { CrossCorrelogramData, CrossCorrelogramsViewData } from './CrossCorrelogramsViewData';
 
 type Props = {
@@ -41,19 +44,13 @@ const CrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) 
     const listLengthScaler = useMemo(() => Math.pow(10, Math.ceil(Math.log10(unitIds.length))), [unitIds])
 
     const content = (
-        unitIds.length > MAX_UNITS_SELECTED ? (
-            <div>Not showing cross-correlogram matrix. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>
-        ) : unitIds.length === 0 ? (
-            <div>Select one or more units to view cross-correlograms.</div>
-        ) : (
-            <CrossCorrelogramsViewChild
-                data={data}
-                width={0} // filled in by splitter
-                height={0} // filled in by splitter
-                unitIds={unitIds}
-                listLengthScaler={listLengthScaler}
-            />
-        )
+        <CrossCorrelogramsViewChild
+            data={data}
+            width={0} // filled in by splitter
+            height={0} // filled in by splitter
+            unitIds={unitIds}
+            listLengthScaler={listLengthScaler}
+        />
     )
 
     return (
@@ -92,6 +89,8 @@ type ChildProps = {
 }
 
 const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width, height, unitIds}) => {
+    const [showXAxis, setShowXAxis] = useState<boolean>(false)
+
     const crossCorrelogramsSorted = useMemo(() => {
         const C = data.crossCorrelograms.filter(a => (unitIds.includes(a.unitId1) && (unitIds.includes(a.unitId2))))
         const ret: (CrossCorrelogramData | undefined)[] = []
@@ -123,26 +122,55 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
                 binCounts: cc ? cc.binCounts : undefined,
                 color: cc?.unitId1 === cc?.unitId2 ? colorForUnitId(idToNum(cc?.unitId1)) : 'gray',
                 width: plotWidth,
-                height: plotHeight
+                height: plotHeight,
+                hideXAxis: !showXAxis
             }
         }))
-    }, [crossCorrelogramsSorted, height, width, unitIds])
+    }, [crossCorrelogramsSorted, height, width, unitIds, showXAxis])
 
-    const divStyle: React.CSSProperties = useMemo(() => ({
-        width: width - 20, // leave room for the scrollbar
-        height: height,
-        position: 'relative',
-        overflowY: 'auto'
-    }), [width, height])
+    const customToolbarActions = useMemo(() => {
+        const showXAxisAction: ToolbarItem = {
+            type: 'toggle',
+            subtype: 'checkbox',
+            callback: () => setShowXAxis(a => (!a)),
+            title: 'Show X Axis',
+            selected: showXAxis === true
+        }
+        return [
+            showXAxisAction
+        ]
+    }, [showXAxis])
+
+    const TOOLBAR_WIDTH = 36 // hard-coded for now
     return (
-        <div style={divStyle}>
-            <PlotGrid
-                plots={plots}
-                plotComponent={CorrelogramPlot}
-                selectedPlotKeys={undefined}
-                numPlotsPerRow={unitIds.length}
+        <Splitter
+            width={width}
+            height={height}
+            initialPosition={TOOLBAR_WIDTH}
+            adjustable={false}
+        >
+            <ViewToolbar
+                width={TOOLBAR_WIDTH}
+                height={height}
+                customActions={customToolbarActions}
             />
-        </div>
+            <VerticalScrollView width={0} height={0}>
+                {
+                    unitIds.length > MAX_UNITS_SELECTED ? (
+                        <div>Not showing cross-correlogram matrix. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>
+                    ) : unitIds.length === 0 ? (
+                        <div>Select one or more units to view cross-correlograms.</div>
+                    ) : (
+                        <PlotGrid
+                            plots={plots}
+                            plotComponent={CorrelogramPlot}
+                            selectedPlotKeys={undefined}
+                            numPlotsPerRow={unitIds.length}
+                        />
+                    )
+                }
+            </VerticalScrollView>
+        </Splitter>
     )
 }
 

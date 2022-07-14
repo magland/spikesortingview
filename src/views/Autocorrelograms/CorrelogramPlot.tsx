@@ -8,6 +8,7 @@ type Props = {
     color: string
     width: number
     height: number
+    hideXAxis?: boolean
 }
 
 const determineTickLocationsMsec = (xMin: number, xMax: number): number[] => {
@@ -26,7 +27,7 @@ const determineTickLocationsMsec = (xMin: number, xMax: number): number[] => {
     return ret
 }
 
-const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, color, width, height}) => {
+const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, color, width, height, hideXAxis}) => {
     const bars: BarPlotBar[] = useMemo(() => (
         (binCounts || []).map((count, ii) => {
             const xStart = (binEdgesSec || [])[ii] * 1000
@@ -58,10 +59,10 @@ const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, colo
             <BarPlot
                 bars={bars}
                 color={color}
-                ticks={ticks}
+                ticks={hideXAxis ? undefined : ticks}
                 width={width}
                 height={height}
-                xLabel="dt (msec)"
+                xLabel={hideXAxis ? undefined : "dt (msec)"}
             />
         ) : (
             <div
