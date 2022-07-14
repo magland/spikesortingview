@@ -13,8 +13,8 @@ type Props = {
     barBoxes: BarBox[]
     color: string
     margins: Margins
-    pixelTicks: BarPlotTick[]
-    xLabel: string
+    pixelTicks?: BarPlotTick[]
+    xLabel?: string
     width: number
     height: number
 }
@@ -28,12 +28,14 @@ const draw = (context: CanvasRenderingContext2D, data: Props) => {
         context.fillRect(b.x1, b.y1, b.x2 - b.x1, b.y2 - b.y1)
     })
 
-    context.textBaseline = 'bottom'
-    context.textAlign = 'center'
-    context.fillStyle = 'black'
-    context.fillText(data.xLabel, data.width / 2, data.height - 3)
+    if (data.xLabel) {
+        context.textBaseline = 'bottom'
+        context.textAlign = 'center'
+        context.fillStyle = 'black'
+        context.fillText(data.xLabel, data.width / 2, data.height - 3)
+    }
 
-    for (let tick of data.pixelTicks) {
+    for (let tick of data.pixelTicks || []) {
         context.strokeStyle = 'black'
         context.beginPath()
         context.moveTo(tick.x, data.height - data.margins.bottom)

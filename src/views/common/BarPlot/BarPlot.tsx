@@ -13,7 +13,7 @@ type Props = {
     height: number
     bars: BarPlotBar[]
     color: string
-    ticks: BarPlotTick[]
+    ticks?: BarPlotTick[]
     xLabel?: string
 }
 
@@ -33,12 +33,12 @@ const BarPlot: FunctionComponent<Props> = ({bars, color, ticks, xLabel, width, h
         Math.max(...bars.map(b => (b.height)))
     ), [bars])
 
-    const {barBoxes, margins, pixelTicks}: {barBoxes: BarBox[], margins: Margins, pixelTicks: BarPlotTick[]} = useMemo(() => {
+    const {barBoxes, margins, pixelTicks}: {barBoxes: BarBox[], margins: Margins, pixelTicks?: BarPlotTick[]} = useMemo(() => {
         const margins = {
             left: 3,
             right: 3,
             top: 5,
-            bottom: 30
+            bottom: 3 + (xLabel ? 13 : 0) + (ticks ? 13 : 0)
         }
         const W = width - margins.left - margins.right
         const H = height - margins.top - margins.bottom
@@ -49,12 +49,12 @@ const BarPlot: FunctionComponent<Props> = ({bars, color, ticks, xLabel, width, h
             y2: margins.top + H,
             tooltip: bar.tooltip
         }))
-        const pixelTicks = ticks.map(tick => ({
+        const pixelTicks = ticks ? ticks.map(tick => ({
             x: margins.left + (tick.x - xMin) / (xMax - xMin) * W,
             label: `${tick.label}`
-        }))
+        })) : undefined
         return {barBoxes, margins, pixelTicks}
-    }, [bars, ticks, xMin, xMax, yMax, width, height])
+    }, [bars, ticks, xMin, xMax, yMax, width, height, xLabel])
 
     return (
         <div style={{width, height, position: 'relative'}}>
@@ -63,7 +63,7 @@ const BarPlot: FunctionComponent<Props> = ({bars, color, ticks, xLabel, width, h
                 color={color}
                 margins={margins}
                 pixelTicks={pixelTicks}
-                xLabel={xLabel || ''}
+                xLabel={xLabel}
                 width={width}
                 height={height}
             />
