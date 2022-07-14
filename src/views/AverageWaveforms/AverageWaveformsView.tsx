@@ -28,8 +28,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
     const [showWaveformStdev, setShowWaveformStdev] = useState<boolean>(true)
     const [showChannelIds, setShowChannelIds] = useState<boolean>(true)
-
-    const {showFiletMignon} = data
+    const [showFiletMignon, setShowFiletMignon] = useState<boolean>(data.showFiletMignon || false)
 
     const divRef = useRef<HTMLDivElement | null>(null)
 
@@ -119,6 +118,13 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             title: 'Show channel IDs',
             selected: showChannelIds === true
         }
+        const showFiletMignonAction: ToolbarItem = {
+            type: 'toggle',
+            subtype: 'checkbox',
+            callback: () => setShowFiletMignon(a => (!a)),
+            title: 'Show "filet mignon"',
+            selected: showFiletMignon === true
+        }
         return [
             ...amplitudeScaleToolbarEntries,
             {type: 'divider'},
@@ -128,9 +134,11 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             {type: 'divider'},
             showWaveformStdevAction,
             {type: 'divider'},
-            showChannelIdsAction
+            showChannelIdsAction,
+            {type: 'divider'},
+            showFiletMignonAction
         ]
-    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds])
+    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds, showFiletMignon])
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
         if (!e.shiftKey) return
