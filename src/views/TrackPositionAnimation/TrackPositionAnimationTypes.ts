@@ -54,11 +54,11 @@ export type TrackAnimationStaticData = {
     type: 'TrackAnimation'
     trackBinWidth: number
     trackBinHeight: number
-    trackBinULCorners: [number, number][]
+    trackBinULCorners: [number[], number[]]
     totalRecordingFrameLength: number
     timestampStart?: number
     timestamps: number[]
-    positions: [number, number][]
+    positions: [number[], number[]]
     xmin: number
     xmax: number
     ymin: number
