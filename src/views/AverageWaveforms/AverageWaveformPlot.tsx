@@ -5,23 +5,26 @@ import ElectrodeGeometry from './WaveformWidget/sharedDrawnComponents/ElectrodeG
 import { WaveformColors } from './WaveformWidget/WaveformPlot';
 import WaveformWidget from './WaveformWidget/WaveformWidget';
 
-type Props = {
+export type AverageWaveformPlotProps = {
     channelIds: (number | string)[]
-    waveform: number[][]
-    waveformStdDev?: number[][]
+    units: {
+        channelIds: (number | string)[]
+        waveform: number[][]
+        waveformStdDev?: number[][]
+        waveformColor: string
+    }[]
     layoutMode: 'geom' | 'vertical'
     channelLocations?: {[key: string]: number[]}
     samplingFrequency: number
     peakAmplitude: number
     ampScaleFactor: number
-    waveformColor: string
     showChannelIds: boolean
     width: number
     height: number
     showReferenceProbe?: boolean
 }
 
-const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, waveformColor, showChannelIds, showReferenceProbe, width, height}) => {
+const AverageWaveformPlot: FunctionComponent<AverageWaveformPlotProps> = ({channelIds, units, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, showChannelIds, showReferenceProbe, width, height}) => {
     const electrodes = useMemo(() => {
         const locs = channelLocations || {}
         return channelIds.map(channelId => ({
@@ -41,21 +44,29 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             y: locs[`${channelId}`] !== undefined ? locs[`${channelId}`][1] : 0
         }))
     }, [allChannelIds, channelLocations])
-    const waveformOpts = useMemo(() => {
-        const waveformColors: WaveformColors = {
-            base: waveformColor
-        }
-        return {
-            waveformWidth: 2,
-            colors: waveformColors,
-            showChannelIds
-        }
-    }, [waveformColor, showChannelIds])
     const referenceProbeWidth = width / 4
+
+    const waveforms = useMemo(() => (
+        units.map(unit => {
+            const waveformColors: WaveformColors = {
+                base: unit.waveformColor
+            }
+            const electrodeIndices = []
+            for (let id of unit.channelIds) {
+                electrodeIndices.push(electrodes.map(e => (e.id)).indexOf(id))
+            }
+            return {
+                electrodeIndices,
+                waveform: unit.waveform,
+                waveformStdDev: unit.waveformStdDev,
+                waveformColors
+            }
+        })
+    ), [electrodes, units])
+
     const waveformWidget = (
         <WaveformWidget
-            waveform={waveform}
-            waveformStdDev={waveformStdDev}
+            waveforms={waveforms}
             electrodes={electrodes}
             ampScaleFactor={ampScaleFactor}
             layoutMode={channelLocations ? layoutMode : 'vertical'}
@@ -64,7 +75,8 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             showLabels={true} // for now
             peakAmplitude={peakAmplitude}
             samplingFrequency={samplingFrequency}
-            waveformOpts={waveformOpts}
+            showChannelIds={showChannelIds}
+            waveformWidth={2}
         />
     )
 

@@ -3,15 +3,14 @@ import { TransformationMatrix, transformPoints, Vec2 } from 'FigurlCanvas/Geomet
 import { matrix } from "mathjs"
 import { useMemo } from 'react'
 import { LayoutMode, PixelSpaceElectrode } from './sharedDrawnComponents/ElectrodeGeometry'
-import { defaultWaveformOpts } from './WaveformWidget'
 
 
 export type WaveformColors = {
     base: string
 }
-const defaultWaveformColors: WaveformColors = {
-    base: 'black'
-}
+// const defaultWaveformColors: WaveformColors = {
+//     base: 'black'
+// }
 
 export type WaveformPoint = {
     amplitude: number,
@@ -20,13 +19,13 @@ export type WaveformPoint = {
 
 export type WaveformProps = {
     electrodes: PixelSpaceElectrode[]
-    waveformPoints?: WaveformPoint[][]
-    waveformLowerPoints?: WaveformPoint[][]
-    waveformUpperPoints?: WaveformPoint[][]
-    waveformOpts: {
-        colors?: WaveformColors
-        waveformWidth: number
-    }
+    waveforms: {
+        electrodeIndices: number[]
+        waveform: number[][]
+        waveformStdDev?: number[][]
+        waveformColors: WaveformColors
+    }[]
+    waveformWidth: number
     oneElectrodeWidth: number
     oneElectrodeHeight: number
     yScale: number
@@ -38,42 +37,68 @@ export type WaveformProps = {
 type PixelSpacePath = {
     pointsInPaintBox: Vec2[]
     offsetFromParentCenter: Vec2
+    color: string
 }
 
 type PaintProps = {
-    waveformOpts: {
-        colors?: WaveformColors
-        waveformWidth: number
-    }
+    waveformWidth: number
     pixelSpacePaths: PixelSpacePath[]
     pixelSpacePathsLower?: PixelSpacePath[]
     pixelSpacePathsUpper?: PixelSpacePath[]
     xMargin: number
 }
 
-const computePaths = (transform: TransformationMatrix, waveforms: WaveformPoint[][], electrodes: PixelSpaceElectrode[]): PixelSpacePath[] => {
-    const pointsPerWaveform = waveforms[0].length
+const computePaths = (
+    transform: TransformationMatrix,
+    waveforms: {
+        electrodeIndices: number[]
+        waveform: number[][]
+        waveformStdDev?: number[][]
+        waveformColors: WaveformColors
+    }[],
+    electrodes: PixelSpaceElectrode[],
+    mode: 'normal' | 'lower' | 'upper'
+): PixelSpacePath[] => {
+    // const pointsPerWaveform = waveforms.length > 0 ? waveforms[0].waveform.length > 0 ? waveforms[0].waveform[0].length : 0 : 0 // assumed constant across all
     // Flatten a list of waveforms (waveforms[i] = WaveformPoint[] = array of {time, amplitude}) to Vec2[] for vectorized point conversion
-    const rawPoints = waveforms.map(waveform => waveform.map(pt => [pt.time, pt.amplitude])).flat(1)
-    const pointsProjectedToElectrodeBox = transformPoints(transform, rawPoints)
+    // const rawPoints = waveforms.map(waveform => waveform.map(pt => [pt.time, pt.amplitude])).flat(1)
+    // const pointsProjectedToElectrodeBox = transformPoints(transform, rawPoints)
 
-    return electrodes.map((e, ii) => {
-        const rangeStart = ii * pointsPerWaveform
-        // rewrite with splice to avoid iterator?
-        const pathForElectrode = pointsProjectedToElectrodeBox.slice(rangeStart, rangeStart + pointsPerWaveform).map(p => [p[0], p[1]] as Vec2)
-        return {
-            pointsInPaintBox: pathForElectrode,
-            offsetFromParentCenter: [e.pixelX, e.pixelY]
+    const ret: PixelSpacePath[] = []
+    electrodes.forEach((e, ii) => {
+        for (let W of waveforms) {
+            const jj = W.electrodeIndices.indexOf(ii)
+            if (jj >= 0) {
+                let ww: number[] | undefined
+                const wsd = W.waveformStdDev
+                if (mode === 'normal') {
+                    ww = W.waveform[jj]
+                }
+                else if (mode === 'lower') {
+                    ww = wsd ? W.waveform[jj].map((v, i) => (W.waveform[jj][i] - wsd[jj][i])) : undefined
+                }
+                else if (mode === 'upper') {
+                    ww = wsd ? W.waveform[jj].map((v, i) => (W.waveform[jj][i] + wsd[jj][i])) : undefined
+                }
+                if (ww) {
+                    const points: Vec2[] = ww.map((amplitude, time) => ([time, amplitude]))
+                    const pointsProjectedToElectrodeBox = transformPoints(transform, points)
+                    ret.push({
+                        pointsInPaintBox: pointsProjectedToElectrodeBox,
+                        offsetFromParentCenter: [e.pixelX, e.pixelY],
+                        color: W.waveformColors.base
+                    })
+                }
+            }
         }
     })
+    return ret
 }
 
 const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
-    const { waveformOpts, pixelSpacePaths, pixelSpacePathsLower, pixelSpacePathsUpper, xMargin } = props
+    const { pixelSpacePaths, pixelSpacePathsLower, pixelSpacePathsUpper, xMargin, waveformWidth } = props
     if (!pixelSpacePaths || pixelSpacePaths.length === 0) return
 
-    const colors = waveformOpts?.colors || defaultWaveformColors
-    ctxt.lineWidth = waveformOpts?.waveformWidth ?? 1
     ctxt.resetTransform()
     ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
     ctxt.translate(xMargin, 0)
@@ -87,6 +112,7 @@ const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
 
         ctxt.fillStyle = '#dddddd'
         ctxt.strokeStyle = '#bbbbbb'
+        ctxt.lineWidth = 1
         ctxt.translate(pLower.offsetFromParentCenter[0], pLower.offsetFromParentCenter[1])
         ctxt.beginPath()
         
@@ -104,7 +130,8 @@ const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
     })
 
     pixelSpacePaths.forEach((p) => {
-        ctxt.strokeStyle = colors.base
+        ctxt.strokeStyle = p.color
+        ctxt.lineWidth = waveformWidth
         ctxt.translate(p.offsetFromParentCenter[0], p.offsetFromParentCenter[1])
         ctxt.beginPath()
         ctxt.moveTo(p.pointsInPaintBox[0][0], p.pointsInPaintBox[0][1])
@@ -119,13 +146,10 @@ const paint = (ctxt: CanvasRenderingContext2D, props: PaintProps) => {
 
 
 const WaveformPlot = (props: WaveformProps) => {
-    const { electrodes, waveformPoints, waveformLowerPoints, waveformUpperPoints, waveformOpts, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, layoutMode } = props
-    const opts = waveformOpts ?? defaultWaveformOpts
+    const { electrodes, waveforms, oneElectrodeHeight, oneElectrodeWidth, yScale, width, height, layoutMode, waveformWidth } = props
 
     const canvas = useMemo(() => {
-        if (!waveformPoints || waveformPoints.length === 0) return <div /> // Should not happen
-
-        const pointsPerWaveform = waveformPoints[0].length           // assumed constant across snippets
+        const pointsPerWaveform = waveforms.length > 0 ? waveforms[0].waveform.length > 0 ? waveforms[0].waveform[0].length : 0 : 0 // assumed constant across all
         const timeScale = oneElectrodeWidth/pointsPerWaveform   // converts the frame numbers (1..130 or w/e) to pixel width of electrode
         const offsetToCenter = -oneElectrodeWidth*(.5 + 1/pointsPerWaveform) // adjusts the waveforms to start at the left of the electrode, not its center
         const finalYScale = (yScale*oneElectrodeHeight)/2       // scales waveform amplitudes to the pixel height of a single electrode
@@ -134,17 +158,19 @@ const WaveformPlot = (props: WaveformProps) => {
                                   [        0,    -finalYScale,                0],
                                   [        0,               0,                1]]
                                 ).toArray() as TransformationMatrix
-        const paths = computePaths(transform, waveformPoints, electrodes)
-        const pathsLower = waveformLowerPoints ? computePaths(transform, waveformLowerPoints, electrodes) : undefined
-        const pathsUpper = waveformUpperPoints ? computePaths(transform, waveformUpperPoints, electrodes) : undefined
+        const paths = computePaths(transform, waveforms, electrodes, 'normal')
+        const pathsLower = computePaths(transform, waveforms, electrodes, 'lower')
+        const pathsUpper = computePaths(transform, waveforms, electrodes, 'upper')
+        // const pathsLower = waveformLowerPoints ? computePaths(transform, waveformLowerPoints, electrodes) : undefined
+        // const pathsUpper = waveformUpperPoints ? computePaths(transform, waveformUpperPoints, electrodes) : undefined
         const xMargin = layoutMode === 'vertical' ? (width - oneElectrodeWidth)/2 : 0
 
         const paintProps: PaintProps = {
-            waveformOpts: opts,
             pixelSpacePaths: paths,
             pixelSpacePathsLower: pathsLower,
             pixelSpacePathsUpper: pathsUpper,
-            xMargin: xMargin
+            xMargin: xMargin,
+            waveformWidth
         }
 
         return <BaseCanvas<PaintProps>
@@ -153,7 +179,7 @@ const WaveformPlot = (props: WaveformProps) => {
             draw={paint}
             drawData={paintProps}
         />
-    }, [waveformPoints, waveformLowerPoints, waveformUpperPoints, electrodes, yScale, opts, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode])
+    }, [waveforms, electrodes, yScale, width, height, oneElectrodeWidth, oneElectrodeHeight, layoutMode, waveformWidth])
 
     return canvas
 }

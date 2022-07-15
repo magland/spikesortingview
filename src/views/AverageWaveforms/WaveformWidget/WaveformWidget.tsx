@@ -3,7 +3,7 @@ import ElectrodeGeometry, { Electrode, LayoutMode } from './sharedDrawnComponent
 import { computeElectrodeLocations, xMargin as xMarginDefault } from './sharedDrawnComponents/electrodeGeometryLayout'
 import { ElectrodeColors } from './sharedDrawnComponents/electrodeGeometryPainting'
 import { getSpikeAmplitudeNormalizationFactor } from './waveformLogic'
-import WaveformPlot, { WaveformColors, WaveformPoint } from './WaveformPlot'
+import WaveformPlot, { WaveformColors } from './WaveformPlot'
 
 
 export type WaveformOpts = {
@@ -13,8 +13,12 @@ export type WaveformOpts = {
 }
 
 export type WaveformWidgetProps = {
-    waveform?: number[][]
-    waveformStdDev?: number[][]
+    waveforms: {
+        electrodeIndices: number[]
+        waveform: number[][]
+        waveformStdDev?: number[][]
+        waveformColors: WaveformColors
+    }[]
     ampScaleFactor: number
     electrodes: Electrode[]
     layoutMode: LayoutMode
@@ -24,7 +28,8 @@ export type WaveformWidgetProps = {
     showLabels?: boolean
     peakAmplitude: number
     samplingFrequency: number
-    waveformOpts: WaveformOpts
+    showChannelIds: boolean
+    waveformWidth: number
 }
 
 const electrodeColors: ElectrodeColors = {
@@ -58,8 +63,7 @@ export const defaultWaveformOpts: WaveformOpts = {
 // TODO: FIX SNIPPET BOX
 const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const colors = props.colors ?? defaultElectrodeOpts.colors
-    const waveformOpts = useMemo(() => ({...defaultWaveformOpts, ...props.waveformOpts}), [props.waveformOpts])
-    const {electrodes, waveform, waveformStdDev, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height} = props
+    const {electrodes, waveforms, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height, showChannelIds, waveformWidth} = props
 
     const maxElectrodePixelRadius = 1000
 
@@ -69,12 +73,12 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         height={height}
         layoutMode={layoutMode}
         colors={colors}
-        showLabels={waveformOpts.showChannelIds}      // Would we ever not want to show labels for this?
+        showLabels={showChannelIds}      // Would we ever not want to show labels for this?
         // offsetLabels={true}  // this isn't appropriate for a waveform view--it mislabels the electrodes
         // maxElectrodePixelRadius={defaultMaxPixelRadius}
         maxElectrodePixelRadius={maxElectrodePixelRadius}
         disableSelection={true}      // ??
-    />, [electrodes, width, height, layoutMode, colors, waveformOpts.showChannelIds])
+    />, [electrodes, width, height, layoutMode, colors, showChannelIds])
 
     // TODO: Don't do this twice, work it out differently
     const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius, {})
@@ -84,45 +88,19 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const amplitudeNormalizationFactor = useMemo(() => getSpikeAmplitudeNormalizationFactor(props.peakAmplitude), [props.peakAmplitude])
     const yScaleFactor = useMemo(() => (userSpecifiedAmplitudeScaling * amplitudeNormalizationFactor), [userSpecifiedAmplitudeScaling, amplitudeNormalizationFactor])
 
-    // 'waveforms' is a list of lists of points. There's one outer list per channel (so far so good).
-    // The inner list is just a list of numbers, but they should be interpreted as pairs of (amplitude, time).
-    // So to get the job result into something structured, you need to iterate *pairwise* over the inner list.
-    const baseWaveformPoints: WaveformPoint[][] = useMemo(() => (waveform ? waveform.map(waveformDataSet => 
-        {
-            return waveformDataSet.map((amplitude, time) => {
-                return { amplitude, time } as WaveformPoint
-            })
-        }) : []), [waveform])
-    
-    const baseWaveformLowerPoints = useMemo(() => ((waveformStdDev && waveform) ? waveformStdDev.map((waveformStdDevDataSet, ii) => 
-        {
-            return waveformStdDevDataSet.map((amplitude, time) => {
-                return { amplitude: waveform[ii][time] - amplitude, time } as WaveformPoint
-            })
-        }) : undefined), [waveform, waveformStdDev])
-    
-    const baseWaveformUpperPoints = useMemo(() => ((waveformStdDev && waveform) ? waveformStdDev.map((waveformStdDevDataSet, ii) => 
-        {
-            return waveformStdDevDataSet.map((amplitude, time) => {
-                return { amplitude: waveform[ii][time] + amplitude, time } as WaveformPoint
-            })
-        }) : undefined), [waveform, waveformStdDev])
-    
     // TODO: THIS LOGIC PROBABLY SHOULDN'T BE REPEATED HERE AND IN THE ELECTRODE GEOMETRY PAINT FUNCTION
     const oneElectrodeHeight = layoutMode === 'geom' ? pixelRadius * 2 : height / electrodes.length
-    const oneElectrodeWidth = layoutMode === 'geom' ? pixelRadius * 2 : width - xMargin - (waveformOpts.showChannelIds ? 2*pixelRadius : 0)
+    const oneElectrodeWidth = layoutMode === 'geom' ? pixelRadius * 2 : width - xMargin - (showChannelIds ? 2*pixelRadius : 0)
     const waveformPlot = <WaveformPlot
         electrodes={convertedElectrodes}
-        waveformPoints={baseWaveformPoints}
-        waveformLowerPoints={baseWaveformLowerPoints}
-        waveformUpperPoints={baseWaveformUpperPoints}
-        waveformOpts={waveformOpts}
+        waveforms={waveforms}
         oneElectrodeHeight={oneElectrodeHeight}
         oneElectrodeWidth={oneElectrodeWidth}
         yScale={yScaleFactor}
         width={width}
         height={height}
         layoutMode={layoutMode}
+        waveformWidth={waveformWidth}
     />
 
     return (

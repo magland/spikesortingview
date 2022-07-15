@@ -11,7 +11,7 @@ import { ToolbarItem } from 'views/common/Toolbars';
 import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
-import AverageWaveformPlot from './AverageWaveformPlot';
+import AverageWaveformPlot, { AverageWaveformPlotProps } from './AverageWaveformPlot';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 
 type Props = {
@@ -21,14 +21,15 @@ type Props = {
 }
 
 const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) => {
-    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>(defaultUnitsTableBottomToolbarOptions)
+    const [toolbarOptions, setToolbarOptions] = useState<UnitsTableBottomToolbarOptions>({...defaultUnitsTableBottomToolbarOptions, onlyShowSelected: false})
     const {selectedUnitIds, orderedUnitIds, plotClickHandlerGenerator, unitIdSelectionDispatch} = useSelectedUnitIds()
 
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
-    const [waveformsMode, setWaveformsMode] = useState<string>('geom')
+    const [waveformsMode, setWaveformsMode] = useState<'geom' | 'vertical'>('geom')
     const [showWaveformStdev, setShowWaveformStdev] = useState<boolean>(true)
-    const [showChannelIds, setShowChannelIds] = useState<boolean>(true)
+    const [showChannelIds, setShowChannelIds] = useState<boolean>(false)
     const [showReferenceProbe, setShowReferenceProbe] = useState<boolean>(data.showReferenceProbe || false)
+    const [showOverlapping, setShowOverlapping] = useState<boolean>(false)
 
     const divRef = useRef<HTMLDivElement | null>(null)
 
@@ -51,28 +52,42 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         return ret
     }, [data.averageWaveforms])
 
-    const plots: PGPlot[] = useMemo(() => data.averageWaveforms.filter(a => (toolbarOptions.onlyShowSelected ? (selectedUnitIds.has(a.unitId)) : true)).map(aw => ({
-        unitId: aw.unitId,
-        key: aw.unitId,
-        label: `Unit ${aw.unitId}`,
-        labelColor: colorForUnitId(idToNum(aw.unitId)),
-        clickHandler: !toolbarOptions.onlyShowSelected ? plotClickHandlerGenerator(aw.unitId) : undefined,
-        props: {
+    const plots: PGPlot[] = useMemo(() => data.averageWaveforms.filter(a => (toolbarOptions.onlyShowSelected ? (selectedUnitIds.has(a.unitId)) : true)).map(aw => {
+        const units: {
+            channelIds: (number | string)[];
+            waveform: number[][];
+            waveformStdDev?: number[][];
+            waveformColor: string;
+        }[] = [
+            {
+                channelIds: aw.channelIds,
+                waveform: subtractChannelMeans(aw.waveform),
+                waveformStdDev: showWaveformStdev && !showOverlapping ? aw.waveformStdDev : undefined,
+                waveformColor: colorForUnitId(idToNum(aw.unitId))
+            }
+        ]
+        const props: AverageWaveformPlotProps = {
             channelIds: aw.channelIds,
-            waveform: subtractChannelMeans(aw.waveform),
-            waveformStdDev: showWaveformStdev ? aw.waveformStdDev : undefined,
+            units,
             layoutMode: waveformsMode,
             channelLocations: data.channelLocations,
             samplingFrequency: data.samplingFrequency,
             peakAmplitude,
             ampScaleFactor,
-            waveformColor: colorForUnitId(idToNum(aw.unitId)),
             showChannelIds,
             width: 120 * plotBoxScaleFactor + (showReferenceProbe ? (120 * plotBoxScaleFactor / 4) : 0),
             height: 120 * plotBoxScaleFactor,
             showReferenceProbe
         }
-    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds, showReferenceProbe])
+        return {
+            unitId: aw.unitId,
+            key: aw.unitId,
+            label: `Unit ${aw.unitId}`,
+            labelColor: colorForUnitId(idToNum(aw.unitId)),
+            clickHandler: !toolbarOptions.onlyShowSelected ? plotClickHandlerGenerator(aw.unitId) : undefined,
+            props
+        }
+    }), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds, showReferenceProbe, showOverlapping])
 
     const plots2: PGPlot[] = useMemo(() => {
         if (orderedUnitIds) {
@@ -80,6 +95,13 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         }
         else return plots
     }, [plots, orderedUnitIds])
+
+    const plots3: PGPlot[] = useMemo(() => {
+        if (showOverlapping) {
+            return combinePlotsForOverlappingView(plots2)
+        }
+        return plots2
+    }, [plots2, showOverlapping])
 
     const customToolbarActions = useMemo(() => {
         const amplitudeScaleToolbarEntries = AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor})
@@ -125,6 +147,13 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             title: 'Show reference probes',
             selected: showReferenceProbe === true
         }
+        const showOverlappingAction: ToolbarItem = {
+            type: 'toggle',
+            subtype: 'checkbox',
+            callback: () => setShowOverlapping(a => (!a)),
+            title: 'Show overlapping',
+            selected: showOverlapping === true
+        }
         return [
             ...amplitudeScaleToolbarEntries,
             {type: 'divider'},
@@ -136,9 +165,11 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             {type: 'divider'},
             showChannelIdsAction,
             {type: 'divider'},
-            showReferenceProbeAction
+            showReferenceProbeAction,
+            {type: 'divider'},
+            showOverlappingAction
         ]
-    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds, showReferenceProbe])
+    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds, showOverlapping, showReferenceProbe])
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
         if (!e.shiftKey) return
@@ -181,7 +212,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
                 />
                 <VerticalScrollView width={0} height={0}>
                     <PlotGrid
-                        plots={plots2}
+                        plots={plots3}
                         plotComponent={AverageWaveformPlot}
                         selectedPlotKeys={!toolbarOptions.onlyShowSelected ? selectedUnitIds : undefined}
                     />
@@ -197,7 +228,33 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     )
 }
 
-const subtractChannelMeans = (waveform: number[][]) => {
+const combinePlotsForOverlappingView = (plots: PGPlot[]): PGPlot[] => {
+    if (plots.length === 0) return plots
+    const thePlot: PGPlot = {...plots[0], props: {...plots[0].props}}
+
+    const plotProps: AverageWaveformPlotProps = thePlot.props as any as AverageWaveformPlotProps
+    thePlot.key = 'overlaping'
+    thePlot.label = 'Overlaping'
+    thePlot.labelColor = 'black'
+    thePlot.unitId = 'overlaping'
+    plotProps.height *= 2
+    plotProps.width *= 2
+
+    const allChannelIdsSet = new Set<number | string>()
+    for (let plot of plots) {
+        for (let id of plot.props.channelIds) {
+            allChannelIdsSet.add(id)
+        }
+    }
+    const allChannelIds = [...allChannelIdsSet].sort((a, b) => (idToNum(a) - idToNum(b)))
+    plotProps.channelIds = allChannelIds
+    
+    plotProps.units = plots.map(p => (p.props.units[0]))
+
+    return [thePlot]
+}
+
+const subtractChannelMeans = (waveform: number[][]): number[][] => {
     return waveform.map(W => {
         const mean0 = computeMean(W)
         return W.map(a => (a - mean0))
