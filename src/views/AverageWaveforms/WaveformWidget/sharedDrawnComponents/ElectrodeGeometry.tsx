@@ -3,6 +3,8 @@ import BaseCanvas from 'FigurlCanvas/BaseCanvas'
 import DragCanvas, { DragAction, handleMouseDownIfDragging, handleMouseMoveIfDragging, handleMouseUpIfDragging } from 'FigurlCanvas/DragCanvas'
 import { Vec2 } from 'FigurlCanvas/Geometry'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
+import { applyAffineTransform, applyAffineTransformInv, detAffineTransform } from 'views/UnitSimilarityMatrix/AffineTransform'
+import { useWheelZoom } from 'views/UnitSimilarityMatrix/MatrixWidget'
 import { defaultColors, ElectrodeColors, paint } from './electrodeGeometryPainting'
 import { ElectrodeGeometryActionType, electrodeGeometryReducer } from './electrodeGeometryStateManagement'
 import SvgElectrodeLayout from './ElectrodeGeometrySvg'
@@ -66,6 +68,28 @@ const ElectrodeGeometry = (props: WidgetProps) => {
                                                 dragState: {isActive: false},
                                                 xMarginWidth: -1
                                             })
+    const {affineTransform, handleWheel} = useWheelZoom(width, height)
+    const state2 = useMemo(() => {
+        const convertedElectrodes = state.convertedElectrodes.map(e => {
+            const pt = applyAffineTransform(affineTransform, {x: e.pixelX, y: e.pixelY})
+            return {
+                ...e,
+                pixelX: pt.x,
+                pixelY: pt.y
+            }
+        })
+        return {
+            ...state,
+            convertedElectrodes,
+            pixelRadius: state.pixelRadius * Math.sqrt(detAffineTransform(affineTransform))
+        }
+    }, [affineTransform, state])
+
+    const getEventPointWithAffineTransform = useMemo(() => ((e: React.MouseEvent): Vec2 => {
+        const point = getEventPoint(e)
+        const point2 = applyAffineTransformInv(affineTransform, {x: point[0], y: point[1]})
+        return [point2.x, point2.y]
+    }), [affineTransform])
 
     useEffect(() => {
         const type: ElectrodeGeometryActionType = 'INITIALIZE'
@@ -94,13 +118,13 @@ const ElectrodeGeometry = (props: WidgetProps) => {
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
         const wasHandled = handleMouseMoveIfDragging(e, {nextDragStateUpdate, nextFrame, reducer: dispatchState, reducerOtherProps: {type: 'DRAGUPDATE'}})
         if (!wasHandled) {
-            const point = getEventPoint(e)
+            const point = getEventPointWithAffineTransform(e)
             dispatchState({
                 type: 'UPDATEHOVER',
-                point: point
+                point
             })
         }
-    }, [])
+    }, [getEventPointWithAffineTransform])
 
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         handleMouseDownIfDragging(e, {nextDragStateUpdate, nextFrame, reducer: dispatchState, reducerOtherProps: {type: 'DRAGUPDATE'}})
@@ -112,7 +136,7 @@ const ElectrodeGeometry = (props: WidgetProps) => {
             handleMouseUpIfDragging(e, {nextDragStateUpdate, nextFrame, reducer: dispatchState, reducerOtherProps: {type: 'DRAGUPDATE', selectedElectrodeIds: selectedElectrodeIds}})
         } else {
             // if there was no active drag, then the mouseup is a click. Treat it as such.
-            const point = getEventPoint(e)
+            const point = getEventPointWithAffineTransform(e)
             dispatchState({
                 type: 'UPDATECLICK',
                 point: point,
@@ -121,15 +145,15 @@ const ElectrodeGeometry = (props: WidgetProps) => {
                 selectedElectrodeIds: selectedElectrodeIds
             })
         }
-    }, [state.dragState.isActive, selectedElectrodeIds])
+    }, [state.dragState.isActive, selectedElectrodeIds, getEventPointWithAffineTransform])
 
     const canvas = useMemo(() => {
         const data = {
-            pixelElectrodes: state.convertedElectrodes,
+            pixelElectrodes: state2.convertedElectrodes,
             selectedElectrodeIds: selectedElectrodeIds,
             hoveredElectrodeId: state.hoveredElectrodeId,
             draggedElectrodeIds: state.draggedElectrodeIds,
-            pixelRadius: state.pixelRadius,
+            pixelRadius: state2.pixelRadius,
             showLabels: props.showLabels ?? defaultElectrodeLayerProps.showLabels,
             offsetLabels: offsetLabels,
             layoutMode: props.layoutMode ?? 'geom',
@@ -142,7 +166,7 @@ const ElectrodeGeometry = (props: WidgetProps) => {
             draw={paint}
             drawData={data}
         />
-    }, [width, height, state.convertedElectrodes, selectedElectrodeIds, state.hoveredElectrodeId, state.draggedElectrodeIds, state.pixelRadius, props.showLabels, offsetLabels, props.layoutMode, state.xMarginWidth, colors])
+    }, [width, height, state2.convertedElectrodes, selectedElectrodeIds, state.hoveredElectrodeId, state.draggedElectrodeIds, state2.pixelRadius, props.showLabels, offsetLabels, props.layoutMode, state.xMarginWidth, colors])
 
     const svg = useMemo(() => {
         return USE_SVG && <SvgElectrodeLayout 
@@ -167,6 +191,7 @@ const ElectrodeGeometry = (props: WidgetProps) => {
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseDown={handleMouseDown}
+            onWheel={handleWheel}
         >
             {dragCanvas}
             {USE_SVG && svg}

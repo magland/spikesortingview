@@ -92,7 +92,7 @@ const AverageWaveformPlot: FunctionComponent<AverageWaveformPlotProps> = ({chann
                 <RecordingSelectionContext.Provider value={recordingSelectionProviderValue}>
                     <ElectrodeGeometry
                         electrodes={allElectrodes}
-                        disableSelection={true}
+                        disableSelection={false}
                         width={referenceProbeWidth}
                         height={height}
                     />

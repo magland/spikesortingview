@@ -6,6 +6,8 @@ import { useCallback, useMemo } from 'react'
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
 import { computeElectrodeLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
+import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform } from 'views/UnitSimilarityMatrix/AffineTransform'
+import { useWheelZoom } from 'views/UnitSimilarityMatrix/MatrixWidget'
 import { defaultColors, ElectrodeColors } from '../AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryPainting'
 import useDragSelectLayer from './useDragSelectLayer'
 
@@ -58,6 +60,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
     const { width, height, electrodes, units, disableAutoRotate, onlyShowSelected } = props
     const { selectedElectrodeIds } = useSelectedElectrodes()
     const { selectedUnitIds, unitIdSelectionDispatch } = useSelectedUnitIds()
+    const {affineTransform, handleWheel} = useWheelZoom(width, height)
 
     const selectedUnitIdsSet = useMemo(() => (new Set([...selectedUnitIds])), [selectedUnitIds])
 
@@ -79,7 +82,10 @@ const UnitLocationsWidget = (props: WidgetProps) => {
         computeElectrodeLocations(width, height, electrodes, 'geom', maxElectrodePixelRadius, {disableAutoRotate})
     ), [electrodes, height, maxElectrodePixelRadius, width, disableAutoRotate])
 
+    const radiusScale = Math.sqrt(detAffineTransform(affineTransform))
+
     const paintElectrodes = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
+        const pixelRadius2 = pixelRadius * radiusScale
         // set up fills
         const electrodesWithColors = pixelElectrodes.map(e => {
             const selected = selectedElectrodeIds.includes(e.e.id)
@@ -118,51 +124,57 @@ const UnitLocationsWidget = (props: WidgetProps) => {
         //     }
         // })
         electrodesWithColors.forEach(e => {
+            const pt = applyAffineTransform(affineTransform, {x: e.pixelX, y: e.pixelY})
             ctxt.fillStyle = e.color
             ctxt.beginPath()
-            ctxt.ellipse(e.pixelX, e.pixelY, pixelRadius, pixelRadius, 0, 0, circle)
+            ctxt.ellipse(pt.x, pt.y, pixelRadius2, pixelRadius2, 0, 0, circle)
             ctxt.fill()
         })
 
         // Draw borders
         ctxt.strokeStyle = defaultColors.border
         pixelElectrodes.forEach(e => {
+            const pt = applyAffineTransform(affineTransform, {x: e.pixelX, y: e.pixelY})
             ctxt.beginPath()
-            ctxt.ellipse(e.pixelX, e.pixelY, pixelRadius, pixelRadius, 0, 0, circle)
+            ctxt.ellipse(pt.x, pt.y, pixelRadius2, pixelRadius2, 0, 0, circle)
             ctxt.stroke()
         })
 
         // draw electrode labels
         if (showLabels) {
-            ctxt.font = `${pixelRadius}px Arial`
+            ctxt.font = `${pixelRadius2}px Arial`
             ctxt.textAlign = offsetLabels ? 'right' : 'center'
             ctxt.textBaseline = 'middle'
-            const xOffset = offsetLabels ? 1.4 * pixelRadius : 0
+            const xOffset = offsetLabels ? 1.4 * pixelRadius2 : 0
             electrodesWithColors.forEach(e => {
+                const pt = applyAffineTransform(affineTransform, {x: e.pixelX, y: e.pixelY})
                 ctxt.fillStyle = offsetLabels ? colors.textDark : e.textColor
-                ctxt.fillText(`${e.e.label}`, e.pixelX - xOffset, e.pixelY)
+                ctxt.fillText(`${e.e.label}`, pt.x - xOffset, pt.y)
             })
         }
-    }, [colors, offsetLabels, pixelElectrodes, pixelRadius, selectedElectrodeIds, showLabels])
+    }, [colors, offsetLabels, pixelElectrodes, pixelRadius, selectedElectrodeIds, showLabels, affineTransform, radiusScale])
 
     const paintUnits = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
+        // const markerRadius2 = markerRadius * radiusScale
+        const markerRadius2 = markerRadius
         ctxt.clearRect(0, 0, ctxt.canvas.width, ctxt.canvas.height)
         const drawUnit = (x: number, y: number, color: string) => {
             ctxt.fillStyle = color
             ctxt.strokeStyle = 'black'
             ctxt.beginPath()
-            ctxt.ellipse(x, y, markerRadius, markerRadius, 0, 0, circle)
+            ctxt.ellipse(x, y, markerRadius2, markerRadius2, 0, 0, circle)
             ctxt.fill()
             ctxt.stroke()
         }
         for (let unit of filteredUnits) {
-            const pt = transformPoint(transform, [unit.x, unit.y])
+            const pt0 = transformPoint(transform, [unit.x, unit.y])
+            const pt = applyAffineTransform(affineTransform, {x: pt0[0], y: pt0[1]})
             const col = selectedUnitIds.size === 0 || selectedUnitIds.has(unit.unitId) ? (
                 colorForUnitId(idToNum(unit.unitId))
             ) : 'rgb(220, 220, 220)'
-            drawUnit(pt[0], pt[1], col)
+            drawUnit(pt.x, pt.y, col)
         }
-    }, [transform, filteredUnits, selectedUnitIds])
+    }, [transform, filteredUnits, selectedUnitIds, affineTransform])
 
     const electrodeGeometryCanvas = useMemo(() => {
         return <BaseCanvas 
@@ -183,10 +195,11 @@ const UnitLocationsWidget = (props: WidgetProps) => {
     }, [width, height, paintUnits])
 
     const handleSelectRect = useCallback((r: Vec4, {ctrlKey}: {ctrlKey: boolean}) => {
+        const r2 = applyAffineTransformToRectInv(affineTransform, r)
         const ids: (number | string)[] = []
         for (let unit of filteredUnits) {
             const pt = transformPoint(transform, [unit.x, unit.y])
-            if (rectangularRegionsIntersect(rectangularRegion([pt[0] - markerRadius, pt[1] - markerRadius, markerRadius * 2, markerRadius * 2]), rectangularRegion(r))) {
+            if (rectangularRegionsIntersect(rectangularRegion([pt[0] - markerRadius, pt[1] - markerRadius, markerRadius * 2, markerRadius * 2]), rectangularRegion(r2))) {
                 ids.push(unit.unitId)
             }
         }
@@ -204,7 +217,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
                 incomingSelectedUnitIds: ids
             })
         }
-    }, [transform, unitIdSelectionDispatch, filteredUnits])
+    }, [transform, unitIdSelectionDispatch, filteredUnits, affineTransform])
 
     const handleClickPoint = useCallback((x: Vec2, {ctrlKey}: {ctrlKey: boolean}) => {
         let somethingFound = false
@@ -250,6 +263,7 @@ const UnitLocationsWidget = (props: WidgetProps) => {
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUp}
             onMouseDown={onMouseDown}
+            onWheel={handleWheel}
         >
             {electrodeGeometryCanvas}
             {unitsCanvas}
@@ -265,6 +279,18 @@ const rectangularRegion = (r: Vec4): RectangularRegion => {
         xmax: r[0] + r[2],
         ymax: r[1] + r[3]
     }
+}
+
+// const applyAffineTransformToRect = (T: AffineTransform, r: Vec4): Vec4 => {
+//     const p00 = applyAffineTransform(T, {x: r[0], y: r[1]})
+//     const p11 = applyAffineTransform(T, {x: r[0] + r[2], y: r[1] + r[3]})
+//     return [p00.x, p00.y, p11.x - p00.x, p11.y - p00.y]
+// }
+
+const applyAffineTransformToRectInv = (T: AffineTransform, r: Vec4): Vec4 => {
+    const p00 = applyAffineTransformInv(T, {x: r[0], y: r[1]})
+    const p11 = applyAffineTransformInv(T, {x: r[0] + r[2], y: r[1] + r[3]})
+    return [p00.x, p00.y, p11.x - p00.x, p11.y - p00.y]
 }
 
 export default UnitLocationsWidget

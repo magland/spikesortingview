@@ -13,8 +13,42 @@ type Props = {
     height: number
 }
 
-const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSetSelectedUnitIds, matrix, range, setHoveredInfo, width, height}) => {
+export const useWheelZoom = (width: number, height: number) => {
     const [affineTransform, setAffineTransform] = useState<AffineTransform>(identityAffineTransform)
+    const handleWheel = useCallback((e: React.WheelEvent) => {
+        if (!e.shiftKey) return
+        const boundingRect = e.currentTarget.getBoundingClientRect()
+        const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
+        const deltaY = e.deltaY
+        const scaleFactor = 1.3
+        let X = createAffineTransform([
+            [scaleFactor, 0, (1 - scaleFactor) * point.x],
+            [0, scaleFactor, (1 - scaleFactor) * point.y]
+        ])
+        if (deltaY > 0) X = inverseAffineTransform(X)
+        let newTransform = multAffineTransforms(
+            X,
+            affineTransform
+        )
+        // test to see if we should snap back to identity
+        const p00 = applyAffineTransform(newTransform, {x: 0, y: 0})
+        const p11 = applyAffineTransform(newTransform, {x: width, y: height})
+        if ((0 <= p00.x) && (p00.x < width) && (0 <= p00.y) && (p00.y < height)) {
+            if ((0 <= p11.x) && (p11.x < width) && (0 <= p11.y) && (p11.y < height)) {
+                newTransform = identityAffineTransform
+            }
+        }
+
+        setAffineTransform(newTransform)
+        return false
+    }, [affineTransform, height, width])
+    return {
+        affineTransform,
+        handleWheel
+    }
+}
+
+const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSetSelectedUnitIds, matrix, range, setHoveredInfo, width, height}) => {
     // const indsForIds = useMemo(() => {
     //     const indsForIds: { [k: number | string]: number } = {}
     //     unitIds.forEach((id, i) => {
@@ -22,9 +56,11 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
     //     })
     //     return indsForIds
     // }, [unitIds])
+
     const size = Math.min(width, height)
     const offsetX = (width - size) / 2
     const offsetY = (height - size) / 2
+    const {affineTransform, handleWheel} = useWheelZoom(width, height)
     const indToPixel = useMemo(() => (o: {i1: number, i2: number}) => (
         applyAffineTransform(affineTransform, {
             x: offsetX + o.i1 / unitIds.length * size,
@@ -80,31 +116,7 @@ const MatrixWidget: FunctionComponent<Props> = ({unitIds, selectedUnitIds, onSet
     const handleMouseLeave = useCallback((e: React.MouseEvent) => {
         setHoveredInfo(undefined)
     }, [setHoveredInfo])
-    const handleWheel = useCallback((e: React.WheelEvent) => {
-        const boundingRect = e.currentTarget.getBoundingClientRect()
-        const point = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
-        const deltaY = e.deltaY
-        const scaleFactor = 1.3
-        let X = createAffineTransform([
-            [scaleFactor, 0, (1 - scaleFactor) * point.x],
-            [0, scaleFactor, (1 - scaleFactor) * point.y]
-        ])
-        if (deltaY > 0) X = inverseAffineTransform(X)
-        let newTransform = multAffineTransforms(
-            X,
-            affineTransform
-        )
-        // test to see if we should snap back to identity
-        const p00 = applyAffineTransform(newTransform, indToPixel({i1: 0, i2: 0}))
-        const p11 = applyAffineTransform(newTransform, indToPixel({i1: unitIds.length, i2: unitIds.length}))
-        if ((0 <= p00.x) && (p00.x < width) && (0 <= p00.y) && (p00.y < height)) {
-            if ((0 <= p11.x) && (p11.x < width) && (0 <= p11.y) && (p11.y < height)) {
-                newTransform = identityAffineTransform
-            }
-        }
-
-        setAffineTransform(newTransform)
-    }, [affineTransform, height, indToPixel, unitIds.length, width])
+    
     return (
         <div
             style={{width, height, position: 'relative'}}

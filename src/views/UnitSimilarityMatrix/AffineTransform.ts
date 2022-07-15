@@ -37,6 +37,10 @@ export const inverseAffineTransform = (A: AffineTransform): AffineTransform => {
     }
 }
 
+export const detAffineTransform = (A: AffineTransform): number => {
+    return A.forward[0][0] * A.forward[1][1] - A.forward[0][1] * A.forward[1][0]
+}
+
 const _mult = (A: number[][], B: number[][]): number[][] => {
     return [
         [A[0][0] * B[0][0] + A[0][1] * B[1][0], A[0][0] * B[0][1] + A[0][1] * B[1][1], A[0][0] * B[0][2] + A[0][1] * B[1][2] + A[0][2]],

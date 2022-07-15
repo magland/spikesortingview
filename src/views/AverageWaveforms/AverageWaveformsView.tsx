@@ -2,8 +2,7 @@ import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
 import { mean } from 'mathjs';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
-import { useCallback, useRef } from 'react';
-import { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
@@ -30,8 +29,6 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [showChannelIds, setShowChannelIds] = useState<boolean>(false)
     const [showReferenceProbe, setShowReferenceProbe] = useState<boolean>(data.showReferenceProbe || false)
     const [showOverlapping, setShowOverlapping] = useState<boolean>(false)
-
-    const divRef = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
         unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b)) })
@@ -182,14 +179,14 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
         return false // don't scroll
     }, [])
 
-    useEffect(() => {
-        if (!divRef.current) return
-        divRef.current.addEventListener('wheel', (e: WheelEvent) => {
-            if (e.shiftKey) {
-                e.preventDefault()
-            }
-        })
-    }, [divRef])
+    // useEffect(() => {
+    //     if (!divRef.current) return
+    //     divRef.current.addEventListener('wheel', (e: WheelEvent) => {
+    //         if (e.shiftKey) {
+    //             e.preventDefault()
+    //         }
+    //     })
+    // }, [divRef])
 
     const bottomToolbarHeight = 30
 
@@ -197,7 +194,6 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     return (
         <div
             onWheel={handleWheel}
-            ref={divRef}
         >
             <Splitter
                 width={width}
