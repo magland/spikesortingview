@@ -71,7 +71,7 @@ def main():
         ]
     }
 
-    F = fig.Figure(view_url='gs://figurl/spikesortingview-6', data=data)
+    F = fig.Figure(view_url='gs://figurl/spikesortingview-7', data=data)
     url = F.url(label='Alessio test data')
     print(url)
 
