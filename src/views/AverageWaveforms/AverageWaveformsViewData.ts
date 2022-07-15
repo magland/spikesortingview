@@ -17,29 +17,13 @@ export const isAverageWaveformData = (x: any): x is AverageWaveformData => {
     }, {allowAdditionalFields: true})
 }
 
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣤⣶⣶⣦⣤⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣾⠟⠋⠁⠀⠀⠀⠀⠀⠙⠻⣷⣄⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⢀⣴⠟⢻⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠙⢷⡄⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⣠⡞⠁⠀⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⠀⣄⠀⠀
-// ⠀⠀⠀⠀⠀⣴⠋⠀⠀⠀⣿⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣼⡟⢠⣿⡆⠀
-// ⠀⠀⠀⢀⣾⣧⣤⠤⠶⠾⣿⣦⣄⣀⠀⠀⠀⠀⠀⠀⣀⣠⡴⠞⠋⣠⣿⠟⠀⠀
-// ⠀⠀⠀⣼⠟⠁⠀⠀⠀⠀⠀⠈⠙⠻⢿⣿⣿⣿⠿⠛⠋⣁⣤⣶⡿⠟⠁⠀⠀⠀
-// ⠀⠀⣼⡇⠀⠀⠀⠀⠀⠀⠀⠀⣠⡾⠟⢉⣁⣤⣶⠾⠟⠋⠉⠀⠀⠀⠀⠀⠀⠀
-// ⠀⢠⣿⠀⢠⣾⣿⡆⠀⠀⣠⡾⠋⣠⣴⡿⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⢸⣿⠀⠘⠛⠛⠁⣠⣾⠏⢀⣾⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠈⣿⡄⠀⠀⣠⣾⠟⢁⣴⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠈⠻⠿⠿⠛⢁⣴⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠚⠛⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-// ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-
 export type AverageWaveformsViewData = {
     type: 'AverageWaveforms'
     averageWaveforms: AverageWaveformData[]
     samplingFrequency: number
     noiseLevel?: number
     channelLocations?: {[key: string]: number[]}
-    showFiletMignon?: boolean
+    showReferenceProbe?: boolean
 }
 
 export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewData => {
@@ -49,6 +33,6 @@ export const isAverageWaveformsViewData = (x: any): x is AverageWaveformsViewDat
         samplingFrequency: isNumber,
         noiseLevel: optional(isNumber),
         channelLocations: optional(() => (true)),
-        showFiletMignon: optional(isBoolean)
+        showReferenceProbe: optional(isBoolean)
     }, {allowAdditionalFields: true})
 }

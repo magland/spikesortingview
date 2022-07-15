@@ -18,10 +18,10 @@ type Props = {
     showChannelIds: boolean
     width: number
     height: number
-    showFiletMignon?: boolean
+    showReferenceProbe?: boolean
 }
 
-const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, waveformColor, showChannelIds, showFiletMignon, width, height}) => {
+const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, waveformStdDev, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, waveformColor, showChannelIds, showReferenceProbe, width, height}) => {
     const electrodes = useMemo(() => {
         const locs = channelLocations || {}
         return channelIds.map(channelId => ({
@@ -51,7 +51,7 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             showChannelIds
         }
     }, [waveformColor, showChannelIds])
-    const filetMignonWidth = width / 4
+    const referenceProbeWidth = width / 4
     const waveformWidget = (
         <WaveformWidget
             waveform={waveform}
@@ -59,7 +59,7 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
             electrodes={electrodes}
             ampScaleFactor={ampScaleFactor}
             layoutMode={channelLocations ? layoutMode : 'vertical'}
-            width={showFiletMignon ? width - filetMignonWidth : width}
+            width={showReferenceProbe ? width - referenceProbeWidth : width}
             height={height}
             showLabels={true} // for now
             peakAmplitude={peakAmplitude}
@@ -74,19 +74,19 @@ const AverageWaveformPlot: FunctionComponent<Props> = ({channelIds, waveform, wa
         {recordingSelection: {...recordingSelection, selectedElectrodeIds: channelIds}, recordingSelectionDispatch: () => {}}
     ), [recordingSelection, channelIds])
 
-    return showFiletMignon ? (
+    return showReferenceProbe ? (
         <div style={{position: 'relative', width, height}}>
-            <div style={{position: 'absolute', left: 0, top: 0, width: filetMignonWidth, height}}>
+            <div style={{position: 'absolute', left: 0, top: 0, width: referenceProbeWidth, height}}>
                 <RecordingSelectionContext.Provider value={recordingSelectionProviderValue}>
                     <ElectrodeGeometry
                         electrodes={allElectrodes}
                         disableSelection={true}
-                        width={filetMignonWidth}
+                        width={referenceProbeWidth}
                         height={height}
                     />
                 </RecordingSelectionContext.Provider>
             </div>
-            <div style={{position: 'absolute', left: filetMignonWidth, top: 0, width: width - filetMignonWidth, height}}>
+            <div style={{position: 'absolute', left: referenceProbeWidth, top: 0, width: width - referenceProbeWidth, height}}>
                 {waveformWidget}
             </div>
         </div>

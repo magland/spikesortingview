@@ -28,7 +28,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [waveformsMode, setWaveformsMode] = useState<string>('geom')
     const [showWaveformStdev, setShowWaveformStdev] = useState<boolean>(true)
     const [showChannelIds, setShowChannelIds] = useState<boolean>(true)
-    const [showFiletMignon, setShowFiletMignon] = useState<boolean>(data.showFiletMignon || false)
+    const [showReferenceProbe, setShowReferenceProbe] = useState<boolean>(data.showReferenceProbe || false)
 
     const divRef = useRef<HTMLDivElement | null>(null)
 
@@ -68,11 +68,11 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             ampScaleFactor,
             waveformColor: colorForUnitId(idToNum(aw.unitId)),
             showChannelIds,
-            width: 120 * plotBoxScaleFactor + (showFiletMignon ? (120 * plotBoxScaleFactor / 4) : 0),
+            width: 120 * plotBoxScaleFactor + (showReferenceProbe ? (120 * plotBoxScaleFactor / 4) : 0),
             height: 120 * plotBoxScaleFactor,
-            showFiletMignon
+            showReferenceProbe
         }
-    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds, showFiletMignon])
+    })), [data.averageWaveforms, data.channelLocations, data.samplingFrequency, peakAmplitude, waveformsMode, ampScaleFactor, plotClickHandlerGenerator, toolbarOptions.onlyShowSelected, selectedUnitIds, plotBoxScaleFactor, showWaveformStdev, showChannelIds, showReferenceProbe])
 
     const plots2: PGPlot[] = useMemo(() => {
         if (orderedUnitIds) {
@@ -118,12 +118,12 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             title: 'Show channel IDs',
             selected: showChannelIds === true
         }
-        const showFiletMignonAction: ToolbarItem = {
+        const showReferenceProbeAction: ToolbarItem = {
             type: 'toggle',
             subtype: 'checkbox',
-            callback: () => setShowFiletMignon(a => (!a)),
-            title: 'Show "filet mignon"',
-            selected: showFiletMignon === true
+            callback: () => setShowReferenceProbe(a => (!a)),
+            title: 'Show reference probes',
+            selected: showReferenceProbe === true
         }
         return [
             ...amplitudeScaleToolbarEntries,
@@ -136,9 +136,9 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             {type: 'divider'},
             showChannelIdsAction,
             {type: 'divider'},
-            showFiletMignonAction
+            showReferenceProbeAction
         ]
-    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds, showFiletMignon])
+    }, [waveformsMode, ampScaleFactor, showWaveformStdev, showChannelIds, showReferenceProbe])
 
     const handleWheel = useCallback((e: React.WheelEvent) => {
         if (!e.shiftKey) return
