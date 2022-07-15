@@ -88,7 +88,7 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
     }, [plots])
 
     return (
-        <Grid container>
+        <Grid container spacing={0}>
             {
                 rowStarts.map((start) => (
                     <PlotRow

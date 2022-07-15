@@ -108,8 +108,12 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
         return ret
     }, [data.crossCorrelograms, unitIds])
 
+    const TOOLBAR_WIDTH = 36 // hard-coded for now
+    const W = width - TOOLBAR_WIDTH
+    const H = height
     const plots: PGPlot[] = useMemo(() => {
-        const plotHeight = Math.min(width / unitIds.length - 30, height / unitIds.length - 30)
+        const nn = unitIds.length
+        const plotHeight = Math.min((W - 30 - (nn - 1) * 7)  / nn, (H - 30 - (nn - 1) * (7 + 20))  / nn)
         const plotWidth = plotHeight
         return crossCorrelogramsSorted.map((cc, ii) => ({
             key: `${ii}`,
@@ -126,7 +130,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
                 hideXAxis: !showXAxis
             }
         }))
-    }, [crossCorrelogramsSorted, height, width, unitIds, showXAxis])
+    }, [crossCorrelogramsSorted, W, H, unitIds, showXAxis])
 
     const customToolbarActions = useMemo(() => {
         const showXAxisAction: ToolbarItem = {
@@ -141,7 +145,6 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
         ]
     }, [showXAxis])
 
-    const TOOLBAR_WIDTH = 36 // hard-coded for now
     return (
         <Splitter
             width={width}
@@ -154,7 +157,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
                 height={height}
                 customActions={customToolbarActions}
             />
-            <VerticalScrollView width={0} height={0}>
+            <VerticalScrollView width={0} height={0} disableScroll={true}>
                 {
                     unitIds.length > MAX_UNITS_SELECTED ? (
                         <div>Not showing cross-correlogram matrix. Too many units selected (max = {MAX_UNITS_SELECTED}).</div>

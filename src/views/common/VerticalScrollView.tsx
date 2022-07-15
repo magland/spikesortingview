@@ -3,15 +3,16 @@ import React, { FunctionComponent, useMemo } from 'react';
 type Props = {
     width: number
     height: number
+    disableScroll?: boolean
 }
 
-const VerticalScrollView: FunctionComponent<Props> = ({width, height, children}) => {
+const VerticalScrollView: FunctionComponent<Props> = ({width, height, children, disableScroll}) => {
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
         height,
         position: 'relative',
-        overflowY: 'auto'
-    }), [width, height])
+        overflowY: !disableScroll ? 'auto' : 'hidden'
+    }), [width, height, disableScroll])
     return (
         <div style={divStyle}>
             {children}
