@@ -61,10 +61,10 @@ export const dragSelectReducer = (state: DragSelectState, action: DragSelectActi
         }
     } else if (action.type === 'DRAG_MOUSE_LEAVE') {
         return {
-            ...state,
-            isActive: false,
-            dragAnchor: undefined,
-            dragRect: undefined
+            ...state
+            // isActive: false,
+            // dragAnchor: undefined,
+            // dragRect: undefined
         }
     } else {
         console.log(`Error: unrecognized verb in dragSelectReducer.`)

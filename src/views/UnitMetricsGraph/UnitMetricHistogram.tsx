@@ -14,8 +14,8 @@ export type UnitMetricHistogramProps = {
 
 const UnitMetricHistogram: FunctionComponent<UnitMetricHistogramProps> = ({metric, units, selectedUnitIds, width, height}) => {
     const {bars, ticks} = useMemo(() => {
-        const values = units.map(unit => (unit.values[metric.key] as number))
-        const valuesSelected = units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => (unit.values[metric.key] as number))
+        const values = units.map(unit => (unit.values[metric.key])).filter(a => (a !== undefined)).map(a => (a as number))
+        const valuesSelected = units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => (unit.values[metric.key])).filter(a => (a !== undefined)).map(a => (a as number))
         return createHistogramBars(values, valuesSelected, 10)
     }, [units, metric, selectedUnitIds])
     return (

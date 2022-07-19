@@ -5,10 +5,12 @@ import dragSelectReducer from "./dragSelectReducer"
 const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r: Vec4, o: {ctrlKey: boolean}) => void, handleClickPoint: (p: Vec2, o: {ctrlKey: boolean}) => void) => {
     const [dragSelectState, dragSelectStateDispatch] = useReducer(dragSelectReducer, {})
     const onMouseMove = useCallback((e: React.MouseEvent) => {
-        dragSelectStateDispatch({
-            type: 'DRAG_MOUSE_MOVE',
-            point: getEventPoint(e)
-        })
+        if (e.buttons) { // this condition is important for the case where we leave the window and then come back without the button pressed
+            dragSelectStateDispatch({
+                type: 'DRAG_MOUSE_MOVE',
+                point: getEventPoint(e)
+            })
+        }
     }, [])
 
     const onMouseDown = useCallback((e: React.MouseEvent) => {
@@ -31,6 +33,12 @@ const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r:
         })
     }, [dragSelectState, handleSelectRect, handleClickPoint])
 
+    const onMouseLeave = useCallback((e: React.MouseEvent) => {
+        dragSelectStateDispatch({
+            type: 'DRAG_MOUSE_LEAVE'
+        })
+    }, [])
+
     const paintDragSelectLayer = useCallback((ctxt: CanvasRenderingContext2D, props: any) => {
         ctxt.clearRect(0, 0, width, height)
         if ((dragSelectState.isActive) && (dragSelectState.dragRect)) {
@@ -45,6 +53,7 @@ const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r:
         onMouseDown,
         onMouseMove,
         onMouseUp,
+        onMouseLeave,
         paintDragSelectLayer
     }
 }

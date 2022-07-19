@@ -113,8 +113,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
     const H = height
     const plots: PGPlot[] = useMemo(() => {
         const nn = unitIds.length
-        const plotHeight = Math.min((W - 30 - (nn - 1) * 7)  / nn, (H - 30 - (nn - 1) * (7 + 20))  / nn)
-        const plotWidth = plotHeight
+        const {plotWidth, plotHeight} = determinePlotSizeForSquareMatrixGrid(W, H, nn)
         return crossCorrelogramsSorted.map((cc, ii) => ({
             key: `${ii}`,
             unitId: cc ? cc.unitId1 : 0,
@@ -175,6 +174,12 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
             </VerticalScrollView>
         </Splitter>
     )
+}
+
+export const determinePlotSizeForSquareMatrixGrid = (W: number, H: number, nn: number) => {
+    const plotHeight = Math.min((W - 30 - (nn - 1) * 7)  / nn, (H - 30 - (nn - 1) * (7 + 20))  / nn)
+    const plotWidth = plotHeight
+    return {plotWidth, plotHeight}
 }
 
 export default CrossCorrelogramsView

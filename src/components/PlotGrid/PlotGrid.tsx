@@ -62,7 +62,7 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
                         data-key={p.key}
                         onClick={p.clickHandler || voidClickHandler}
                     >
-                        <div className={'plotLabelStyle'} style={{maxWidth: p.props.width}}>
+                        <div className={'plotLabelStyle'} style={{maxWidth: p.props.width, userSelect: 'none'}}>
                             <span style={{color: p.labelColor}}>{p.label || <span>&nbsp;</span>}</span>
                         </div>
                         <ReactVisibilitySensor partialVisibility={true}>

@@ -1,8 +1,9 @@
+import UnitMetricSelectionContext, { unitMetricSelectionReducer } from 'contexts/UnitMetricSelectionContext';
 import SortingCurationAction from 'contexts/SortingCurationAction';
 import SortingCurationContext, { sortingCurationReducer } from 'contexts/SortingCurationContext';
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
 import getMutable from 'figurl/getMutable';
-import { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
 
@@ -52,13 +53,17 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
         })()
     }, [userId, googleIdToken, data.sortingCurationUri])
 
+    const [unitMetricSelection, unitMetricSelectionDispatch] = useReducer(unitMetricSelectionReducer, {})
+
     const content = (
-        <LayoutItemView
-            layoutItem={layout}
-            views={views}
-            width={width}
-            height={height}
-        />
+        <UnitMetricSelectionContext.Provider value={{unitMetricSelection, unitMetricSelectionDispatch}}>
+            <LayoutItemView
+                layoutItem={layout}
+                views={views}
+                width={width}
+                height={height}
+            />
+        </UnitMetricSelectionContext.Provider>
     )
 
     if (data.sortingCurationUri) {
