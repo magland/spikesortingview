@@ -1,7 +1,9 @@
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { determineTickLocationsMsec } from "views/Autocorrelograms/CorrelogramPlot";
+import { idToNum } from "views/AverageWaveforms/AverageWaveformsView";
 import BarPlot, { BarPlotBar } from "views/common/BarPlot/BarPlot";
-import { BarPlotTick } from "views/common/BarPlot/BarPlotMainLayer";
+import { BarPlotTick, BarPlotVerticalLine } from "views/common/BarPlot/BarPlotMainLayer";
+import colorForUnitId from "views/common/ColorHandling/colorForUnitId";
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";
 
 export type UnitMetricHistogramProps = {
@@ -15,10 +17,12 @@ export type UnitMetricHistogramProps = {
 }
 
 const UnitMetricHistogram: FunctionComponent<UnitMetricHistogramProps> = ({metric, units, selectedUnitIds, setSelectedUnitIds, numBins, width, height}) => {
-    const {bars, ticks} = useMemo(() => {
+    const {bars, ticks, verticalLines} = useMemo(() => {
         const values = units.map(unit => (unit.values[metric.key])).filter(a => (a !== undefined)).map(a => (a as number))
         const valuesSelected = units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => (unit.values[metric.key])).filter(a => (a !== undefined)).map(a => (a as number))
-        return createHistogramBars(values, valuesSelected, numBins || 10)
+        const unitIdsSelected = units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => ({unitId: unit.unitId, value: unit.values[metric.key]})).filter(a => (a.value !== undefined)).map(a => (a.unitId))
+        const colorsSelected = unitIdsSelected.map(u => (colorForUnitId(idToNum(u))))
+        return createHistogramBars(values, valuesSelected, colorsSelected, numBins || 10)
     }, [units, metric, selectedUnitIds, numBins])
     const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedBarKeys: (string | number)[], {ctrlKey, shiftKey}) => {
         if (selectedBarKeys.length === 0) return
@@ -51,16 +55,17 @@ const UnitMetricHistogram: FunctionComponent<UnitMetricHistogramProps> = ({metri
             height={height}
             bars={bars}
             ticks={ticks}
+            verticalLines={verticalLines}
             onSelectRect={handleSelectRect}
         />
     )
 }
 
-const createHistogramBars = (values: number[], valuesSelected: number[], numBins: number): {bars: BarPlotBar[], ticks: BarPlotTick[]} => {
-    if (values.length === 0) return {bars: [], ticks: []}
+const createHistogramBars = (values: number[], valuesSelected: number[], colorsSelected: string[], numBins: number): {bars: BarPlotBar[], ticks: BarPlotTick[], verticalLines: BarPlotVerticalLine[]} => {
+    if (values.length === 0) return {bars: [], ticks: [], verticalLines: []}
     let min = Math.min(...values)
     let max = Math.max(...values)
-    if (max <= min) return {bars: [], ticks: []}
+    if (max <= min) return {bars: [], ticks: [], verticalLines: []}
     min -= (max - min) / numBins / 2
     max += (max - min) / numBins / 2
     const counts: number[] = []
@@ -75,6 +80,14 @@ const createHistogramBars = (values: number[], valuesSelected: number[], numBins
         const i = Math.min(Math.floor((value - min) / (max - min) * numBins), numBins - 1)
         countsSelected[i] ++
     }
+
+    const verticalLines: BarPlotVerticalLine[] = []
+    valuesSelected.forEach((value, i) => {
+        verticalLines.push({
+            x: value,
+            color: colorsSelected[i]
+        })
+    })
 
     const tickLocations: number[] = determineTickLocations(min, max)
     const ticks: BarPlotTick[] = tickLocations.map(x => ({
@@ -107,7 +120,8 @@ const createHistogramBars = (values: number[], valuesSelected: number[], numBins
                 return bar
             })
         ],
-        ticks
+        ticks,
+        verticalLines
     }
 }
 

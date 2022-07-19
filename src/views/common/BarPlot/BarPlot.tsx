@@ -2,7 +2,7 @@ import BaseCanvas from 'FigurlCanvas/BaseCanvas';
 import { Vec2, Vec4 } from 'FigurlCanvas/Geometry';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import useDragSelectLayer from 'views/UnitLocations/useDragSelectLayer';
-import BarPlotMainLayer, { BarBox, BarPlotTick } from './BarPlotMainLayer';
+import BarPlotMainLayer, { BarBox, BarPlotTick, BarPlotVerticalLine } from './BarPlotMainLayer';
 
 export type BarPlotBar = {
     key: string | number
@@ -18,6 +18,7 @@ type Props = {
     height: number
     bars: BarPlotBar[]
     ticks?: BarPlotTick[]
+    verticalLines?: BarPlotVerticalLine[]
     xLabel?: string
     onSelectRect?: (r: {x: number, y: number, width: number, height: number}, selectedBarKeys: (string | number)[], o: {ctrlKey: boolean, shiftKey: boolean}) => void
 }
@@ -28,7 +29,7 @@ export type Margins = {
 
 const emptyDrawData = {}
 
-const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, onSelectRect, width, height}) => {
+const BarPlot: FunctionComponent<Props> = ({bars, ticks, verticalLines, xLabel, onSelectRect, width, height}) => {
     const {xMin, xMax} = useMemo(() => (
         bars.length > 0 ? (
             {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
@@ -40,7 +41,7 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, onSelectRect, w
         Math.max(...bars.map(b => (b.height)))
     ), [bars])
 
-    const {barBoxes, margins, pixelTicks}: {barBoxes: BarBox[], margins: Margins, pixelTicks?: BarPlotTick[]} = useMemo(() => {
+    const {barBoxes, margins, pixelTicks, pixelVerticalLines}: {barBoxes: BarBox[], margins: Margins, pixelTicks?: BarPlotTick[], pixelVerticalLines?: BarPlotVerticalLine[]} = useMemo(() => {
         const margins = {
             left: 3,
             right: 3,
@@ -62,8 +63,12 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, onSelectRect, w
             x: margins.left + (tick.x - xMin) / (xMax - xMin) * W,
             label: `${tick.label}`
         })) : undefined
-        return {barBoxes, margins, pixelTicks}
-    }, [bars, ticks, xMin, xMax, yMax, width, height, xLabel])
+        const pixelVerticalLines = verticalLines ? verticalLines.map(v => ({
+            x: margins.left + (v.x - xMin) / (xMax - xMin) * W,
+            color: v.color
+        })) : undefined
+        return {barBoxes, margins, pixelTicks, pixelVerticalLines}
+    }, [bars, ticks, verticalLines, xMin, xMax, yMax, width, height, xLabel])
 
     const handleSelectRect = useCallback((r: Vec4, {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
         const selectedBarKeys: (string | number)[] = []
@@ -101,6 +106,7 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, onSelectRect, w
                 barBoxes={barBoxes}
                 margins={margins}
                 pixelTicks={pixelTicks}
+                pixelVerticalLines={pixelVerticalLines}
                 xLabel={xLabel}
                 width={width}
                 height={height}

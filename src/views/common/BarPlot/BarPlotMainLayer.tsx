@@ -9,10 +9,16 @@ export type BarPlotTick = {
     label: string
 }
 
+export type BarPlotVerticalLine = {
+    x: number
+    color: string
+}
+
 type Props = {
     barBoxes: BarBox[]
     margins: Margins
     pixelTicks?: BarPlotTick[]
+    pixelVerticalLines?: BarPlotVerticalLine[]
     xLabel?: string
     width: number
     height: number
@@ -21,6 +27,14 @@ type Props = {
 const draw = (context: CanvasRenderingContext2D, data: Props) => {
     context.clearRect(0, 0, data.width, data.height)
     
+    for (let vline of data.pixelVerticalLines || []) {
+        context.strokeStyle = vline.color
+        context.beginPath()
+        context.moveTo(vline.x, data.margins.top - 20)
+        context.lineTo(vline.x, data.height - data.margins.bottom)
+        context.stroke()
+    }
+
     data.barBoxes.forEach(b => {
         context.fillStyle = b.color
         context.fillRect(b.x1, b.y1, b.x2 - b.x1, b.y2 - b.y1)
