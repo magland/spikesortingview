@@ -2,7 +2,7 @@ import { Vec2, Vec4 } from "FigurlCanvas/Geometry"
 import { useCallback, useReducer } from "react"
 import dragSelectReducer from "./dragSelectReducer"
 
-const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r: Vec4, o: {ctrlKey: boolean}) => void, handleClickPoint: (p: Vec2, o: {ctrlKey: boolean}) => void) => {
+const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r: Vec4, o: {ctrlKey: boolean, shiftKey: boolean}) => void, handleClickPoint: (p: Vec2, o: {ctrlKey: boolean, shiftKey: boolean}) => void) => {
     const [dragSelectState, dragSelectStateDispatch] = useReducer(dragSelectReducer, {})
     const onMouseMove = useCallback((e: React.MouseEvent) => {
         if (e.buttons) { // this condition is important for the case where we leave the window and then come back without the button pressed
@@ -22,10 +22,10 @@ const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r:
 
     const onMouseUp = useCallback((e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         if ((dragSelectState.isActive) && (dragSelectState.dragRect)) {
-            handleSelectRect(dragSelectState.dragRect, {ctrlKey: e.ctrlKey})
+            handleSelectRect(dragSelectState.dragRect, {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey})
         }
         if (!dragSelectState.isActive) {
-            handleClickPoint(getEventPoint(e), {ctrlKey: e.ctrlKey})
+            handleClickPoint(getEventPoint(e), {ctrlKey: e.ctrlKey, shiftKey: e.shiftKey})
         }
         dragSelectStateDispatch({
             type: 'DRAG_MOUSE_UP',

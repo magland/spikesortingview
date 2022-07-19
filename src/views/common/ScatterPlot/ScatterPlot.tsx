@@ -17,7 +17,8 @@ type Props = {
     width: number
     height: number
     markers: ScatterPlotMarker[]
-    onSelectRect?: (r: {x: number, y: number, width: number, height: number}, selectedMarkerKeys: (string | number)[], o: {ctrlKey: boolean}) => void
+    onSelectRect?: (r: {x: number, y: number, width: number, height: number}, selectedMarkerKeys: (string | number)[], o: {ctrlKey: boolean, shiftKey: boolean}) => void
+    onClickPoint?: (p: {x: number, y: number}, markerKey: string | number | undefined, o: {ctrlKey: boolean, shiftKey: boolean}) => void
 }
 
 export type Margins = {
@@ -26,7 +27,7 @@ export type Margins = {
 
 const emptyDrawData = {}
 
-const ScatterPlot: FunctionComponent<Props> = ({markers, onSelectRect, width, height}) => {
+const ScatterPlot: FunctionComponent<Props> = ({markers, onSelectRect, onClickPoint, width, height}) => {
     const {margins}: {margins: Margins} = useMemo(() => {
         const margins = {
             left: 20,
@@ -66,7 +67,7 @@ const ScatterPlot: FunctionComponent<Props> = ({markers, onSelectRect, width, he
         }
         return {coord2Pixel, pixel2Coord}
     }, [markers, width, height, margins])
-    const handleSelectRect = useCallback((r: Vec4, {ctrlKey}: {ctrlKey: boolean}) => {
+    const handleSelectRect = useCallback((r: Vec4, {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
         const rA = {x: r[0], y: r[1], width: r[2], height: r[3]}
         const selectedMarkerKeys: (string | number)[] = []
         for (let m of markers) {
@@ -77,10 +78,21 @@ const ScatterPlot: FunctionComponent<Props> = ({markers, onSelectRect, width, he
             }
         }
         const r0 = transformRect(pixel2Coord, rA)
-        onSelectRect && onSelectRect(r0, selectedMarkerKeys, {ctrlKey})
+        onSelectRect && onSelectRect(r0, selectedMarkerKeys, {ctrlKey, shiftKey})
     }, [onSelectRect, pixel2Coord, markers, coord2Pixel])
-    const handleClickPoint = useCallback((x: Vec2, {ctrlKey}: {ctrlKey: boolean}) => {
-    }, [])
+    const handleClickPoint = useCallback((x: Vec2, {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
+        const p = {x: x[0], y: x[1]}
+        const rA = {x: p.x, y: p.y, width: 1, height: 1}
+        let selectedMarkerKey: string | number | undefined = undefined
+        for (let m of markers) {
+            const p = coord2Pixel({x: m.x, y: m.y})
+            const pR = {xmin: p.x - m.radius, ymin: p.y - m.radius, xmax: p.x + m.radius, ymax: p.y + m.radius}
+            if (rectangularRegionsIntersect({xmin: rA.x, xmax: rA.x + rA.width, ymin: rA.y, ymax: rA.y + rA.height}, pR)) {
+                selectedMarkerKey = m.key
+            }
+        }
+        onClickPoint && onClickPoint(pixel2Coord(p), selectedMarkerKey, {ctrlKey, shiftKey})
+    }, [coord2Pixel, markers, onClickPoint, pixel2Coord])
     const {onMouseMove, onMouseDown, onMouseUp, onMouseLeave, paintDragSelectLayer} = useDragSelectLayer(width, height, handleSelectRect, handleClickPoint)
 
     const dragSelectCanvas = useMemo(() => {

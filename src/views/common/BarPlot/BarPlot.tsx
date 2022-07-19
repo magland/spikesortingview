@@ -1,7 +1,11 @@
-import React, { FunctionComponent, useMemo } from 'react';
+import BaseCanvas from 'FigurlCanvas/BaseCanvas';
+import { Vec2, Vec4 } from 'FigurlCanvas/Geometry';
+import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import useDragSelectLayer from 'views/UnitLocations/useDragSelectLayer';
 import BarPlotMainLayer, { BarBox, BarPlotTick } from './BarPlotMainLayer';
 
 export type BarPlotBar = {
+    key: string | number
     xStart: number
     xEnd: number
     height: number
@@ -15,13 +19,16 @@ type Props = {
     bars: BarPlotBar[]
     ticks?: BarPlotTick[]
     xLabel?: string
+    onSelectRect?: (r: {x: number, y: number, width: number, height: number}, selectedBarKeys: (string | number)[], o: {ctrlKey: boolean, shiftKey: boolean}) => void
 }
 
 export type Margins = {
     left: number, right: number, top: number, bottom: number
 }
 
-const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, width, height}) => {
+const emptyDrawData = {}
+
+const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, onSelectRect, width, height}) => {
     const {xMin, xMax} = useMemo(() => (
         bars.length > 0 ? (
             {xMin: bars[0].xStart, xMax: bars[bars.length - 1].xEnd}
@@ -43,6 +50,7 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, width, height})
         const W = width - margins.left - margins.right
         const H = height - margins.top - margins.bottom
         const barBoxes = bars.map(bar => ({
+            key: bar.key,
             x1: margins.left + (bar.xStart - xMin) / (xMax - xMin) * W,
             x2: margins.left + (bar.xEnd - xMin) / (xMax - xMin) * W,
             y1: margins.top + H * (1 - (bar.height / yMax)),
@@ -57,8 +65,38 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, width, height})
         return {barBoxes, margins, pixelTicks}
     }, [bars, ticks, xMin, xMax, yMax, width, height, xLabel])
 
+    const handleSelectRect = useCallback((r: Vec4, {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
+        const selectedBarKeys: (string | number)[] = []
+        const r0 = {x: r[0], y: r[1], width: r[2], height: r[3]}
+        for (let bb of barBoxes) {
+            if ((bb.x1 <= r0.x + r0.width) && (bb.x2 >= r0.x)) {
+                selectedBarKeys.push(bb.key)
+            }
+        }
+        onSelectRect && onSelectRect(r0, selectedBarKeys, {ctrlKey, shiftKey})
+    }, [barBoxes, onSelectRect])
+    const handleClickPoint = useCallback((x: Vec2, {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
+        
+    }, [])
+    const {onMouseMove, onMouseDown, onMouseUp, onMouseLeave, paintDragSelectLayer} = useDragSelectLayer(width, height, handleSelectRect, handleClickPoint)
+
+    const dragSelectCanvas = useMemo(() => {
+        return <BaseCanvas
+            width={width}
+            height={height}
+            draw={paintDragSelectLayer}
+            drawData={emptyDrawData}
+        />
+    }, [width, height, paintDragSelectLayer])
+
     return (
-        <div style={{width, height, position: 'relative'}}>
+        <div
+            style={{width, height, position: 'relative'}}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={onMouseUp}
+            onMouseLeave={onMouseLeave}
+        >
             <BarPlotMainLayer
                 barBoxes={barBoxes}
                 margins={margins}
@@ -67,6 +105,7 @@ const BarPlot: FunctionComponent<Props> = ({bars, ticks, xLabel, width, height})
                 width={width}
                 height={height}
             />
+            {dragSelectCanvas}
         </div>
     )
 }

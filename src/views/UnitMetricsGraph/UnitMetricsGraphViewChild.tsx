@@ -23,13 +23,31 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
     const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
     const {selectedUnitMetrics} = useUnitMetricSelection()
     const [plotBoxScaleFactor, setPlotBoxScaleFactor] = useState<number>(1)
+    const [numHistogramBins, setNumHistogramBins] = useState<number>(10)
+
+    const unitsSorted = useMemo(() => (
+        units.sort((u1, u2) => {
+            if ((selectedUnitIds.has(u1.unitId)) && (!selectedUnitIds.has(u2.unitId))) {
+                return 1
+            }
+            else if ((!selectedUnitIds.has(u1.unitId)) && (selectedUnitIds.has(u2.unitId))) {
+                return -1
+            }
+            else return idToNum(u1.unitId) - idToNum(u2.unitId)
+        })
+    ), [units, selectedUnitIds])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: units.map(u => (u.unitId)).sort((a, b) => idToNum(a) - idToNum(b)) })
-    }, [units, unitIdSelectionDispatch])
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: unitsSorted.map(u => (u.unitId)).sort((a, b) => idToNum(a) - idToNum(b)) })
+    }, [unitsSorted, unitIdSelectionDispatch])
 
     const customToolbarActions = useMemo(() => {
-        const boxSizeActions: ToolbarItem[] = [
+        const boxSizeActions: ToolbarItem[] = selectedUnitMetrics.length === 0 ? [
+            {
+                type: 'text',
+                content: 'Size',
+                title: ''
+            },
             {
                 type: 'button',
                 callback: () => setPlotBoxScaleFactor(s => (s * 1.3)),
@@ -42,11 +60,32 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
                 title: 'Decrease box size',
                 icon: <FaMinus />
             }
+        ] : []
+        const numBinsActions: ToolbarItem[] = [
+            {
+                type: 'text',
+                content: '# bins',
+                title: ''
+            },
+            {
+                type: 'button',
+                callback: () => setNumHistogramBins(x => (x + 5)),
+                title: 'Increase num. histogram bins',
+                icon: <FaPlus />
+            },
+            {
+                type: 'button',
+                callback: () => setNumHistogramBins(x => Math.max(5, (x - 5))),
+                title: 'Decrease num. histogram bins',
+                icon: <FaMinus />
+            }
         ]
         return [
-            ...boxSizeActions
+            ...(boxSizeActions),
+            {type: 'divider'},
+            ...numBinsActions
         ]
-    }, [])
+    }, [selectedUnitMetrics.length])
 
     const TOOLBAR_WIDTH = 36 // hard-coded for now
 
@@ -63,9 +102,10 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
                     type: 'histogram',
                     metric1: metric,
                     metric2: metric,
-                    units,
+                    units: unitsSorted,
                     width: 400 * plotBoxScaleFactor,
                     height: 400 * plotBoxScaleFactor,
+                    numHistogramBins,
                     selectedUnitIds,
                     setSelectedUnitIds
                 }
@@ -89,17 +129,18 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
                     if (metric1 && metric2) {
                         const props: UnitMetricPlotProps = {
                             type: m1 === m2 ? 'histogram': 'scatter',
-                            metric1: metric1,
-                            metric2: metric2,
-                            units,
+                            metric1: metric2,
+                            metric2: metric1,
+                            units: unitsSorted,
+                            numHistogramBins,
                             width: plotWidth,
                             height: plotHeight,
                             selectedUnitIds,
                             setSelectedUnitIds
                         }
                         ret.push({
-                            key: `${m1}-${m2}`,
-                            label: props.type === 'histogram' ? m1 : `${m2} vs. ${m1}`,
+                            key: `${m2}-${m1}`,
+                            label: props.type === 'histogram' ? m1 : `${m1} vs. ${m2}`,
                             unitId: '',
                             labelColor: 'black',
                             props
@@ -109,7 +150,7 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
             }
             return ret
         }
-    }, [metrics, selectedUnitIds, units, plotBoxScaleFactor, selectedUnitMetrics, width, height, unitIdSelectionDispatch])
+    }, [metrics, selectedUnitIds, unitsSorted, plotBoxScaleFactor, selectedUnitMetrics, numHistogramBins, width, height, unitIdSelectionDispatch])
 
     return (
         <div>
@@ -128,6 +169,7 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
                     <PlotGrid
                         plots={plots}
                         plotComponent={UnitMetricPlot}
+                        numPlotsPerRow={selectedUnitMetrics.length === 0 ? undefined : selectedUnitMetrics.length}
                     />
                 </VerticalScrollView>
             </Splitter>

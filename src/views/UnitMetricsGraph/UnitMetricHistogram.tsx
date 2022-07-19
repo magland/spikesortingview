@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo } from "react";
+import { FunctionComponent, useCallback, useMemo } from "react";
 import { determineTickLocationsMsec } from "views/Autocorrelograms/CorrelogramPlot";
 import BarPlot, { BarPlotBar } from "views/common/BarPlot/BarPlot";
 import { BarPlotTick } from "views/common/BarPlot/BarPlotMainLayer";
@@ -8,22 +8,50 @@ export type UnitMetricHistogramProps = {
     metric: UMGMetric
     units: UMGUnit[]
     selectedUnitIds: Set<number | string>
+    setSelectedUnitIds: (unitIds: (string | number)[]) => void
+    numBins?: number
     width: number
     height: number
 }
 
-const UnitMetricHistogram: FunctionComponent<UnitMetricHistogramProps> = ({metric, units, selectedUnitIds, width, height}) => {
+const UnitMetricHistogram: FunctionComponent<UnitMetricHistogramProps> = ({metric, units, selectedUnitIds, setSelectedUnitIds, numBins, width, height}) => {
     const {bars, ticks} = useMemo(() => {
         const values = units.map(unit => (unit.values[metric.key])).filter(a => (a !== undefined)).map(a => (a as number))
         const valuesSelected = units.filter(u => (selectedUnitIds.has(u.unitId))).map(unit => (unit.values[metric.key])).filter(a => (a !== undefined)).map(a => (a as number))
-        return createHistogramBars(values, valuesSelected, 10)
-    }, [units, metric, selectedUnitIds])
+        return createHistogramBars(values, valuesSelected, numBins || 10)
+    }, [units, metric, selectedUnitIds, numBins])
+    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedBarKeys: (string | number)[], {ctrlKey, shiftKey}) => {
+        if (selectedBarKeys.length === 0) return
+        const selectedBars: BarPlotBar[] = []
+        for (let i of selectedBarKeys) {
+            const bar = bars[i as number]
+            selectedBars.push(bar)
+        }
+        const x1 = Math.min(...selectedBars.map(b => (b.xStart)))
+        const x2 = Math.max(...selectedBars.map(b => (b.xEnd)))
+        const ids: (number | string)[] = []
+        for (let u of units) {
+            const v = u.values[metric.key]
+            if (v !== undefined) {
+                if ((x1 <= v) && (v <= x2)) {
+                    ids.push(u.unitId)
+                }
+            }
+        }
+        if (ctrlKey || shiftKey) {
+            setSelectedUnitIds([...new Set([...selectedUnitIds, ...ids])])
+        }
+        else {
+            setSelectedUnitIds(ids)
+        }
+    }, [bars, metric, selectedUnitIds, setSelectedUnitIds, units])
     return (
         <BarPlot
             width={width}
             height={height}
             bars={bars}
             ticks={ticks}
+            onSelectRect={handleSelectRect}
         />
     )
 }
@@ -58,6 +86,7 @@ const createHistogramBars = (values: number[], valuesSelected: number[], numBins
         bars: [
             ...counts.map((count, i) => {
                 const bar: BarPlotBar = {
+                    key: i,
                     xStart: min + i * (max - min) / numBins,
                     xEnd: min + (i + 1) * (max - min) / numBins,
                     height: count,
@@ -68,6 +97,7 @@ const createHistogramBars = (values: number[], valuesSelected: number[], numBins
             }),
             ...countsSelected.map((count, i) => {
                 const bar: BarPlotBar = {
+                    key: i,
                     xStart: min + i * (max - min) / numBins,
                     xEnd: min + (i + 1) * (max - min) / numBins,
                     height: count,

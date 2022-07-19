@@ -35,6 +35,7 @@ const CorrelogramPlot: FunctionComponent<Props> = ({binEdgesSec, binCounts, colo
             const xStart: number = (binEdgesSec || [])[ii] * 1000
             const xEnd: number = (binEdgesSec || [])[ii + 1] * 1000
             return {
+                key: ii,
                 xStart,
                 xEnd,
                 height: count,

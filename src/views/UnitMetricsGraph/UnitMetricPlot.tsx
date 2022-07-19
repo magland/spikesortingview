@@ -10,17 +10,20 @@ export type UnitMetricPlotProps = {
     units: UMGUnit[]
     selectedUnitIds: Set<number | string>
     setSelectedUnitIds: (unitIds: (string | number)[]) => void
+    numHistogramBins?: number
     width: number
     height: number
 }
 
-const UnitMetricPlot: FunctionComponent<UnitMetricPlotProps> = ({type, metric1, metric2, units, selectedUnitIds, setSelectedUnitIds, width, height}) => {
+const UnitMetricPlot: FunctionComponent<UnitMetricPlotProps> = ({type, metric1, metric2, units, selectedUnitIds, setSelectedUnitIds, numHistogramBins, width, height}) => {
     if (type === 'histogram') {
         return (
             <UnitMetricHistogram
                 metric={metric1}
                 units={units}
                 selectedUnitIds={selectedUnitIds}
+                setSelectedUnitIds={setSelectedUnitIds}
+                numBins={numHistogramBins}
                 width={width}
                 height={height}
             />

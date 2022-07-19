@@ -26,7 +26,7 @@ const UnitMetricScatterPlot: FunctionComponent<UnitMetricScatterPlotProps> = ({m
                     key: unit.unitId,
                     x: xValue,
                     y: yValue,
-                    color: selectedUnitIds.has(unit.unitId) ? colorForUnitId(idToNum(unit.unitId)) : 'gray',
+                    color: selectedUnitIds.has(unit.unitId) ? colorForUnitId(idToNum(unit.unitId)) : 'lightgray',
                     radius,
                     tooltip: `Unit ${unit.unitId}`
                 })
@@ -34,16 +34,40 @@ const UnitMetricScatterPlot: FunctionComponent<UnitMetricScatterPlotProps> = ({m
         }
         return ret
     }, [units, metric1, metric2, selectedUnitIds])
-    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedMarkerIds: (string | number)[], {ctrlKey}) => {
-        const selectedUnitIds = selectedMarkerIds
-        setSelectedUnitIds(selectedUnitIds)
-    }, [setSelectedUnitIds])
+    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedMarkerIds: (string | number)[], {ctrlKey, shiftKey}) => {
+        let selectedIds = selectedMarkerIds
+        if ((ctrlKey) || (shiftKey)) {
+            selectedIds = [...new Set([...selectedMarkerIds, ...selectedUnitIds])]
+        }
+        setSelectedUnitIds(selectedIds)
+    }, [setSelectedUnitIds, selectedUnitIds])
+    const handleClickPoint = useCallback((p: {x: number, y: number}, selectedMarkerKey: string | number | undefined, {ctrlKey, shiftKey}) => {
+        let selectedIds: (number | string)[]
+        if ((ctrlKey) || (shiftKey)) {
+            const x = new Set([...selectedUnitIds])
+            if (selectedMarkerKey !== undefined) {
+                if (x.has(selectedMarkerKey)) x.delete(selectedMarkerKey)
+                else x.add(selectedMarkerKey)
+            }
+            selectedIds = [...x]
+        }
+        else {
+            if (selectedMarkerKey === undefined) {
+                selectedIds = []
+            }
+            else {
+                selectedIds = [selectedMarkerKey]
+            }
+        }
+        setSelectedUnitIds(selectedIds)
+    }, [setSelectedUnitIds, selectedUnitIds])
     return (
         <ScatterPlot
             width={width}
             height={height}
             markers={markers}
             onSelectRect={handleSelectRect}
+            onClickPoint={handleClickPoint}
         />
     )
 }
