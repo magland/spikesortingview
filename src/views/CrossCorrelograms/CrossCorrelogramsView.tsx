@@ -177,7 +177,7 @@ const CrossCorrelogramsViewChild: FunctionComponent<ChildProps> = ({data, width,
 }
 
 export const determinePlotSizeForSquareMatrixGrid = (W: number, H: number, nn: number) => {
-    const plotHeight = Math.min((W - 30 - (nn - 1) * 7)  / nn, (H - 30 - (nn - 1) * (7 + 20))  / nn)
+    const plotHeight = Math.min((W - 30 - (nn - 1) * 7)  / nn, (H - 30 - (nn - 1) * 7)  / nn)
     const plotWidth = plotHeight
     return {plotWidth, plotHeight}
 }

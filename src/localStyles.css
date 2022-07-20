@@ -57,6 +57,9 @@
     border: 3px solid blue;
     background-color: #b5d1ff;
 }
+.plotUnselectableStyle {
+    border: 3px solid transparent;
+}
 
 .plotLabelStyle {
     font-weight: bold;

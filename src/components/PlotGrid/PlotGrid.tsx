@@ -6,10 +6,11 @@ import ReactVisibilitySensor from 'react-visibility-sensor';
 export type PGPlot = {
     key: string | number,
     unitId: string | number,
-    label: string,
+    label: string | undefined,
     labelColor: string,
     clickHandler?: (evt: React.MouseEvent) => void,
     props: {[key: string]: any}
+    hideBorderColor?: boolean
 }
 
 type Props = {
@@ -23,17 +24,24 @@ type PlotGridRowData = {
     rowStart: number,
     maxItems?: number,
     selectedPlotKeys?: Set<number | string>
+    hideBorderColorPlotKeys?: Set<number | string>
     plotIds: (number | string)[],
     plotsDict: {[key: number | string]: JSX.Element}
 }
 const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => {
-    const { rowStart, maxItems, plotIds, selectedPlotKeys, plotsDict } = props
+    const { rowStart, maxItems, plotIds, selectedPlotKeys, plotsDict, hideBorderColorPlotKeys } = props
     const rowEnd = maxItems || plotIds.length
     const idsThisRow = plotIds.slice(rowStart, rowStart + rowEnd)
     return <Grid key={rowStart} container>
             {
                 idsThisRow.filter(id => (plotsDict[id])).map(id => {
-                    const className = `plotWrapperStyle plot${selectedPlotKeys?.has(id) ? 'S' : 'Uns'}electedStyle`
+                    let className = `plotWrapperStyle`
+                    if (!hideBorderColorPlotKeys?.has(id)) {
+                        className = className + ' ' + (selectedPlotKeys?.has(id) ? 'plotSelectedStyle' : 'plotUnselectedStyle')
+                    }
+                    else {
+                        className = className + ' plotUnselectableStyle'
+                    }
                     return (
                         <Grid key={id} item>
                             <div className={className}>
@@ -49,6 +57,16 @@ const PlotRow: FunctionComponent<PlotGridRowData> = (props: PlotGridRowData) => 
 const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotKeys, numPlotsPerRow}) => {
     const Component = plotComponent
 
+    const hideBorderColorPlotKeys = useMemo(() => {
+        const ret = new Set<string | number>()
+        for (let p of plots) {
+            if (p.hideBorderColor) {
+                ret.add(p.key)
+            }
+        }
+        return ret
+    }, [plots])
+
     // Don't rerender the individual plots with every pass
     // This code renders the individual components, memoized based on Component type and plot data, and then
     // loads them into a dictionary mapping the ID to the rendered plot (with label and interactivity function).
@@ -57,20 +75,25 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
         const contents = Object.assign(
             {},
             ...plots.map((p) => {
+                const labelHeight = p.label !== undefined ? 20 : 0
                 const rendered =
                     <div
                         data-key={p.key}
                         onClick={p.clickHandler || voidClickHandler}
                     >
-                        <div className={'plotLabelStyle'} style={{maxWidth: p.props.width, userSelect: 'none'}}>
-                            <span style={{color: p.labelColor}}>{p.label || <span>&nbsp;</span>}</span>
-                        </div>
+                        {
+                            p.label !== undefined && (
+                                <div className={'plotLabelStyle'} style={{maxWidth: p.props.width, height: labelHeight, userSelect: 'none'}}>
+                                    <span style={{color: p.labelColor}}>{p.label || <span>&nbsp;</span>}</span>
+                                </div>
+                            )
+                        }
                         <ReactVisibilitySensor partialVisibility={true}>
                             {({isVisible}) => (
                                 isVisible ? (
-                                    <Component {...p.props} />
+                                    <Component {...{...p.props, height: p.props.height ? p.props.height - labelHeight : p.props.height}} />
                                 ) : (
-                                    <div style={{position: 'relative', width: p.props.width, height: p.props.height}}>Not visible</div>
+                                    <div style={{position: 'relative', width: p.props.width, height: p.props.height - labelHeight}}>Not visible</div>
                                 )
                             )}
                         </ReactVisibilitySensor>
@@ -97,6 +120,7 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
                         maxItems={numPlotsPerRow}
                         plotIds={plotIds}
                         selectedPlotKeys={selectedPlotKeys}
+                        hideBorderColorPlotKeys={hideBorderColorPlotKeys}
                         plotsDict={_plotsDict}
                     />
                 ))

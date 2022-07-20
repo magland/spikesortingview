@@ -120,10 +120,33 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
             })
         }
         else {
-            const {plotWidth, plotHeight} = determinePlotSizeForSquareMatrixGrid(width - TOOLBAR_WIDTH, height, selectedUnitMetrics.length)
+            const bottomLabelHeight = 30
+            const leftLabelWidth = 30
+            const {plotWidth, plotHeight} = determinePlotSizeForSquareMatrixGrid(width - TOOLBAR_WIDTH - leftLabelWidth, height - bottomLabelHeight, selectedUnitMetrics.length)
             const ret: PGPlot[] = []
             for (let m1 of selectedUnitMetrics) {
                 const metric1: UMGMetric | undefined = metrics.filter(x => (x.key === m1))[0]
+                {
+                    const props: UnitMetricPlotProps = {
+                        type: 'left-label',
+                        metric1: metric1,
+                        metric2: metric1,
+                        units: unitsSorted,
+                        numHistogramBins,
+                        width: leftLabelWidth,
+                        height: plotHeight,
+                        selectedUnitIds,
+                        setSelectedUnitIds
+                    }
+                    ret.push({
+                        key: `left-label-${m1}`,
+                        label: undefined,
+                        unitId: '',
+                        labelColor: 'black',
+                        props,
+                        hideBorderColor: true
+                    })
+                }
                 for (let m2 of selectedUnitMetrics) {
                     const metric2: UMGMetric | undefined = metrics.filter(x => (x.key === m2))[0]
                     if (metric1 && metric2) {
@@ -140,13 +163,58 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
                         }
                         ret.push({
                             key: `${m2}-${m1}`,
-                            label: props.type === 'histogram' ? m1 : `${m1} vs. ${m2}`,
+                            // label: props.type === 'histogram' ? m1 : `${m1} vs. ${m2}`,
+                            label: props.type === 'histogram' ? m1 : undefined,
                             unitId: '',
                             labelColor: 'black',
                             props
                         })
                     }
                 }
+            }
+            {
+                const props: UnitMetricPlotProps = {
+                    type: 'bottom-label',
+                    metric1: undefined,
+                    metric2: undefined,
+                    units: unitsSorted,
+                    numHistogramBins,
+                    width: leftLabelWidth,
+                    height: bottomLabelHeight,
+                    selectedUnitIds,
+                    setSelectedUnitIds
+                }
+                ret.push({
+                    key: `left-bottom-label`,
+                    label: undefined,
+                    unitId: '',
+                    labelColor: 'black',
+                    props,
+                    hideBorderColor: true
+                })
+            }
+            for (let m of selectedUnitMetrics) {
+                const metric: UMGMetric | undefined = metrics.filter(x => (x.key === m))[0]
+                const props: UnitMetricPlotProps = {
+                    type: 'bottom-label',
+                    metric1: metric,
+                    metric2: metric,
+                    units: unitsSorted,
+                    numHistogramBins,
+                    width: plotWidth,
+                    height: bottomLabelHeight,
+                    selectedUnitIds,
+                    setSelectedUnitIds
+                }
+                ret.push({
+                    key: `bottom-label-${m}`,
+                    // label: props.type === 'histogram' ? m1 : `${m1} vs. ${m2}`,
+                    label: undefined,
+                    unitId: '',
+                    labelColor: 'black',
+                    props,
+                    hideBorderColor: true
+                })
             }
             return ret
         }
@@ -165,11 +233,11 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
                     height={height}
                     customActions={customToolbarActions}
                 />
-                <VerticalScrollView width={0} height={0}>
+                <VerticalScrollView width={0} height={0} disableScroll={selectedUnitMetrics.length > 0 ? true : false}>
                     <PlotGrid
                         plots={plots}
                         plotComponent={UnitMetricPlot}
-                        numPlotsPerRow={selectedUnitMetrics.length === 0 ? undefined : selectedUnitMetrics.length}
+                        numPlotsPerRow={selectedUnitMetrics.length === 0 ? undefined : selectedUnitMetrics.length + 1}
                     />
                 </VerticalScrollView>
             </Splitter>
