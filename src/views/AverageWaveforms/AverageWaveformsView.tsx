@@ -74,7 +74,8 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
             showChannelIds,
             width: 120 * plotBoxScaleFactor + (showReferenceProbe ? (120 * plotBoxScaleFactor / 4) : 0),
             height: 120 * plotBoxScaleFactor,
-            showReferenceProbe
+            showReferenceProbe,
+            disableAutoRotate: true
         }
         return {
             unitId: aw.unitId,

@@ -108,17 +108,17 @@ const createHistogramBars = (values: number[], valuesSelected: number[], colorsS
                 }
                 return bar
             }),
-            ...countsSelected.map((count, i) => {
-                const bar: BarPlotBar = {
-                    key: i,
-                    xStart: min + i * (max - min) / numBins,
-                    xEnd: min + (i + 1) * (max - min) / numBins,
-                    height: count,
-                    tooltip: '',
-                    color: 'green'
-                }
-                return bar
-            })
+            // ...countsSelected.map((count, i) => {
+            //     const bar: BarPlotBar = {
+            //         key: i,
+            //         xStart: min + i * (max - min) / numBins,
+            //         xEnd: min + (i + 1) * (max - min) / numBins,
+            //         height: count,
+            //         tooltip: '',
+            //         color: 'green'
+            //     }
+            //     return bar
+            // })
         ],
         ticks,
         verticalLines

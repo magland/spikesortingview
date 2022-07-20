@@ -38,6 +38,7 @@ interface WidgetProps {
     maxElectrodePixelRadius?: number
     offsetLabels?: boolean
     disableSelection?: boolean
+    disableAutoRotate?: boolean
 }
 
 const defaultElectrodeLayerProps = {
@@ -53,7 +54,7 @@ const getEventPoint = (e: React.MouseEvent) => {
 }
 
 const ElectrodeGeometry = (props: WidgetProps) => {
-    const { width, height, electrodes } = props
+    const { width, height, electrodes, disableAutoRotate } = props
     const { selectedElectrodeIds, setSelectedElectrodeIds } = useSelectedElectrodes()
     const disableSelection = props.disableSelection ?? false
     const offsetLabels = props.offsetLabels ?? false
@@ -99,10 +100,11 @@ const ElectrodeGeometry = (props: WidgetProps) => {
             width: width,
             height: height,
             maxElectrodePixelRadius: maxElectrodePixelRadius,
-            layoutMode: layoutMode
+            layoutMode: layoutMode,
+            disableAutoRotate
         }
         dispatchState(a)
-    }, [width, height, electrodes, layoutMode, maxElectrodePixelRadius])
+    }, [width, height, electrodes, layoutMode, maxElectrodePixelRadius, disableAutoRotate])
 
     // Call to update selected electrode IDs if our opinion differs from the one that was passed in
     // (but only if our opinion has changed)

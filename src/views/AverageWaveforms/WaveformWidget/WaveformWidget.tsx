@@ -30,6 +30,7 @@ export type WaveformWidgetProps = {
     samplingFrequency: number
     showChannelIds: boolean
     waveformWidth: number
+    disableAutoRotate?: boolean
 }
 
 const electrodeColors: ElectrodeColors = {
@@ -63,7 +64,7 @@ export const defaultWaveformOpts: WaveformOpts = {
 // TODO: FIX SNIPPET BOX
 const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
     const colors = props.colors ?? defaultElectrodeOpts.colors
-    const {electrodes, waveforms, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height, showChannelIds, waveformWidth} = props
+    const {electrodes, waveforms, ampScaleFactor: userSpecifiedAmplitudeScaling, layoutMode, width, height, showChannelIds, waveformWidth, disableAutoRotate} = props
 
     const maxElectrodePixelRadius = 1000
 
@@ -78,10 +79,11 @@ const WaveformWidget: FunctionComponent<WaveformWidgetProps> = (props) => {
         // maxElectrodePixelRadius={defaultMaxPixelRadius}
         maxElectrodePixelRadius={maxElectrodePixelRadius}
         disableSelection={true}      // ??
-    />, [electrodes, width, height, layoutMode, colors, showChannelIds])
+        disableAutoRotate={disableAutoRotate}
+    />, [electrodes, width, height, layoutMode, colors, showChannelIds, disableAutoRotate])
 
     // TODO: Don't do this twice, work it out differently
-    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius, {})
+    const { convertedElectrodes, pixelRadius, xMargin: xMarginBase } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius, {disableAutoRotate})
     const xMargin = xMarginBase || xMarginDefault
 
     // Spikes are defined as being some factor greater than the baseline noise.

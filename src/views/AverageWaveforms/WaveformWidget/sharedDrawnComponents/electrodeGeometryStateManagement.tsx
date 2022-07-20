@@ -21,7 +21,8 @@ type InitializeElectrodesElectrodeGeometryAction = {
     width: number,
     height: number,
     maxElectrodePixelRadius: number,
-    layoutMode: LayoutMode
+    layoutMode: LayoutMode,
+    disableAutoRotate?: boolean
 }
 
 type UpdateSelectionsElectrodeGeometryAction = {
@@ -56,7 +57,7 @@ const emptyDragState = {isActive: false}
 export const electrodeGeometryReducer = (state: ElectrodeGeometryState, action: ElectrodeGeometryAction): ElectrodeGeometryState => {
     if (action.type === 'INITIALIZE') {
         const { width, height, electrodes, layoutMode, maxElectrodePixelRadius } = action
-        const { convertedElectrodes, pixelRadius, xMargin } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius, {})
+        const { convertedElectrodes, pixelRadius, xMargin } = computeElectrodeLocations(width, height, electrodes, layoutMode, maxElectrodePixelRadius, {disableAutoRotate: action.disableAutoRotate})
         return {
             ...state,
             convertedElectrodes: convertedElectrodes,

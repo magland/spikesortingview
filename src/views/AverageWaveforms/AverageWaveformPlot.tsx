@@ -22,9 +22,10 @@ export type AverageWaveformPlotProps = {
     width: number
     height: number
     showReferenceProbe?: boolean
+    disableAutoRotate?: boolean
 }
 
-const AverageWaveformPlot: FunctionComponent<AverageWaveformPlotProps> = ({channelIds, units, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, showChannelIds, showReferenceProbe, width, height}) => {
+const AverageWaveformPlot: FunctionComponent<AverageWaveformPlotProps> = ({channelIds, units, layoutMode, channelLocations, samplingFrequency, peakAmplitude, ampScaleFactor, showChannelIds, showReferenceProbe, disableAutoRotate, width, height}) => {
     const electrodes = useMemo(() => {
         const locs = channelLocations || {}
         return channelIds.map(channelId => ({
@@ -77,6 +78,7 @@ const AverageWaveformPlot: FunctionComponent<AverageWaveformPlotProps> = ({chann
             samplingFrequency={samplingFrequency}
             showChannelIds={showChannelIds}
             waveformWidth={2}
+            disableAutoRotate={disableAutoRotate}
         />
     )
 
