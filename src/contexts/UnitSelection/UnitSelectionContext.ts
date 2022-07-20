@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react"
-import { getCheckboxClickHandlerGenerator, getPlotClickHandlerGenerator, selectUnique, setSelectionExplicit, toggleSelectAll, toggleSelectedRange, toggleSelectedUnit } from "./UnitSelectionFunctions"
+import { getCheckboxClickHandlerGenerator, getPlotClickHandlerGenerator, selectUnique, selectUniqueFirst, selectUniqueLast, selectUniqueNext, selectUniquePrevious, setSelectionExplicit, toggleSelectAll, toggleSelectedRange, toggleSelectedUnit } from "./UnitSelectionFunctions"
 import { resetUnitOrder, updateSort } from "./UnitSelectionSortingFunctions"
 import { SortingCallback, SortingRule } from "./UnitSelectionTypes"
 import { setVisibleUnits } from "./UnitSelectionVisibilityFunctions"
@@ -30,13 +30,17 @@ export type UnitSelectionAction = {
 export type UnitSelectionState = 'all' | 'none' | 'partial'
 
 
-export type UnitSelectionActionType = 'SET_SELECTION' | 'UNIQUE_SELECT' | 'TOGGLE_UNIT' | 'TOGGLE_RANGE' | 'TOGGLE_SELECT_ALL' | 'DESELECT_ALL' | 
+export type UnitSelectionActionType = 'SET_SELECTION' | 'UNIQUE_SELECT' | 'UNIQUE_SELECT_NEXT' | 'UNIQUE_SELECT_PREVIOUS' | 'UNIQUE_SELECT_FIRST' | 'UNIQUE_SELECT_LAST' | 'TOGGLE_UNIT' | 'TOGGLE_RANGE' | 'TOGGLE_SELECT_ALL' | 'DESELECT_ALL' | 
                                      'INITIALIZE_UNITS' | 'SET_UNIT_ORDER' | 'UPDATE_SORT_FIELDS' |
                                      'SET_VISIBLE_UNITS' | // 'SET_WINDOW_SIZE' | 'SET_PAGE_NUMBER' |
                                      'COPY_STATE'
 
 export const SET_SELECTION: UnitSelectionActionType = 'SET_SELECTION'
 export const UNIQUE_SELECT: UnitSelectionActionType = 'UNIQUE_SELECT'
+export const UNIQUE_SELECT_NEXT: UnitSelectionActionType = 'UNIQUE_SELECT_NEXT'
+export const UNIQUE_SELECT_PREVIOUS: UnitSelectionActionType = 'UNIQUE_SELECT_PREVIOUS'
+export const UNIQUE_SELECT_FIRST: UnitSelectionActionType = 'UNIQUE_SELECT_FIRST'
+export const UNIQUE_SELECT_LAST: UnitSelectionActionType = 'UNIQUE_SELECT_LAST'
 export const TOGGLE_UNIT: UnitSelectionActionType = 'TOGGLE_UNIT'
 export const TOGGLE_RANGE: UnitSelectionActionType = 'TOGGLE_RANGE'
 export const TOGGLE_SELECT_ALL: UnitSelectionActionType = 'TOGGLE_SELECT_ALL'
@@ -74,6 +78,14 @@ export const unitSelectionReducer = (s: UnitSelection, a: UnitSelectionAction): 
             return setSelectionExplicit(s, a)
         case UNIQUE_SELECT:
             return selectUnique(s, a)
+        case UNIQUE_SELECT_NEXT:
+            return selectUniqueNext(s, a)
+        case UNIQUE_SELECT_PREVIOUS:
+            return selectUniquePrevious(s, a)
+        case UNIQUE_SELECT_FIRST:
+            return selectUniqueFirst(s, a)
+        case UNIQUE_SELECT_LAST:
+            return selectUniqueLast(s, a)
         case TOGGLE_UNIT:
             return toggleSelectedUnit(s, a)
         case TOGGLE_RANGE:

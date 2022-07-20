@@ -16,6 +16,40 @@ export const selectUnique = (s: UnitSelection, a: UnitSelectionAction): UnitSele
     }
 }
 
+export const selectUniqueNext = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
+    if (s.lastClickedId === undefined) {
+        if (s.orderedUnitIds.length === 0) return s
+        return selectUnique(s, {type: UNIQUE_SELECT, targetUnit: s.orderedUnitIds[0]})
+    }
+    const index = s.orderedUnitIds.indexOf(s.lastClickedId)
+    if (index < 0) return s
+    const id = s.orderedUnitIds[index + 1]
+    if (id === undefined) return s
+    return selectUnique(s, {type: UNIQUE_SELECT, targetUnit: id})
+}
+
+export const selectUniquePrevious = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
+    if (s.lastClickedId === undefined) {
+        return s
+    }
+    const index = s.orderedUnitIds.indexOf(s.lastClickedId)
+    if (index < 0) return s
+    if (index === 0) return s
+    const id = s.orderedUnitIds[index - 1]
+    if (id === undefined) return s
+    return selectUnique(s, {type: UNIQUE_SELECT, targetUnit: id})
+}
+
+export const selectUniqueFirst = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
+    if (s.orderedUnitIds.length === 0) return s
+    return selectUnique(s, {type: UNIQUE_SELECT, targetUnit: s.orderedUnitIds[0]})
+}
+
+export const selectUniqueLast = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
+    if (s.orderedUnitIds.length === 0) return s
+    return selectUnique(s, {type: UNIQUE_SELECT, targetUnit: s.orderedUnitIds[s.orderedUnitIds.length - 1]})
+}
+
 export const setSelectionExplicit = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
     if ((a.incomingSelectedUnitIds || []).some(unitId => !s.orderedUnitIds.includes(unitId))) {
         throw Error(`Attempt to set a selection including units that are not in known data.`)
@@ -90,7 +124,7 @@ export const getPlotClickHandlerGenerator = (reducer: React.Dispatch<UnitSelecti
 
 export const checkboxClick = (unitId: number | string, reducer: React.Dispatch<UnitSelectionAction>, evt: React.MouseEvent) => {
     const action = {
-        type: evt.shiftKey ? TOGGLE_RANGE : TOGGLE_UNIT,
+        type: evt.ctrlKey ? UNIQUE_SELECT : evt.shiftKey ? TOGGLE_RANGE : TOGGLE_UNIT,
         targetUnit: unitId,
     }
     reducer(action)

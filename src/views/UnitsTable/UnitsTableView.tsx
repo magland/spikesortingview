@@ -1,6 +1,6 @@
-import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { INITIALIZE_UNITS, UNIQUE_SELECT_FIRST, UNIQUE_SELECT_LAST, UNIQUE_SELECT_NEXT, UNIQUE_SELECT_PREVIOUS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
+import React, { FunctionComponent, KeyboardEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import { SortableTableWidgetColumn, SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
 import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
@@ -116,9 +116,38 @@ const UnitsTableView: FunctionComponent<Props> = ({data, width, height}) => {
         overflowY: 'auto'
     }), [width, height])
 
+    const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.ctrlKey) {
+            if (e.key === 'ArrowDown') {
+                unitIdSelectionDispatch({
+                    type: UNIQUE_SELECT_NEXT
+                })
+            }
+            else if (e.key === 'ArrowUp') {
+                unitIdSelectionDispatch({
+                    type: UNIQUE_SELECT_PREVIOUS
+                })
+            }
+            else if (e.key === 'Home') {
+                unitIdSelectionDispatch({
+                    type: UNIQUE_SELECT_FIRST
+                })
+            }
+            else if (e.key === 'End') {
+                unitIdSelectionDispatch({
+                    type: UNIQUE_SELECT_LAST
+                })
+            }
+            return false
+        }
+    }, [unitIdSelectionDispatch])
+
     return (
         <div>
-            <div style={divStyle}>
+            <div
+                style={divStyle}
+                onKeyDown={handleKeyDown}
+            >
                 <SortableTableWidget
                     columns={columns}
                     rows={rowMap}
