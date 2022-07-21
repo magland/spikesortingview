@@ -15,7 +15,7 @@ export type PGPlot = {
 
 type Props = {
     plots: PGPlot[]
-    plotComponent: React.ComponentType<any>
+    plotComponent: React.FunctionComponent<any>
     selectedPlotKeys?: Set<number | string>
     numPlotsPerRow?: number
 }
@@ -89,8 +89,8 @@ const PlotGrid: FunctionComponent<Props> = ({plots, plotComponent, selectedPlotK
                             )
                         }
                         <ReactVisibilitySensor partialVisibility={true}>
-                            {({isVisible}) => (
-                                isVisible ? (
+                            {({isVisible}: {isVisible: boolean}) => (
+                                isVisible && Component !== null ? (
                                     <Component {...{...p.props, height: p.props.height ? p.props.height - labelHeight : p.props.height}} />
                                 ) : (
                                     <div style={{position: 'relative', width: p.props.width, height: p.props.height - labelHeight}}>Not visible</div>

@@ -1,7 +1,7 @@
 export interface MWViewPlugin {
     name: string
     label: string
-    component: React.ComponentType<any>
+    component: React.FunctionComponent<any>
     singleton: boolean
     icon?: any
     additionalProps?: {[key: string]: any}

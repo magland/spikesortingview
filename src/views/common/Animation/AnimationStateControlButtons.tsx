@@ -35,7 +35,7 @@ const PlaybackRateDropdown = <T, >(props: AnimationStateControlButtonsProps<T>) 
         return playbackRateOptions.find(e => Math.abs(e.value - Math.abs(playbackRate)) < 0.001) || null
     }, [playbackRateOptions, playbackRate, usingRateButtons])
 
-    const handleChangePlaybackRateOption = useCallback((selectedOption) => {
+    const handleChangePlaybackRateOption = useCallback((selectedOption: any) => {
         dispatch({
             type: 'SET_REPLAY_RATE',
             newRate: (playbackRate > 0 ? 1 : -1) * selectedOption.value

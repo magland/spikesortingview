@@ -34,14 +34,14 @@ const UnitMetricScatterPlot: FunctionComponent<UnitMetricScatterPlotProps> = ({m
         }
         return ret
     }, [units, metric1, metric2, selectedUnitIds])
-    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedMarkerIds: (string | number)[], {ctrlKey, shiftKey}) => {
+    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedMarkerIds: (string | number)[], {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
         let selectedIds = selectedMarkerIds
         if ((ctrlKey) || (shiftKey)) {
             selectedIds = [...new Set([...selectedMarkerIds, ...selectedUnitIds])]
         }
         setSelectedUnitIds(selectedIds)
     }, [setSelectedUnitIds, selectedUnitIds])
-    const handleClickPoint = useCallback((p: {x: number, y: number}, selectedMarkerKey: string | number | undefined, {ctrlKey, shiftKey}) => {
+    const handleClickPoint = useCallback((p: {x: number, y: number}, selectedMarkerKey: string | number | undefined, {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
         let selectedIds: (number | string)[]
         if ((ctrlKey) || (shiftKey)) {
             const x = new Set([...selectedUnitIds])

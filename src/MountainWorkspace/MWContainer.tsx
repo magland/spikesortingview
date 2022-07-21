@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import React, { FunctionComponent, PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 import { MWView } from './MWViewPlugin';
 import MWContainerTabBar from './MWContainerTabBar';
@@ -15,7 +15,7 @@ type Props = {
 // needs to correspond to css (not best system) - see mountainview.css
 const tabBarHeight = 30 + 5
 
-const MWContainer: FunctionComponent<Props> = ({ children, views, onViewClosed, onSetViewArea, width, height }) => {
+const MWContainer: FunctionComponent<PropsWithChildren<Props>> = ({ children, views, onViewClosed, onSetViewArea, width, height }) => {
     const [currentNorthView, setCurrentNorthView] = useState<MWView | null>(null)
     const [currentSouthView, setCurrentSouthView] = useState<MWView | null>(null)
     const [activeArea, setActiveArea] = useState<'north' | 'south'>('north')
@@ -159,8 +159,11 @@ const SplitterGrip: FunctionComponent<{onDelta: (delta: number) => void, width: 
 
     const innerGripThickness = 4
 
+    // see: https://github.com/react-grid-layout/react-draggable/issues/652
+    const Draggable1: any = Draggable
+
     return (
-        <Draggable
+        <Draggable1
             // nodeRef={draggableNodeRef} // this was actually causing an error with Draggable
             key="drag"
             position={{ x: 0, y: 0 }}
@@ -192,7 +195,7 @@ const SplitterGrip: FunctionComponent<{onDelta: (delta: number) => void, width: 
                     <div style={{...styleGripInner, position: 'absolute'}} />
                 </div>
             </div> */}
-        </Draggable>
+        </Draggable1>
     )
 }
 

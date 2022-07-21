@@ -1,7 +1,10 @@
-import assert from 'assert';
 import crypto from 'crypto';
 import validateObject, { isArrayOf, isBoolean, isJSONObject, isNumber, isObject, isObjectOf, isString, JSONObject, JSONValue, optional } from './validateObject';
 
+
+const assert = (x: any) => {
+    if (!x) throw Error('Assertion error')
+}
 
 // objectToMap and mapToObject
 export const objectToMap = <KeyType extends String, ValueType>(obj: {[key: string]: any}) => {

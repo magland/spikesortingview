@@ -1,5 +1,5 @@
 import { Accordion, AccordionDetails, AccordionSummary } from '@material-ui/core'
-import React, { FunctionComponent } from 'react'
+import React, { FunctionComponent, PropsWithChildren } from 'react'
 
 interface Props {
     label: string
@@ -8,7 +8,7 @@ interface Props {
     unmountOnExit?: boolean // default is true
 }
 
-export const Expandable: FunctionComponent<Props> = (props) => {
+export const Expandable: FunctionComponent<PropsWithChildren<Props>> = (props) => {
     return (
         <Accordion TransitionProps={{ unmountOnExit: props.unmountOnExit !== undefined ? props.unmountOnExit : true }} defaultExpanded={props.defaultExpanded}>
             <AccordionSummary>

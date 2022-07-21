@@ -89,7 +89,7 @@ const SortableTableWidgetHeaderRow: FunctionComponent<HeaderRowProps> = (props) 
     // passing to the reducer.
     const sortCallback = useCallback((rules: SortingRule[]) => rowSorterCallback(columnsMap)(rules), [rowSorterCallback, columnsMap])
 
-    const handleColumnClick = useCallback((columnName) => {
+    const handleColumnClick = useCallback((columnName: string) => {
         if (selectionDisabled) return
         selectionDispatch({
             type: UPDATE_SORT_FIELDS,

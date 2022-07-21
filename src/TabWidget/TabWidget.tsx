@@ -1,4 +1,4 @@
-import { FunctionComponent, useState } from "react";
+import { FunctionComponent, PropsWithChildren, useState } from "react";
 import TabWidgetTabBar from "./TabWidgetTabBar";
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
 // needs to correspond to css (not best system) - see mountainview.css
 const tabBarHeight = 30 + 5
 
-const TabWidget: FunctionComponent<Props> = ({children, tabs, width, height}) => {
+const TabWidget: FunctionComponent<PropsWithChildren<Props>> = ({children, tabs, width, height}) => {
     const [currentTabIndex, setCurrentTabIndex] = useState<number | undefined>(undefined)
     const children2 = children as React.ReactElement[]
     if ((children2 || []).length !== tabs.length) {

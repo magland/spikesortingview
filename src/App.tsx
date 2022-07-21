@@ -24,7 +24,7 @@ function App() {
         return
       }
       setData(data)
-    }).catch(err => {
+    }).catch((err: any) => {
       setErrorMessage(`Error getting figure data`)
       console.error(`Error getting figure data`, err)
     })

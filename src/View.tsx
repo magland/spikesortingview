@@ -25,6 +25,7 @@ import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import MarkdownView from 'views/Markdown/MarkdownView';
 import { ViewData } from './ViewData';
 import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
+import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageComponent';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -114,6 +115,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'UnitMetricsGraph') {
         return <UnitMetricsGraphView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'TiledImage') {
+        return <TiledImageComponent data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)

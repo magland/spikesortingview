@@ -187,4 +187,4 @@ const Label: FunctionComponent<{label: string, partial: boolean, onClick: () => 
     )
 }
 
-export default sizeMe()(MWCurationControl)
+export default sizeMe()(MWCurationControl) as any

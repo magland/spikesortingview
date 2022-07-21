@@ -24,7 +24,7 @@ const UnitMetricHistogram: FunctionComponent<UnitMetricHistogramProps> = ({metri
         const colorsSelected = unitIdsSelected.map(u => (colorForUnitId(idToNum(u))))
         return createHistogramBars(values, valuesSelected, colorsSelected, numBins || 10)
     }, [units, metric, selectedUnitIds, numBins])
-    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedBarKeys: (string | number)[], {ctrlKey, shiftKey}) => {
+    const handleSelectRect = useCallback((r: {x: number, y: number, width: number, height: number}, selectedBarKeys: (string | number)[], {ctrlKey, shiftKey}: {ctrlKey: boolean, shiftKey: boolean}) => {
         if (selectedBarKeys.length === 0) return
         const selectedBars: BarPlotBar[] = []
         for (let i of selectedBarKeys) {

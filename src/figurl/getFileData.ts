@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import sendRequestToParent from "./sendRequestToParent"
-import { GetFileDataRequest, isGetFileDataResponse } from "./viewInterface/FigurlRequestTypes"
+import { GetFileDataRequest, GetFileDataUrlRequest, isGetFileDataResponse, isGetFileDataUrlResponse } from "./viewInterface/FigurlRequestTypes"
 
 const getFileData = async (uri: string, onProgress: (a: {loaded: number, total: number}) => void) => {
     const request: GetFileDataRequest = {
@@ -13,6 +13,16 @@ const getFileData = async (uri: string, onProgress: (a: {loaded: number, total: 
     const response = await sendRequestToParent(request)
     if (!isGetFileDataResponse(response)) throw Error('Invalid response to getFigureData')
     return response.fileData
+}
+
+export const getFileDataUrl = async (uri: string) => {
+    const request: GetFileDataUrlRequest = {
+        type: 'getFileDataUrl',
+        uri
+    }
+    const response = await sendRequestToParent(request)
+    if (!isGetFileDataUrlResponse(response)) throw Error('Invalid response to getFigureUrlData')
+    return response.fileDataUrl
 }
 
 const progressListeners: {[uri: string]: (a: {loaded: number, total: number}) => void} = {}

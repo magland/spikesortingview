@@ -19,6 +19,7 @@ import { isSortingCurationViewData, SortingCurationViewData } from 'views/Sortin
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
+import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/TiledImageComponent'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
 import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
 import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'views/UnitMetricsGraph/UnitMetricsGraphViewData'
@@ -50,7 +51,8 @@ export type ViewData =
     SortingCurationViewData |
     UnitLocationsViewData |
     MarkdownViewData |
-    UnitMetricsGraphViewData
+    UnitMetricsGraphViewData |
+    TiledImageData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -78,6 +80,7 @@ export const isViewData = (x: any): x is ViewData => {
         isSortingCurationViewData,
         isUnitLocationsViewData,
         isMarkdownViewData,
-        isUnitMetricsGraphViewData
+        isUnitMetricsGraphViewData,
+        isTiledImageData
     ])(x)
 }

@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from 'react';
+import React, { FunctionComponent, PropsWithChildren, useMemo } from 'react';
 
 type Props = {
     width: number
@@ -6,7 +6,7 @@ type Props = {
     disableScroll?: boolean
 }
 
-const VerticalScrollView: FunctionComponent<Props> = ({width, height, children, disableScroll}) => {
+const VerticalScrollView: FunctionComponent<PropsWithChildren<Props>> = ({width, height, children, disableScroll}) => {
     const divStyle: React.CSSProperties = useMemo(() => ({
         width: width - 20, // leave room for the scrollbar
         height,

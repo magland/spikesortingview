@@ -35,7 +35,7 @@ const CanvasFrame = <T extends {}>(props: CanvasFrameProps<T>) => {
             left: leftOffset ?? 0,
             top: topOffset ?? 0
         }}
-        {...(disableHandlers || (handlers && {...handlers}))}
+        {...(!disableHandlers ? (handlers && {...handlers}) : {})}
     >
         {canvases}
     </div>

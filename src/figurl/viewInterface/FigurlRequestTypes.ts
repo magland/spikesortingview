@@ -51,6 +51,32 @@ export const isGetFileDataResponse = (x: any): x is GetFileDataResponse => {
     })
 }
 
+// getFileDataUrl
+
+export type GetFileDataUrlRequest = {
+    type: 'getFileDataUrl'
+    uri: string
+}
+
+export const isGetFileDataUrlRequest = (x: any): x is GetFileDataUrlRequest => {
+    return validateObject(x, {
+        type: isEqualTo('getFileDataUrl'),
+        uri: optional(isString)
+    })
+}
+
+export type GetFileDataUrlResponse = {
+    type: 'getFileDataUrl'
+    fileDataUrl: string
+}
+
+export const isGetFileDataUrlResponse = (x: any): x is GetFileDataUrlResponse => {
+    return validateObject(x, {
+        type: isEqualTo('getFileDataUrl'),
+        fileDataUrl: isString
+    })
+}
+
 // getMutable
 
 export type GetMutableRequest = {
@@ -144,6 +170,7 @@ export const isSubscribeToFeedResponse = (x: any): x is SubscribeToFeedResponse 
 export type FigurlRequest =
     GetFigureDataRequest |
     GetFileDataRequest |
+    GetFileDataUrlRequest |
     GetMutableRequest |
     InitiateTaskRequest |
     SubscribeToFeedRequest
@@ -152,6 +179,7 @@ export const isFigurlRequest = (x: any): x is FigurlRequest => {
     return isOneOf([
         isGetFigureDataRequest,
         isGetFileDataRequest,
+        isGetFileDataUrlResponse,
         isGetMutableRequest,
         isInitiateTaskRequest,
         isSubscribeToFeedRequest
@@ -161,6 +189,7 @@ export const isFigurlRequest = (x: any): x is FigurlRequest => {
 export type FigurlResponse =
     GetFigureDataResponse |
     GetFileDataResponse |
+    GetFileDataUrlResponse |
     GetMutableResponse |
     InitiateTaskResponse |
     SubscribeToFeedResponse
@@ -169,6 +198,7 @@ export const isFigurlResponse = (x: any): x is FigurlResponse => {
     return isOneOf([
         isGetFigureDataResponse,
         isGetFileDataResponse,
+        isGetFileDataUrlResponse,
         isGetMutableResponse,
         isInitiateTaskResponse,
         isSubscribeToFeedResponse

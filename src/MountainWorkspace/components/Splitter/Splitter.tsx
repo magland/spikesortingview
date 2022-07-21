@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactElement, useEffect, useState } from 'react';
+import React, { FunctionComponent, PropsWithChildren, ReactElement, useEffect, useState } from 'react';
 import Draggable, { DraggableData, DraggableEvent } from 'react-draggable';
 
 interface Props {
@@ -18,7 +18,10 @@ const defaultGripThickness = 10
 const defaultGripInnerThickness = 4
 const defaultGripMargin = 2
 
-const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = React.forwardRef((props, ref) => {
+// see: https://github.com/react-grid-layout/react-draggable/issues/652
+const Draggable1: any = Draggable
+
+const Splitter: FunctionComponent<PropsWithChildren<Props> & {ref?: React.Ref<HTMLDivElement>}> = React.forwardRef((props, ref) => {
     const {width, height, initialPosition, onChange, adjustable=true, positionFromRight=false, direction='horizontal'} = props
 
     const size1 = direction === 'horizontal' ? width : height
@@ -140,7 +143,7 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
             </div>
             {
                 adjustable && (
-                    <Draggable
+                    <Draggable1
                         // nodeRef={draggableNodeRef} // this was actually causing an error with Draggable
                         key="drag"
                         position={{ x: direction === 'horizontal' ? gripPositionFromLeft - gripThickness / 2 - gripMargin : 0, y: direction === 'horizontal' ? 0 : gripPositionFromLeft - gripThickness / 2 - gripMargin }}
@@ -153,7 +156,7 @@ const Splitter: FunctionComponent<Props & {ref?: React.Ref<HTMLDivElement>}> = R
                                 <div style={{...styleGripInner, position: 'absolute'}} />
                             </div>
                         </div>
-                    </Draggable>
+                    </Draggable1>
                 )
             }
 
