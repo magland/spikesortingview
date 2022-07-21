@@ -43,9 +43,9 @@ function App() {
       <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
         <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
             <View
-            data={data}
-            width={width - 10}
-            height={height - 5}
+              data={data}
+              width={width - 10}
+              height={height - 5}
             />
         </UnitSelectionContext.Provider>
       </RecordingSelectionContext.Provider>

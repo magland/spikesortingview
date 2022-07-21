@@ -35,6 +35,9 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
         // curationSubfeed.appendOfflineMessages([a]) // this would need to be implemented
     }, [data.sortingCurationUri, userId, googleIdToken])
     const [canCurate, setCanCurate] = useState<boolean>(false)
+
+    const [sortingCuration2, sortingCurationDispatch2] = useReducer(sortingCurationReducer, {})
+
     useEffect(() => {
         setCanCurate(false)
         if (!data.sortingCurationUri) {
@@ -66,14 +69,17 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
         </UnitMetricSelectionContext.Provider>
     )
 
-    if (data.sortingCurationUri) {
-        return (
-            <SortingCurationContext.Provider value={{sortingCuration, sortingCurationDispatch: canCurate ? sortingCurationDispatch : undefined}}>
-                {content}
-            </SortingCurationContext.Provider>
-        )
-    }
-    else return content
+    return (
+        <SortingCurationContext.Provider value={
+            data.sortingCurationUri ? (
+                {sortingCuration, sortingCurationDispatch: canCurate ? sortingCurationDispatch : undefined}
+            ) : (
+                {sortingCuration: sortingCuration2, sortingCurationDispatch: sortingCurationDispatch2}
+            )
+        }>
+            {content}
+        </SortingCurationContext.Provider>
+    )
 }
 
 export default SortingLayoutView
