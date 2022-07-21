@@ -133,8 +133,14 @@ const useDrawingSpace = (width: number, drawHeight: number, xmax: number, xmin: 
     return { finalMargins, transform }
 }
 
+
 type TPAReducer = React.Reducer<AnimationState<PositionFrame>, AnimationStateAction<PositionFrame>>
 const initialState = makeDefaultState<PositionFrame>()
+
+const snapTimeToGrid = (time: number, timestampStart: number | undefined, timestamps: number[]) => {
+    const relativeTime = timestampStart ? time - timestampStart : time
+
+}
 
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
