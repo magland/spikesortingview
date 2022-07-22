@@ -11,6 +11,11 @@ export interface MarkdownProps {
 }
 
 const Markdown: FunctionComponent<MarkdownProps> = ({ source, substitute, linkTarget, renderers }) => {
+    // This is a hack because there is no npm:process-browserify for package.json
+    window.process = {
+        cwd: () => ('')
+    } as any
+    
     const source2 = substitute ? doSubstitute(source, substitute) : source
     return (
         <div className='markdown-body'>

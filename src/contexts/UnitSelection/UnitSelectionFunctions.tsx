@@ -103,11 +103,9 @@ export const toggleSelectedRange = (s: UnitSelection, a: UnitSelectionAction): U
 
 export const toggleSelectAll = (s: UnitSelection): UnitSelection => {
     const selectionStatus = allUnitSelectionState(s)
-    const newSelection = selectionStatus === 'all'
+    const newSelection = selectionStatus === 'all' || selectionStatus === 'partial'
                             ? new Set<number>()
-                            : s.visibleUnitIds && s.visibleUnitIds.length > 0
-                                ? new Set<number | string>(s.visibleUnitIds)
-                                : new Set<number | string>(s.orderedUnitIds)
+                            : new Set<number | string>(s.orderedUnitIds)
     return {
         ...s,
         selectedUnitIds: newSelection

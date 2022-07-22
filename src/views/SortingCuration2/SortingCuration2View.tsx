@@ -88,7 +88,7 @@ const getLabelCheckboxStates = (labelChoices: string[], sortingCuration: Sorting
     return ret
 }
 
-const getAllLabelChoices = (curation: SortingCuration | undefined) => {
+export const getAllLabelChoices = (curation: SortingCuration | undefined) => {
     const ret = [...standardLabelChoices]
     if (curation !== undefined) {
         for (let a of Object.values(curation.labelsByUnit || {})) {
@@ -100,7 +100,7 @@ const getAllLabelChoices = (curation: SortingCuration | undefined) => {
     return ret
 }
 
-const getAbbreviatedUnitIdsString = (unitIds: (string | number)[], maxLength: number) => {
+export const getAbbreviatedUnitIdsString = (unitIds: (string | number)[], maxLength: number) => {
     let ret: string = ''
     for (let id of unitIds) {
         if (ret.length > maxLength - 3) {

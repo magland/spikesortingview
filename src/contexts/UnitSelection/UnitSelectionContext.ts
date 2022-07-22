@@ -2,7 +2,7 @@ import React, { useContext, useMemo } from "react"
 import { getCheckboxClickHandlerGenerator, getPlotClickHandlerGenerator, selectUnique, selectUniqueFirst, selectUniqueLast, selectUniqueNext, selectUniquePrevious, setSelectionExplicit, toggleSelectAll, toggleSelectedRange, toggleSelectedUnit } from "./UnitSelectionFunctions"
 import { resetUnitOrder, updateSort } from "./UnitSelectionSortingFunctions"
 import { SortingCallback, SortingRule } from "./UnitSelectionTypes"
-import { setVisibleUnits } from "./UnitSelectionVisibilityFunctions"
+import { setRestrictedUnits, setVisibleUnits } from "./UnitSelectionVisibilityFunctions"
 
 export type UnitSelection = {
     selectedUnitIds: Set<number | string>,
@@ -11,6 +11,7 @@ export type UnitSelection = {
     page?: number
     unitsPerPage?: number
     visibleUnitIds?: (number | string)[]
+    restrictedUnitIds?: (number | string)[]
     sortRules?: SortingRule[]
 }
 
@@ -20,6 +21,7 @@ export type UnitSelectionAction = {
     targetUnit?: number | string
     newUnitOrder?: (number | string)[]
     newVisibleUnitIds?: (number | string)[]
+    newRestrictedUnitIds?: (number | string)[]
     pageNumber?: number
     unitsPerPage?: number
     newSortField?: string
@@ -33,7 +35,8 @@ export type UnitSelectionState = 'all' | 'none' | 'partial'
 export type UnitSelectionActionType = 'SET_SELECTION' | 'UNIQUE_SELECT' | 'UNIQUE_SELECT_NEXT' | 'UNIQUE_SELECT_PREVIOUS' | 'UNIQUE_SELECT_FIRST' | 'UNIQUE_SELECT_LAST' | 'TOGGLE_UNIT' | 'TOGGLE_RANGE' | 'TOGGLE_SELECT_ALL' | 'DESELECT_ALL' | 
                                      'INITIALIZE_UNITS' | 'SET_UNIT_ORDER' | 'UPDATE_SORT_FIELDS' |
                                      'SET_VISIBLE_UNITS' | // 'SET_WINDOW_SIZE' | 'SET_PAGE_NUMBER' |
-                                     'COPY_STATE'
+                                     'COPY_STATE' |
+                                     'SET_RESTRICTED_UNITS'
 
 export const SET_SELECTION: UnitSelectionActionType = 'SET_SELECTION'
 export const UNIQUE_SELECT: UnitSelectionActionType = 'UNIQUE_SELECT'
@@ -49,6 +52,7 @@ export const INITIALIZE_UNITS: UnitSelectionActionType = 'INITIALIZE_UNITS'
 export const SET_UNIT_ORDER: UnitSelectionActionType = 'SET_UNIT_ORDER'
 export const UPDATE_SORT_FIELDS: UnitSelectionActionType = 'UPDATE_SORT_FIELDS'
 export const SET_VISIBLE_UNITS: UnitSelectionActionType = 'SET_VISIBLE_UNITS'
+export const SET_RESTRICTED_UNITS: UnitSelectionActionType = 'SET_RESTRICTED_UNITS'
 
 // Not sure if this is the best approach...?
 export const COPY_STATE: UnitSelectionActionType = 'COPY_STATE'
@@ -106,6 +110,8 @@ export const unitSelectionReducer = (s: UnitSelection, a: UnitSelectionAction): 
         // case SET_PAGE_NUMBER:
         //     break;
         // This is kind of hacky but necessary to sync for useLocalSelectedUnitIds. There's probably a better way to do this.
+        case SET_RESTRICTED_UNITS:
+            return setRestrictedUnits(s, a)
         case COPY_STATE:
             if (!a.sourceState) throw Error('Attempt to copy state but no source state was provided.')
             return {
@@ -137,9 +143,14 @@ export const useSelectedUnitIds = () => {
     const checkboxClickHandlerGenerator = useMemo(() => getCheckboxClickHandlerGenerator(unitSelectionDispatch), [unitSelectionDispatch])
     const plotClickHandlerGenerator = useMemo(() => getPlotClickHandlerGenerator(unitSelectionDispatch), [unitSelectionDispatch])
 
+    const orderedUnitIds = useMemo(() => (
+        restrictUnitIds(unitSelection.orderedUnitIds, unitSelection.restrictedUnitIds)
+    ), [unitSelection.orderedUnitIds, unitSelection.restrictedUnitIds])
+
     return {
         selectedUnitIds: unitSelection.selectedUnitIds,
-        orderedUnitIds: unitSelection.orderedUnitIds,
+        orderedUnitIds,
+        allOrderedUnitIds: unitSelection.orderedUnitIds,
         visibleUnitIds: unitSelection.visibleUnitIds,
         primarySortRule: unitSelection.sortRules && unitSelection.sortRules.length > 0 ? unitSelection.sortRules[unitSelection.sortRules.length -1] : undefined,
         page: unitSelection.page,
@@ -149,6 +160,12 @@ export const useSelectedUnitIds = () => {
         unitIdSelectionDispatch: unitSelectionDispatch,
         currentState: unitSelection
     }
+}
+
+const restrictUnitIds = (unitIds: (string | number)[], restrictedUnitIds: (string | number)[] | undefined) => {
+    if (restrictedUnitIds === undefined) return unitIds
+    const restrictedSet = new Set(restrictedUnitIds)
+    return unitIds.filter(id => (restrictedSet.has(id)))
 }
 
 export default UnitSelectionContext

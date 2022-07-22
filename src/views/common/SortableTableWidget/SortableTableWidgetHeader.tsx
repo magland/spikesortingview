@@ -131,7 +131,7 @@ const SortableTableWidgetHeaderRow: FunctionComponent<HeaderRowProps> = (props) 
                         <TableCell key="_checkbox" width="30px">
                             <SortableTableWidgetCheckbox 
                                 rowId={'all'}
-                                selected={allUnitSelectionStatus === 'all'}
+                                selected={allUnitSelectionStatus === 'all' || allUnitSelectionStatus === 'partial'}
                                 onClick={toggleSelectAllCallback}
                                 isIndeterminate={allUnitSelectionStatus === 'partial'}
                                 isDisabled={selectionDisabled}

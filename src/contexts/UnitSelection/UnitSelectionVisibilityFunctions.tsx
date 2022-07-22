@@ -27,6 +27,16 @@ export const setVisibleUnits = (s: UnitSelection, a: UnitSelectionAction): UnitS
     }
 }
 
+export const setRestrictedUnits = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
+    return {
+        ...s,
+        restrictedUnitIds: a.newRestrictedUnitIds,
+        selectedUnitIds: a.newRestrictedUnitIds !== undefined && (s.selectedUnitIds !== undefined) ? (
+            new Set([...s.selectedUnitIds].filter(id => ((!a.newRestrictedUnitIds) || (a.newRestrictedUnitIds.includes(id)))))
+        ) : s.selectedUnitIds
+    }
+}
+
 export const getVisibleUnitsOnSortUpdate = (s: UnitSelection, newOrder: (number | string)[]) => {
     const windowStart = (s.unitsPerPage || DEFAULT_UnitS_PER_PAGE) * ((s.page || 1) - 1)
     return (s.visibleUnitIds && s.visibleUnitIds.length > 0)
