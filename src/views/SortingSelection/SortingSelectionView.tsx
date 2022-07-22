@@ -11,7 +11,7 @@ type Props = {
     height: number
 }
 
-const SortingSelectionView: FunctionComponent<Props> = () => {
+const SortingSelectionView: FunctionComponent<Props> = ({width, height}) => {
     const {sortingCuration} = useSortingCuration()
     const {selectedUnitIds: selectedUnitIdsSet, orderedUnitIds, allOrderedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
     const selectedUnitIds = useMemo(() => (
@@ -79,7 +79,7 @@ const SortingSelectionView: FunctionComponent<Props> = () => {
         })
     }, [unitIdSelectionDispatch])
     return (
-        <div>
+        <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
             <h3>Selection</h3>
             <div>
                 Selected units:&nbsp;{getAbbreviatedUnitIdsString(selectedUnitIds, 50)}

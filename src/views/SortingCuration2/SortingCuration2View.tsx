@@ -12,7 +12,7 @@ type Props = {
 
 const standardLabelChoices = ['accept', 'reject', 'noise', 'artifact', 'mua']
 
-const SortingCuration2View: FunctionComponent<Props> = () => {
+const SortingCuration2View: FunctionComponent<Props> = ({width, height}) => {
     const {sortingCuration, sortingCurationDispatch} = useSortingCuration()
     const {selectedUnitIds: selectedUnitIdsSet, orderedUnitIds} = useSelectedUnitIds()
     const selectedUnitIds = useMemo(() => (
@@ -43,7 +43,7 @@ const SortingCuration2View: FunctionComponent<Props> = () => {
         }
     }, [selectedUnitIds, sortingCurationDispatch])
     return (
-        <div>
+        <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
             <h3>Curation</h3>
             <div>
                 Selected units:&nbsp;{getAbbreviatedUnitIdsString(selectedUnitIds, 25)}
