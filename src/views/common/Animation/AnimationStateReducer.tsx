@@ -230,6 +230,11 @@ const setFrame = <T, >(s: AnimationState<T>, a: AnimationStateSetCurrentFrameAct
         console.warn(`Attempt to set playback index to negative value ${newIndex}. No-op.`)
         return s
     }
+    if (newIndex === s.currentFrameIndex) {
+        // attempt to set index to current frame index--no-op.
+        // Return the input state to avoid causing rerenders anywhere.
+        return s
+    }
     if (0 < newIndex && newIndex < 1) {
         const i = Math.floor(s.frameData.length * newIndex)
         s.currentFrameIndex = i
