@@ -1,3 +1,4 @@
+import { useTimeFocus } from 'contexts/RecordingSelectionContext'
 import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from 'FigurlCanvas/CanvasTransforms'
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
@@ -7,6 +8,7 @@ import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispa
 import TPADecodedPositionLayer, { ValidColorMap } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
+import useTimeLookupFn, { matchFocusToFrame, matchFrameToFocus } from './TPATimeSyncLogic'
 import TPATrackLayer from './TPATrackLayer'
 import { DecodedPositionData, DecodedPositionFrame, PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
 
@@ -137,17 +139,12 @@ const useDrawingSpace = (width: number, drawHeight: number, xmax: number, xmin: 
 type TPAReducer = React.Reducer<AnimationState<PositionFrame>, AnimationStateAction<PositionFrame>>
 const initialState = makeDefaultState<PositionFrame>()
 
-const snapTimeToGrid = (time: number, timestampStart: number | undefined, timestamps: number[]) => {
-    const relativeTime = timestampStart ? time - timestampStart : time
-
-}
 
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
     const { xmin, xmax, ymin, ymax, headDirection, samplingFrequencyHz } = data
     const realTimeReplayRateMs = samplingFrequencyHz !== undefined ? 1000 / samplingFrequencyHz : undefined
 
-    // Note: to expose timestamp to other components, may need to elevate to a full context
     const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
     useEffect(() => setupAnimationStateDispatchFn(animationStateDispatch), [animationStateDispatch])
     useEffect(() => setupReplayRate(realTimeReplayRateMs, animationStateDispatch), [realTimeReplayRateMs, animationStateDispatch])
@@ -169,6 +166,13 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             replaceExistingFrames: true
         })
     }, [dataFrames])
+
+    // TODO: Full support of dynamic updates to frame set will require looking at AnimationState.frameData instead of dataFrames!
+
+    const { focusTime, setTimeFocus } = useTimeFocus()  // state imported from recording context
+    const findNearestTime = useTimeLookupFn(animationState)
+    useEffect(() => matchFrameToFocus(focusTime, findNearestTime, animationState, animationStateDispatch), [focusTime])
+    useEffect(() => matchFocusToFrame(animationState, focusTime, setTimeFocus), [animationState.isPlaying])
 
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = dataFrames[animationState.currentFrameIndex].decodedPositionFrame
