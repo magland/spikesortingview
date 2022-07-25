@@ -1,6 +1,6 @@
-import UnitMetricSelectionContext, { unitMetricSelectionReducer } from 'contexts/UnitMetricSelectionContext';
 import SortingCurationAction from 'contexts/SortingCurationAction';
 import SortingCurationContext, { sortingCurationReducer } from 'contexts/SortingCurationContext';
+import UnitMetricSelectionContext, { unitMetricSelectionReducer } from 'contexts/UnitMetricSelectionContext';
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
 import getMutable from 'figurl/getMutable';
 import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
