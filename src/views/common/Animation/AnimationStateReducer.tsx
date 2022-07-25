@@ -137,7 +137,7 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
                 console.warn('Attempt to set ms-per-frame to 0.')
                 return s
             }
-            refreshAnimationCycle(s)
+            // refreshAnimationCycle(s)
             return { ...s, baseMsPerFrame: a.baseMsPerFrame, playbackStartedTimestamp: undefined }
         case SET_REPLAY_RATE:
             // Negative values are allowed and will just play it backwards.
@@ -145,13 +145,13 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
                 console.warn(`Attempt to set new replay rate to 0.`)
                 return s
             }
-            refreshAnimationCycle(s)
+            // refreshAnimationCycle(s)
             return { ...s, replayMultiplier: a.newRate, playbackStartedTimestamp: undefined }
         case SKIP:
             return doSkip(s, a)
         case TO_END:
             s.currentFrameIndex = a.backward ? 0 : s.frameData.length - 1
-            refreshAnimationCycle(s)
+            // refreshAnimationCycle(s)
             return {...s, playbackStartedTimestamp: undefined}
         default: {
             throw Error(`Invalid action type for animation state reducer: ${type}`)
@@ -159,14 +159,21 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
     }
 }
 
+// It's not actually clear that this ever did anything useful.
+// TODO: Deprecated. Remove this function (& references to it) after Sep 2022
+// if the widget's behavior remains normal.
 const refreshAnimationCycle = (s: AnimationState<any>) => {
-    if (s.pendingFrameCode === undefined || !s.isPlaying) return
+    if (s.pendingFrameCode === undefined) {
+        return
+    }
     window.cancelAnimationFrame(s.pendingFrameCode)
     if (s.animationDispatchFn === undefined) {
         console.warn('Animation callback unset.')
         return
     }
-    s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
+    if (s.isPlaying) {
+        s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
+    }
 }
 
 
@@ -186,6 +193,13 @@ const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): Animati
     if (s.animationDispatchFn === undefined) {
         console.warn('Attempt to animate, but no dispatch function set. No-op.')
         return s
+    }
+    if (!s.isPlaying) {
+        // Shouldn't happen, but these sometimes slip through on rapid interactions.
+        console.log(`Caught unexpected tick while theoretically paused.`)
+        s.pendingFrameCode && window.cancelAnimationFrame(s.pendingFrameCode)
+        s.pendingFrameCode = undefined
+        return {...s}
     }
     if (s.playbackStartedTimestamp) {
         const elapsedMs = a.now - s.playbackStartedTimestamp
@@ -243,7 +257,6 @@ const setFrame = <T, >(s: AnimationState<T>, a: AnimationStateSetCurrentFrameAct
     }
     if (s.playbackStartedTimestamp) {
         s.playbackStartedTimestamp = undefined
-        refreshAnimationCycle(s)
     }
     return {...s}
 }
@@ -259,7 +272,7 @@ const coarseStepSizePct = 0.03
  * - When `fineSteps` is set, *fine* skip is used. The step rate is:
  *    - if `AnimationStateSkipAction.frameByFrame` is true, then each step is one frame.
  *    - Otherwise, each step is 1/10 of a second of playback at the current speed (min 1 frame).
- *   The per-step skip rate is multiplied by the numer of fine steps requested (for debouncing mouse wheel controls).
+ *   The per-step skip rate is multiplied by the number of fine steps requested (for debouncing mouse wheel controls).
  * - If `fineSteps` is a 0 value, the function returns the input state (a no-op).
  * @param s Current animation state
  * @param a Skip action
@@ -284,7 +297,7 @@ const doSkip = <T, >(s: AnimationState<T>, a: AnimationStateSkipAction): Animati
         ? 0
         : newFrame > (s.frameData.length - 1)
             ? s.frameData.length : newFrame
-    refreshAnimationCycle(s)
+    // refreshAnimationCycle(s)
     return {...s, playbackStartedTimestamp: undefined}
 }
 

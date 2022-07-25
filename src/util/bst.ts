@@ -73,6 +73,10 @@ const _searchBinaryTree = <T,>(value: T, metricFn: MetricFn<T>, node?: BstNode<T
                 : nodeToValue(node, diff)
 }
 
+// TODO: This is all potentially unnecessary--if we don't support inserts, we don't need an actual tree; we could
+// just use a binary search pattern on a sorted array.
+// Do note though that we probably don't have O(1) random access to elements of a javascript array, so
+// that might be a reason to still do this.
 
 /**
  * Hook to create a reusable binary search tree for a fixed data set.
@@ -87,7 +91,6 @@ const _searchBinaryTree = <T,>(value: T, metricFn: MetricFn<T>, node?: BstNode<T
 // export const useBinarySearchTree = <T,>(items: T[], metricFn: (a: T, b: T) => number): BstNode<T> => {
 const useBinarySearchTree = <T,>(items: T[], metricFn: MetricFn<T>): BstSearchFn<T> => {
     return useMemo(() => {
-        console.log(`Building BST.`)
         const labeledItems = items.map((item, index) => { return { value: item, baseListIndex: index } })
         const sorted = labeledItems.every((item, index, array) => {
             return index === 0 || metricFn(item.value, array[index - 1].value) >= 0
