@@ -2,8 +2,8 @@ import { MuiThemeProvider } from '@material-ui/core';
 import RecordingSelectionContext, { defaultRecordingSelection, recordingSelectionReducer } from 'contexts/RecordingSelectionContext';
 import UnitSelectionContext, { defaultUnitSelection, unitSelectionReducer } from 'contexts/UnitSelection/UnitSelectionContext';
 import { getFigureData, useWindowDimensions } from 'figurl';
-import useUrlState from 'figurl/useUrlState';
-import React, { useEffect, useReducer, useState } from 'react';
+import SetupUrlState from 'figurl/SetupUrlState';
+import { useEffect, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';
 import View from './View';
@@ -16,16 +16,6 @@ function App() {
 
   const [unitSelection, unitSelectionDispatch] = useReducer(unitSelectionReducer, defaultUnitSelection)
   const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
-
-  const {initialUrlState} = useUrlState()
-  useEffect(() => {
-    if (initialUrlState.selectedUnitIds) {
-      unitSelectionDispatch({type: 'SET_SELECTION', incomingSelectedUnitIds: initialUrlState.selectedUnitIds})
-    }
-    if (initialUrlState.visibleUnitIds) {
-      unitSelectionDispatch({type: 'SET_RESTRICTED_UNITS', newRestrictedUnitIds: initialUrlState.visibleUnitIds})
-    }
-  }, [initialUrlState])
 
   useEffect(() => {
     getFigureData().then((data: any) => {
@@ -53,11 +43,13 @@ function App() {
     <MuiThemeProvider theme={theme}>
       <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
         <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
+          <SetupUrlState>
             <View
               data={data}
               width={width - 10}
               height={height - 5}
             />
+          </SetupUrlState>
         </UnitSelectionContext.Provider>
       </RecordingSelectionContext.Provider>
     </MuiThemeProvider>

@@ -1,8 +1,11 @@
 import SortingCurationAction from 'contexts/SortingCurationAction';
 import SortingCurationContext, { sortingCurationReducer } from 'contexts/SortingCurationContext';
 import UnitMetricSelectionContext, { unitMetricSelectionReducer } from 'contexts/UnitMetricSelectionContext';
+import { useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
+import getFileData from 'figurl/getFileData';
 import getMutable from 'figurl/getMutable';
+import { useUrlState } from 'figurl/UrlStateContext';
 import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
@@ -18,6 +21,7 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
 
     const {state: sortingCuration} = useFeedReducer({feedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
     const {userId, googleIdToken} = useSignedIn()
+    const {unitIdSelectionDispatch} = useSelectedUnitIds()
     const sortingCurationDispatch = useCallback((a: SortingCurationAction) => {
         if (!data.sortingCurationUri) return
         initiateTask({
@@ -37,6 +41,28 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
     const [canCurate, setCanCurate] = useState<boolean>(false)
 
     const [sortingCuration2, sortingCurationDispatch2] = useReducer(sortingCurationReducer, {})
+
+    const {initialUrlState} = useUrlState()
+    useEffect(() => {
+        if (initialUrlState.curation) {
+            ;(async () => {
+              const curation = await getFileData(initialUrlState.curation, () => {})
+              sortingCurationDispatch2({
+                type: 'SET_CURATION',
+                curation
+              })
+            })()
+        }
+    }, [initialUrlState])
+
+    useEffect(() => {
+        if (initialUrlState.selectedUnitIds) {
+          unitIdSelectionDispatch({type: 'SET_SELECTION', incomingSelectedUnitIds: initialUrlState.selectedUnitIds})
+        }
+        if (initialUrlState.visibleUnitIds) {
+          unitIdSelectionDispatch({type: 'SET_RESTRICTED_UNITS', newRestrictedUnitIds: initialUrlState.visibleUnitIds})
+        }
+      }, [initialUrlState, unitIdSelectionDispatch])
 
     useEffect(() => {
         setCanCurate(false)
