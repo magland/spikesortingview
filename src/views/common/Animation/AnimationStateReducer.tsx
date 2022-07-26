@@ -162,19 +162,21 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
 // It's not actually clear that this ever did anything useful.
 // TODO: Deprecated. Remove this function (& references to it) after Sep 2022
 // if the widget's behavior remains normal.
-const refreshAnimationCycle = (s: AnimationState<any>) => {
-    if (s.pendingFrameCode === undefined) {
-        return
-    }
-    window.cancelAnimationFrame(s.pendingFrameCode)
-    if (s.animationDispatchFn === undefined) {
-        console.warn('Animation callback unset.')
-        return
-    }
-    if (s.isPlaying) {
-        s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
-    }
-}
+// jfm says: All references to this function have been commented out,
+// so I'm commenting out this function so it doesn't create a linter warning
+// const refreshAnimationCycle = (s: AnimationState<any>) => {
+//     if (s.pendingFrameCode === undefined) {
+//         return
+//     }
+//     window.cancelAnimationFrame(s.pendingFrameCode)
+//     if (s.animationDispatchFn === undefined) {
+//         console.warn('Animation callback unset.')
+//         return
+//     }
+//     if (s.isPlaying) {
+//         s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
+//     }
+// }
 
 
 const updateFrames = <T, >(s: AnimationState<T>, a: AnimationStateUpdateFrameDataAction<T>): AnimationState<T> => {

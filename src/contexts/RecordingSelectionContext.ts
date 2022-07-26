@@ -117,10 +117,11 @@ export const useTimeFocus = () => {
         const time = window * fraction
         return time + (recordingSelection.visibleTimeStartSeconds || 0)
     }), [recordingSelection.visibleTimeStartSeconds, recordingSelection.visibleTimeEndSeconds])
-    const setTimeFocus = useCallback((time: number) => {
+    const setTimeFocus = useCallback((time: number, o: {autoScrollVisibleTimeRange?: boolean}={}) => {
         recordingSelectionDispatch({
             type: 'setFocusTime',
-            focusTimeSec: time
+            focusTimeSec: time,
+            autoScrollVisibleTimeRange: o.autoScrollVisibleTimeRange
         })
     }, [recordingSelectionDispatch])
     const setTimeFocusFraction = useCallback((fraction: number) => {
@@ -185,7 +186,8 @@ type ZoomRecordingSelectionAction = {
 
 type SetFocusTimeRecordingSelectionAction = {
     type: 'setFocusTime',
-    focusTimeSec: number
+    focusTimeSec: number,
+    autoScrollVisibleTimeRange?: boolean
 }
 
 type SetSelectedElectrodeIdsRecordingSelectionAction = {
@@ -323,7 +325,22 @@ const zoomTime = (state: RecordingSelection, action: ZoomRecordingSelectionActio
 }
 
 const setFocusTime = (state: RecordingSelection, action: SetFocusTimeRecordingSelectionAction): RecordingSelection => {
-    const newState = { ...state, focusTimeSeconds: action.focusTimeSec }
+    const {focusTimeSec, autoScrollVisibleTimeRange} = action
+    const newState = { ...state, focusTimeSeconds: focusTimeSec }
+    if (autoScrollVisibleTimeRange) {
+        if ((state.visibleTimeStartSeconds !== undefined) && (state.visibleTimeEndSeconds !== undefined)) {
+            if ((focusTimeSec < state.visibleTimeStartSeconds) || (focusTimeSec > state.visibleTimeEndSeconds)) {
+                const span = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
+                newState.visibleTimeStartSeconds = focusTimeSec - span / 2
+                newState.visibleTimeEndSeconds = focusTimeSec + span / 2
+                if (newState.visibleTimeStartSeconds < (state.recordingStartTimeSeconds || 0)) {
+                    const delta = (state.recordingStartTimeSeconds || 0) - newState.visibleTimeStartSeconds
+                    newState.visibleTimeStartSeconds += delta
+                    newState.visibleTimeEndSeconds += delta
+                }
+            }
+        }
+    }
     return selectionIsValid(newState) ? newState : state
 }
 
