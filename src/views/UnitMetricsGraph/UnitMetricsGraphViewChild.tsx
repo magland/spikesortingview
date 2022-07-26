@@ -122,7 +122,7 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
         else {
             const bottomLabelHeight = 30
             const leftLabelWidth = 30
-            const {plotWidth, plotHeight} = determinePlotSizeForSquareMatrixGrid(width - TOOLBAR_WIDTH - leftLabelWidth, height - bottomLabelHeight, selectedUnitMetrics.length)
+            const {plotWidth, plotHeight} = determinePlotSizeForSquareMatrixGrid(width - TOOLBAR_WIDTH - leftLabelWidth - 10, height - bottomLabelHeight - 10, selectedUnitMetrics.length)
             const ret: PGPlot[] = []
             for (let m1 of selectedUnitMetrics) {
                 const metric1: UMGMetric | undefined = metrics.filter(x => (x.key === m1))[0]
