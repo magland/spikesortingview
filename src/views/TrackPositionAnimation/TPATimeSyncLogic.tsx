@@ -14,24 +14,23 @@ const timeComparison = (a: number, b: number) => a - b
 
 type TimeLookupFn = (time: number) => BstSearchResult<number> | undefined
 
-export const matchFocusToFrame = (animationState: AnimationState<PositionFrame>, focusTime: number | undefined, setTimeFocus: (time: number) => void) => {
-    const epsilon = 0.05
-    const currentTime = animationState?.frameData[animationState?.currentFrameIndex]?.timestamp
-    if (!currentTime || !focusTime) return
-    if (Math.abs(focusTime - currentTime) < epsilon) return
-    setTimeFocus(currentTime)
+export const matchFocusToFrame = (animationCurrentTime: number | undefined, setTimeFocus: (time: number, o: {autoScrollVisibleTimeRange?: boolean}) => void) => {
+    // const epsilon = 0.05
+    const currentTime = animationCurrentTime
+    if (currentTime === undefined) return
+    // don't let this function depend on focusTime
+    // if (Math.abs(focusTime - currentTime) < epsilon) return
+    setTimeFocus(currentTime, {autoScrollVisibleTimeRange: true})
 }
 
-export const matchFrameToFocus = (focusTime: number | undefined, findNearestTime: TimeLookupFn, animationState: AnimationState<PositionFrame>, animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>) => {
-    const focusIndex = focusTime
-        ? findNearestTime(focusTime)?.baseListIndex ?? animationState.currentFrameIndex
-        : animationState?.currentFrameIndex
-    if (focusIndex !== animationState.currentFrameIndex) {
-        animationStateDispatch({
-            type: 'SET_CURRENT_FRAME',
-            newIndex: focusIndex
-        })
-    }
+export const matchFrameToFocus = (focusTime: number | undefined, findNearestTime: TimeLookupFn, animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>) => {
+    if (focusTime === undefined) return
+    const focusIndex = findNearestTime(focusTime)?.baseListIndex
+    if (focusIndex === undefined) return
+    animationStateDispatch({
+        type: 'SET_CURRENT_FRAME',
+        newIndex: focusIndex
+    })
 }
 
 const useTimeLookupFn = (animationState: AnimationState<PositionFrame>) => {
