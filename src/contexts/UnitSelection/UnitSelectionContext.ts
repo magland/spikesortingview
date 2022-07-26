@@ -73,7 +73,8 @@ export const unitSelectionReducer = (s: UnitSelection, a: UnitSelectionAction): 
             if (s.orderedUnitIds.length > 0) return s
             if (a.newUnitOrder && a.newUnitOrder.length > 1) {
                 return {
-                    selectedUnitIds: new Set<number | string>(),
+                    ...s,
+                    // selectedUnitIds: new Set<number | string>(), // don't initialze here, to support case of selection initialized via state
                     orderedUnitIds: a.newUnitOrder
                 }
             }
@@ -158,7 +159,8 @@ export const useSelectedUnitIds = () => {
         checkboxClickHandlerGenerator,
         plotClickHandlerGenerator,
         unitIdSelectionDispatch: unitSelectionDispatch,
-        currentState: unitSelection
+        currentState: unitSelection,
+        restrictedUnitIds: unitSelection.restrictedUnitIds
     }
 }
 

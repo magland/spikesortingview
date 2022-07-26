@@ -51,9 +51,10 @@ export const selectUniqueLast = (s: UnitSelection, a: UnitSelectionAction): Unit
 }
 
 export const setSelectionExplicit = (s: UnitSelection, a: UnitSelectionAction): UnitSelection => {
-    if ((a.incomingSelectedUnitIds || []).some(unitId => !s.orderedUnitIds.includes(unitId))) {
-        throw Error(`Attempt to set a selection including units that are not in known data.`)
-    }
+    // don't do this check, in order to support case of initialization via url state
+    // if ((a.incomingSelectedUnitIds || []).some(unitId => !s.orderedUnitIds.includes(unitId))) {
+    //     throw Error(`Attempt to set a selection including units that are not in known data.`)
+    // }
     return {
         ...s,
         selectedUnitIds: new Set((a.incomingSelectedUnitIds ?? []))

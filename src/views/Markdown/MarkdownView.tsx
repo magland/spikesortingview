@@ -22,7 +22,7 @@ type Props = {
 const MarkdownView: FunctionComponent<Props> = ({data, width, height}) => {
     const {source} = data
     return (
-        <div style={{margin: 30}}>
+        <div style={{margin: 12, width: width - 24, height: height - 24, overflowY: 'auto'}}>
             <Markdown
                 source={source}
                 linkTarget={'_blank'}

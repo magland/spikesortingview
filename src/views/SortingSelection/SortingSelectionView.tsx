@@ -1,6 +1,7 @@
 import { Button, Checkbox } from "@material-ui/core";
 import { SortingCuration, useSortingCuration } from "contexts/SortingCurationContext";
 import { useSelectedUnitIds } from "contexts/UnitSelection/UnitSelectionContext";
+import useUrlState from "figurl/useUrlState";
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { getAbbreviatedUnitIdsString, getAllLabelChoices } from "views/SortingCuration2/SortingCuration2View";
 import { SortingSelectionViewData } from "./SortingSelectionViewData";
@@ -13,7 +14,7 @@ type Props = {
 
 const SortingSelectionView: FunctionComponent<Props> = ({width, height}) => {
     const {sortingCuration} = useSortingCuration()
-    const {selectedUnitIds: selectedUnitIdsSet, orderedUnitIds, allOrderedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const {selectedUnitIds: selectedUnitIdsSet, orderedUnitIds, allOrderedUnitIds, unitIdSelectionDispatch, restrictedUnitIds} = useSelectedUnitIds()
     const selectedUnitIds = useMemo(() => (
         orderedUnitIds.filter(x => (selectedUnitIdsSet && selectedUnitIdsSet.has(x))
     )), [selectedUnitIdsSet, orderedUnitIds])
@@ -78,6 +79,13 @@ const SortingSelectionView: FunctionComponent<Props> = ({width, height}) => {
             newRestrictedUnitIds: undefined
         })
     }, [unitIdSelectionDispatch])
+    const {updateUrlState} = useUrlState()
+    const handleSaveSelection = useCallback(() => {
+        updateUrlState({
+            selectedUnitIds,
+            visibleUnitIds: restrictedUnitIds
+        })
+    }, [selectedUnitIds, updateUrlState, restrictedUnitIds])
     return (
         <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
             <h3>Selection</h3>
@@ -88,7 +96,7 @@ const SortingSelectionView: FunctionComponent<Props> = ({width, height}) => {
             <div>
                 {
                     [false, true].map(useNot => (
-                        <div>
+                        <div key={useNot ? 'true' : 'false'}>
                             {
                                 labelChoices.map(label => (useNot ? 'not:' + label : label)).map(label => (
                                     <span key={label}>
@@ -132,6 +140,10 @@ const SortingSelectionView: FunctionComponent<Props> = ({width, height}) => {
                 }
                 <Button onClick={handleRestrictToSelectedUnits}>Restrict to selected units</Button>
                 <Button onClick={handleClearUnitRestriction}>Clear unit restriction</Button>
+            </div>
+            <hr />
+            <div>
+                <Button onClick={handleSaveSelection}>Save selection</Button>
             </div>
         </div>
     )

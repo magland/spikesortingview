@@ -2,6 +2,7 @@ import { MuiThemeProvider } from '@material-ui/core';
 import RecordingSelectionContext, { defaultRecordingSelection, recordingSelectionReducer } from 'contexts/RecordingSelectionContext';
 import UnitSelectionContext, { defaultUnitSelection, unitSelectionReducer } from 'contexts/UnitSelection/UnitSelectionContext';
 import { getFigureData, useWindowDimensions } from 'figurl';
+import useUrlState from 'figurl/useUrlState';
 import React, { useEffect, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';
@@ -15,6 +16,17 @@ function App() {
 
   const [unitSelection, unitSelectionDispatch] = useReducer(unitSelectionReducer, defaultUnitSelection)
   const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
+
+  const {urlState} = useUrlState()
+  useEffect(() => {
+    if (urlState.selectedUnitIds) {
+      unitSelectionDispatch({type: 'SET_SELECTION', incomingSelectedUnitIds: urlState.selectedUnitIds})
+    }
+    if (urlState.visibleUnitIds) {
+      unitSelectionDispatch({type: 'SET_RESTRICTED_UNITS', newRestrictedUnitIds: urlState.visibleUnitIds})
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // intentionally exclude urlState from dependencies so we only do this on initial load
 
   useEffect(() => {
     getFigureData().then((data: any) => {
