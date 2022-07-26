@@ -38,7 +38,7 @@ const useUrlState = () => {
     }, [urlState])
 
 
-    return {urlState, setUrlState, updateUrlState}
+    return {urlState, setUrlState, updateUrlState, initialUrlState}
 }
 
 export default useUrlState
