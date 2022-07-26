@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import AnimationStateControlButtons from './AnimationStateControlButtons'
 import AnimationStatePlaybackBarLayer from './AnimationStatePlaybackBarLayer'
 import { AnimationStateDispatcher } from './AnimationStateReducer'
@@ -9,6 +9,7 @@ export type AnimationPlaybackControlsProps<T> = {
     verticalOffset: number
     dispatch: AnimationStateDispatcher<T>
     totalFrameCount: number
+    visibleWindow: [number, number]
     currentFrameIndex: number
     isPlaying: boolean
     playbackRate: number
@@ -20,7 +21,7 @@ export type AnimationPlaybackControlsProps<T> = {
 const buttonWidthPx = 280
 
 const AnimationPlaybackControls = <T, >(props: AnimationPlaybackControlsProps<T>) => {
-    const { width, height, verticalOffset, dispatch, isPlaying, totalFrameCount, currentFrameIndex, playbackRate, usingRateButtons, customPlaybackRates } = props
+    const { width, height, verticalOffset, dispatch, isPlaying, totalFrameCount, visibleWindow, currentFrameIndex, playbackRate, usingRateButtons, customPlaybackRates } = props
     const ctrlPanelDiv = useMemo(() => {
         return (<AnimationStateControlButtons
             height={height}
@@ -39,11 +40,11 @@ const AnimationPlaybackControls = <T, >(props: AnimationPlaybackControlsProps<T>
             height={height}
             buttonPanelOffset={buttonWidthPx}
             dispatch={dispatch}
-            totalFrameCount={totalFrameCount}
+            visibleWindow={visibleWindow}
             currentFrameIndex={currentFrameIndex}
             isPlaying={isPlaying}
         />)
-    }, [currentFrameIndex, dispatch, height, isPlaying, totalFrameCount, width])
+    }, [currentFrameIndex, dispatch, height, isPlaying, visibleWindow, width])
 
     return (
         <div

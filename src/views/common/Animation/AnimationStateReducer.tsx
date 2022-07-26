@@ -6,6 +6,7 @@ export type DrawFn<T> = (frame_data: T) => void
 
 export type AnimationState<T> = {
     frameData: T[],
+    frameWindow: [number, number],
     replayMultiplier: number,
     isPlaying: boolean,
     currentFrameIndex: number,
@@ -18,11 +19,12 @@ export type AnimationState<T> = {
 
 export type AnimationStateDispatcher<T> = React.Dispatch<AnimationStateAction<T>>
 
-export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'TICK' | 'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SET_BASE_MS_PER_FRAME' | 'SET_REPLAY_RATE' | 'SKIP' | 'TO_END'
+export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'SET_FRAME_WINDOW' | 'TICK' | 'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SET_BASE_MS_PER_FRAME' | 'SET_REPLAY_RATE' | 'SKIP' | 'TO_END'
 
 export type AnimationStateAction<T> =
     AnimationStateSetDispatchAction |
     AnimationStateUpdateFrameDataAction<T> |
+    AnimationStateSetFrameWindowAction |
     AnimationStateTickAction |
     AnimationStateTogglePlaybackAction |
     AnimationStateSetCurrentFrameAction |
@@ -40,6 +42,11 @@ export type AnimationStateUpdateFrameDataAction<T> = {
     type: 'UPDATE_FRAME_DATA'
     incomingFrames: T[]
     replaceExistingFrames?: boolean
+}
+
+export type AnimationStateSetFrameWindowAction = {
+    type: 'SET_FRAME_WINDOW'
+    bounds?: [number, number]
 }
 
 export type AnimationStateTickAction = {
@@ -80,6 +87,7 @@ export type AnimationStateToEndAction = {
 
 export const SET_DISPATCH: AnimationStateActionType = 'SET_DISPATCH'
 export const UPDATE_FRAME_DATA: AnimationStateActionType = 'UPDATE_FRAME_DATA'
+export const SET_FRAME_WINDOW: AnimationStateActionType = 'SET_FRAME_WINDOW'
 export const TICK: AnimationStateActionType = 'TICK'
 export const TOGGLE_PLAYBACK: AnimationStateActionType = 'TOGGLE_PLAYBACK'
 export const SET_CURRENT_FRAME: AnimationStateActionType = 'SET_CURRENT_FRAME'
@@ -92,6 +100,7 @@ export const TO_END: AnimationStateActionType = 'TO_END'
 export const makeDefaultState = <T, >(): AnimationState<T> => {
     return {
         frameData: [],
+        frameWindow: [0, 0],
         replayMultiplier: 1,
         isPlaying: false,
         currentFrameIndex: 0,
@@ -126,6 +135,8 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
             return {...s, animationDispatchFn: a.animationDispatchFn}
         case UPDATE_FRAME_DATA:
             return updateFrames(s, a)
+        case SET_FRAME_WINDOW:
+            return setWindow(s, a)
         case TICK:
             return doTick(s, a)
         case TOGGLE_PLAYBACK:
@@ -150,7 +161,7 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
         case SKIP:
             return doSkip(s, a)
         case TO_END:
-            s.currentFrameIndex = a.backward ? 0 : s.frameData.length - 1
+            s.currentFrameIndex = a.backward ? s.frameWindow[0] : s.frameWindow[1]
             // refreshAnimationCycle(s)
             return {...s, playbackStartedTimestamp: undefined}
         default: {
@@ -187,7 +198,21 @@ const updateFrames = <T, >(s: AnimationState<T>, a: AnimationStateUpdateFrameDat
         // but the reference is pretty old, so we should consider profiling this
         a.incomingFrames.forEach(frame => s.frameData.push(frame))
     }
-    return {...s}
+    return setWindow(s, { type: SET_FRAME_WINDOW })
+}
+
+
+const setWindow = <T, >(s: AnimationState<T>, a: AnimationStateSetFrameWindowAction): AnimationState<T> => {
+    const { bounds } = a
+    const visibleWindow: [number, number] = bounds === undefined
+        ? [0, s.frameData.length - 1]
+        : [Math.max(Math.min(...bounds), 0), Math.min(Math.max(...bounds), s.frameData.length - 1)]
+
+    // Don't update if no change
+    if (visibleWindow[0] === s.frameWindow[0] && visibleWindow[1] === s.frameWindow[1]) return s
+    s.currentFrameIndex = Math.min(visibleWindow[1], Math.max(s.currentFrameIndex, visibleWindow[0]))
+    s.playbackStartedTimestamp = undefined
+    return { ...s, frameWindow: visibleWindow }
 }
 
 
@@ -211,13 +236,13 @@ const doTick = <T, >(s: AnimationState<T>, a: AnimationStateTickAction): Animati
         }
         const rawElapsedFrames = elapsedMs/s.baseMsPerFrame * s.replayMultiplier
         const elapsedFrames = s.replayMultiplier > 0 ? Math.floor(rawElapsedFrames) : Math.ceil(rawElapsedFrames)
-        s.currentFrameIndex = Math.max(0, Math.min((s.frameData.length - 1), s.playbackStartedFrameIndex + elapsedFrames))
+        s.currentFrameIndex = Math.max(s.frameWindow[0], Math.min((s.frameWindow[1]), s.playbackStartedFrameIndex + elapsedFrames))
     } else {
         s.playbackStartedTimestamp = a.now
         s.playbackStartedFrameIndex = s.currentFrameIndex
     }
 
-    if (((s.currentFrameIndex === s.frameData.length - 1) && s.replayMultiplier > 0) || ((s.currentFrameIndex === 0) && s.replayMultiplier < 0)) {
+    if (((s.currentFrameIndex === s.frameWindow[1]) && s.replayMultiplier > 0) || ((s.currentFrameIndex === s.frameWindow[0]) && s.replayMultiplier < 0)) {
         return togglePlayState(s)
     }
     return {...s, pendingFrameCode: window.requestAnimationFrame(s.animationDispatchFn)}
@@ -246,16 +271,20 @@ const setFrame = <T, >(s: AnimationState<T>, a: AnimationStateSetCurrentFrameAct
         console.warn(`Attempt to set playback index to negative value ${newIndex}. No-op.`)
         return s
     }
+    if (newIndex < s.frameWindow[0] || newIndex > s.frameWindow[1]) {
+        console.log(`Note: attempt to set current frame outside window (to ${newIndex} vs (${s.frameWindow[0]}, ${s.frameWindow[1]})). No-op for now.`)
+        return s
+    }
     if (newIndex === s.currentFrameIndex) {
         // attempt to set index to current frame index--no-op.
         // Return the input state to avoid causing rerenders anywhere.
         return s
     }
     if (0 < newIndex && newIndex < 1) {
-        const i = Math.floor(s.frameData.length * newIndex)
+        const i = Math.floor((s.frameWindow[1] - s.frameWindow[0]) * newIndex)
         s.currentFrameIndex = i
     } else {
-        s.currentFrameIndex = Math.min(newIndex, s.frameData.length - 1)
+        s.currentFrameIndex = Math.min(newIndex, s.frameWindow[1])
     }
     if (s.playbackStartedTimestamp) {
         s.playbackStartedTimestamp = undefined
@@ -282,7 +311,12 @@ const coarseStepSizePct = 0.03
  */
 const doSkip = <T, >(s: AnimationState<T>, a: AnimationStateSkipAction): AnimationState<T> => {
     const { backward, fineSteps, frameByFrame } = a
+    const windowLength = s.frameWindow[1] - s.frameWindow[0]
 
+    if (windowLength === 0) {
+        // Attempting to navigate in a 0-width frame. no-op.
+        return s
+    }
     if (fineSteps !== undefined && fineSteps === 0) {
         // No steps requested. No-op: return identity.
         return s
@@ -291,14 +325,14 @@ const doSkip = <T, >(s: AnimationState<T>, a: AnimationStateSkipAction): Animati
         ? fineSteps * (frameByFrame
                         ? minStepSize
                         : (Math.max((Math.round(s.replayMultiplier * msPerFineSkip/s.baseMsPerFrame)), minStepSize)))
-        : (Math.floor(s.frameData.length * coarseStepSizePct))
+        : (Math.floor(windowLength * coarseStepSizePct))
 
     const newFrame = s.currentFrameIndex + (frameSkipCount * (backward ? -1 : 1))
 
-    s.currentFrameIndex = newFrame < 0
-        ? 0
-        : newFrame > (s.frameData.length - 1)
-            ? s.frameData.length : newFrame
+    s.currentFrameIndex = newFrame < s.frameWindow[0]
+        ? s.frameWindow[0]
+        : newFrame > s.frameWindow[1]
+            ? s.frameWindow[1] : newFrame
     // refreshAnimationCycle(s)
     return {...s, playbackStartedTimestamp: undefined}
 }

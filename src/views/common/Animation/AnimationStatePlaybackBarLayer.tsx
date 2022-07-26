@@ -7,7 +7,7 @@ export type AnimationStatePlaybackBarLayerProps<T> = {
     width: number
     height: number
     dispatch: AnimationStateDispatcher<T>
-    totalFrameCount: number
+    visibleWindow: [number, number]
     currentFrameIndex: number
     isPlaying: boolean
     buttonPanelOffset: number
@@ -77,18 +77,20 @@ const useDebouncedWheelHandler = (dispatch: AnimationStateDispatcher<any>, isPla
 // However, the parser can figure out that this is a FunctionComponent, so we just let it infer that
 // and annotate the type of the underlying frame set.
 const AnimationStatePlaybackBarLayer = <T, >(props: AnimationStatePlaybackBarLayerProps<T>) => {
-    const { width, height, dispatch, isPlaying, totalFrameCount, currentFrameIndex, buttonPanelOffset } = props
+    const { width, height, dispatch, isPlaying, visibleWindow, currentFrameIndex, buttonPanelOffset } = props
+    const totalFrameCount = visibleWindow[1] - visibleWindow[0]
+    const currentFrameIndexRelative = currentFrameIndex - visibleWindow[0]
     const barAreaVCenter = useMemo(() => height / 2, [height])
     const drawData = useMemo(() => {
         const barWidth = width - buttonPanelOffset - (leftMargin * 2)
-        const seenX = Math.floor(barWidth * currentFrameIndex / totalFrameCount)
+        const seenX = Math.floor(barWidth * currentFrameIndexRelative / totalFrameCount)
         return { seenX, isPlaying, barWidth }
-    }, [width, buttonPanelOffset, currentFrameIndex, totalFrameCount, isPlaying])
+    }, [width, buttonPanelOffset, currentFrameIndexRelative, totalFrameCount, isPlaying])
 
     const getNewFrame = useCallback((x: number, y:  number) => {
         if (barAreaVCenter - scrubberRadius < y && y < barAreaVCenter + scrubberRadius) {
             const newPct = x/drawData.barWidth
-            return Math.floor(newPct * totalFrameCount)
+            return Math.floor(newPct * totalFrameCount) + visibleWindow[0]
         }
         return undefined
     }, [barAreaVCenter, drawData.barWidth, totalFrameCount])

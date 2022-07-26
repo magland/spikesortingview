@@ -1,4 +1,4 @@
-import { useTimeFocus } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeFocus, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from 'FigurlCanvas/CanvasTransforms'
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
@@ -158,6 +158,7 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     }, [data.decodedData])
     const dataFrames = useFrames(data.positions, decodedData, transform, headDirection, data.timestampStart, data.timestamps)
     const decodedLocationsMap = useProbabilityLocationsMap(transform, decodedData)
+    useRecordingSelectionTimeInitialization(data.timestamps[0] + (data.timestampStart ?? 0), data.timestamps[data.timestamps.length - 1] + (data.timestampStart ?? 0))
 
     useEffect(() => {
         animationStateDispatch({
@@ -180,9 +181,17 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
         if (animationState.isPlaying) return
         matchFocusToFrame(animationCurrentTime, setTimeFocus)
     }, [animationCurrentTime, setTimeFocus, animationState.isPlaying])
+    useEffect(() => { console.log(`Current window: ${animationState.frameWindow[0]} - ${animationState.frameWindow[1]}`) }, [animationState.frameWindow])
+    const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
+    useEffect(() => {
+        const windowBounds: [number, number] | undefined = (!visibleTimeStartSeconds || !visibleTimeEndSeconds)
+            ? undefined
+            : [(findNearestTime(visibleTimeStartSeconds)?.baseListIndex) as number, (findNearestTime(visibleTimeEndSeconds)?.baseListIndex) as number]
+        animationStateDispatch({ type: 'SET_FRAME_WINDOW', bounds: windowBounds })
+    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, animationStateDispatch, findNearestTime])
 
     const currentProbabilityFrame = useMemo(() => {
-        const linearFrame = dataFrames[animationState.currentFrameIndex].decodedPositionFrame
+        const linearFrame = dataFrames[animationState.currentFrameIndex]?.decodedPositionFrame
         const finalFrame = getDecodedPositionFramePx(linearFrame, decodedLocationsMap)
         return {
             frame: finalFrame,
@@ -221,10 +230,11 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             verticalOffset={drawHeight}
             dispatch={animationStateDispatch}
             totalFrameCount={animationState.frameData.length}
+            visibleWindow={animationState.frameWindow}
             currentFrameIndex={animationState.currentFrameIndex}
             isPlaying={animationState.isPlaying}
             playbackRate={animationState.replayMultiplier}
-        />, [width, drawHeight, animationState.frameData.length, animationState.currentFrameIndex, animationState.isPlaying, animationState.replayMultiplier])
+        />, [width, drawHeight, animationState.frameData.length, animationState.frameWindow, animationState.currentFrameIndex, animationState.isPlaying, animationState.replayMultiplier])
  
     return (
         <Fragment>
