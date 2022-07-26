@@ -171,8 +171,15 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
 
     const { focusTime, setTimeFocus } = useTimeFocus()  // state imported from recording context
     const findNearestTime = useTimeLookupFn(animationState)
-    useEffect(() => matchFrameToFocus(focusTime, findNearestTime, animationState, animationStateDispatch), [focusTime])
-    useEffect(() => matchFocusToFrame(animationState, focusTime, setTimeFocus), [animationState.isPlaying])
+    const animationCurrentTime = animationState?.frameData[animationState?.currentFrameIndex]?.timestamp
+    useEffect(() => {
+        matchFrameToFocus(focusTime, findNearestTime, animationStateDispatch)
+    }, [focusTime, findNearestTime])
+    
+    useEffect(() => {
+        if (animationState.isPlaying) return
+        matchFocusToFrame(animationCurrentTime, setTimeFocus)
+    }, [animationCurrentTime, setTimeFocus, animationState.isPlaying])
 
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = dataFrames[animationState.currentFrameIndex].decodedPositionFrame
