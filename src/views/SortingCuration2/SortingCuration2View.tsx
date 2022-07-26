@@ -85,7 +85,7 @@ const SortingCuration2View: FunctionComponent<Props> = ({width, height}) => {
             </div>
             <hr />
             <div>
-                <Button onClick={handleSaveSelection}>Save selection</Button>
+                <Button onClick={handleSaveSelection}>Save curation</Button>
             </div>
         </div>
     )
