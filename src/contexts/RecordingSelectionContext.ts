@@ -333,6 +333,11 @@ const setFocusTime = (state: RecordingSelection, action: SetFocusTimeRecordingSe
                 const span = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
                 newState.visibleTimeStartSeconds = focusTimeSec - span / 2
                 newState.visibleTimeEndSeconds = focusTimeSec + span / 2
+                if (newState.visibleTimeEndSeconds > (state.recordingEndTimeSeconds || 0)) {
+                    const delta = (state.recordingEndTimeSeconds || 0) - newState.visibleTimeEndSeconds
+                    newState.visibleTimeStartSeconds += delta
+                    newState.visibleTimeEndSeconds += delta
+                }
                 if (newState.visibleTimeStartSeconds < (state.recordingStartTimeSeconds || 0)) {
                     const delta = (state.recordingStartTimeSeconds || 0) - newState.visibleTimeStartSeconds
                     newState.visibleTimeStartSeconds += delta
