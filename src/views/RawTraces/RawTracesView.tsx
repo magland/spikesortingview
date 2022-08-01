@@ -6,10 +6,10 @@ import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntr
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
-import { RawTracesPlotViewData } from './RawTracesPlotViewData'
+import { RawTracesViewData } from './RawTracesViewData'
 
 type Props = {
-    data: RawTracesPlotViewData
+    data: RawTracesViewData
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
     width: number
     height: number
@@ -21,7 +21,7 @@ type PanelProps = {
     pixelValues: number[]
 }
 
-const RawTracesPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
+const RawTracesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {startTimeSec, samplingFrequency, traces} = data
     const numSamples = traces.length
     const endTimeSec = startTimeSec + numSamples / samplingFrequency
@@ -143,4 +143,4 @@ const adjustSpan = (x: {min: number, max: number}, span: number) => {
     x.max += diff / 2
 }
 
-export default RawTracesPlotView
+export default RawTracesView

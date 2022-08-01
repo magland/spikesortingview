@@ -14,7 +14,7 @@ import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "views/MultiT
 import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
-import { isRawTracesPlotViewData, RawTracesPlotViewData } from "views/RawTracesPlot/RawTracesPlotViewData"
+import { isRawTracesViewData, RawTracesViewData } from "views/RawTraces/RawTracesViewData"
 import { isSortingCurationViewData, SortingCurationViewData } from 'views/SortingCuration/SortingCurationViewData'
 import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'views/SortingCuration2/SortingCuration2ViewData'
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
@@ -45,7 +45,7 @@ export type ViewData =
     LivePositionPdfPlotViewData |
     EpochsViewData |
     ConsoleViewData |
-    RawTracesPlotViewData |
+    RawTracesViewData |
     TrackAnimationStaticData |
     SortingLayoutViewData |
     CrossCorrelogramsViewData |
@@ -76,7 +76,7 @@ export const isViewData = (x: any): x is ViewData => {
         isLivePositionPdfPlotViewData,
         isEpochsViewData,
         isConsoleViewData,
-        isRawTracesPlotViewData,
+        isRawTracesViewData,
         isTrackAnimationStaticData,
         isSortingLayoutViewData,
         isCrossCorrelogramsViewData,

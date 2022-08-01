@@ -13,7 +13,7 @@ import MultiTimeseriesView from 'views/MultiTimeseries/MultiTimeseriesView';
 import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
 import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
-import RawTracesPlotView from 'views/RawTracesPlot/RawTracesPlotView';
+import RawTracesView from 'views/RawTraces/RawTracesView';
 import SortingCurationView from 'views/SortingCuration/SortingCurationView';
 import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
@@ -91,8 +91,8 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     else if (data.type === 'Console') {
         return <ConsoleView data={data} width={width} height={height} />
     }
-    else if (data.type === 'RawTracesPlot') {
-        return <RawTracesPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+    else if (data.type === 'RawTraces') {
+        return <RawTracesView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'TrackAnimation') {
         return <TrackPositionAnimationView data={data} width={width} height={height} />
