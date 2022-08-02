@@ -1,8 +1,8 @@
 import objectHash from 'object-hash'
 import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 
-export type FetchCache<QueryType> = {
-    get: (query: QueryType) => any | undefined
+export type FetchCache<QueryType, ReturnType> = {
+    get: (query: QueryType) => ReturnType | undefined
 }
 
 type FetchCacheState = {
@@ -69,7 +69,7 @@ const queryHash = <QueryType>(query: QueryType) => {
     return objectHash(query)
 }
 
-const useFetchCache = <QueryType>(fetchFunction: (query: QueryType) => Promise<any>): FetchCache<QueryType> => {
+const useFetchCache = <QueryType, ReturnType>(fetchFunction: (query: QueryType) => Promise<any>): FetchCache<QueryType, ReturnType> => {
     const [count, setCount] = useState(0)
     if (count < 0) console.info(count) // just suppress the unused warning (will never print)
     const prevFetchFunction = useRef<(query: QueryType) => Promise<any>>(fetchFunction)

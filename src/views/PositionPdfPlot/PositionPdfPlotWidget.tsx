@@ -34,7 +34,7 @@ type PanelProps = {
 const panelSpacing = 4
 
 const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise<number[][]>, numTimepoints: number, numPositions: number, segmentSize: number, multiscaleFactor: number) => {
-    const fetchSegmentCache = useFetchCache<FetchSegmentQuery>(fetchSegment)
+    const fetchSegmentCache = useFetchCache<FetchSegmentQuery, number[][]>(fetchSegment)
     const get = useCallback((i1: number, i2: number, downsampleFactor: number) => {
         const s1 = Math.floor(i1 / segmentSize)
         const s2 = Math.ceil(i2 / segmentSize)
