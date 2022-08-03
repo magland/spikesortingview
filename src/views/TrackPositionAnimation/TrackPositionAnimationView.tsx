@@ -3,6 +3,9 @@ import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
 import React, { Fragment, FunctionComponent, useEffect, useMemo } from "react"
+import { CROP_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackCropWindowButton'
+import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControls/PlaybackOptionalButtons'
+import { SYNC_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackSyncWindowButton'
 import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
 import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
 import TPADecodedPositionLayer, { ValidColorMap } from './TPADecodedPositionLayer'
@@ -178,17 +181,23 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     }, [focusTime, findNearestTime])
     
     useEffect(() => {
-        if (animationState.isPlaying) return
+        if (animationState.isPlaying) return // TODO: Do a debounce on this instead of an absolute ban
         matchFocusToFrame(animationCurrentTime, setTimeFocus)
     }, [animationCurrentTime, setTimeFocus, animationState.isPlaying])
-    useEffect(() => { console.log(`Current window: ${animationState.frameWindow[0]} - ${animationState.frameWindow[1]}`) }, [animationState.frameWindow])
+
+    // useEffect(() => { console.log(`Current window: ${animationState.window[0]} - ${animationState.window[1]}`) }, [animationState.window])
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     useEffect(() => {
-        const windowBounds: [number, number] | undefined = (!visibleTimeStartSeconds || !visibleTimeEndSeconds)
+        const windowBounds: [number, number] | undefined = (!animationState.windowSynced || !visibleTimeStartSeconds || !visibleTimeEndSeconds)
             ? undefined
             : [(findNearestTime(visibleTimeStartSeconds)?.baseListIndex) as number, (findNearestTime(visibleTimeEndSeconds)?.baseListIndex) as number]
-        animationStateDispatch({ type: 'SET_FRAME_WINDOW', bounds: windowBounds })
-    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, animationStateDispatch, findNearestTime])
+        if (windowBounds) { // Narrow the animation window if "closest frame" falls outside the range due to rounding. Avoids weird sync behavior.
+            // TODO: Should probably just turn off the focus auto-reset if the window is being synced.
+            windowBounds[0] += (animationState.frameData[windowBounds[0]].timestamp || -1) < (visibleTimeStartSeconds ?? 0) ?  1 : 0
+            windowBounds[1] += (animationState.frameData[windowBounds[1]].timestamp || -1) > ( visibleTimeEndSeconds  ?? 0) ? -1 : 0
+        }
+        animationStateDispatch({ type: 'SET_WINDOW', bounds: windowBounds })
+    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, animationStateDispatch, findNearestTime, animationState.windowSynced, animationState.frameData])
 
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = dataFrames[animationState.currentFrameIndex]?.decodedPositionFrame
@@ -205,6 +214,14 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             frame: animationState.frameData[animationState.currentFrameIndex],
         }
     }, [animationState.currentFrameIndex, animationState.frameData, finalMargins.bottom])
+
+    const uiFeatures = useMemo(() => {
+        return {
+            optionalButtons: [ SYNC_BUTTON, CROP_BUTTON ] as PlaybackOptionalButtons[],
+            isSynced: animationState?.windowSynced,
+            isCropped: animationState?.windowSynced || !(animationState?.window[0] === 0 && animationState?.window[1] === (animationState?.frameData?.length - 1))
+        }
+    }, [animationState.windowSynced, animationState.window, animationState.frameData])
 
     const trackLayer = useMemo(() => <TPATrackLayer
             width={width}
@@ -230,11 +247,12 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             verticalOffset={drawHeight}
             dispatch={animationStateDispatch}
             totalFrameCount={animationState.frameData.length}
-            visibleWindow={animationState.frameWindow}
+            visibleWindow={animationState.window}
             currentFrameIndex={animationState.currentFrameIndex}
             isPlaying={animationState.isPlaying}
             playbackRate={animationState.replayMultiplier}
-        />, [width, drawHeight, animationState.frameData.length, animationState.frameWindow, animationState.currentFrameIndex, animationState.isPlaying, animationState.replayMultiplier])
+            ui={uiFeatures}
+        />, [width, drawHeight, animationState.frameData.length, animationState.window, animationState.currentFrameIndex, animationState.isPlaying, uiFeatures, animationState.replayMultiplier])
  
     return (
         <Fragment>
