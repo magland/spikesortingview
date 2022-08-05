@@ -16,12 +16,6 @@ type PlaybackSelectionResolverProps = {
     updateSelectedWindow: SelectedWindowUpdater
 }
 
-/**
- * Returns true if scrubbing has been initiated, false if not.
- */
-// INITIATION: Option a: only initiate if we're outside the scrubber radius.
-// Option b: do a quick debounce-style callback. Start scrolling if the callback isn't cancelled fast enough by a mouseup event.
-
 const handleSelectionInitiation = (x: number, refs: PlaybackSelectionRefs) => {
     const { dragStartXRef, currentXRef } = refs
     if (dragStartXRef.current !== undefined) return // already dragging. Shouldn't happen. Might be interesting to log if it does.
@@ -35,14 +29,12 @@ const handleSelectionTermination = (refs: PlaybackSelectionRefs, selectedWindow:
     dragStartXRef.current = undefined
     currentXRef.current = undefined
 
-    console.log(`Terminating drag select. Proposed window: ${selectedWindow}`)
     if (selectedWindow === undefined) {
         dispatch({ type: 'PROPOSE_WINDOW', bounds: undefined })
     }
 
     const lowerFrame = xToFrame(Math.min(...(selectedWindow ?? [])))
     const higherFrame = xToFrame(Math.max(...(selectedWindow ?? [])))
-    console.log(`Dispatching ${lowerFrame} to ${higherFrame}`)
     dispatch({ type: 'PROPOSE_WINDOW', bounds: [lowerFrame, higherFrame] })
 }
 

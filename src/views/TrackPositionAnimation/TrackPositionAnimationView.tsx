@@ -8,7 +8,7 @@ import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControl
 import { SYNC_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackSyncWindowButton'
 import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
 import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
-import TPADecodedPositionLayer, { ValidColorMap } from './TPADecodedPositionLayer'
+import TPADecodedPositionLayer, { useConfiguredPositionDrawFunction } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
 import useTimeLookupFn, { matchFocusToFrame, matchFrameToFocus } from './TPATimeSyncLogic'
@@ -142,7 +142,6 @@ const useDrawingSpace = (width: number, drawHeight: number, xmax: number, xmin: 
 type TPAReducer = React.Reducer<AnimationState<PositionFrame>, AnimationStateAction<PositionFrame>>
 const initialState = makeDefaultState<PositionFrame>()
 
-
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
     const { xmin, xmax, ymin, ymax, headDirection, samplingFrequencyHz } = data
@@ -185,7 +184,6 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
         matchFocusToFrame(animationCurrentTime, setTimeFocus)
     }, [animationCurrentTime, setTimeFocus, animationState.isPlaying])
 
-    // useEffect(() => { console.log(`Current window: ${animationState.window[0]} - ${animationState.window[1]}`) }, [animationState.window])
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     useEffect(() => {
         const windowBounds: [number, number] | undefined = (!animationState.windowSynced || !visibleTimeStartSeconds || !visibleTimeEndSeconds)
@@ -203,8 +201,7 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
         const linearFrame = dataFrames[animationState.currentFrameIndex]?.decodedPositionFrame
         const finalFrame = getDecodedPositionFramePx(linearFrame, decodedLocationsMap)
         return {
-            frame: finalFrame,
-            colorMap: 'plasma' as any as ValidColorMap // TODO: This is ugly, should be configured once, not on a per-frame basis
+            frame: finalFrame
         }
     }, [animationState.currentFrameIndex, dataFrames, decodedLocationsMap])
 
@@ -228,12 +225,14 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             height={drawHeight}
             trackBucketRectanglesPx={trackBins}
         />, [width, drawHeight, trackBins])
-
+        
+    const configuredPositionDrawFn = useConfiguredPositionDrawFunction('plasma')
     const probabilityLayer = useMemo(() => <TPADecodedPositionLayer
             width={width}
             height={drawHeight}
             drawData={currentProbabilityFrame}
-        />, [width, drawHeight, currentProbabilityFrame])
+            configuredDrawFnCallback={configuredPositionDrawFn}
+        />, [width, drawHeight, currentProbabilityFrame, configuredPositionDrawFn])
 
     const positionLayer = useMemo(() => <TPAPositionLayer
             width={width}

@@ -28,7 +28,7 @@ type InitiateTerminateScrubbingProps = {
     dispatch: AnimationStateDispatcher<any>
 }
 /**
- * Returns true if scrubbing has been initiated, false if not.
+ * Returns true if we initiated scrubbing, false if not.
  */
 const conditionallyHandleScrubbingInitiation = (props: InitiateTerminateScrubbingProps) => {
     const { x, y, barInterpreter, dragPointRef, isPlaying, wasPlayingRef, dispatch } = props
@@ -40,6 +40,7 @@ const conditionallyHandleScrubbingInitiation = (props: InitiateTerminateScrubbin
     return true
 }
 
+
 const conditionallyHandleScrubbingTermination = (isPlaying: boolean, dragPointRef: React.MutableRefObject<number | undefined>, wasPlayingRef: React.MutableRefObject<boolean>, dispatch: AnimationStateDispatcher<any>) => {
     if (dragPointRef.current && wasPlayingRef.current && !isPlaying) {
         dispatch({type: 'TOGGLE_PLAYBACK'})
@@ -47,6 +48,7 @@ const conditionallyHandleScrubbingTermination = (isPlaying: boolean, dragPointRe
     wasPlayingRef.current = false
     dragPointRef.current = undefined
 }
+
 
 const scrubberMoveUpdate: DebounceThrottleUpdater<ScrubberDragProperties, ScrubberDragRefs> = (refs, state) => {
     const { dragPointRef, targetFrameIndexRef } = refs
@@ -62,6 +64,7 @@ const scrubberMoveUpdate: DebounceThrottleUpdater<ScrubberDragProperties, Scrubb
     return true
 }
 
+
 const scrubberMoveResolver: DebounceThrottleResolver<ScrubberDragRefs, ScrubberDragResolverProps> = (refs, props) => {
     const { dispatch } = props
     const { dragPointRef, currentFrameIndexRef, targetFrameIndexRef } = refs
@@ -71,6 +74,7 @@ const scrubberMoveResolver: DebounceThrottleResolver<ScrubberDragRefs, ScrubberD
     targetFrameIndexRef.current = undefined
 }
 
+
 const useScrubberRefs = () => {
     const dragPointRef = useRef<number | undefined>(undefined)
     const currentFrameIndexRef = useRef<number>(0)
@@ -79,11 +83,13 @@ const useScrubberRefs = () => {
     return refs
 }
 
+
 const useScrubberMoveUpdater = (dispatch: AnimationStateDispatcher<any>, refs: ScrubberDragRefs) => {
     const resolverProps = useMemo(() => { return { dispatch }}, [dispatch])
     const updateHandler = useThrottler(scrubberMoveUpdate, scrubberMoveResolver, refs, resolverProps)
     return updateHandler
 }
+
 
 const useDraggableScrubber = (dispatch: AnimationStateDispatcher<any>, barInterpreter: LogicalBarInterpreter) => {
     const refs = useScrubberRefs()
@@ -107,5 +113,6 @@ const useDraggableScrubber = (dispatch: AnimationStateDispatcher<any>, barInterp
     
     return { initiateScrubbing, terminateScrubbing, scrubbingStateHandler: throttledStateSetter }
 }
+
 
 export default useDraggableScrubber

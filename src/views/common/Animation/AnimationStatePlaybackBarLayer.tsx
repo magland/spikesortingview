@@ -1,7 +1,8 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import React, { FunctionComponent, useCallback, useMemo, useRef } from 'react'
+import React, { FunctionComponent, useCallback, useRef } from 'react'
 import useDraggableScrubber from './AnimationControls/useDraggableScrubber'
 import usePlaybackBarGeometry from './AnimationControls/usePlaybackBarGeometry'
+import usePlaybackBarPixelState from './AnimationControls/usePlaybackBarPixelState'
 import useDragSelection from './AnimationControls/usePlaybackBarSelection'
 import useWheelHandler from './AnimationControls/useWheelHandler'
 import { SelectedWindowUpdater, SelectionWindow } from './AnimationPlaybackControls'
@@ -44,12 +45,11 @@ export const defaultStyling: ScrubberStyle = {
 
 export type ProgressBarDrawData = {
     scrubberCenterX: number
-    selectRange?: number[] // technically [number, number] but that requires a cast. Refers to an ongoing drag-selected window range.
+    selectRange?: number[] // technically [number, number] but that requires a cast elsewhere. Refers to an ongoing drag-selected window range.
     proposedWindow?: number[]
 }
 
-// NOTE: the "scrubberCenterX" is proportional to the bar length but assumes the bar starts at 0.
-// The margin only shows up in the draw function.
+// NOTE: "scrubberCenterX" assumes the bar starts at 0; the margin only shows up in the draw function.
 const _draw = (context: CanvasRenderingContext2D, props: ProgressBarDrawData, barWidth: number, styling: ScrubberStyle) => {
     const { scrubberCenterX, selectRange, proposedWindow } = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
@@ -84,22 +84,15 @@ const _handleScrollbarClick = (x: number, y: number, pointToFrame: (x: number, y
 }
 
 
-const useWindowProposal = (frameToPixelX: (elapsedFrames: number) => number, visibleStart: number, windowProposal?: [number, number]) => {
-    return useMemo(() => {
-        return windowProposal ? windowProposal.map(i => frameToPixelX(i - visibleStart)) : undefined
-    }, [frameToPixelX, windowProposal, visibleStart])
-}
-
-
 const AnimationStatePlaybackBarLayer: FunctionComponent<AnimationStatePlaybackBarLayerProps> = (props: AnimationStatePlaybackBarLayerProps) => {
-    const { height, dispatch, isPlaying, leftOffset, selectedWindow, windowProposal, visibleWindow, updateSelectedWindow } = props
-    const { draw, scrubberCenterX, barInterpreter, getEventPoint, barCanvasWidth, barClickToFrame, xToFrame, frameToPixelX } = usePlaybackBarGeometry({...props, baseDrawFn: _draw})
-    
-    const proposalXRange = useWindowProposal(frameToPixelX, visibleWindow[0], windowProposal)
+    const { height, dispatch, isPlaying, leftOffset, selectedWindow, updateSelectedWindow } = props
+    const { draw, getBarInterpreter, getEventPoint, barCanvasWidth, getBarClickToFrame, xToFrame, frameToPixelX } = usePlaybackBarGeometry({...props, baseDrawFn: _draw})
+    const { scrubberCenterX, proposalXRange, barInterpreter, barClickToFrame } = usePlaybackBarPixelState({ ...props, getBarInterpreter, getBarClickToFrame, frameToPixelX })
 
     const { initiateScrubbing, terminateScrubbing, scrubbingStateHandler } = useDraggableScrubber(dispatch, barInterpreter)
     
     const handleScrollbarClick = useCallback((x: number, y: number) => _handleScrollbarClick(x, y, barClickToFrame, dispatch), [barClickToFrame, dispatch])
+
     const wheelHandler = useWheelHandler(dispatch)
     const handleWheel = useCallback((e: React.WheelEvent) => !isPlaying && wheelHandler(e), [isPlaying, wheelHandler])
 
@@ -109,10 +102,7 @@ const AnimationStatePlaybackBarLayer: FunctionComponent<AnimationStatePlaybackBa
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
         if (e.buttons !== 1) return // we only care about left-clicks
         const [x, y] = getEventPoint(e)
-        if (initiateScrubbing(x, y, isPlaying)) return
-        // "window" shouldn't be necessary but it's resolving to Node by default here. See
-        // https://stackoverflow.com/questions/45802988/typescript-use-correct-version-of-settimeout-node-vs-window
-        // for (dated) commentary
+        if (initiateScrubbing(x, y, isPlaying)) return // if the user grabbed the scrubber, don't do anything else
         dragSelectInitiationRef.current = window.setTimeout(() => {
             dragSelectInitiationRef.current = undefined
             initiateDragSelection(x)
@@ -127,7 +117,7 @@ const AnimationStatePlaybackBarLayer: FunctionComponent<AnimationStatePlaybackBa
             dragSelectInitiationRef.current = undefined
             const [x, y] = getEventPoint(e)
             handleScrollbarClick(x, y)
-            updateSelectedWindow(undefined) // TODO: Possible race condition?
+            updateSelectedWindow(undefined) // TODO: Check for possible race condition or double-rerender?
             return
         }
         terminateScrubbing(isPlaying)
@@ -150,7 +140,7 @@ const AnimationStatePlaybackBarLayer: FunctionComponent<AnimationStatePlaybackBa
         selectRange: selectedWindow,
         proposedWindow: proposalXRange
     }
-    console.log(`drawData: ${JSON.stringify(drawData)}`)
+
     return (
         <div onMouseUp={handleMouseUp}
                 onMouseDown={handleMouseDown}

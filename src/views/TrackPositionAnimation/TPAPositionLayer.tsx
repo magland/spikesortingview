@@ -12,7 +12,7 @@ export type TPAPositionLayerProps = {
 type PositionProps = {
     frame: PositionFrame
     bottomMargin: number
-    dotStyle?: string
+    dotStyle?: string // TODO: Make this configurable by adding a draw callback generator
 }
 
 const DEFAULT_POSITION_DOT_STYLE = 'rgb(210, 128, 0)'

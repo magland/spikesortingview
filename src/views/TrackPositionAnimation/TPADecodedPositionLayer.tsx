@@ -1,5 +1,5 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { FunctionComponent } from 'react'
+import BaseCanvas, { DrawFn } from 'FigurlCanvas/BaseCanvas'
+import { FunctionComponent, useCallback } from 'react'
 import { inferno, magma, plasma, viridis } from 'scale-color-perceptual'
 import { DecodedPositionFramePx } from './TrackPositionAnimationTypes'
 
@@ -12,11 +12,11 @@ export type DecodeLayerProps = {
     width: number
     height: number
     drawData: DecodeFrameProps
+    configuredDrawFnCallback: DrawFn<DecodeFrameProps>
 }
 
 type DecodeFrameProps = {
     frame: DecodedPositionFramePx | undefined
-    colorMap?: ValidColorMap
 }
 
 export type ValidColorMap =  'inferno' | 'magma' | 'plasma' | 'viridis'
@@ -39,8 +39,8 @@ const stylesMap = {
     'base': valuesRange.map((i) => `rgba(${baseRed}, ${baseBlue}, ${baseGreen}, ${i/5})`)
 }
 
-const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps) => {
-    const { frame, colorMap } = props
+const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps, colorMap?: ValidColorMap) => {
+    const { frame } = props
     if (!frame) return
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
@@ -61,15 +61,19 @@ const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps) => {
     })
 }
 
+export const useConfiguredPositionDrawFunction = (colorMap?: ValidColorMap) => {
+    return useCallback((context: CanvasRenderingContext2D, props: DecodeFrameProps) => draw(context, props, colorMap), [colorMap])
+}
+
 const TPADecodedPositionLayer: FunctionComponent<DecodeLayerProps> = (props: DecodeLayerProps) => {
-    const { width, height, drawData } = props
+    const { width, height, drawData, configuredDrawFnCallback } = props
 
     return (
         <BaseCanvas<DecodeFrameProps>
             // {...props} // can replace width/height/drawData with this, but eh
             width={width}
             height={height}
-            draw={draw}
+            draw={configuredDrawFnCallback}
             drawData={drawData}
         />
     )

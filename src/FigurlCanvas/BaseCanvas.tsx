@@ -14,7 +14,7 @@ const getDrawingContextFromCanvasRef = (canvasRef: React.MutableRefObject<HTMLCa
     return ctxt
 }
 
-type DrawFn<T> = (ctxt: CanvasRenderingContext2D, data: T) => void
+export type DrawFn<T> = (ctxt: CanvasRenderingContext2D, data: T) => void
 /**
  * @param width Pixel width of canvas element.
  * @param height Pixel height of canvas element.
