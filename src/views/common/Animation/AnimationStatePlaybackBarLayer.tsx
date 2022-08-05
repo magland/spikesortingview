@@ -1,7 +1,10 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { norm } from 'mathjs'
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useRef } from 'react'
-import useWheelHandler, { useWheelDebouncer } from './AnimationControls/useWheelHandler'
+import React, { FunctionComponent, useCallback, useMemo, useRef } from 'react'
+import useDraggableScrubber from './AnimationControls/useDraggableScrubber'
+import usePlaybackBarGeometry from './AnimationControls/usePlaybackBarGeometry'
+import useDragSelection from './AnimationControls/usePlaybackBarSelection'
+import useWheelHandler from './AnimationControls/useWheelHandler'
+import { SelectedWindowUpdater, SelectionWindow } from './AnimationPlaybackControls'
 import { AnimationStateDispatcher } from './AnimationStateReducer'
 
 export type AnimationStatePlaybackBarLayerProps = {
@@ -9,6 +12,9 @@ export type AnimationStatePlaybackBarLayerProps = {
     height: number
     dispatch: AnimationStateDispatcher<any>
     visibleWindow: [number, number]
+    windowProposal?: [number, number]
+    selectedWindow: SelectionWindow
+    updateSelectedWindow: SelectedWindowUpdater
     currentFrameIndex: number
     isPlaying: boolean
     leftOffset: number
@@ -21,202 +27,137 @@ export type ScrubberStyle = {
     barHeight: number
     seenFillStyle: string
     unseenFillStyle: string
+    selectedFillStyle: string
     scrubberFillStyle: string
     scrubberRadius: number
 }
 
-// TODO: Expose configuration for this styling
-// TODO: set vertical stuff based on actual height rather than assuming a constant?
-const defaultStyling: ScrubberStyle = {
+export const defaultStyling: ScrubberStyle = {
     leftMargin: 15,
     barHeight: 6,
     seenFillStyle: 'rgb(130, 130, 130)',
     unseenFillStyle: 'rgb(180, 14, 0)',
+    selectedFillStyle: 'rgba(0, 0, 64, .4)',
     scrubberFillStyle: 'rgb(220, 220, 220)',
     scrubberRadius: 10
 }
 
-// NOTE: TODO maybe -- this uses a 0-based "seenX" value, which would assume the bar starts
-// all the way to the left of the canvas. The draw function adds the left-margin padding.
-// That's a little confusing, but so it goes.
-const draw = (context: CanvasRenderingContext2D, props: ControlsDrawData) => {
-    const { seenX, barWidth, styling } = props
-    console.log(`seenx: ${seenX} barWidth: ${barWidth}`)
+export type ProgressBarDrawData = {
+    scrubberCenterX: number
+    selectRange?: number[] // technically [number, number] but that requires a cast. Refers to an ongoing drag-selected window range.
+    proposedWindow?: number[]
+}
+
+// NOTE: the "scrubberCenterX" is proportional to the bar length but assumes the bar starts at 0.
+// The margin only shows up in the draw function.
+const _draw = (context: CanvasRenderingContext2D, props: ProgressBarDrawData, barWidth: number, styling: ScrubberStyle) => {
+    const { scrubberCenterX, selectRange, proposedWindow } = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    const unseen = barWidth - seenX
-    context.font = `${Math.floor(context.canvas.height/2)}px FontAwesome`
+    const unseen = barWidth - scrubberCenterX
     const verticalPadding = Math.floor((context.canvas.height - styling.barHeight)/2)
     context.fillStyle = styling.seenFillStyle
-    context.fillRect(styling.leftMargin, verticalPadding, seenX, styling.barHeight)
+    context.fillRect(styling.leftMargin, verticalPadding, scrubberCenterX, styling.barHeight)
     context.fillStyle = styling.unseenFillStyle
-    context.fillRect(seenX + styling.leftMargin, verticalPadding, unseen, styling.barHeight)
+    context.fillRect(scrubberCenterX + styling.leftMargin, verticalPadding, unseen, styling.barHeight)
+    if (selectRange && selectRange.length === 2) {
+        context.fillStyle = styling.selectedFillStyle
+        const height = [0, context.canvas.height]
+        context.fillRect(styling.leftMargin + selectRange[0], height[0], selectRange[1] - selectRange[0], height[1])
+    }
+    if (proposedWindow && proposedWindow.length === 2 && Math.abs(proposedWindow[0] - proposedWindow[1]) < barWidth) {
+        context.fillStyle = styling.selectedFillStyle
+        const height = [verticalPadding, styling.barHeight]
+        context.fillRect(styling.leftMargin + proposedWindow[0], height[0], proposedWindow[1] - proposedWindow[0], height[1])
+    }
     context.fillStyle = styling.scrubberFillStyle
-    // Question: is it worth it to make it a tiny bit faster by using FontAwesome icons?
-    // context.textAlign = 'center'
-    // context.textBaseline = 'middle'    context.beginPath()
-    // context.fillText(`\uf111`, seen + leftMargin, context.canvas.height / 2) // solid circle
     context.beginPath()
-    context.arc(seenX + styling.leftMargin, context.canvas.height / 2, styling.scrubberRadius, 0, 2*Math.PI)
+    context.arc(scrubberCenterX + styling.leftMargin, context.canvas.height / 2, styling.scrubberRadius, 0, 2*Math.PI)
     context.fill()
 }
 
-type ControlsDrawData = {
-    seenX: number
-    barWidth: number
-    styling: ScrubberStyle
-}
+const dragSelectInitiationDelayMs = 150;
 
-// const useDebouncedWheelHandler = (dispatch: AnimationStateDispatcher<any>, isPlaying: boolean) => {
-//     // console.log(`Creating wheel handler debouncer.`) // Shows this fires on every bar click... odd.
-//     const wheelCount = useRef<number>(0)
-//     const useFineWheel = useRef<boolean>(false)
-//     const wheelDebounceRequest = useRef<number | undefined>(undefined)
-//     const debounceWheel = useCallback(() => {
-//         if (wheelDebounceRequest.current) {
-//             if (wheelCount.current !== 0 && !isPlaying) {
-//                 dispatch({type: 'SKIP', backward: wheelCount.current < 0, fineSteps: Math.abs(wheelCount.current), frameByFrame: useFineWheel.current})
-//             }
-//             useFineWheel.current = false
-//             wheelCount.current = 0
-//             wheelDebounceRequest.current = undefined
-//         }
-//     }, [dispatch, isPlaying])
-//     const handleWheel = useCallback((e: React.WheelEvent) => {
-//         if (e.deltaY === 0 || isPlaying) return
-//         useFineWheel.current = e.shiftKey
-//         wheelCount.current += (e.deltaY > 0 ? 1 : -1)
-//         if (!wheelDebounceRequest.current) {
-//             wheelDebounceRequest.current = window.requestAnimationFrame(debounceWheel)
-//         }
-//     }, [debounceWheel, isPlaying])
-
-//     return handleWheel
-// }
-
-
-type LogicalBarStatus = 'scrubber' | 'bar' | undefined
-export type LogicalBarInterpreter = (x: number, y: number) => LogicalBarStatus
-const _mouseEventBarStatus = (x: number, y: number, scrubberCenterX: number, scrubberRadius: number, canvasVMidline: number): LogicalBarStatus => {
-    const xOffset = x - scrubberCenterX
-    const yOffset = canvasVMidline - y
-    // case 1: click is on the scrubber
-    return norm([xOffset, yOffset], 2) < scrubberRadius
-        ? 'scrubber'
-        // case 2: not on scrubber but within scrubber's height of bar
-        : Math.abs(yOffset) < scrubberRadius
-            ? 'bar'
-            : undefined // case 3: not on bar or scrubber
-}
-
-const _xToFrame = (x: number, framesPerPixel: number, firstFrame: number) => {
-    return Math.floor(x * framesPerPixel) + firstFrame
+const _handleScrollbarClick = (x: number, y: number, pointToFrame: (x: number, y: number) => number | undefined, dispatch: AnimationStateDispatcher<any>) => {
+    const newFrame = pointToFrame(x, y)
+    if (!newFrame) return
+    dispatch({type: 'SET_CURRENT_FRAME', newIndex: newFrame})
 }
 
 
-const _frameToPixelX = (framesPastInitialFrame: number, framesPerPixel: number) => {
-    return Math.floor(framesPastInitialFrame/framesPerPixel)
-}
-
-const _getEventPoint = (e: React.MouseEvent, totalLeftOffset: number) => {
-    const boundingRect = e.currentTarget.getBoundingClientRect()
-    const point = [e.clientX - boundingRect.x - totalLeftOffset, e.clientY - boundingRect.y]
-    return point
+const useWindowProposal = (frameToPixelX: (elapsedFrames: number) => number, visibleStart: number, windowProposal?: [number, number]) => {
+    return useMemo(() => {
+        return windowProposal ? windowProposal.map(i => frameToPixelX(i - visibleStart)) : undefined
+    }, [frameToPixelX, windowProposal, visibleStart])
 }
 
 
 const AnimationStatePlaybackBarLayer: FunctionComponent<AnimationStatePlaybackBarLayerProps> = (props: AnimationStatePlaybackBarLayerProps) => {
-    const { width, height, dispatch, isPlaying, visibleWindow, currentFrameIndex, leftOffset, rightOffset, styling } = props
-    const currentElapsedFrames = currentFrameIndex - visibleWindow[0]
-    const _styling = useMemo(() => styling ? styling : defaultStyling, [styling])
-    const barCanvasVCenter = useMemo(() => height / 2, [height])
-    const barCanvasWidth = useMemo(() => width - leftOffset - (rightOffset ?? 0), [width, leftOffset, rightOffset])
-    const barWidth = useMemo(() => barCanvasWidth - (_styling.leftMargin * 2), [barCanvasWidth, _styling.leftMargin])
-    const framesPerPixel = useMemo(() => (visibleWindow[1] - visibleWindow[0])/barWidth, [visibleWindow, barWidth])
-    const getEventPoint = useCallback((e: React.MouseEvent) => _getEventPoint(e, (leftOffset + _styling.leftMargin)), [leftOffset, _styling.leftMargin])
-    const xToFrame = useCallback((x: number) => _xToFrame(x, framesPerPixel, visibleWindow[0]), [framesPerPixel, visibleWindow])
-    const frameToPixelX = useCallback((elapsedFrames: number) => _frameToPixelX(elapsedFrames, framesPerPixel), [framesPerPixel])
-    const scrubberCenterX = useMemo(() => frameToPixelX(currentElapsedFrames), [frameToPixelX, currentElapsedFrames])
-    const barInterpreter: LogicalBarInterpreter = useCallback((x, y) => _mouseEventBarStatus(x, y, scrubberCenterX, _styling.scrubberRadius, barCanvasVCenter),
-        [scrubberCenterX, _styling.scrubberRadius, barCanvasVCenter])
-    const getFrameFromMouseEvent = useCallback((x: number, y: number) => barInterpreter(x, y) ? xToFrame(x) : undefined, [barInterpreter, xToFrame])
-
-    const drawData = useMemo(() => {
-        return { seenX: scrubberCenterX, barWidth, styling: _styling }
-    }, [scrubberCenterX, barWidth, _styling])
+    const { height, dispatch, isPlaying, leftOffset, selectedWindow, windowProposal, visibleWindow, updateSelectedWindow } = props
+    const { draw, scrubberCenterX, barInterpreter, getEventPoint, barCanvasWidth, barClickToFrame, xToFrame, frameToPixelX } = usePlaybackBarGeometry({...props, baseDrawFn: _draw})
     
+    const proposalXRange = useWindowProposal(frameToPixelX, visibleWindow[0], windowProposal)
 
-    // const handleWheel = useDebouncedWheelHandler(dispatch, isPlaying)
-    const playingRef = useRef<boolean>(isPlaying)
-    useEffect(() => { playingRef.current = isPlaying }, [isPlaying])
-    const wheelDebouncer = useWheelDebouncer(dispatch, playingRef)
-    const handleWheel = useWheelHandler(wheelDebouncer, playingRef)
+    const { initiateScrubbing, terminateScrubbing, scrubbingStateHandler } = useDraggableScrubber(dispatch, barInterpreter)
+    
+    const handleScrollbarClick = useCallback((x: number, y: number) => _handleScrollbarClick(x, y, barClickToFrame, dispatch), [barClickToFrame, dispatch])
+    const wheelHandler = useWheelHandler(dispatch)
+    const handleWheel = useCallback((e: React.WheelEvent) => !isPlaying && wheelHandler(e), [isPlaying, wheelHandler])
 
+    const dragSelectInitiationRef = useRef<number | undefined>(undefined)
+    const { initiateDragSelection, terminateDragSelection, selectionUpdater } = useDragSelection(updateSelectedWindow, selectedWindow, dispatch, xToFrame)
 
-    const draggingXRef = useRef<number | undefined>(undefined)
-    const wasPlayingRef = useRef<boolean>(false)
     const handleMouseDown = useCallback((e: React.MouseEvent) => {
+        if (e.buttons !== 1) return // we only care about left-clicks
         const [x, y] = getEventPoint(e)
-        if (norm([x - drawData.seenX, barCanvasVCenter - y], 2) < defaultStyling.scrubberRadius)
-        {
-            // start dragging
-            draggingXRef.current = x
-            // and pause while dragging, if we were already playing
-            if (isPlaying) {
-                wasPlayingRef.current = true
-                dispatch({type: 'TOGGLE_PLAYBACK'})
-            }
-        }
-        else {
-            const newFrame = getFrameFromMouseEvent(x, y)
-            if (!newFrame) return
-            dispatch({type: 'SET_CURRENT_FRAME', newIndex: newFrame})
-        }
-    }, [getEventPoint, drawData.seenX, barCanvasVCenter, isPlaying, dispatch, getFrameFromMouseEvent])
-
+        if (initiateScrubbing(x, y, isPlaying)) return
+        // "window" shouldn't be necessary but it's resolving to Node by default here. See
+        // https://stackoverflow.com/questions/45802988/typescript-use-correct-version-of-settimeout-node-vs-window
+        // for (dated) commentary
+        dragSelectInitiationRef.current = window.setTimeout(() => {
+            dragSelectInitiationRef.current = undefined
+            initiateDragSelection(x)
+        }, dragSelectInitiationDelayMs)
+    }, [getEventPoint, isPlaying, initiateScrubbing, initiateDragSelection])
+    
     const handleMouseUp = useCallback((e: React.MouseEvent) => {
-        if (draggingXRef.current && wasPlayingRef.current && !isPlaying) {
-            dispatch({type: 'TOGGLE_PLAYBACK'})
-            wasPlayingRef.current = false
+        if (dragSelectInitiationRef.current !== undefined) {
+            // mouseup within dragSelectInitiationDelayMs after mousedown === timedout callback hasn't yet fired.
+            // This corresponds to an actual click, not a drag initiation, so do the click handling stuff
+            clearTimeout(dragSelectInitiationRef.current)
+            dragSelectInitiationRef.current = undefined
+            const [x, y] = getEventPoint(e)
+            handleScrollbarClick(x, y)
+            updateSelectedWindow(undefined) // TODO: Possible race condition?
+            return
         }
-        draggingXRef.current = undefined
-    }, [dispatch, isPlaying])
-
-    // TODO: Break drag debounce stuff into a more self-contained hook?
-    const dragTargetFrameRef = useRef<number | undefined>(undefined)
-    const nextDebounceRequest = useRef<number | undefined>(undefined)
-    const debounceSetFrame = useCallback(() => {
-        if (draggingXRef.current && dragTargetFrameRef.current) {
-            if (dragTargetFrameRef.current !== currentFrameIndex) {
-                dispatch({type: 'SET_CURRENT_FRAME', newIndex: dragTargetFrameRef.current})
-            }
-            nextDebounceRequest.current = window.requestAnimationFrame(debounceSetFrame)
-        } else {
-            if (nextDebounceRequest.current) {
-                window.cancelAnimationFrame(nextDebounceRequest.current)
-            }
-            nextDebounceRequest.current = undefined
-            dragTargetFrameRef.current = undefined
-        }
-    }, [currentFrameIndex, dispatch])
-
+        terminateScrubbing(isPlaying)
+        terminateDragSelection()
+    }, [getEventPoint, terminateScrubbing, terminateDragSelection, handleScrollbarClick, updateSelectedWindow, isPlaying])
+    
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        if (!draggingXRef.current) return
-
-        const [x, y] = getEventPoint(e)
-        if (Math.abs(x - draggingXRef.current) > 2) {
-            dragTargetFrameRef.current = getFrameFromMouseEvent(x, y)
-            draggingXRef.current = x
-            debounceSetFrame()
+        if (e.buttons === 0) { // terminate drags where mouseup happened outside our element
+            terminateScrubbing(isPlaying)
+            terminateDragSelection()
+            return // short-circuit processing of no-button mouse moves--we don't care about them
         }
-    }, [debounceSetFrame, getEventPoint, getFrameFromMouseEvent])
-
+        const [x] = getEventPoint(e)
+        scrubbingStateHandler({ draggingPixelX: x, lookupFrameFn: xToFrame })
+        selectionUpdater({ currentX: x})
+    }, [terminateScrubbing, terminateDragSelection, isPlaying, getEventPoint, scrubbingStateHandler, xToFrame, selectionUpdater])
+    
+    const drawData = { 
+        scrubberCenterX,
+        selectRange: selectedWindow,
+        proposedWindow: proposalXRange
+    }
+    console.log(`drawData: ${JSON.stringify(drawData)}`)
     return (
         <div onMouseUp={handleMouseUp}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onWheel={handleWheel}
         >
-            <BaseCanvas<ControlsDrawData>
+            <BaseCanvas<ProgressBarDrawData>
                 width={barCanvasWidth}
                 height={height}
                 hOffsetPx={leftOffset}

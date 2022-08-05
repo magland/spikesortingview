@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { PlaybackOptionalButtons } from './AnimationControls/PlaybackOptionalButtons'
 import AnimationStatePlaybackBarLayer from './AnimationStatePlaybackBarLayer'
 import { AnimationStateDispatcher } from './AnimationStateReducer'
@@ -12,6 +12,7 @@ export type AnimationPlaybackControlsProps = {
     dispatch: AnimationStateDispatcher<any>
     totalFrameCount: number
     visibleWindow: [number, number]
+    windowProposal?: [number, number]
     currentFrameIndex: number
     isPlaying: boolean
     playbackRate: number
@@ -28,9 +29,15 @@ export type ControlFeatures = {
 
 // TODO: Allow changing?
 const leftButtonWidthPx = 280
+export type SelectionWindow = [number, number] | undefined
+export type SelectedWindowUpdater = React.Dispatch<React.SetStateAction<SelectionWindow>>
+
 
 const AnimationPlaybackControls = (props: AnimationPlaybackControlsProps) => {
-    const { width, height, verticalOffset, dispatch, isPlaying, visibleWindow, currentFrameIndex, playbackRate, ui } = props
+    const { width, height, verticalOffset, dispatch, isPlaying, visibleWindow, windowProposal, currentFrameIndex, playbackRate, ui } = props
+    const [selectedWindow, updateSelectedWindow] = useState<SelectionWindow>(undefined)
+    useEffect(() => { updateSelectedWindow(undefined) }, [windowProposal])
+
     const ctrlPanelDiv = useMemo(() => {
         return (<MainPlaybackControls
             height={height}
@@ -52,10 +59,13 @@ const AnimationPlaybackControls = (props: AnimationPlaybackControlsProps) => {
             rightOffset={secondaryControlPanelWidthPx}
             dispatch={dispatch}
             visibleWindow={visibleWindow}
+            windowProposal={windowProposal}
+            selectedWindow={selectedWindow}
+            updateSelectedWindow={updateSelectedWindow}
             currentFrameIndex={currentFrameIndex}
             isPlaying={isPlaying}
         />)
-    }, [currentFrameIndex, dispatch, height, isPlaying, visibleWindow, width, secondaryControlPanelWidthPx])
+    }, [currentFrameIndex, dispatch, height, isPlaying, visibleWindow, width, secondaryControlPanelWidthPx, selectedWindow, updateSelectedWindow, windowProposal])
 
     return (
         <div style={{position: 'absolute', top: verticalOffset, userSelect: "none"}}>

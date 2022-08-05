@@ -248,11 +248,13 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             dispatch={animationStateDispatch}
             totalFrameCount={animationState.frameData.length}
             visibleWindow={animationState.window}
+            windowProposal={animationState.windowProposal}
             currentFrameIndex={animationState.currentFrameIndex}
             isPlaying={animationState.isPlaying}
             playbackRate={animationState.replayMultiplier}
             ui={uiFeatures}
-        />, [width, drawHeight, animationState.frameData.length, animationState.window, animationState.currentFrameIndex, animationState.isPlaying, uiFeatures, animationState.replayMultiplier])
+        />, [width, drawHeight, animationState.frameData.length, animationState.window, animationState.windowProposal, animationState.currentFrameIndex,
+            animationState.isPlaying, uiFeatures, animationState.replayMultiplier])
  
     return (
         <Fragment>

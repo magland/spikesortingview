@@ -1,14 +1,14 @@
 import React, { useCallback, useMemo, useRef } from 'react'
-import { DebounceResolver, DebounceUpdater, useDebouncer } from 'util/useDebouncer'
-import { LogicalBarInterpreter } from '../AnimationStatePlaybackBarLayer'
+import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'util/useDebouncer'
 import { AnimationStateDispatcher } from '../AnimationStateReducer'
+import { LogicalBarInterpreter } from './usePlaybackBarGeometry'
 
-type ScrubberDragDebounceProperties = {
+type ScrubberDragProperties = {
     draggingPixelX: number
     lookupFrameFn: (x: number) => number | undefined
 }
 
-type ScrubberDragDebouncePropertiesRefs = {
+type ScrubberDragRefs = {
     dragPointRef: React.MutableRefObject<number | undefined>
     currentFrameIndexRef: React.MutableRefObject<number>
     targetFrameIndexRef: React.MutableRefObject<number | undefined>
@@ -48,35 +48,11 @@ const conditionallyHandleScrubbingTermination = (isPlaying: boolean, dragPointRe
     dragPointRef.current = undefined
 }
 
-// What are the components?
-// An updater
-// An initializer (?)
-// A set of state that lets the updater know what to do
-// A resolver, that has a condition.
-
-// THE THING WE ARE DEBOUNCING HERE is the FRAME UPDATE. Drag initiation and play/pause is SEPARATE.
-
-// Behavior:
-// On scrubber-drag initialization, pause playback (if any) to resume later.
-// --> this DOES NOT NEED DEBOUNCING, but maybe we want to accommodate it in the framework anyway?
-// Every time the mouse moves AND drag is active:
-//  - update the new frame we're pointing to.
-//  - If enough time has passed, resolve to the new frame.
-//  - When dragging ends, resume playback if it was paused by us.
-
-// So playback is toggled on click, and that sets the overall "we are dragging" state as well.
-// TO RESOLVE, we need:
-// - the current drag target
-// - the current frame index
-// - the current window or something I guess
-// WE NEED:
-// - the current drag target x value
-// - the current frame index
-
-const scrubberMoveUpdate: DebounceUpdater<ScrubberDragDebounceProperties, ScrubberDragDebouncePropertiesRefs> = (refs, state) => {
+const scrubberMoveUpdate: DebounceThrottleUpdater<ScrubberDragProperties, ScrubberDragRefs> = (refs, state) => {
     const { dragPointRef, targetFrameIndexRef } = refs
     const { draggingPixelX, lookupFrameFn } = state
     if (!dragPointRef.current) return false
+    if (Math.abs(draggingPixelX - dragPointRef.current) < 2) return false
 
     dragPointRef.current = draggingPixelX
     const frame = lookupFrameFn(draggingPixelX)
@@ -86,17 +62,16 @@ const scrubberMoveUpdate: DebounceUpdater<ScrubberDragDebounceProperties, Scrubb
     return true
 }
 
-const scrubberMoveResolver: DebounceResolver<ScrubberDragDebouncePropertiesRefs, ScrubberDragResolverProps> = (refs, props) => {
+const scrubberMoveResolver: DebounceThrottleResolver<ScrubberDragRefs, ScrubberDragResolverProps> = (refs, props) => {
     const { dispatch } = props
     const { dragPointRef, currentFrameIndexRef, targetFrameIndexRef } = refs
-
     if (dragPointRef.current && targetFrameIndexRef.current && targetFrameIndexRef.current !== currentFrameIndexRef.current) {
         dispatch({type: 'SET_CURRENT_FRAME', newIndex: targetFrameIndexRef.current})
     }
     targetFrameIndexRef.current = undefined
 }
 
-const useDebouncerRefs = () => {
+const useScrubberRefs = () => {
     const dragPointRef = useRef<number | undefined>(undefined)
     const currentFrameIndexRef = useRef<number>(0)
     const targetFrameIndexRef = useRef<number | undefined>(undefined)
@@ -104,17 +79,18 @@ const useDebouncerRefs = () => {
     return refs
 }
 
-const useScrubberMoveResolver = (dispatch: AnimationStateDispatcher<any>, refs: ScrubberDragDebouncePropertiesRefs) => {
+const useScrubberMoveUpdater = (dispatch: AnimationStateDispatcher<any>, refs: ScrubberDragRefs) => {
     const resolverProps = useMemo(() => { return { dispatch }}, [dispatch])
-    const resolver = useDebouncer(scrubberMoveUpdate, scrubberMoveResolver, refs, resolverProps)
-    return resolver
+    const updateHandler = useThrottler(scrubberMoveUpdate, scrubberMoveResolver, refs, resolverProps)
+    return updateHandler
 }
 
 const useDraggableScrubber = (dispatch: AnimationStateDispatcher<any>, barInterpreter: LogicalBarInterpreter) => {
-    const refs = useDebouncerRefs()
+    const refs = useScrubberRefs()
     const wasPlayingRef = useRef<boolean>(false)
-    const throttledStateSetter = useScrubberMoveResolver(dispatch, refs)
-    const handleScrubbingInitiation = useCallback((x: number, y: number, isPlaying: boolean) => {
+    const throttledStateSetter = useScrubberMoveUpdater(dispatch, refs)
+
+    const initiateScrubbing = useCallback((x: number, y: number, isPlaying: boolean) => {
         const props = {
             barInterpreter,
             isPlaying,
@@ -122,12 +98,14 @@ const useDraggableScrubber = (dispatch: AnimationStateDispatcher<any>, barInterp
             wasPlayingRef: wasPlayingRef,
             dispatch
         }
-        conditionallyHandleScrubbingInitiation({ x, y, ...props })
+        return conditionallyHandleScrubbingInitiation({ x, y, ...props })
     }, [barInterpreter, refs.dragPointRef, wasPlayingRef, dispatch])
-    const handleScrubbingTermination = useCallback((isPlaying: boolean) => {
+
+    const terminateScrubbing = useCallback((isPlaying: boolean) => {
         conditionallyHandleScrubbingTermination(isPlaying, refs.dragPointRef, wasPlayingRef, dispatch)
     }, [refs.dragPointRef, wasPlayingRef, dispatch])
-    return { handleScrubbingInitiation, handleScrubbingTermination, scrubbingStateHandler: throttledStateSetter }
+    
+    return { initiateScrubbing, terminateScrubbing, scrubbingStateHandler: throttledStateSetter }
 }
 
 export default useDraggableScrubber

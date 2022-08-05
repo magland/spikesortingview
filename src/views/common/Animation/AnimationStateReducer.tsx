@@ -7,6 +7,7 @@ export type DrawFn<T> = (frame_data: T) => void
 export type AnimationState<T> = {
     frameData: T[],
     window: [number, number],
+    windowProposal?: [number, number]
     windowSynced: boolean,
     replayMultiplier: number,
     isPlaying: boolean,
@@ -20,18 +21,24 @@ export type AnimationState<T> = {
 
 export type AnimationStateDispatcher<T> = React.Dispatch<AnimationStateAction<T>>
 
-export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'SET_WINDOW' | 'TOGGLE_WINDOW_SYNC' | 'TICK' | 'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SET_BASE_MS_PER_FRAME' | 'SET_REPLAY_RATE' | 'SKIP' | 'TO_END'
+export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'SET_BASE_MS_PER_FRAME' | 'SET_REPLAY_RATE' | 
+                                       'SET_WINDOW' | 'PROPOSE_WINDOW' | 'COMMIT_WINDOW' | 'RELEASE_WINDOW' | 'TOGGLE_WINDOW_SYNC' |
+                                       'TICK' |
+                                       'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SKIP' | 'TO_END'
 
 export type AnimationStateAction<T> =
     AnimationStateSetDispatchAction |
     AnimationStateUpdateFrameDataAction<T> |
+    AnimationStateSetBaseMsPerFrameAction |
+    AnimationStateSetReplayRateAction |
     AnimationStateSetWindowAction |
+    AnimationStateProposeWindowAction |
+    AnimationStateCommitWindowAction |
+    AnimationStateReleaseWindowAction |
     AnimationStateToggleWindowSyncAction |
     AnimationStateTickAction |
     AnimationStateTogglePlaybackAction |
     AnimationStateSetCurrentFrameAction |
-    AnimationStateSetBaseMsPerFrameAction |
-    AnimationStateSetReplayRateAction |
     AnimationStateSkipAction |
     AnimationStateToEndAction
 
@@ -46,9 +53,32 @@ export type AnimationStateUpdateFrameDataAction<T> = {
     replaceExistingFrames?: boolean
 }
 
+export type AnimationStateSetBaseMsPerFrameAction = {
+    type: 'SET_BASE_MS_PER_FRAME',
+    baseMsPerFrame: number
+}
+
+export type AnimationStateSetReplayRateAction = {
+    type: 'SET_REPLAY_RATE',
+    newRate: number
+}
+
 export type AnimationStateSetWindowAction = {
     type: 'SET_WINDOW'
     bounds?: [number, number]
+}
+
+export type AnimationStateProposeWindowAction = {
+    type: 'PROPOSE_WINDOW'
+    bounds?: [number, number]
+}
+
+export type AnimationStateCommitWindowAction = {
+    type: 'COMMIT_WINDOW'
+}
+
+export type AnimationStateReleaseWindowAction = {
+    type: 'RELEASE_WINDOW'
 }
 
 export type AnimationStateToggleWindowSyncAction = {
@@ -69,16 +99,6 @@ export type AnimationStateSetCurrentFrameAction = {
     newIndex: number
 }
 
-export type AnimationStateSetBaseMsPerFrameAction = {
-    type: 'SET_BASE_MS_PER_FRAME',
-    baseMsPerFrame: number
-}
-
-export type AnimationStateSetReplayRateAction = {
-    type: 'SET_REPLAY_RATE',
-    newRate: number
-}
-
 export type AnimationStateSkipAction = {
     type: 'SKIP'
     backward?: boolean
@@ -94,6 +114,9 @@ export type AnimationStateToEndAction = {
 export const SET_DISPATCH: AnimationStateActionType = 'SET_DISPATCH'
 export const UPDATE_FRAME_DATA: AnimationStateActionType = 'UPDATE_FRAME_DATA'
 export const SET_WINDOW: AnimationStateActionType = 'SET_WINDOW'
+export const PROPOSE_WINDOW: AnimationStateActionType = 'PROPOSE_WINDOW'
+export const COMMIT_WINDOW: AnimationStateActionType = 'COMMIT_WINDOW'
+export const RELEASE_WINDOW: AnimationStateActionType = 'RELEASE_WINDOW'
 export const TOGGLE_WINDOW_SYNC: AnimationStateActionType = 'TOGGLE_WINDOW_SYNC'
 export const TICK: AnimationStateActionType = 'TICK'
 export const TOGGLE_PLAYBACK: AnimationStateActionType = 'TOGGLE_PLAYBACK'
@@ -143,16 +166,6 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
             return {...s, animationDispatchFn: a.animationDispatchFn}
         case UPDATE_FRAME_DATA:
             return updateFrames(s, a)
-        case SET_WINDOW:
-            return setWindow(s, a)
-        case TOGGLE_WINDOW_SYNC:
-            return { ...s, windowSynced: !s.windowSynced }
-        case TICK:
-            return doTick(s, a)
-        case TOGGLE_PLAYBACK:
-            return togglePlayState(s)
-        case SET_CURRENT_FRAME:
-            return setFrame(s, a)
         case SET_BASE_MS_PER_FRAME:
             if (a.baseMsPerFrame === 0) {
                 console.warn('Attempt to set ms-per-frame to 0.')
@@ -168,6 +181,25 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
             }
             // refreshAnimationCycle(s)
             return { ...s, replayMultiplier: a.newRate, playbackStartedTimestamp: undefined }
+        case SET_WINDOW:
+            return setWindow(s, a)
+        case PROPOSE_WINDOW:
+            return setProposedWindow(s, a)
+        case COMMIT_WINDOW:
+            // Operates as a non-deleting toggle if we are currently zoomed to the exact proposal
+            if (s.windowProposal && s.windowProposal[0] === s.window[0] && s.windowProposal[1] === s.window[1])
+                return setWindow(s, {type: SET_WINDOW, bounds: undefined})
+            return setWindow(s, {type: SET_WINDOW, bounds: s.windowProposal})
+        case RELEASE_WINDOW:
+            return setWindow(s, {type: SET_WINDOW, bounds: undefined})
+        case TOGGLE_WINDOW_SYNC:
+            return { ...s, windowSynced: !s.windowSynced, windowProposal: undefined }
+        case TICK:
+            return doTick(s, a)
+        case TOGGLE_PLAYBACK:
+            return togglePlayState(s)
+        case SET_CURRENT_FRAME:
+            return setFrame(s, a)
         case SKIP:
             return doSkip(s, a)
         case TO_END:
@@ -179,25 +211,6 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
         }
     }
 }
-
-// It's not actually clear that this ever did anything useful.
-// TODO: Deprecated. Remove this function (& references to it) after Sep 2022
-// if the widget's behavior remains normal.
-// jfm says: All references to this function have been commented out,
-// so I'm commenting out this function so it doesn't create a linter warning
-// const refreshAnimationCycle = (s: AnimationState<any>) => {
-//     if (s.pendingFrameCode === undefined) {
-//         return
-//     }
-//     window.cancelAnimationFrame(s.pendingFrameCode)
-//     if (s.animationDispatchFn === undefined) {
-//         console.warn('Animation callback unset.')
-//         return
-//     }
-//     if (s.isPlaying) {
-//         s.pendingFrameCode = window.requestAnimationFrame(s.animationDispatchFn)
-//     }
-// }
 
 
 const updateFrames = <T, >(s: AnimationState<T>, a: AnimationStateUpdateFrameDataAction<T>): AnimationState<T> => {
@@ -223,6 +236,16 @@ const setWindow = <T, >(s: AnimationState<T>, a: AnimationStateSetWindowAction):
     s.currentFrameIndex = Math.min(visibleWindow[1], Math.max(s.currentFrameIndex, visibleWindow[0]))
     s.playbackStartedTimestamp = undefined
     return { ...s, window: visibleWindow }
+}
+
+
+const setProposedWindow = <T, >(s: AnimationState<T>, a: AnimationStateProposeWindowAction): AnimationState<T> => {
+    const { bounds } = a
+    const { window, windowProposal: currentProposal } = s
+    if (bounds === undefined || bounds.length !== 2) return currentProposal ? { ...s, windowProposal: undefined } : s
+    const newProposal = [Math.max(bounds[0], window[0]), Math.min(bounds[1], window[1])] as [number, number]
+    if (currentProposal && newProposal[0] === currentProposal[0] && newProposal[1] === currentProposal[1]) return s
+    return {...s, windowProposal: newProposal}
 }
 
 

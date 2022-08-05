@@ -1,29 +1,57 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 
-export type DebounceUpdater<T, TRefs> = (refs: TRefs, state: T) => boolean
-export type DebounceResolver<TRefs, ResolverProps> = (refs: TRefs, props: ResolverProps) => void
+export type DebounceThrottleUpdater<T, TRefs> = (refs: TRefs, state: T) => boolean
+export type DebounceThrottleResolver<TRefs, ResolverProps> = (refs: TRefs, props: ResolverProps) => void
 
-// TODO: Okay, technically this is a THROTTLE, not a DEBOUNCE: debounce fires after X time with no event, while
-// a throttle rate-limits the event in progress. We should consider providing both...
-// And also renaming this for accuracy/pedantry.
-export const useDebouncer = <T, TRefs, ResolverProps>(updateFn: DebounceUpdater<T, TRefs>, resolveFn: DebounceResolver<TRefs, ResolverProps>, refs: TRefs, resolverProps: ResolverProps) => {
+// TODO: Allow different throttling rate as per the debouncer?
+export const useThrottler = <T, TRefs, ResolverProps>(
+        updateFn: DebounceThrottleUpdater<T, TRefs>,
+        resolveFn: DebounceThrottleResolver<TRefs, ResolverProps>,
+        refs: TRefs,
+        resolverProps: ResolverProps,
+        timeMs?: number
+    ) => {
     const pendingRequest = useRef<number| undefined>(undefined)
     const cleanup = useCallback(() => pendingRequest.current = undefined, [pendingRequest])
 
     const updater = useCallback((state: T) => updateFn(refs, state), [updateFn, refs])
     const resolver = useCallback((time: number) => {
-        // OPTIONAL: documentation here controlled by debug or something?
+        // OPTIONAL: could insert debug messages here
+        resolveFn(refs, resolverProps)
+        cleanup()
+    }, [resolveFn, refs, resolverProps, cleanup])
+    const throttler = useCallback((state: T) => {
+        const change = updater(state)
+        if (change && !(pendingRequest.current)) {
+            pendingRequest.current = timeMs ?  window.requestAnimationFrame(resolver) : window.setTimeout(resolver, timeMs)
+        }
+    }, [pendingRequest, updater, resolver, timeMs])
+    return throttler
+}
+
+export const useDebouncer = <T, TRefs, ResolverProps>(
+        updateFn: DebounceThrottleUpdater<T, TRefs>,
+        resolveFn: DebounceThrottleResolver<TRefs, ResolverProps>,
+        refs: TRefs,
+        resolverProps: ResolverProps,
+        timeMs?: number
+    ) => {
+    const time = useMemo(() => timeMs ?? 100, [timeMs])
+    const lastRequest = useRef<number | undefined>(undefined)
+    const cleanup = useCallback(() => lastRequest.current = undefined, [lastRequest])
+
+    const updater = useCallback((state: T) => updateFn(refs, state), [updateFn, refs])
+    const resolver = useCallback((time: number) => {
         resolveFn(refs, resolverProps)
         cleanup()
     }, [resolveFn, refs, resolverProps, cleanup])
     const debouncer = useCallback((state: T) => {
         const change = updater(state)
-        console.log(`Request pending: ${pendingRequest.current} Change: ${change}`)
-        if (change && !(pendingRequest.current)) {
-            console.log(`Scheduling update`)
-            pendingRequest.current = window.requestAnimationFrame(resolver)
+        if (change) {
+            if (lastRequest.current) clearTimeout(lastRequest.current)
+            lastRequest.current = setTimeout(resolver, time)
         }
-    }, [pendingRequest, updater, resolver])
+    }, [updater, lastRequest, resolver, time])
     return debouncer
 }

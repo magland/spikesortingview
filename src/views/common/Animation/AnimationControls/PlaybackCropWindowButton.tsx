@@ -9,15 +9,20 @@ export const CROP_BUTTON = "cropButton"
 type PlaybackCropWindowButtonProps = {
     dispatch: AnimationStateDispatcher<any>
     isCropped: boolean
-    selectionBounds?: [number, number]
 }
 
 const PlaybackCropWindowButton = (props: PlaybackCropWindowButtonProps) => {
-    const { dispatch, isCropped, selectionBounds } = props
+    const { dispatch, isCropped } = props
 
-    const cropHandler = useCallback((e: React.MouseEvent) => {
-        dispatch({ type: 'SET_WINDOW', bounds: selectionBounds })
-    }, [dispatch, selectionBounds])
+    // const cropHandler = useCallback((e: React.MouseEvent) => {
+    //     isCropped
+    //         ? dispatch({ type: 'RELEASE_WINDOW' })
+    //         : dispatch({ type: 'COMMIT_WINDOW' })
+    // }, [isCropped, dispatch])
+
+    const cropHandler = useCallback((E: React.MouseEvent) => {
+        dispatch({ type: 'COMMIT_WINDOW' })
+    }, [dispatch])
 
     const cropButton = useMemo(() =>
         <span className={isCropped ? 'Inverted' : ''}
