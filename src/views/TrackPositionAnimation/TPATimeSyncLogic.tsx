@@ -14,6 +14,21 @@ const timeComparison = (a: number, b: number) => a - b
 
 type TimeLookupFn = (time: number) => BstSearchResult<number> | undefined
 
+export type liveMatchFocusToFrameProps = {
+    focusTime: number | undefined
+    checkFocusWithinEpsilon: (focusTime: number | undefined, replayRateMultiplier: number) => boolean
+    multiplier: number
+    cancelPendingRefocus: () => void
+    findNearestTime: (time: number) => BstSearchResult<number> | undefined
+    animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>
+}
+export const liveMatchFocusToFrame = (props: liveMatchFocusToFrameProps) => {
+    const { focusTime, checkFocusWithinEpsilon, multiplier, cancelPendingRefocus, findNearestTime, animationStateDispatch } = props
+    if (checkFocusWithinEpsilon(focusTime, multiplier)) return
+    cancelPendingRefocus()
+    matchFrameToFocus(focusTime, findNearestTime, animationStateDispatch)
+}
+
 export const matchFocusToFrame = (animationCurrentTime: number | undefined, setTimeFocus: (time: number, o: {autoScrollVisibleTimeRange?: boolean}) => void) => {
     // const epsilon = 0.05
     const currentTime = animationCurrentTime
@@ -34,6 +49,7 @@ export const matchFrameToFocus = (focusTime: number | undefined, findNearestTime
 }
 
 const useTimeLookupFn = (animationState: AnimationState<PositionFrame>) => {
+    // TODO: Is this updating too often?
     const realizedTimestamps = useMemo(() => animationState.frameData.map(d => d ? d.timestamp || -1 : -1), [animationState.frameData])
     const timeSearchFn = useBinarySearchTree<number>(realizedTimestamps, timeComparison) // do not use an anonymous fn here--results in constant refreshes
     const findNearestTime = useCallback((time: number) => {

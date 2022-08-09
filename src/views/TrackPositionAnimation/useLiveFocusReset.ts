@@ -1,30 +1,43 @@
-import { useRef } from "react"
+import { useCallback, useMemo, useRef } from "react"
 import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from "util/useDebouncer"
 import { matchFocusToFrame } from "./TPATimeSyncLogic"
 
-// NOTE: This is a sketch that isn't fully implemented yet.
-
-type debounceUpdateRefs = { currentTimeRef: React.MutableRefObject<number | undefined> }
+type debounceUpdateRefs = { currentTargetFocusTimeRef: React.MutableRefObject<number | undefined> }
 type debounceUpdateProps = { currentTime: number | undefined }
-type debounceUpdateResolverProps = { committer: (time: number | undefined, setTimeFocus: any) => void, setterFn: any }
+type debounceUpdateResolverProps = { committer: (time: number | undefined, setTimeFocus: timeSetter) => void, setterFn: timeSetter }
 
+type timeSetter = (time: number, o?: any) => void
 
-const currentTimeRef = useRef<number | undefined>(undefined)
-const refs: debounceUpdateRefs = { currentTimeRef }
+const throttleRateMs = 100
+
 const timeUpdater: DebounceThrottleUpdater<debounceUpdateProps, debounceUpdateRefs> = (refs, state) => {
-    if (state.currentTime === refs.currentTimeRef.current) return false
-    refs.currentTimeRef.current = state.currentTime
+    if (state.currentTime === refs.currentTargetFocusTimeRef.current) return false
+    refs.currentTargetFocusTimeRef.current = state.currentTime
     return true
 }
 const timeResolver: DebounceThrottleResolver<debounceUpdateRefs, debounceUpdateResolverProps> = (refs, props) => {
-    console.log(`Updating time, it is ${Date.now()}`)
-    props.committer(refs.currentTimeRef.current, props.setterFn)
+    // It looks like this is actually getting called too often--not sure what's going on there.
+    // console.log(`Updating time, it is ${Date.now()}`)
+    props.committer(refs.currentTargetFocusTimeRef.current, props.setterFn)
 }
 
-const useLiveFocusReset = (setTimeFocus: any) => {
-    const liveFocus = useThrottler(timeUpdater, timeResolver, refs, { committer: matchFocusToFrame, setterFn: setTimeFocus }, 100)
+const checkFocusIsWithinEpsilon = (scheduledFocusRef: React.MutableRefObject<number | undefined>, focusTime: number | undefined, replayRateMultiplier: number) => {
+    if (scheduledFocusRef.current === undefined || focusTime === undefined) return false
+    // At 1:1 playback, we expect ~100 ms to pass between 100-ms-throttled focus-update calls. Just need to multiply by replay rate multiplier.
+    const epsilon = Math.abs(throttleRateMs * replayRateMultiplier * 1.5 * .001) // the 1.5 multiplier gives us a bit of fudge, while .001 converts MS to S.
+    return Math.abs(scheduledFocusRef.current - focusTime) < epsilon
+}
 
-    return liveFocus
+const useLiveFocusReset = (setTimeFocus: timeSetter) => {
+    const currentTargetFocusTimeRef = useRef<number | undefined>(undefined)
+    const refs: debounceUpdateRefs = useMemo(() => { return { currentTargetFocusTimeRef }}, [currentTargetFocusTimeRef])
+    const resolverProps = useMemo(() => { return { committer: matchFocusToFrame, setterFn: setTimeFocus }  }, [setTimeFocus])
+    const { throttler, cancelThrottled } = useThrottler(timeUpdater, timeResolver, refs, resolverProps, throttleRateMs)
+    const checkFocusWithinEpsilon = useCallback(
+        (focusTime: number | undefined, replayRateMultiplier: number) => checkFocusIsWithinEpsilon(refs.currentTargetFocusTimeRef, focusTime, replayRateMultiplier),
+        [refs])
+
+    return { liveFocus: throttler, checkFocusWithinEpsilon, cancelPendingRefocus: cancelThrottled }
 }
 
 

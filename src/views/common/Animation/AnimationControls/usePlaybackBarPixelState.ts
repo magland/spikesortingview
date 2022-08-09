@@ -24,7 +24,7 @@ const usePlaybackBarPixelState = (props: PlaybackBarPixelStateProps) => {
     const proposalXRange = useWindowProposal(frameToPixelX, visibleWindow[0], windowProposal)
     const currentElapsedFrames = useMemo(() => currentFrameIndex - visibleWindow[0], [currentFrameIndex, visibleWindow])
     const scrubberCenterX = useMemo(() => frameToPixelX(currentElapsedFrames), [frameToPixelX, currentElapsedFrames])
-    const barInterpreter = getBarInterpreter(currentElapsedFrames)
+    const barInterpreter = getBarInterpreter(scrubberCenterX)
     const barClickToFrame = getBarClickToFrame(barInterpreter)
 
     return { scrubberCenterX, barInterpreter, barClickToFrame, proposalXRange }

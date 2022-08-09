@@ -2,7 +2,7 @@ import { useRecordingSelectionTimeInitialization, useTimeFocus, useTimeRange } f
 import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from 'FigurlCanvas/CanvasTransforms'
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
-import React, { Fragment, FunctionComponent, useEffect, useMemo } from "react"
+import React, { Fragment, FunctionComponent, useCallback, useEffect, useMemo } from "react"
 import { CROP_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackCropWindowButton'
 import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControls/PlaybackOptionalButtons'
 import { SYNC_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackSyncWindowButton'
@@ -11,9 +11,10 @@ import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispa
 import TPADecodedPositionLayer, { useConfiguredPositionDrawFunction } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
-import useTimeLookupFn, { matchFocusToFrame, matchFrameToFocus } from './TPATimeSyncLogic'
+import useTimeLookupFn, { liveMatchFocusToFrame, matchFocusToFrame } from './TPATimeSyncLogic'
 import TPATrackLayer from './TPATrackLayer'
 import { DecodedPositionData, DecodedPositionFrame, PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
+import useLiveFocusReset from './useLiveFocusReset'
 
 // TODO: Implement streaming / live view
 
@@ -170,40 +171,51 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
         })
     }, [dataFrames])
 
-    // TODO: Full support of dynamic updates to frame set will require looking at AnimationState.frameData instead of dataFrames!
-
     const { focusTime, setTimeFocus } = useTimeFocus()  // state imported from recording context
     const findNearestTime = useTimeLookupFn(animationState)
     const animationCurrentTime = animationState?.frameData[animationState?.currentFrameIndex]?.timestamp
-    useEffect(() => {
-        matchFrameToFocus(focusTime, findNearestTime, animationStateDispatch)
-    }, [focusTime, findNearestTime])
+    // TODO: this could probably still be made neater/better compartmentalized
+    const { liveFocus, checkFocusWithinEpsilon, cancelPendingRefocus } = useLiveFocusReset(setTimeFocus)
+    const onNewFocusTime = useCallback((focusTime: number | undefined) => liveMatchFocusToFrame({
+        focusTime,
+        checkFocusWithinEpsilon,
+        multiplier: animationState.replayMultiplier,
+        cancelPendingRefocus,
+        findNearestTime,
+        animationStateDispatch
+    }), [checkFocusWithinEpsilon, animationState.replayMultiplier, cancelPendingRefocus, findNearestTime, animationStateDispatch])
+    useEffect(() => onNewFocusTime(focusTime), [onNewFocusTime, focusTime])
     
     useEffect(() => {
-        if (animationState.isPlaying) return // TODO: Do a debounce on this instead of an absolute ban
-        matchFocusToFrame(animationCurrentTime, setTimeFocus)
-    }, [animationCurrentTime, setTimeFocus, animationState.isPlaying])
+        animationState.isPlaying ? liveFocus({ currentTime: animationCurrentTime }) : matchFocusToFrame(animationCurrentTime, setTimeFocus)
+    }, [animationCurrentTime, setTimeFocus, animationState.isPlaying, liveFocus])
+
 
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     useEffect(() => {
-        const windowBounds: [number, number] | undefined = (!animationState.windowSynced || !visibleTimeStartSeconds || !visibleTimeEndSeconds)
+        if (!animationState.windowSynced) return
+        const windowBounds: [number, number] | undefined = (visibleTimeStartSeconds === undefined || visibleTimeEndSeconds === undefined)
             ? undefined
             : [(findNearestTime(visibleTimeStartSeconds)?.baseListIndex) as number, (findNearestTime(visibleTimeEndSeconds)?.baseListIndex) as number]
         if (windowBounds) { // Narrow the animation window if "closest frame" falls outside the range due to rounding. Avoids weird sync behavior.
-            // TODO: Should probably just turn off the focus auto-reset if the window is being synced.
             windowBounds[0] += (animationState.frameData[windowBounds[0]].timestamp || -1) < (visibleTimeStartSeconds ?? 0) ?  1 : 0
             windowBounds[1] += (animationState.frameData[windowBounds[1]].timestamp || -1) > ( visibleTimeEndSeconds  ?? 0) ? -1 : 0
         }
         animationStateDispatch({ type: 'SET_WINDOW', bounds: windowBounds })
     }, [visibleTimeStartSeconds, visibleTimeEndSeconds, animationStateDispatch, findNearestTime, animationState.windowSynced, animationState.frameData])
+    useEffect(() => {
+        // Reset to full recording when we turn off syncing
+        if (animationState.windowSynced) return
+        animationStateDispatch({ type: 'SET_WINDOW', bounds: undefined })
+    }, [animationState.windowSynced])
 
     const currentProbabilityFrame = useMemo(() => {
-        const linearFrame = dataFrames[animationState.currentFrameIndex]?.decodedPositionFrame
+        const linearFrame = animationState.frameData[animationState.currentFrameIndex]?.decodedPositionFrame
         const finalFrame = getDecodedPositionFramePx(linearFrame, decodedLocationsMap)
         return {
             frame: finalFrame
         }
-    }, [animationState.currentFrameIndex, dataFrames, decodedLocationsMap])
+    }, [animationState.currentFrameIndex, animationState.frameData, decodedLocationsMap])
 
     const currentPositionFrame = useMemo(() => {
         return {

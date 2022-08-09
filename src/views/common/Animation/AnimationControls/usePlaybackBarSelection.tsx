@@ -67,7 +67,7 @@ const useSelectionRefs = () => {
 
 const useThrottledDragSelection = (refs: PlaybackSelectionRefs, updateSelectedWindow: SelectedWindowUpdater) => {
     const resolverProps = useMemo(() => { return { updateSelectedWindow }}, [updateSelectedWindow])
-    const updateHandler = useThrottler(dragSelectionUpdater, dragSelectionResolver, refs, resolverProps)
+    const { throttler: updateHandler } = useThrottler(dragSelectionUpdater, dragSelectionResolver, refs, resolverProps)
     return updateHandler
 }
 

@@ -94,7 +94,7 @@ const useScrubberMoveUpdater = (dispatch: AnimationStateDispatcher<any>, refs: S
 const useDraggableScrubber = (dispatch: AnimationStateDispatcher<any>, barInterpreter: LogicalBarInterpreter) => {
     const refs = useScrubberRefs()
     const wasPlayingRef = useRef<boolean>(false)
-    const throttledStateSetter = useScrubberMoveUpdater(dispatch, refs)
+    const { throttler } = useScrubberMoveUpdater(dispatch, refs)
 
     const initiateScrubbing = useCallback((x: number, y: number, isPlaying: boolean) => {
         const props = {
@@ -111,7 +111,7 @@ const useDraggableScrubber = (dispatch: AnimationStateDispatcher<any>, barInterp
         conditionallyHandleScrubbingTermination(isPlaying, refs.dragPointRef, wasPlayingRef, dispatch)
     }, [refs.dragPointRef, wasPlayingRef, dispatch])
     
-    return { initiateScrubbing, terminateScrubbing, scrubbingStateHandler: throttledStateSetter }
+    return { initiateScrubbing, terminateScrubbing, scrubbingStateHandler: throttler }
 }
 
 

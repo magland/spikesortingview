@@ -50,7 +50,7 @@ export const useThrottledWheel = (dispatch: AnimationStateDispatcher<any>) => {
 }
 
 const useWheelHandler = (dispatch: AnimationStateDispatcher<any>) => {
-    const throttledUpdater = useThrottledWheel(dispatch)
+    const { throttler: throttledUpdater } = useThrottledWheel(dispatch)
     const wheelHandler = useCallback((e: React.WheelEvent) => {
         if (e.deltaY === 0) return
         const useFineWheel = e.shiftKey
