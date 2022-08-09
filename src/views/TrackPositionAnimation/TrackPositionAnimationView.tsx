@@ -1,20 +1,17 @@
-import { useRecordingSelectionTimeInitialization, useTimeFocus, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeFocus } from 'contexts/RecordingSelectionContext'
 import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from 'FigurlCanvas/CanvasTransforms'
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
-import React, { Fragment, FunctionComponent, useCallback, useEffect, useMemo } from "react"
-import { CROP_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackCropWindowButton'
-import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControls/PlaybackOptionalButtons'
-import { SYNC_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackSyncWindowButton'
-import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
-import AnimationStateReducer, { AnimationState, AnimationStateAction, curryDispatch, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
+import React, { FunctionComponent, useCallback, useEffect, useMemo } from "react"
+import AnimationStateReducer, { AnimationState, AnimationStateAction, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
+import useLiveTimeSyncing from 'views/common/Animation/AnimationUtilities/useTimeSyncing'
+import useTimeWindowSyncing from 'views/common/Animation/AnimationUtilities/useTimeWindowSyncing'
+import FrameAnimation from 'views/common/Animation/FrameAnimation'
 import TPADecodedPositionLayer, { useConfiguredPositionDrawFunction } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
-import useTimeLookupFn, { liveMatchFocusToFrame, matchFocusToFrame } from './TPATimeSyncLogic'
 import TPATrackLayer from './TPATrackLayer'
 import { DecodedPositionData, DecodedPositionFrame, PositionFrame, TrackAnimationStaticData } from "./TrackPositionAnimationTypes"
-import useLiveFocusReset from './useLiveFocusReset'
 
 // TODO: Implement streaming / live view
 
@@ -96,24 +93,6 @@ const usePositionFrames = (positions: number[][] | undefined, timestampStart: nu
     }, [positions, timestampStart, timestamps, headDirection, decodedData])
 }
 
-const setupAnimationStateDispatchFn = (animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>) => {
-    if (!animationStateDispatch) return
-    const aniDispatch = curryDispatch(animationStateDispatch)
-    animationStateDispatch({
-        type: 'SET_DISPATCH',
-        animationDispatchFn: aniDispatch
-    })
-}
-
-const setupReplayRate = (realTimeReplayRateMs: number | undefined, animationStateDispatch: React.Dispatch<AnimationStateAction<PositionFrame>>) => {
-    if (realTimeReplayRateMs && realTimeReplayRateMs !== 0) {
-        animationStateDispatch({
-            type: 'SET_BASE_MS_PER_FRAME',
-            baseMsPerFrame: realTimeReplayRateMs
-        })
-    }
-}
-
 const useDrawingSpace = (width: number, drawHeight: number, xmax: number, xmin: number, ymax: number, ymin: number) => {
     // We call the final-margin computation manually because we need to track margins for timestamp display
     const finalMargins = useAspectTrimming({
@@ -146,11 +125,8 @@ const initialState = makeDefaultState<PositionFrame>()
 const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps> = (props: TrackPositionAnimationProps) => {
     const { data, width, height } = props
     const { xmin, xmax, ymin, ymax, headDirection, samplingFrequencyHz } = data
-    const realTimeReplayRateMs = samplingFrequencyHz !== undefined ? 1000 / samplingFrequencyHz : undefined
 
     const [animationState, animationStateDispatch] = React.useReducer<TPAReducer>(AnimationStateReducer, initialState)
-    useEffect(() => setupAnimationStateDispatchFn(animationStateDispatch), [animationStateDispatch])
-    useEffect(() => setupReplayRate(realTimeReplayRateMs, animationStateDispatch), [realTimeReplayRateMs, animationStateDispatch])
     const drawHeight = height - controlsHeight
     const { finalMargins, transform } = useDrawingSpace(width, drawHeight, xmax, xmin, ymax, ymin)
     const trackBins = useTrackBinPixelDimensions(transform, data.trackBinULCorners, data.trackBinWidth, data.trackBinHeight)
@@ -172,42 +148,13 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     }, [dataFrames])
 
     const { focusTime, setTimeFocus } = useTimeFocus()  // state imported from recording context
-    const findNearestTime = useTimeLookupFn(animationState)
-    const animationCurrentTime = animationState?.frameData[animationState?.currentFrameIndex]?.timestamp
-    // TODO: this could probably still be made neater/better compartmentalized
-    const { liveFocus, checkFocusWithinEpsilon, cancelPendingRefocus } = useLiveFocusReset(setTimeFocus)
-    const onNewFocusTime = useCallback((focusTime: number | undefined) => liveMatchFocusToFrame({
-        focusTime,
-        checkFocusWithinEpsilon,
-        multiplier: animationState.replayMultiplier,
-        cancelPendingRefocus,
-        findNearestTime,
-        animationStateDispatch
-    }), [checkFocusWithinEpsilon, animationState.replayMultiplier, cancelPendingRefocus, findNearestTime, animationStateDispatch])
-    useEffect(() => onNewFocusTime(focusTime), [onNewFocusTime, focusTime])
-    
-    useEffect(() => {
-        animationState.isPlaying ? liveFocus({ currentTime: animationCurrentTime }) : matchFocusToFrame(animationCurrentTime, setTimeFocus)
-    }, [animationCurrentTime, setTimeFocus, animationState.isPlaying, liveFocus])
+    const getTimeFromFrame = useCallback((frame: PositionFrame | undefined) => frame?.timestamp ?? -1, [])
 
+    const { handleOutsideTimeUpdate, handleFrameTimeUpdate } = useLiveTimeSyncing(setTimeFocus, animationState, animationStateDispatch, getTimeFromFrame)
+    useEffect(() => handleOutsideTimeUpdate(focusTime), [handleOutsideTimeUpdate, focusTime])
+    useEffect(() => handleFrameTimeUpdate(), [handleFrameTimeUpdate])
 
-    const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
-    useEffect(() => {
-        if (!animationState.windowSynced) return
-        const windowBounds: [number, number] | undefined = (visibleTimeStartSeconds === undefined || visibleTimeEndSeconds === undefined)
-            ? undefined
-            : [(findNearestTime(visibleTimeStartSeconds)?.baseListIndex) as number, (findNearestTime(visibleTimeEndSeconds)?.baseListIndex) as number]
-        if (windowBounds) { // Narrow the animation window if "closest frame" falls outside the range due to rounding. Avoids weird sync behavior.
-            windowBounds[0] += (animationState.frameData[windowBounds[0]].timestamp || -1) < (visibleTimeStartSeconds ?? 0) ?  1 : 0
-            windowBounds[1] += (animationState.frameData[windowBounds[1]].timestamp || -1) > ( visibleTimeEndSeconds  ?? 0) ? -1 : 0
-        }
-        animationStateDispatch({ type: 'SET_WINDOW', bounds: windowBounds })
-    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, animationStateDispatch, findNearestTime, animationState.windowSynced, animationState.frameData])
-    useEffect(() => {
-        // Reset to full recording when we turn off syncing
-        if (animationState.windowSynced) return
-        animationStateDispatch({ type: 'SET_WINDOW', bounds: undefined })
-    }, [animationState.windowSynced])
+    useTimeWindowSyncing(animationState, animationStateDispatch, getTimeFromFrame)
 
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = animationState.frameData[animationState.currentFrameIndex]?.decodedPositionFrame
@@ -223,14 +170,6 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             frame: animationState.frameData[animationState.currentFrameIndex],
         }
     }, [animationState.currentFrameIndex, animationState.frameData, finalMargins.bottom])
-
-    const uiFeatures = useMemo(() => {
-        return {
-            optionalButtons: [ SYNC_BUTTON, CROP_BUTTON ] as PlaybackOptionalButtons[],
-            isSynced: animationState?.windowSynced,
-            isCropped: animationState?.windowSynced || !(animationState?.window[0] === 0 && animationState?.window[1] === (animationState?.frameData?.length - 1))
-        }
-    }, [animationState.windowSynced, animationState.window, animationState.frameData])
 
     const trackLayer = useMemo(() => <TPATrackLayer
             width={width}
@@ -252,30 +191,19 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             drawData={currentPositionFrame}
         />, [width, drawHeight, currentPositionFrame])
 
-    const controlLayer = useMemo(() => <AnimationPlaybackControls
-            width={width}
-            height={controlsHeight}
-            verticalOffset={drawHeight}
-            dispatch={animationStateDispatch}
-            totalFrameCount={animationState.frameData.length}
-            visibleWindow={animationState.window}
-            windowProposal={animationState.windowProposal}
-            currentFrameIndex={animationState.currentFrameIndex}
-            isPlaying={animationState.isPlaying}
-            playbackRate={animationState.replayMultiplier}
-            ui={uiFeatures}
-        />, [width, drawHeight, animationState.frameData.length, animationState.window, animationState.windowProposal, animationState.currentFrameIndex,
-            animationState.isPlaying, uiFeatures, animationState.replayMultiplier])
- 
     return (
-        <Fragment>
-            <div>
-                {trackLayer}
-                {probabilityLayer}
-                {positionLayer}
-                {controlLayer}
-            </div>
-        </Fragment>
+        <FrameAnimation
+            width={width}
+            height={height}
+            controlsHeight={controlsHeight}
+            state={animationState}
+            dispatch={animationStateDispatch}
+            dataSeriesFrameRateHz={samplingFrequencyHz}
+        >
+            {trackLayer}
+            {probabilityLayer}
+            {positionLayer}
+        </FrameAnimation>
     )
 }
 
