@@ -22,6 +22,7 @@ export type AnimationPlaybackControlsProps = {
 export type ControlFeatures = {
     isSynced?: boolean
     isCropped?: boolean
+    couldCrop?: boolean
     optionalButtons?: PlaybackOptionalButtons[]
     usingRateButtons?: boolean
     customPlaybackRates?: number[]

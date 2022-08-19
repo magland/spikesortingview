@@ -20,9 +20,11 @@ const PlaybackSyncWindowButton = (props: PlaybackSyncButtonProps) => {
 
     const syncButton = useMemo(() => 
         <span onMouseDown={toggleWindowSyncHandler}
-          title={isSynced ? "Unsync playback window from shared state" : "Sync playback window to shared state"}
+          title={isSynced
+            ? "Unsync playback bar from global time range"
+            : "Sync playback bar to global time range"}
         >
-            {isSynced ? <FontAwesomeIcon icon={faLinkSlash} /> : <FontAwesomeIcon icon={faLink} />}
+            {isSynced ? <FontAwesomeIcon icon={faLink} /> : <FontAwesomeIcon icon={faLinkSlash} />}
         </span>
         , [isSynced, toggleWindowSyncHandler])
 

@@ -24,9 +24,14 @@ const GetSecondaryPlaybackControls = (props: SecondaryControlButtonsProps) => {
     const rightButtonSpacingPx = rightButtonCount * perButtonRightButtonSpacingPx
 
     const selectedButtons = useMemo(() => new Set(ui?.optionalButtons), [ui?.optionalButtons])
-    // TODO: More thinking--this could result in building expensive buttons that aren't actually used.
+    // TODO: Consider if this could result in building expensive buttons that aren't actually used.
     const syncButton = PlaybackSyncWindowButton({dispatch, isSynced: (ui?.isSynced ?? false)})
-    const cropButton = PlaybackCropWindowButton({dispatch, isCropped: (ui?.isCropped ?? false)}) // TODO: MUST ADD RANGE!!!
+    const cropButton = PlaybackCropWindowButton({
+        dispatch,
+        isSynced: (ui?.isSynced ?? false),
+        isCropped: (ui?.isCropped ?? false),
+        willCrop: (ui?.couldCrop ?? false)
+    }) // TODO: Add range for display ?
 
     const panel = useMemo(() => {
         return ( 

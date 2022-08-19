@@ -3,10 +3,14 @@ div.AnimationControlButton span {
     /* text-align: center; /* Ought to work, but doesn't, alas. */
 }
 
-div.AnimationControlButton span.Inverted {
+div.AnimationControlButton span.Highlighted {
     /* color: white; */
-    color: #828282;
+    color: #b50e00;
     /* background-color: black; */
+}
+
+div.AnimationControlButton span.Inactive {
+    color: #828282;
 }
 
 /* Styling for inline dropdown from https://github.com/JedWatson/react-select/issues/4201

@@ -47,12 +47,16 @@ const FrameAnimation = <T, >(props: FrameAnimationProps<T>) => {
     const drawHeight = useMemo(() => height - controlsHeight, [height, controlsHeight])
 
     const uiFeatures = useMemo(() => {
+        const currentWindowIsFullRecording = (state?.window[0] === 0 && state?.window[1] === (state?.frameData?.length - 1))
+        const proposalExists = (state?.windowProposal && state?.windowProposal?.length === 2)
+        const proposalMatchesWindow = (state?.windowProposal && state?.windowProposal[0] === state?.window[0] && state?.windowProposal[1] === state?.window[1])
         return {
             optionalButtons: [ SYNC_BUTTON, CROP_BUTTON ] as PlaybackOptionalButtons[],
             isSynced: state?.windowSynced,
-            isCropped: state?.windowSynced || !(state?.window[0] === 0 && state?.window[1] === (state?.frameData?.length - 1))
+            isCropped: state?.windowSynced || !currentWindowIsFullRecording,
+            couldCrop: (!state?.windowSynced && proposalExists && !proposalMatchesWindow) || false
         }
-    }, [state.windowSynced, state.window, state.frameData])
+    }, [state.windowSynced, state.window, state.windowProposal, state.frameData])
 
     const controlLayer = useMemo(() => <AnimationPlaybackControls
             width={width}

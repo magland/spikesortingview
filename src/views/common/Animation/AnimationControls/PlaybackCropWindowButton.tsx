@@ -8,31 +8,32 @@ export const CROP_BUTTON = "cropButton"
 
 type PlaybackCropWindowButtonProps = {
     dispatch: AnimationStateDispatcher<any>
+    isSynced: boolean
     isCropped: boolean
+    willCrop: boolean
 }
 
 const PlaybackCropWindowButton = (props: PlaybackCropWindowButtonProps) => {
-    const { dispatch, isCropped } = props
-
-    // const cropHandler = useCallback((e: React.MouseEvent) => {
-    //     isCropped
-    //         ? dispatch({ type: 'RELEASE_WINDOW' })
-    //         : dispatch({ type: 'COMMIT_WINDOW' })
-    // }, [isCropped, dispatch])
-
+    const { dispatch, isSynced, isCropped, willCrop } = props
     const cropHandler = useCallback((E: React.MouseEvent) => {
         dispatch({ type: 'COMMIT_WINDOW' })
     }, [dispatch])
 
     const cropButton = useMemo(() =>
-        <span className={isCropped ? 'Inverted' : ''}
-            title={isCropped ? "Unset window" : "Trim visible time to selection"}
+        <span className={isSynced ? 'Inactive' : isCropped ? 'Highlighted' : ''}
+            title={isSynced
+                ? "Playback range syncing is on--playback is automatically limited to global state"
+                : willCrop
+                    ? "Limit playback bar range to current selection"
+                    : isCropped
+                        ? "Show complete animation duration in playback bar"
+                        : "Drag-click in the playback bar to select a focus range" }
             onMouseDown={cropHandler}
           >
             <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
             {/* <FontAwesomeIcon icon={faCrop} /> */}
           </span>
-    , [isCropped, cropHandler])
+    , [isSynced, isCropped, willCrop, cropHandler])
 
     return cropButton
 }

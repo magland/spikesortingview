@@ -24,7 +24,7 @@ const PlaybackChangeDirectionButton = (props: PlaybackChangeDirectionButtonProps
 
     // Alternatively, consider the faArrowRightArrowLeft icon, which wouldn't need to be changed and might be more expressive.
     const directionIcon = useMemo(() => {
-        return playbackRate > 0 ? <FontAwesomeIcon icon={faStepBackward} /> : <FontAwesomeIcon icon={faStepForward} />
+        return playbackRate < 0 ? <FontAwesomeIcon icon={faStepBackward} /> : <FontAwesomeIcon icon={faStepForward} />
     }, [playbackRate])
 
     const button = useMemo(() => {
