@@ -28,6 +28,7 @@ import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
 import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageComponent';
 import SortingCuration2View from 'views/SortingCuration2/SortingCuration2View';
 import SortingSelectionView from 'views/SortingSelection/SortingSelectionView';
+import SpikeLocationsView from 'views/SpikeLocations/SpikeLocationsView';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -126,6 +127,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'SortingSelection') {
         return <SortingSelectionView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'SpikeLocations') {
+        return <SpikeLocationsView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
