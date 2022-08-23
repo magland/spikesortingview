@@ -69,7 +69,6 @@ const FrameAnimation: FunctionComponent<PropsWithChildren<FrameAnimationProps<an
         const currentWindowIsFullRecording = (state?.window[0] === 0 && state?.window[1] === (state?.frameData?.length - 1))
         const proposalExists = (state?.windowProposal && state?.windowProposal?.length === 2)
         const proposalMatchesWindow = (state?.windowProposal && state?.windowProposal[0] === state?.window[0] && state?.windowProposal[1] === state?.window[1])
-        // TODO: make the optional buttons list a parameter rather than hard-coded here
         return {
             optionalButtons: optionalButtons ?? [],
             isSynced: state?.windowSynced,
