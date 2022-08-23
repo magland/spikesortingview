@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import AnimationControlButtonContainer from './AnimationControlButtonContainer'
+import PlaybackBookmarkButton, { BOOKMARK_BUTTON } from './AnimationControls/PlaybackBookmarkButton'
 import PlaybackCropWindowButton, { CROP_BUTTON } from './AnimationControls/PlaybackCropWindowButton'
 import PlaybackSyncWindowButton, { SYNC_BUTTON } from './AnimationControls/PlaybackSyncWindowButton'
 import { ControlFeatures } from './AnimationPlaybackControls'
@@ -32,6 +33,10 @@ const GetSecondaryPlaybackControls = (props: SecondaryControlButtonsProps) => {
         isCropped: (ui?.isCropped ?? false),
         willCrop: (ui?.couldCrop ?? false)
     }) // TODO: Add range for display ?
+    const bookmarkButton = PlaybackBookmarkButton({
+        handleSave: (ui?.doBookmark === undefined ? () => {} : ui.doBookmark),
+        stateIsSaved: (ui?.stateIsBookmarked ?? false)
+    })
 
     const panel = useMemo(() => {
         return ( 
@@ -43,9 +48,10 @@ const GetSecondaryPlaybackControls = (props: SecondaryControlButtonsProps) => {
              >
                 {selectedButtons.has(SYNC_BUTTON) && syncButton}
                 {selectedButtons.has(CROP_BUTTON) && cropButton}
+                {selectedButtons.has(BOOKMARK_BUTTON) && bookmarkButton}
              </AnimationControlButtonContainer>
         )
-    }, [rightButtonSpacingPx, height, width, syncButton, cropButton, selectedButtons])
+    }, [rightButtonSpacingPx, height, width, syncButton, cropButton, bookmarkButton, selectedButtons])
 
     return { panelWidth: rightButtonSpacingPx, panel }
 }

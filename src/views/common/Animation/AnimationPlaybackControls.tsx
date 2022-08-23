@@ -23,6 +23,8 @@ export type ControlFeatures = {
     isSynced?: boolean
     isCropped?: boolean
     couldCrop?: boolean
+    stateIsBookmarked?: boolean
+    doBookmark?: () => void
     optionalButtons?: PlaybackOptionalButtons[]
     usingRateButtons?: boolean
     customPlaybackRates?: number[]

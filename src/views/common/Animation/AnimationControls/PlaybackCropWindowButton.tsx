@@ -1,7 +1,7 @@
 import { faArrowsLeftRightToLine } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useCallback, useMemo } from 'react'
-import { AnimationStateDispatcher } from '../AnimationStateReducer'
+import { AnimationStateDispatcher } from 'views/common/Animation/AnimationStateReducer'
 
 
 export const CROP_BUTTON = "cropButton"
