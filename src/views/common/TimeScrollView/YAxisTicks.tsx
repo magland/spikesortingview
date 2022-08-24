@@ -43,10 +43,10 @@ const fitGridLines = (minGridLines: number, maxGridLines: number, range: number)
             if (fit > minGridLines && fit < maxGridLines) {
                 results.push({step: s, scale: scale})
             }
-            // this means the step size is too big. This shouldn't really happen without finding an acceptable step size first,
-            // but we'll check for it later just in case.
-            if (fit < minGridLines) { return {step: -1, scale: -1} }
-            results.push({step: 0, scale: 0})
+            // // this means the step size is too big. This shouldn't really happen without finding an acceptable step size first,
+            // // but we'll check for it later just in case.
+            // if (fit < minGridLines) { return {step: -1, scale: -1} }
+            // results.push({step: 0, scale: 0})
         }
         const a = results.find(r => r.step > 0)
         if (a) return a
