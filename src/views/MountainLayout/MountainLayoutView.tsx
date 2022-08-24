@@ -73,7 +73,7 @@ const MountainLayoutView: FunctionComponent<Props> = ({data, hideCurationControl
             return
         }
         ;(async () => {
-            const a = await getMutable(`@sortingview/@sortingCurationAuthorizedUsers/${data.sortingCurationUri}`)
+            const a = await getMutable(`@sortingview/@sortingCurationAuthorizedUsers/${feedIdForUri(data.sortingCurationUri || '')}`)
             if (!a) return
             const authorizedUsers = JSON.parse(a)
             if (authorizedUsers.includes(userId)) {
@@ -89,6 +89,10 @@ const MountainLayoutView: FunctionComponent<Props> = ({data, hideCurationControl
         )
     }
     else return content
+}
+
+export const feedIdForUri = (uri: string) => {
+    return uri.split('/')[2] || 'invalid-feed-uri'
 }
 
 export default MountainLayoutView
