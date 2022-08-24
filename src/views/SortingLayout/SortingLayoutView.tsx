@@ -73,7 +73,7 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
             return
         }
         ;(async () => {
-            const a = await getMutable(`sortingview/sortingCurationAuthorizedUsers/${data.sortingCurationUri}`)
+            const a = await getMutable(`@sortingview/@sortingCurationAuthorizedUsers/${data.sortingCurationUri}`)
             if (!a) return
             const authorizedUsers = JSON.parse(a)
             if (authorizedUsers.includes(userId)) {
