@@ -77,8 +77,6 @@ const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps, colorM
     // TODO: Test efficiency. It may be preferable to order by intensity to avoid changing styles (though current performance is fine).
     // TODO: Test whether we can expand the regions being drawn to create a smoother effect.
     // TODO: Maybe a useful form of preprocessing would convert the scalar value to the styles and then sort by those keys?
-    let maxValue = values[0]
-    let maxIndex = 0
     values.forEach((v, i) => {
         const style = stylesMap[colorMap || 'base'][v]
         context.beginPath()
@@ -88,10 +86,6 @@ const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps, colorM
         context.rect(r[0], r[1], r[2], r[3])
         context.stroke()
         context.fill()
-        if (v > maxValue) {
-            maxValue = v
-            maxIndex = i
-        }
     })
 
     // TODO: Suppress drawing if peak dot is in the same bin as the animal's actual position?
