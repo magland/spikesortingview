@@ -27,6 +27,7 @@ import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'views/Unit
 import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixViewData'
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
 import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
+import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
 
 export type ViewData =
     AutocorrelogramsViewData |
@@ -56,7 +57,8 @@ export type ViewData =
     UnitMetricsGraphViewData |
     TiledImageData |
     SortingCuration2ViewData |
-    SortingSelectionViewData
+    SortingSelectionViewData |
+    SpikeLocationsViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -87,6 +89,7 @@ export const isViewData = (x: any): x is ViewData => {
         isUnitMetricsGraphViewData,
         isTiledImageData,
         isSortingCuration2ViewData,
-        isSortingSelectionViewData
+        isSortingSelectionViewData,
+        isSpikeLocationsViewData
     ])(x)
 }
