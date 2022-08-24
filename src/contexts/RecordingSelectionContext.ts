@@ -61,24 +61,24 @@ export const useRecordingSelection = () => {
     return c
 }
 
-export const useRecordingSelectionTimeInitialization = (start: number, end: number) => {
+export const useRecordingSelectionTimeInitialization = (start: number, end: number, timeOffset: number=0) => {
     const { recordingSelection, recordingSelectionDispatch } = useRecordingSelection()
 
     useEffect(() => {
-        if (recordingSelection.recordingStartTimeSeconds === start &&
-            recordingSelection.recordingEndTimeSeconds === end) return
+        if (recordingSelection.recordingStartTimeSeconds === start + timeOffset &&
+            recordingSelection.recordingEndTimeSeconds === end + timeOffset) return
 
         recordingSelectionDispatch({
             type: 'initializeRecordingSelectionTimes',
-            recordingStartSec: start,
-            recordingEndSec: end
+            recordingStartSec: start + timeOffset,
+            recordingEndSec: end + timeOffset
         })
-    }, [recordingSelection.recordingStartTimeSeconds, recordingSelection.recordingEndTimeSeconds, recordingSelectionDispatch, start, end])
+    }, [recordingSelection.recordingStartTimeSeconds, recordingSelection.recordingEndTimeSeconds, recordingSelectionDispatch, start, end, timeOffset])
 }
 
 export type ZoomDirection = 'in' | 'out'
 export type PanDirection = 'forward' | 'back'
-export const useTimeRange = () => {
+export const useTimeRange = (timestampOffset=0) => {
     const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
     if (recordingSelection.visibleTimeEndSeconds === undefined || recordingSelection.visibleTimeStartSeconds === undefined) {
         console.warn('WARNING: useTimeRange() with uninitialized recording selection state. Time ranges replaced with MIN_SAFE_INTEGER.')
@@ -102,8 +102,8 @@ export const useTimeRange = () => {
         })
     }, [recordingSelectionDispatch])
     return {
-        visibleTimeStartSeconds: recordingSelection.visibleTimeStartSeconds,
-        visibleTimeEndSeconds: recordingSelection.visibleTimeEndSeconds,
+        visibleTimeStartSeconds: recordingSelection.visibleTimeStartSeconds !== undefined ? recordingSelection.visibleTimeStartSeconds - timestampOffset : undefined,
+        visibleTimeEndSeconds: recordingSelection.visibleTimeEndSeconds !== undefined ? recordingSelection.visibleTimeEndSeconds - timestampOffset : undefined,
         zoomRecordingSelection,
         panRecordingSelection,
         panRecordingSelectionDeltaT

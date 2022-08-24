@@ -1,8 +1,9 @@
 import { validateObject } from "figurl"
-import { isArrayOf, isBoolean, isEqualTo, isString, optional } from "figurl/viewInterface/validateObject"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isString, optional } from "figurl/viewInterface/validateObject"
 
 export type PositionPlotViewData = {
     type: 'PositionPlot'
+    timeOffset?: number
     timestamps: number[]
     positions: number[][]
     dimensionLabels: string[]
@@ -12,6 +13,7 @@ export type PositionPlotViewData = {
 export const isPositionPlotViewData = (x: any): x is PositionPlotViewData => {
     return validateObject(x, {
         type: isEqualTo('PositionPlot'),
+        timeOffset: optional(isNumber),
         timestamps: () => (true),
         positions: () => (true),
         dimensionLabels: isArrayOf(isString),
