@@ -32,33 +32,6 @@ const range = (min: number, max: number, step: number, base: number) => {
         .filter(x => x > min)
 }
 
-const fitGridLines = (minGridLines: number, maxGridLines: number, range: number): {step: number, scale: number} => {
-    let scale = 0
-    while (true) {
-        const steps = [1, 2, 5]
-        const realizedScale = Math.pow(10, scale)
-        const results: {step: number, scale: number}[] = []
-        for (let s of steps) {
-            const fit = range/(s * realizedScale)
-            if (fit > minGridLines && fit < maxGridLines) {
-                results.push({step: s, scale: scale})
-            }
-            // this means the step size is too big. This shouldn't really happen without finding an acceptable step size first,
-            // but we'll check for it later just in case.
-            if (fit < minGridLines) { return {step: -1, scale: -1} }
-            results.push({step: 0, scale: 0})
-        }
-        const a = results.find(r => r.step > 0)
-        if (a) return a
-        const b = results.find(r => r.step === -1)
-        if (b) return b
-        scale = scale + 1
-        if (scale > 10) {
-            return {step: 1, scale: 0}
-        }
-    }
-}
-
 const computeInvariant = (min: number, max: number) => {
     // Identify all the high-order digits that don't change between the range min and max, &
     // suppress them for tick labeling purposes, to keep labels from getting too wide or
@@ -114,6 +87,15 @@ const emptyTickSet = {
     datamax: 0
 }
 
+const simplerGridFit = (dataRange: number, maxGridLines: number) => {
+    const baseStep = Math.floor( Math.log10(dataRange / maxGridLines))
+    const step = Math.pow(10, baseStep)
+    const candidates = [1, 2, 5, 10]
+    const numLines = candidates.map(c => (dataRange / (step * c)))
+    const i = numLines.findIndex(x => (x < maxGridLines))
+    return i === 3 ? {step: 1, scale: baseStep + 1 } : { step: candidates[i], scale: baseStep }
+}
+
 const useYAxisTicks = (props: YAxisProps) => {
     const { datamin, datamax, userSpecifiedZoom, pixelHeight } = props
     const yZoom = userSpecifiedZoom ?? 1
@@ -123,21 +105,18 @@ const useYAxisTicks = (props: YAxisProps) => {
         const _dataMax = datamax / yZoom
         const dataRange = _dataMax - _dataMin
     
-        const rangeScale = Math.round(Math.log10(dataRange))
-        const zoomedRangeScale = 3 - rangeScale // make sure we're counting through the range with whole numbers
-        const zoomedRange = Math.round(dataRange * (Math.pow(10, zoomedRangeScale)))
         const minGridLines = pixelHeight / maxGridSpacingPx
         const maxGridLines = pixelHeight / minGridSpacingPx
-        const gridInfo = fitGridLines(minGridLines, maxGridLines, zoomedRange)
-        if (gridInfo.step === -1) {
+
+        const gridInfo = simplerGridFit(dataRange, maxGridLines)
+        const scaledStep = gridInfo.step * Math.pow(10, gridInfo.scale)
+
+        if (dataRange/scaledStep < minGridLines) {
             console.warn(`Error: Unable to compute valid y-axis step size. Suppressing display.`)
             return emptyTickSet
         }
-    
-        const scaledStep = gridInfo.step * Math.pow(10, gridInfo.scale - zoomedRangeScale)
         const startFrom = alignWithStepSize(_dataMin, gridInfo.scale)
-        const steps = enumerateScaledSteps(startFrom, _dataMin, _dataMax, scaledStep, gridInfo.scale - zoomedRangeScale)
-
+        const steps = enumerateScaledSteps(startFrom, _dataMin, _dataMax, scaledStep, gridInfo.scale)
         return { ticks: steps, datamin: _dataMin, datamax: _dataMax }
     }, [datamax, datamin, yZoom, pixelHeight])
 }
