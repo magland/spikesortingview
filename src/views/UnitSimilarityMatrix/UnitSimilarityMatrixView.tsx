@@ -1,6 +1,6 @@
 import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext'
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
+import { sortIds } from 'views/UnitsTable/UnitsTableView'
 import BottomToolbar from './BottomToolbar'
 import MatrixWidget from './MatrixWidget'
 import { UnitSimilarityMatrixViewData } from './UnitSimilarityMatrixViewData'
@@ -24,19 +24,19 @@ const UnitSimilarityMatrixView: FunctionComponent<Props> = ({ data, width, heigh
     const [hoveredInfo, setHoveredInfo] = useState<HoveredInfo | undefined>(undefined)
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: data.unitIds.sort((a, b) => idToNum(a) - idToNum(b))})
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: sortIds(data.unitIds)})
     }, [data.unitIds, unitIdSelectionDispatch])
 
-    const unitIds2 = useMemo(() => (data.unitIds.filter(u => (!visibleUnitIds || visibleUnitIds.includes(u)))), [data.unitIds, visibleUnitIds])
+    const unitIdsFilt = useMemo(() => (data.unitIds.filter(u => (!visibleUnitIds || visibleUnitIds.includes(u)))), [data.unitIds, visibleUnitIds])
     const matrix = useMemo(() => {
         const indsForIds: { [k: number | string]: number } = {}
-        unitIds2.forEach((id, i) => {
+        unitIdsFilt.forEach((id, i) => {
             indsForIds[id] = i
         })
         const m: number[][] = []
-        unitIds2.forEach(() => { // avoid unused variables
+        unitIdsFilt.forEach(() => { // avoid unused variables
             const a: number[] = []
-            unitIds2.forEach(() => {
+            unitIdsFilt.forEach(() => {
                 a.push(NaN)
             })
             m.push(a)
@@ -48,7 +48,7 @@ const UnitSimilarityMatrixView: FunctionComponent<Props> = ({ data, width, heigh
             m[ind1][ind2] = x.similarity
         }
         return m
-    }, [unitIds2, data.similarityScores])
+    }, [unitIdsFilt, data.similarityScores])
 
     const handleSetSelectedUnitIds = useCallback((x: (number | string)[]) => {
         unitIdSelectionDispatch({
@@ -61,7 +61,8 @@ const UnitSimilarityMatrixView: FunctionComponent<Props> = ({ data, width, heigh
     return (
         <div>
             <MatrixWidget
-                unitIds={unitIds2}
+                unitIds1={unitIdsFilt}
+                unitIds2={unitIdsFilt}
                 selectedUnitIds={selectedUnitIds}
                 onSetSelectedUnitIds={handleSetSelectedUnitIds}
                 matrix={matrix}

@@ -9,6 +9,7 @@ import { ToolbarItem } from 'views/common/Toolbars';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
 import { determinePlotSizeForSquareMatrixGrid } from 'views/CrossCorrelograms/CrossCorrelogramsView';
+import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import UnitMetricPlot, { UnitMetricPlotProps } from './UnitMetricPlot';
 import { UMGMetric, UnitMetricsGraphViewData } from './UnitMetricsGraphViewData';
 
@@ -38,7 +39,7 @@ const UnitMetricsGraphViewChild: FunctionComponent<Props> = ({data, width, heigh
     ), [units, selectedUnitIds])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: unitsSorted.map(u => (u.unitId)).sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: sortIds(unitsSorted.map(u => (u.unitId))) })
     }, [unitsSorted, unitIdSelectionDispatch])
 
     const customToolbarActions = useMemo(() => {

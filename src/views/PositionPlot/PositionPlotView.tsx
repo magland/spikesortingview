@@ -32,9 +32,9 @@ const emptyPanelSelection = new Set<number | string>()
 const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {timestamps, positions, dimensionLabels, discontinuous, timeOffset} = data
 
-    useRecordingSelectionTimeInitialization(timestamps[0], timestamps[timestamps.length - 1], timeOffset)
-
-    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange(timeOffset)
+    // This component ignores timeOffset except in the following two hooks
+    useRecordingSelectionTimeInitialization(timestamps[0], timestamps[timestamps.length - 1], timeOffset) // timeOffset is added to start and end before setting to the global state
+    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange(timeOffset) // timeOffset is subtracted from start and end after getting from the global state
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 

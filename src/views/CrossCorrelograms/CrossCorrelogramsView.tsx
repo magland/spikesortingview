@@ -10,6 +10,7 @@ import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSele
 import { ToolbarItem } from 'views/common/Toolbars';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
+import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import { CrossCorrelogramData, CrossCorrelogramsViewData } from './CrossCorrelogramsViewData';
 
 type Props = {
@@ -34,11 +35,11 @@ const CrossCorrelogramsView: FunctionComponent<Props> = ({data, width, height}) 
     }, [data.crossCorrelograms])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: allIds.sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: sortIds(allIds) })
     }, [allIds, unitIdSelectionDispatch])
 
     const unitIds = useMemo(() => (
-        [...selectedUnitIds].sort((a, b) => (idToNum(a) - idToNum(b)))
+        sortIds([...selectedUnitIds])
     ), [selectedUnitIds])
 
     const listLengthScaler = useMemo(() => Math.pow(10, Math.ceil(Math.log10(unitIds.length))), [unitIds])

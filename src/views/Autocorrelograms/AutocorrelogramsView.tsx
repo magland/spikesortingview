@@ -9,6 +9,7 @@ import { ToolbarItem } from 'views/common/Toolbars';
 import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
+import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';
 import CorrelogramPlot from './CorrelogramPlot';
 
@@ -25,7 +26,7 @@ const AutocorrelogramsView: FunctionComponent<Props> = ({data, width, height}) =
     const [showXAxis, setShowXAxis] = useState<boolean>(false)
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: data.autocorrelograms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b))})
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: sortIds(data.autocorrelograms.map(aw => aw.unitId))})
     }, [data.autocorrelograms, unitIdSelectionDispatch])
 
     const plots: PGPlot[] = useMemo(() => (data.autocorrelograms.filter(a => (toolbarOptions.onlyShowSelected ? selectedUnitIds.has(a.unitId) : true)).map(ac => ({
