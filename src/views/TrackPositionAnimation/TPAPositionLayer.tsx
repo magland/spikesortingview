@@ -25,7 +25,6 @@ const draw = (context: CanvasRenderingContext2D, props: PositionProps) => {
     const { bottomMargin, frame, dotStyle } = props
     if (!frame) return
 
-    console.log(`Head orientation: ${frame.headDirection}`)
     context.font = `${Math.min(Math.floor(bottomMargin * .5), 30)}px sans-serif`
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     context.beginPath()
@@ -33,7 +32,9 @@ const draw = (context: CanvasRenderingContext2D, props: PositionProps) => {
     context.arc(frame.x, frame.y, defaultPositionRadius, 0, 2*Math.PI)
     context.fill()
     if (frame.headDirection) {
-        const localHeadDirection = frame.headDirection// + rightAngle
+        const localHeadDirection = frame.headDirection
+        // remember, in pixelspace the y axis is flipped so its positive direction is down, not up.
+        // so we should be subtracting, not adding, the sin values.
         const headX = frame.x + defaultHeadRadius * cos(localHeadDirection)
         const headY = frame.y - defaultHeadRadius * sin(localHeadDirection)
         const triAX = frame.x + defaultTrianglePartialRadius * cos(localHeadDirection + rightAngle)
