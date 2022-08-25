@@ -27,8 +27,8 @@ type PeakPositionStyling = {
 }
 
 export const defaultPeakPositionStyling: PeakPositionStyling = {
-    dotRadius: 7,
-    dotRgb: 'rgb(54, 156, 0)',
+    dotRadius: 10,
+    dotRgb: 'rgb(79, 227, 0)',
     drawPeakDot: true
 }
 
