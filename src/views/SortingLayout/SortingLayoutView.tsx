@@ -7,6 +7,7 @@ import getFileData from 'figurl/getFileData';
 import getMutable from 'figurl/getMutable';
 import { useUrlState } from 'figurl/UrlStateContext';
 import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
+import { feedIdForUri } from 'views/MountainLayout/MountainLayoutView';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
 
@@ -73,7 +74,7 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
             return
         }
         ;(async () => {
-            const a = await getMutable(`sortingview/sortingCurationAuthorizedUsers/${data.sortingCurationUri}`)
+            const a = await getMutable(`@sortingview/@sortingCurationAuthorizedUsers/${feedIdForUri(data.sortingCurationUri || '')}`)
             if (!a) return
             const authorizedUsers = JSON.parse(a)
             if (authorizedUsers.includes(userId)) {

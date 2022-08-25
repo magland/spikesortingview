@@ -30,9 +30,11 @@ const panelSpacing = 4
 const emptyPanelSelection = new Set<number | string>()
 
 const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
+    const {timestamps, positions, dimensionLabels, discontinuous, timeOffset} = data
 
-    useRecordingSelectionTimeInitialization(data.timestamps[0], data.timestamps[data.timestamps.length - 1])
+    useRecordingSelectionTimeInitialization(timestamps[0], timestamps[timestamps.length - 1], timeOffset)
+
+    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange(timeOffset)
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
@@ -85,10 +87,10 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         if ((visibleTimeStartSeconds === undefined) || (visibleTimeEndSeconds === undefined)) {
             return series
         }
-        const filteredTimeIndices = data.timestamps.flatMap((t, ii) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
-        const filteredTimes = filteredTimeIndices.map(i => data.timestamps[i])
-        const filteredValues = filteredTimeIndices.map(index => data.positions[index])
-        data.dimensionLabels.forEach((d, ii) => {
+        const filteredTimeIndices = timestamps.flatMap((t, ii) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
+        const filteredTimes = filteredTimeIndices.map(i => timestamps[i])
+        const filteredValues = filteredTimeIndices.map(index => positions[index])
+        dimensionLabels.forEach((d, ii) => {
             series.push({
                 dimensionIndex: ii,
                 times: filteredTimes,
@@ -97,9 +99,9 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         })
 
         // ought to profile these two
-        // for (let dimensionIndex=0; dimensionIndex<data.dimensionLabels.length; dimensionIndex++) {
-        //     const filteredTimes = data.timestamps.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
-        //     const filteredValues = data.timestamps.map((t, ii) => (data.positions[ii][dimensionIndex])).filter((a, ii) => (visibleTimeStartSeconds <= data.timestamps[ii]) && (data.timestamps[ii] <= visibleTimeEndSeconds))
+        // for (let dimensionIndex=0; dimensionIndex<dimensionLabels.length; dimensionIndex++) {
+        //     const filteredTimes = timestamps.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
+        //     const filteredValues = timestamps.map((t, ii) => (positions[ii][dimensionIndex])).filter((a, ii) => (visibleTimeStartSeconds <= timestamps[ii]) && (timestamps[ii] <= visibleTimeEndSeconds))
         //     series.push({
         //         dimensionIndex,
         //         times: filteredTimes,
@@ -107,7 +109,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         //     })
         // }
         return series
-    }, [data.timestamps, visibleTimeStartSeconds, visibleTimeEndSeconds, data.dimensionLabels, data.positions])
+    }, [timestamps, visibleTimeStartSeconds, visibleTimeEndSeconds, dimensionLabels, positions])
 
     const valueRange = useMemo(() => {
         const yMin = Math.min(0, min(series.map(S => (min(S.values)))))
@@ -139,7 +141,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
             const pixelPoints = multiply(pixelTransform, augmentedPoints).valueOf() as number[][]
             return {
                 dimensionIndex: s.dimensionIndex,
-                dimensionLabel: data.dimensionLabels[s.dimensionIndex],
+                dimensionLabel: dimensionLabels[s.dimensionIndex],
                 pixelTimes: pixelPoints[0],
                 pixelValues: pixelPoints[1]
             }
@@ -150,11 +152,11 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
             props: {
                 pixelZero: pixelZero,
                 dimensions: pixelData,
-                plotType: data.discontinuous ? 'scatter' : 'line',
+                plotType: discontinuous ? 'scatter' : 'line',
             } as PanelProps,
             paint: paintPanel
         }]
-    }, [series, pixelTransform, paintPanel, data.dimensionLabels, data.discontinuous])
+    }, [series, pixelTransform, paintPanel, dimensionLabels, discontinuous])
 
     const content = (
         <TimeScrollView
