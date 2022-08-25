@@ -25,6 +25,7 @@ const draw = (context: CanvasRenderingContext2D, props: PositionProps) => {
     const { bottomMargin, frame, dotStyle } = props
     if (!frame) return
 
+    console.log(`Head orientation: ${frame.headDirection}`)
     context.font = `${Math.min(Math.floor(bottomMargin * .5), 30)}px sans-serif`
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
     context.beginPath()
@@ -34,11 +35,11 @@ const draw = (context: CanvasRenderingContext2D, props: PositionProps) => {
     if (frame.headDirection) {
         const localHeadDirection = frame.headDirection// + rightAngle
         const headX = frame.x + defaultHeadRadius * cos(localHeadDirection)
-        const headY = frame.y + defaultHeadRadius * sin(localHeadDirection)
+        const headY = frame.y - defaultHeadRadius * sin(localHeadDirection)
         const triAX = frame.x + defaultTrianglePartialRadius * cos(localHeadDirection + rightAngle)
-        const triAY = frame.y + defaultTrianglePartialRadius * sin(localHeadDirection + rightAngle)
+        const triAY = frame.y - defaultTrianglePartialRadius * sin(localHeadDirection + rightAngle)
         const triBX = frame.x + defaultTrianglePartialRadius * cos(localHeadDirection - rightAngle)
-        const triBY = frame.y + defaultTrianglePartialRadius * sin(localHeadDirection - rightAngle)
+        const triBY = frame.y - defaultTrianglePartialRadius * sin(localHeadDirection - rightAngle)
 
         context.beginPath()
         context.moveTo(headX, headY)
