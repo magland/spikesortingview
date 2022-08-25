@@ -1,7 +1,5 @@
-import React, { ReactNode, useEffect, useMemo } from "react"
-import { CROP_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackCropWindowButton'
+import React, { FunctionComponent, PropsWithChildren, useCallback, useEffect, useMemo } from "react"
 import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControls/PlaybackOptionalButtons'
-import { SYNC_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackSyncWindowButton'
 import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
 import { AnimationState, AnimationStateAction, curryDispatch } from 'views/common/Animation/AnimationStateReducer'
 
@@ -12,9 +10,14 @@ export type FrameAnimationProps<T> = {
     state: AnimationState<T>
     dispatch: React.Dispatch<AnimationStateAction<T>>
     dataSeriesFrameRateHz?: number
-    children?: ReactNode[]
+    options?: AnimationOptionalFeatures
 }
 
+export type AnimationOptionalFeatures = {
+    optionalButtons: PlaybackOptionalButtons[]
+    doBookmarkCallback?: (state: AnimationState<any>) => void
+    checkBookmarkedCallback?: (state: AnimationState<any>) => boolean
+}
 
 const setupAnimationStateDispatchFn = (animationStateDispatch: React.Dispatch<AnimationStateAction<any>>) => {
     if (!animationStateDispatch) return
@@ -36,8 +39,21 @@ const setupReplayRate = (realTimeReplayRateMs: number | undefined, animationStat
 }
 
 
-const FrameAnimation = <T, >(props: FrameAnimationProps<T>) => {
-    const { width, height, controlsHeight, state, dispatch, dataSeriesFrameRateHz, children } = props
+const _handleBookmark = (callback?: (state: AnimationState<any>) => void) => {
+    const fn = callback === undefined ? () => {} : callback
+    return fn
+}
+
+
+const _checkBookmark = (callback?: (state: AnimationState<any>) => boolean) => {
+    const fn = callback === undefined ? () => false : callback
+    return fn
+}
+
+
+const FrameAnimation: FunctionComponent<PropsWithChildren<FrameAnimationProps<any>>> = <T, >(props: PropsWithChildren<FrameAnimationProps<T>>) => {
+    const { width, height, controlsHeight, state, dispatch, dataSeriesFrameRateHz, children, options } = props
+    const { optionalButtons, doBookmarkCallback, checkBookmarkedCallback } = (options ?? {})
 
     useEffect(() => {
         const msPerFrame = dataSeriesFrameRateHz !== undefined ? 1000 / dataSeriesFrameRateHz : undefined
@@ -46,17 +62,22 @@ const FrameAnimation = <T, >(props: FrameAnimationProps<T>) => {
     useEffect(() => setupAnimationStateDispatchFn(dispatch), [dispatch])
     const drawHeight = useMemo(() => height - controlsHeight, [height, controlsHeight])
 
+    const handleBookmark = useCallback(() => _handleBookmark(doBookmarkCallback)(state), [doBookmarkCallback, state])
+    const stateIsBookmarked = useMemo(() => _checkBookmark(checkBookmarkedCallback)(state), [checkBookmarkedCallback, state])
+
     const uiFeatures = useMemo(() => {
         const currentWindowIsFullRecording = (state?.window[0] === 0 && state?.window[1] === (state?.frameData?.length - 1))
         const proposalExists = (state?.windowProposal && state?.windowProposal?.length === 2)
         const proposalMatchesWindow = (state?.windowProposal && state?.windowProposal[0] === state?.window[0] && state?.windowProposal[1] === state?.window[1])
         return {
-            optionalButtons: [ SYNC_BUTTON, CROP_BUTTON ] as PlaybackOptionalButtons[],
+            optionalButtons: optionalButtons ?? [],
             isSynced: state?.windowSynced,
             isCropped: state?.windowSynced || !currentWindowIsFullRecording,
-            couldCrop: (!state?.windowSynced && proposalExists && !proposalMatchesWindow) || false
+            couldCrop: (!state?.windowSynced && proposalExists && !proposalMatchesWindow) || false,
+            stateIsBookmarked: stateIsBookmarked,
+            doBookmark: handleBookmark
         }
-    }, [state.windowSynced, state.window, state.windowProposal, state.frameData])
+    }, [optionalButtons, state.windowSynced, state.window, state.windowProposal, state.frameData, stateIsBookmarked, handleBookmark])
 
     const controlLayer = useMemo(() => <AnimationPlaybackControls
             width={width}

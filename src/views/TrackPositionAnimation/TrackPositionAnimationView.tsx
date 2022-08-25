@@ -3,11 +3,16 @@ import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from
 import { Margins } from 'FigurlCanvas/Geometry'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
 import React, { FunctionComponent, useCallback, useEffect, useMemo } from "react"
+import { BOOKMARK_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackBookmarkButton'
+import { CROP_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackCropWindowButton'
+import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControls/PlaybackOptionalButtons'
+import { SYNC_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackSyncWindowButton'
+import useUrlPlaybackWindowSupport from 'views/common/Animation/AnimationControls/useUrlPlaybackWindowSupport'
 import AnimationStateReducer, { AnimationState, AnimationStateAction, makeDefaultState } from 'views/common/Animation/AnimationStateReducer'
 import useLiveTimeSyncing from 'views/common/Animation/AnimationUtilities/useTimeSyncing'
 import useTimeWindowSyncing from 'views/common/Animation/AnimationUtilities/useTimeWindowSyncing'
-import FrameAnimation from 'views/common/Animation/FrameAnimation'
-import TPADecodedPositionLayer, { useConfiguredDecodedPositionDrawFunction } from './TPADecodedPositionLayer'
+import FrameAnimation, { AnimationOptionalFeatures } from 'views/common/Animation/FrameAnimation'
+import TPADecodedPositionLayer, { useConfiguredPositionDrawFunction } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
 import TPATrackLayer from './TPATrackLayer'
@@ -137,8 +142,9 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     }, [data.decodedData])
     const dataFrames = useFrames(data.positions, decodedData, transform, headDirection, data.timestampStart, data.timestamps)
     const decodedLocationsMap = useProbabilityLocationsMap(transform, decodedData)
-    useRecordingSelectionTimeInitialization(data.timestamps[0] + (data.timestampStart ?? 0), data.timestamps[data.timestamps.length - 1] + (data.timestampStart ?? 0))
 
+    useRecordingSelectionTimeInitialization(data.timestamps[0] + (data.timestampStart ?? 0), data.timestamps[data.timestamps.length - 1] + (data.timestampStart ?? 0))
+    
     useEffect(() => {
         animationStateDispatch({
             type: 'UPDATE_FRAME_DATA',
@@ -155,6 +161,15 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     useEffect(() => handleFrameTimeUpdate(), [handleFrameTimeUpdate])
 
     useTimeWindowSyncing(animationState, animationStateDispatch, getTimeFromFrame)
+
+    const {setStateToInitialUrl, handleSaveWindowToUrl, compareStateToUrl} = useUrlPlaybackWindowSupport(animationStateDispatch)
+    useEffect(() => setStateToInitialUrl(), [setStateToInitialUrl, dataFrames]) // triggers on (unchanging) callback or when the data is updated
+    const optionalPlaybackControls: AnimationOptionalFeatures = {
+        optionalButtons: [ SYNC_BUTTON, CROP_BUTTON, BOOKMARK_BUTTON ] as PlaybackOptionalButtons[],
+        doBookmarkCallback: handleSaveWindowToUrl,
+        checkBookmarkedCallback: compareStateToUrl
+    }
+    
 
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = animationState.frameData[animationState.currentFrameIndex]?.decodedPositionFrame
@@ -203,6 +218,7 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             state={animationState}
             dispatch={animationStateDispatch}
             dataSeriesFrameRateHz={samplingFrequencyHz}
+            options={optionalPlaybackControls}
         >
             {trackLayer}
             {probabilityLayer}
