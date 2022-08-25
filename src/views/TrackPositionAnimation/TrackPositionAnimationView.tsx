@@ -7,7 +7,7 @@ import AnimationStateReducer, { AnimationState, AnimationStateAction, makeDefaul
 import useLiveTimeSyncing from 'views/common/Animation/AnimationUtilities/useTimeSyncing'
 import useTimeWindowSyncing from 'views/common/Animation/AnimationUtilities/useTimeWindowSyncing'
 import FrameAnimation from 'views/common/Animation/FrameAnimation'
-import TPADecodedPositionLayer, { useConfiguredPositionDrawFunction } from './TPADecodedPositionLayer'
+import TPADecodedPositionLayer, { useConfiguredDecodedPositionDrawFunction } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
 import TPATrackLayer from './TPATrackLayer'
@@ -159,8 +159,12 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
     const currentProbabilityFrame = useMemo(() => {
         const linearFrame = animationState.frameData[animationState.currentFrameIndex]?.decodedPositionFrame
         const finalFrame = getDecodedPositionFramePx(linearFrame, decodedLocationsMap)
+        // The position frames are now sorted in descending order of value, so the first entry is always a valid max value.
+        const peakBinRect = finalFrame?.locationRectsPx[0] ?? undefined
+        const peakCenter = peakBinRect === undefined ? undefined : [peakBinRect[0] + (peakBinRect[2]/2), peakBinRect[1] + (peakBinRect[3]/2)]
         return {
-            frame: finalFrame
+            frame: finalFrame,
+            peakCenterPx: peakCenter
         }
     }, [animationState.currentFrameIndex, animationState.frameData, decodedLocationsMap])
 
@@ -176,14 +180,14 @@ const TrackPositionAnimationView: FunctionComponent<TrackPositionAnimationProps>
             height={drawHeight}
             trackBucketRectanglesPx={trackBins}
         />, [width, drawHeight, trackBins])
-        
-    const configuredPositionDrawFn = useConfiguredPositionDrawFunction('plasma')
+
+    const configuredDecodedPositionDrawFn = useConfiguredDecodedPositionDrawFunction('plasma')
     const probabilityLayer = useMemo(() => <TPADecodedPositionLayer
             width={width}
             height={drawHeight}
             drawData={currentProbabilityFrame}
-            configuredDrawFnCallback={configuredPositionDrawFn}
-        />, [width, drawHeight, currentProbabilityFrame, configuredPositionDrawFn])
+            configuredDrawFnCallback={configuredDecodedPositionDrawFn}
+        />, [width, drawHeight, currentProbabilityFrame, configuredDecodedPositionDrawFn])
 
     const positionLayer = useMemo(() => <TPAPositionLayer
             width={width}

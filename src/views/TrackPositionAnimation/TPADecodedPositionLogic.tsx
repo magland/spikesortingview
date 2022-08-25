@@ -78,11 +78,15 @@ export const useProbabilityFrames = (decodedData: DecodedPositionData | undefine
 }
 
 export const getDecodedPositionFramePx = (linearFrame: DecodedPositionFrame | undefined, decodedLocationsMap: DecodedProbabilityLocationsMap): DecodedPositionFramePx | undefined => {
-    const pixelLocations = linearFrame ? linearFrame.linearLocations.map((l) => decodedLocationsMap[l]) : []
+    if (linearFrame === undefined) return undefined
+    const sortedGroup = linearFrame.values.map((v, i) => {return {value: v, linearLocation: linearFrame.linearLocations[i]}}).sort((a, b) => (b.value - a.value)) // desc sort
+    const pixelLocations = sortedGroup.map(r => decodedLocationsMap[r.linearLocation])
+    const values = sortedGroup.map(r => r.value)
+    // const pixelLocations = linearFrame ? linearFrame.linearLocations.map((l) => decodedLocationsMap[l]) : []
     const finalFrame = linearFrame
         ? {
             locationRectsPx: pixelLocations,
-            values: linearFrame.values
+            values: values
         }
         : undefined
     return finalFrame

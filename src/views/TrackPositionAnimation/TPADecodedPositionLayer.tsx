@@ -17,6 +17,19 @@ export type DecodeLayerProps = {
 
 type DecodeFrameProps = {
     frame: DecodedPositionFramePx | undefined
+    peakCenterPx?: number[] // [x, y] pixel location of the center of the bin with highest probability (lowest linear number breaks ties)
+}
+
+type PeakPositionStyling = {
+    dotRadius?: number,
+    dotRgb?: string,
+    drawPeakDot?: boolean
+}
+
+export const defaultPeakPositionStyling: PeakPositionStyling = {
+    dotRadius: 10,
+    dotRgb: 'rgb(79, 227, 0)',
+    drawPeakDot: true
 }
 
 export type ValidColorMap =  'inferno' | 'magma' | 'plasma' | 'viridis'
@@ -39,16 +52,31 @@ const stylesMap = {
     'base': valuesRange.map((i) => `rgba(${baseRed}, ${baseBlue}, ${baseGreen}, ${i/5})`)
 }
 
-const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps, colorMap?: ValidColorMap) => {
-    const { frame } = props
+const drawPeakDot = (context: CanvasRenderingContext2D, peakCenterPx: number[], peakStyling?: PeakPositionStyling) => {
+    const style = { ...defaultPeakPositionStyling, ...peakStyling }
+    if (style.dotRgb === undefined || style.dotRadius === undefined || style.dotRadius < 1 || !style.drawPeakDot) {
+        console.warn(`Attempt to draw peak-probability dot with invalid settings -- no-op`)
+        return
+    }
+    const [x, y] = [...peakCenterPx]
+
+    context.fillStyle = style.dotRgb ?? defaultPeakPositionStyling.dotRgb
+    context.beginPath()
+    context.arc(x, y, style.dotRadius, 0, 2 * Math.PI)
+    context.fill()
+}
+
+const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps, colorMap?: ValidColorMap, peakStyling?: PeakPositionStyling) => {
+    const { frame, peakCenterPx } = props
     if (!frame) return
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
     const { locationRectsPx: bins, values } = frame
+    if (values.length === 0) return
+
     // TODO: Test efficiency. It may be preferable to order by intensity to avoid changing styles (though current performance is fine).
     // TODO: Test whether we can expand the regions being drawn to create a smoother effect.
     // TODO: Maybe a useful form of preprocessing would convert the scalar value to the styles and then sort by those keys?
-
     values.forEach((v, i) => {
         const style = stylesMap[colorMap || 'base'][v]
         context.beginPath()
@@ -59,10 +87,14 @@ const draw = (context: CanvasRenderingContext2D, props: DecodeFrameProps, colorM
         context.stroke()
         context.fill()
     })
+
+    // TODO: Suppress drawing if peak dot is in the same bin as the animal's actual position?
+    if (peakStyling && !peakStyling.drawPeakDot) return
+    peakCenterPx && drawPeakDot(context, peakCenterPx, peakStyling)
 }
 
-export const useConfiguredPositionDrawFunction = (colorMap?: ValidColorMap) => {
-    return useCallback((context: CanvasRenderingContext2D, props: DecodeFrameProps) => draw(context, props, colorMap), [colorMap])
+export const useConfiguredDecodedPositionDrawFunction = (colorMap?: ValidColorMap, peakStyling?: PeakPositionStyling) => {
+    return useCallback((context: CanvasRenderingContext2D, props: DecodeFrameProps) => draw(context, props, colorMap, peakStyling), [colorMap, peakStyling])
 }
 
 const TPADecodedPositionLayer: FunctionComponent<DecodeLayerProps> = (props: DecodeLayerProps) => {
