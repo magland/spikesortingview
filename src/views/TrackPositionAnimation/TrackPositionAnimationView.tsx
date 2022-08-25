@@ -12,7 +12,7 @@ import AnimationStateReducer, { AnimationState, AnimationStateAction, makeDefaul
 import useLiveTimeSyncing from 'views/common/Animation/AnimationUtilities/useTimeSyncing'
 import useTimeWindowSyncing from 'views/common/Animation/AnimationUtilities/useTimeWindowSyncing'
 import FrameAnimation, { AnimationOptionalFeatures } from 'views/common/Animation/FrameAnimation'
-import TPADecodedPositionLayer, { useConfiguredPositionDrawFunction } from './TPADecodedPositionLayer'
+import TPADecodedPositionLayer, { useConfiguredDecodedPositionDrawFunction } from './TPADecodedPositionLayer'
 import { getDecodedPositionFramePx, useProbabilityFrames, useProbabilityLocationsMap } from './TPADecodedPositionLogic'
 import TPAPositionLayer from './TPAPositionLayer'
 import TPATrackLayer from './TPATrackLayer'
