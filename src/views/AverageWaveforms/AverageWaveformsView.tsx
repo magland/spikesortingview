@@ -10,6 +10,7 @@ import { ToolbarItem } from 'views/common/Toolbars';
 import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
 import VerticalScrollView from 'views/common/VerticalScrollView';
 import ViewToolbar from 'views/common/ViewToolbar';
+import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import AverageWaveformPlot, { AverageWaveformPlotProps } from './AverageWaveformPlot';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 
@@ -31,7 +32,7 @@ const AverageWaveformsView: FunctionComponent<Props> = ({data, width, height}) =
     const [showOverlapping, setShowOverlapping] = useState<boolean>(false)
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: data.averageWaveforms.map(aw => aw.unitId).sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: sortIds(data.averageWaveforms.map(aw => aw.unitId)) })
     }, [data.averageWaveforms, unitIdSelectionDispatch])
 
     const [plotBoxScaleFactor, setPlotBoxScaleFactor] = useState<number>(2)
@@ -243,7 +244,7 @@ const combinePlotsForOverlappingView = (plots: PGPlot[]): PGPlot[] => {
             allChannelIdsSet.add(id)
         }
     }
-    const allChannelIds = [...allChannelIdsSet].sort((a, b) => (idToNum(a) - idToNum(b)))
+    const allChannelIds = sortIds([...allChannelIdsSet])
     plotProps.channelIds = allChannelIds
     
     plotProps.units = plots.map(p => (p.props.units[0]))

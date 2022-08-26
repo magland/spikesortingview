@@ -1,9 +1,9 @@
 import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import { FunctionComponent, useMemo } from 'react';
-import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
+import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import LiveCrossCorrelogramPlot from './LiveCrossCorrelogramPlot';
 import { LiveCrossCorrelogramsViewData } from './LiveCrossCorrelogramsViewData';
 
@@ -19,7 +19,7 @@ const LiveCrossCorrelogramsView: FunctionComponent<Props> = ({data, width, heigh
     const listLengthScaler = useMemo(() => Math.pow(10, Math.ceil(Math.log10(data.unitIds.length))), [data.unitIds])
 
     const unitIds = useMemo(() => (
-        [...selectedUnitIds].sort((a, b) => (idToNum(a) - idToNum(b)))
+        sortIds([...selectedUnitIds])
     ), [selectedUnitIds])
 
     return (

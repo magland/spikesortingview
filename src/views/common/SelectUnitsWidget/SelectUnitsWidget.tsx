@@ -6,6 +6,7 @@ import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'views/common/SortableTableWidget/ColorPatchUnitIdLabel';
 import SortableTableWidget from 'views/common/SortableTableWidget/SortableTableWidget';
 import { SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
+import { sortIds } from 'views/UnitsTable/UnitsTableView';
 
 
 export type SelectUnitsWidgetProps = {
@@ -52,7 +53,7 @@ const SelectUnitsWidget: FunctionComponent<SelectUnitsWidgetProps> = (props: Sel
     ), [unitIds, sortingCuration, checkboxClickHandlerGenerator])
 
     useEffect(() => {
-        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: rows.map(r => r.rowId).sort((a, b) => idToNum(a) - idToNum(b)) })
+        unitIdSelectionDispatch({ type: INITIALIZE_UNITS, newUnitOrder: sortIds(rows.map(r => r.rowId)) })
     }, [rows, unitIdSelectionDispatch])
 
     const rowMap = useMemo(() => {
