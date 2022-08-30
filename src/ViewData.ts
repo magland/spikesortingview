@@ -29,6 +29,7 @@ import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/Units
 import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
 import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
 import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'views/ConfusionMatrix/ConfusionMatrixViewData'
+import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'views/LiveEvaluateFunction/LiveEvaluateFunctionView'
 import { isLiveTracesViewData, LiveTracesViewData } from 'views/LiveTraces/LiveTracesViewData'
 
 export type ViewData =
@@ -62,6 +63,7 @@ export type ViewData =
     SortingSelectionViewData |
     SpikeLocationsViewData |
     ConfusionMatrixViewData |
+    LiveEvaluateFunctionViewData |
     LiveTracesViewData
 
 export const isViewData = (x: any): x is ViewData => {
@@ -96,6 +98,7 @@ export const isViewData = (x: any): x is ViewData => {
         isSortingSelectionViewData,
         isSpikeLocationsViewData,
         isConfusionMatrixViewData,
+        isLiveEvaluateFunctionViewData,
         isLiveTracesViewData
     ])(x)
 }
