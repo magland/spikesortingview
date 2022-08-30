@@ -10,9 +10,11 @@ export class Task<ReturnType> {
     #status: TaskJobStatus
     #errorMessage?: string = undefined
     #result: ReturnType | undefined = undefined
-    constructor(a: {taskJobId: string, status: TaskJobStatus}) {
+    constructor(a: {taskJobId: string, status: TaskJobStatus, errorMessage?: string, returnValue?: ReturnType | undefined}) {
         this.#taskJobId = a.taskJobId
         this.#status = a.status
+        this.#errorMessage = a.errorMessage
+        this.#result = a.returnValue
     }
     onStatusChanged(cb: () => void) {
         this.#onStatusChangedCallbacks.push(cb)
@@ -55,14 +57,14 @@ const initiateTask = async <ReturnType>(args: {taskName: string | undefined, tas
     const resp = await sendRequestToParent(req)
     if (!isInitiateTaskResponse(resp)) throw Error('Unexpected response to initiateTask')
 
-    const {taskJobId, status} = resp
+    const {taskJobId, status, errorMessage, returnValue} = resp
 
     let t: Task<ReturnType>
     if (taskJobId.toString() in allTasks) {
         t = allTasks[taskJobId.toString()]
     }
     else {
-        t = new Task<ReturnType>({taskJobId, status})
+        t = new Task<ReturnType>({taskJobId, status, errorMessage, returnValue})
         allTasks[taskJobId.toString()] = t
     }
     t.onStatusChanged(onStatusChanged)

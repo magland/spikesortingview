@@ -127,6 +127,7 @@ export type InitiateTaskResponse = {
     status: TaskJobStatus
     errorMessage?: string // for status=error
     returnValue?: any // for status=finished
+    returnValueUrl?: string // even before status=finished (optional for backward compatibility)
 }
 
 export const isInitiateTaskResponse = (x: any): x is InitiateTaskResponse => {
@@ -135,7 +136,8 @@ export const isInitiateTaskResponse = (x: any): x is InitiateTaskResponse => {
         taskJobId: isString,
         status: isTaskJobStatus,
         errorMessage: optional(isString),
-        returnValue: optional(() => (true))
+        returnValue: optional(() => (true)),
+        returnValueUrl: optional(isString)
     })
 }
 
