@@ -29,6 +29,7 @@ import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/Units
 import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
 import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
 import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'views/ConfusionMatrix/ConfusionMatrixViewData'
+import { isLiveTracesViewData, LiveTracesViewData } from 'views/LiveTraces/LiveTracesViewData'
 
 export type ViewData =
     AutocorrelogramsViewData |
@@ -60,7 +61,8 @@ export type ViewData =
     SortingCuration2ViewData |
     SortingSelectionViewData |
     SpikeLocationsViewData |
-    ConfusionMatrixViewData
+    ConfusionMatrixViewData |
+    LiveTracesViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -93,6 +95,7 @@ export const isViewData = (x: any): x is ViewData => {
         isSortingCuration2ViewData,
         isSortingSelectionViewData,
         isSpikeLocationsViewData,
-        isConfusionMatrixViewData
+        isConfusionMatrixViewData,
+        isLiveTracesViewData
     ])(x)
 }

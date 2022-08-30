@@ -30,6 +30,7 @@ import SortingCuration2View from 'views/SortingCuration2/SortingCuration2View';
 import SortingSelectionView from 'views/SortingSelection/SortingSelectionView';
 import SpikeLocationsView from 'views/SpikeLocations/SpikeLocationsView';
 import ConfusionMatrixView from 'views/ConfusionMatrix/ConfusionMatrixView';
+import LiveTracesView from 'views/LiveTraces/LiveTracesView';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -134,6 +135,9 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
     }
     else if (data.type === 'ConfusionMatrix') {
         return <ConfusionMatrixView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'LiveTraces') {
+        return <LiveTracesView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
