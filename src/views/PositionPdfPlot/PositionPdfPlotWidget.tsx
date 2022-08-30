@@ -73,8 +73,8 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     const [showLinearPositionsOverlay, setShowLinearPositionsOverlay] = useState<boolean>(false)
 
     const {downsampleFactor, i1, i2} = useMemo(() => {
-        if (!visibleTimeStartSeconds) return {downsampleFactor: 1, i1: 0, i2: 0}
-        if (!visibleTimeEndSeconds) return {downsampleFactor: 1, i1: 0, i2: 0}
+        if (visibleTimeStartSeconds === undefined) return {downsampleFactor: 1, i1: 0, i2: 0}
+        if (visibleTimeEndSeconds === undefined) return {downsampleFactor: 1, i1: 0, i2: 0}
         const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
         const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
         let downsampleFactor: number = 1
@@ -85,8 +85,8 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     }, [dataModel, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds, width])
 
     const {visibleValues, t1, t2} = useMemo(() => {
-        if (!visibleTimeStartSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
-        if (!visibleTimeEndSeconds) return {visibleValues: undefined, t1: 0, t2: 0}
+        if (visibleTimeStartSeconds === undefined) return {visibleValues: undefined, t1: 0, t2: 0}
+        if (visibleTimeEndSeconds === undefined) return {visibleValues: undefined, t1: 0, t2: 0}
         
         if (i2 <= i1) return {visibleValues: undefined, t1: 0, t2: 0}
         
