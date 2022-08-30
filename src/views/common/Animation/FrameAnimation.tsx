@@ -96,11 +96,13 @@ const FrameAnimation: FunctionComponent<PropsWithChildren<FrameAnimationProps<an
             ui: uiFeatures
         }
     }, [width, controlsHeight, drawHeight, dispatch, state.frameData.length, state.window,
-        state.windowProposal, state.currentFrameIndex, state.isPlaying, uiFeatures, state.replayMultiplier])
+        state.windowProposal, state.currentFrameIndex, state.isPlaying, controlButtonLogic,
+        uiFeatures, state.replayMultiplier])
 
     const controlLayer = useMemo(() => <AnimationPlaybackControls {...animationControlProps} />, [animationControlProps])
     const handleKey = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
         controlButtonLogic.keyboardControlHandler(e)
+        // eslint-disable-next-line
     }, [controlButtonLogic.keyboardControlHandler])
     
     return (

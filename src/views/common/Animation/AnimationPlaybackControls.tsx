@@ -33,7 +33,7 @@ export type ControlFeatures = {
 }
 
 // TODO: Allow changing?
-const leftButtonWidthPx = 280  
+const leftButtonWidthPx = 280
 export type SelectionWindow = [number, number] | undefined
 export type SelectedWindowUpdater = React.Dispatch<React.SetStateAction<SelectionWindow>>
 
