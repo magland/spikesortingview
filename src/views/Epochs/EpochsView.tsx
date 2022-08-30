@@ -1,9 +1,9 @@
 import { useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
+import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollView'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { EpochData, EpochsViewData } from './EpochsViewData'
 
 type Props = {

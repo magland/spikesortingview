@@ -1,10 +1,10 @@
 import { Checkbox } from '@material-ui/core'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
+import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollView'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import useFetchCache from './useFetchCache'
 
 export type FetchSegmentQuery = {

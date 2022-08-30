@@ -1,16 +1,16 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
-import React, { FunctionComponent, useMemo, useState } from 'react'
+import { FunctionComponent, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
+import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollView'
 import useYAxisTicks from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
 type Props = {

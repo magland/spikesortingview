@@ -1,11 +1,11 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo } from 'react'
+import { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
+import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollView'
 import useYAxisTicks from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {
