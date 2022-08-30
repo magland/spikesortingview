@@ -21,7 +21,8 @@ export type AnimationState<T> = {
 
 export type AnimationStateDispatcher<T> = React.Dispatch<AnimationStateAction<T>>
 
-export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'SET_BASE_MS_PER_FRAME' | 'SET_REPLAY_RATE' | 
+export type AnimationStateActionType = 'SET_DISPATCH' | 'UPDATE_FRAME_DATA' | 'SET_BASE_MS_PER_FRAME' |
+                                       'SET_REPLAY_RATE' | 'REVERSE_REPLAY_RATE' |
                                        'SET_WINDOW' | 'PROPOSE_WINDOW' | 'COMMIT_WINDOW' | 'RELEASE_WINDOW' | 'TOGGLE_WINDOW_SYNC' |
                                        'TICK' |
                                        'TOGGLE_PLAYBACK' | 'SET_CURRENT_FRAME' | 'SKIP' | 'TO_END'
@@ -31,6 +32,7 @@ export type AnimationStateAction<T> =
     AnimationStateUpdateFrameDataAction<T> |
     AnimationStateSetBaseMsPerFrameAction |
     AnimationStateSetReplayRateAction |
+    AnimationStateReverseReplayRateAction |
     AnimationStateSetWindowAction |
     AnimationStateProposeWindowAction |
     AnimationStateCommitWindowAction |
@@ -61,6 +63,10 @@ export type AnimationStateSetBaseMsPerFrameAction = {
 export type AnimationStateSetReplayRateAction = {
     type: 'SET_REPLAY_RATE',
     newRate: number
+}
+
+export type AnimationStateReverseReplayRateAction = {
+    type: 'REVERSE_REPLAY_RATE'
 }
 
 export type AnimationStateSetWindowAction = {
@@ -123,6 +129,7 @@ export const TOGGLE_PLAYBACK: AnimationStateActionType = 'TOGGLE_PLAYBACK'
 export const SET_CURRENT_FRAME: AnimationStateActionType = 'SET_CURRENT_FRAME'
 export const SET_BASE_MS_PER_FRAME: AnimationStateActionType = 'SET_BASE_MS_PER_FRAME'
 export const SET_REPLAY_RATE: AnimationStateActionType = 'SET_REPLAY_RATE'
+export const REVERSE_REPLAY_RATE: AnimationStateActionType = 'REVERSE_REPLAY_RATE'
 export const SKIP: AnimationStateActionType = 'SKIP'
 export const TO_END: AnimationStateActionType = 'TO_END'
 
@@ -181,6 +188,8 @@ const AnimationStateReducer = <T, >(s: AnimationState<T>, a: AnimationStateActio
             }
             // refreshAnimationCycle(s)
             return { ...s, replayMultiplier: a.newRate, playbackStartedTimestamp: undefined }
+        case REVERSE_REPLAY_RATE:
+            return { ...s, replayMultiplier: -1 * s.replayMultiplier, playbackStartedTimestamp: undefined }
         case SET_WINDOW:
             return setWindow(s, a)
         case PROPOSE_WINDOW:

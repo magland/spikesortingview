@@ -2,6 +2,7 @@ import React, { FunctionComponent, PropsWithChildren, useCallback, useEffect, us
 import { PlaybackOptionalButtons } from 'views/common/Animation/AnimationControls/PlaybackOptionalButtons'
 import AnimationPlaybackControls from 'views/common/Animation/AnimationPlaybackControls'
 import { AnimationState, AnimationStateAction, curryDispatch } from 'views/common/Animation/AnimationStateReducer'
+import usePlaybackControlButtonLogic from "./AnimationControls/PlaybackControlButtonLogic"
 
 export type FrameAnimationProps<T> = {
     width: number
@@ -50,7 +51,6 @@ const _checkBookmark = (callback?: (state: AnimationState<any>) => boolean) => {
     return fn
 }
 
-
 const FrameAnimation: FunctionComponent<PropsWithChildren<FrameAnimationProps<any>>> = <T, >(props: PropsWithChildren<FrameAnimationProps<T>>) => {
     const { width, height, controlsHeight, state, dispatch, dataSeriesFrameRateHz, children, options } = props
     const { optionalButtons, doBookmarkCallback, checkBookmarkedCallback } = (options ?? {})
@@ -79,23 +79,32 @@ const FrameAnimation: FunctionComponent<PropsWithChildren<FrameAnimationProps<an
         }
     }, [optionalButtons, state.windowSynced, state.window, state.windowProposal, state.frameData, stateIsBookmarked, handleBookmark])
 
-    const controlLayer = useMemo(() => <AnimationPlaybackControls
-            width={width}
-            height={controlsHeight}
-            verticalOffset={drawHeight}
-            dispatch={dispatch}
-            totalFrameCount={state.frameData.length}
-            visibleWindow={state.window}
-            windowProposal={state.windowProposal}
-            currentFrameIndex={state.currentFrameIndex}
-            isPlaying={state.isPlaying}
-            playbackRate={state.replayMultiplier}
-            ui={uiFeatures}
-        />, [width, controlsHeight, drawHeight, dispatch, state.frameData.length, state.window, state.windowProposal, state.currentFrameIndex,
-            state.isPlaying, uiFeatures, state.replayMultiplier])
- 
+    const controlButtonLogic = usePlaybackControlButtonLogic(dispatch)
+    const animationControlProps = useMemo(() => {
+        return {
+            width,
+            height: controlsHeight,
+            verticalOffset: drawHeight,
+            dispatch,
+            totalFrameCount: state.frameData.length,
+            visibleWindow: state.window,
+            windowProposal: state.windowProposal,
+            currentFrameIndex: state.currentFrameIndex,
+            isPlaying: state.isPlaying,
+            playbackRate: state.replayMultiplier,
+            logic: controlButtonLogic,
+            ui: uiFeatures
+        }
+    }, [width, controlsHeight, drawHeight, dispatch, state.frameData.length, state.window,
+        state.windowProposal, state.currentFrameIndex, state.isPlaying, uiFeatures, state.replayMultiplier])
+
+    const controlLayer = useMemo(() => <AnimationPlaybackControls {...animationControlProps} />, [animationControlProps])
+    const handleKey = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+        controlButtonLogic.keyboardControlHandler(e)
+    }, [controlButtonLogic.keyboardControlHandler])
+    
     return (
-        <div>
+        <div onKeyDown={handleKey} tabIndex={0}>
             {children}
             {controlLayer}
         </div>

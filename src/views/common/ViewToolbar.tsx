@@ -39,7 +39,8 @@ const ToolbarButton: FunctionComponent<ToolbarElement> = (props: ToolbarElement)
                 key={props.elementIndex}
                 color={color}
                 style={iconButtonStyle}
-                disabled={props.disabled ? true : false}>
+                disabled={props.disabled ? true : false}
+            >
                 {props.icon}
             </IconButton>
         </span>
