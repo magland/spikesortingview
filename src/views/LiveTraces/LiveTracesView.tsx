@@ -1,7 +1,7 @@
 import { runCalculationTaskAsync } from 'figurl'
 import { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
-import LiveTracesComponent from '../RawTraces/RawTracesComponent'
+import RawTracesComponent from '../RawTraces/RawTracesComponent'
 import { LiveTracesViewData } from './LiveTracesViewData'
 
 type Props = {
@@ -25,7 +25,7 @@ const LiveTracesView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
         }
     ), [tracesId])
     return (
-        <LiveTracesComponent
+        <RawTracesComponent
             startTimeSec={startTimeSec}
             samplingFrequency={samplingFrequency}
             numFrames={numFrames}

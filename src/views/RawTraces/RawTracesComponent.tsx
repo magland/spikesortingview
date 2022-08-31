@@ -1,6 +1,6 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
-import { FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
@@ -46,6 +46,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const endTimeSec = startTimeSec + numSamples / samplingFrequency
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const [ampScaleFactor, setAmpScaleFactor] = useState<number>(1)
+    const [spentALotOfTimeAtThisView, setSpentALotOfTimeAtThisView] = useState(false)
 
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
@@ -57,6 +58,16 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const panelSpacing = 0
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
+
+    useEffect(() => {
+        setSpentALotOfTimeAtThisView(false)
+        let canceled = false
+        setTimeout(() => {
+            if (canceled) return
+            setSpentALotOfTimeAtThisView(true)
+        }, 500)
+        return () => {canceled = true}
+    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, ampScaleFactor])
 
     const fetchChunk = useMemo(() => (
         async (q: FetchChunkQuery): Promise<FetchedChunk> => {
@@ -216,14 +227,17 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
 
         if (i1 >= i2) return pixelPanels
 
-        let ds = 1
-        while (true) {
-            if ((i2 - i1) / ds <= width)
-                break
-            if (chunkSize * ds >= numFrames)
-                break
-            ds *= 3
+        function getDs(numPix: number) {
+            let ret = 1
+            while (true) {
+                if ((i2 - i1) / (ret * 3) <= numPix) break
+                if (chunkSize * ret >= numFrames) break
+                ret *= 3
+            }
+            return ret
         }
+
+        const ds = spentALotOfTimeAtThisView ? getDs(width * 3) : getDs(width * 0.7)
 
         const ii1 = Math.floor(i1 / ds)
         const ii2 = Math.floor(i2 / ds)
@@ -262,7 +276,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
         }
 
         return pixelPanels
-    }, [getTraceValues, paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor, numChannels, numFrames, chunkSize, width])
+    }, [getTraceValues, paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor, numChannels, numFrames, chunkSize, width, spentALotOfTimeAtThisView])
 
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
 
