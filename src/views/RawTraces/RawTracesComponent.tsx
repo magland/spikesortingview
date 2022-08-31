@@ -58,7 +58,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const panelSpacing = 0
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
-    const maxNumPoints = 1e7 / numChannels
+    const maxNumPoints = 5e7 / numChannels
 
     const zoomInRequired = useMemo(() => {
         const numPoints = ((visibleTimeEndSeconds || 0) - (visibleTimeStartSeconds || 0)) * samplingFrequency
