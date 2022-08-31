@@ -58,7 +58,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const panelSpacing = 0
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
-    const maxNumPoints = 1e8 / numChannels
+    const maxNumPoints = 1e7 / numChannels
 
     const zoomInRequired = useMemo(() => {
         const numPoints = ((visibleTimeEndSeconds || 0) - (visibleTimeStartSeconds || 0)) * samplingFrequency
@@ -134,7 +134,9 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     }, [numChannels, chunkTop])
 
     const paintZoomInRequired = useCallback((context: CanvasRenderingContext2D, props: any) => {
-        context.fillText('Zoom in to view traces', 20, 20)
+        context.font = '30px Arial'
+        context.fillStyle = 'rgb(100, 100, 155)'
+        context.fillText('Zoom in to view traces', 50, 50)
     }, [])
 
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
