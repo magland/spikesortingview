@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { PlaybackControlLogic } from './AnimationControls/PlaybackControlButtonLogic'
 import { PlaybackOptionalButtons } from './AnimationControls/PlaybackOptionalButtons'
 import AnimationStatePlaybackBarLayer from './AnimationStatePlaybackBarLayer'
 import { AnimationStateDispatcher } from './AnimationStateReducer'
@@ -16,6 +17,7 @@ export type AnimationPlaybackControlsProps = {
     currentFrameIndex: number
     isPlaying: boolean
     playbackRate: number
+    logic: PlaybackControlLogic,
     ui?: ControlFeatures
 }
 
@@ -37,7 +39,7 @@ export type SelectedWindowUpdater = React.Dispatch<React.SetStateAction<Selectio
 
 
 const AnimationPlaybackControls = (props: AnimationPlaybackControlsProps) => {
-    const { width, height, verticalOffset, dispatch, isPlaying, visibleWindow, windowProposal, currentFrameIndex, playbackRate, ui } = props
+    const { width, height, verticalOffset, dispatch, isPlaying, visibleWindow, windowProposal, currentFrameIndex, playbackRate, logic, ui } = props
     const [selectedWindow, updateSelectedWindow] = useState<SelectionWindow>(undefined)
     useEffect(() => { updateSelectedWindow(undefined) }, [windowProposal])
 
@@ -48,11 +50,13 @@ const AnimationPlaybackControls = (props: AnimationPlaybackControlsProps) => {
             isPlaying={isPlaying}
             buttonWidthPx={leftButtonWidthPx}
             playbackRate={playbackRate}
+            logic={logic}
             ui={ui}
         />)
-    }, [height, dispatch, isPlaying, playbackRate, ui])
+    }, [height, dispatch, isPlaying, playbackRate, logic, ui])
 
-    const { panelWidth: secondaryControlPanelWidthPx, panel: secondaryPlaybackControlPanel } = GetSecondaryPlaybackControls({...props})
+    const secondaryControls = GetSecondaryPlaybackControls({...props})
+    const { panelWidth: secondaryControlPanelWidthPx, panel: secondaryPlaybackControlPanel } = secondaryControls
 
     const barLayerDiv = useMemo(() => {
         return (<AnimationStatePlaybackBarLayer

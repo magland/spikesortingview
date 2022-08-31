@@ -1,23 +1,20 @@
 import { faArrowsLeftRightToLine } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useCallback, useMemo } from 'react'
-import { AnimationStateDispatcher } from 'views/common/Animation/AnimationStateReducer'
+import { useMemo } from 'react'
+import { PlaybackButtonLogicCallback } from './PlaybackControlButtonLogic'
 
 
 export const CROP_BUTTON = "cropButton"
 
 type PlaybackCropWindowButtonProps = {
-    dispatch: AnimationStateDispatcher<any>
+    cropWindowHandler: PlaybackButtonLogicCallback
     isSynced: boolean
     isCropped: boolean
     willCrop: boolean
 }
 
 const PlaybackCropWindowButton = (props: PlaybackCropWindowButtonProps) => {
-    const { dispatch, isSynced, isCropped, willCrop } = props
-    const cropHandler = useCallback((E: React.MouseEvent) => {
-        dispatch({ type: 'COMMIT_WINDOW' })
-    }, [dispatch])
+    const { cropWindowHandler, isSynced, isCropped, willCrop } = props
 
     const cropButton = useMemo(() =>
         <span className={isSynced ? 'Inactive' : isCropped ? 'Highlighted' : ''}
@@ -28,12 +25,12 @@ const PlaybackCropWindowButton = (props: PlaybackCropWindowButtonProps) => {
                     : isCropped
                         ? "Show complete animation duration in playback bar"
                         : "Drag-click in the playback bar to select a focus range" }
-            onMouseDown={cropHandler}
+            onMouseDown={cropWindowHandler}
           >
             <FontAwesomeIcon icon={faArrowsLeftRightToLine} />
             {/* <FontAwesomeIcon icon={faCrop} /> */}
           </span>
-    , [isSynced, isCropped, willCrop, cropHandler])
+    , [isSynced, isCropped, willCrop, cropWindowHandler])
 
     return cropButton
 }

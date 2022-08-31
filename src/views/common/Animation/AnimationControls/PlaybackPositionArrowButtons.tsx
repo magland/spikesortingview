@@ -1,37 +1,29 @@
 import { faBackward, faFastBackward, faFastForward, faForward } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useCallback, useMemo } from 'react'
-import { AnimationStateDispatcher } from '../AnimationStateReducer'
+import { useMemo } from 'react'
+import { PlaybackControlLogic } from './PlaybackControlButtonLogic'
 
-const usePlaybackPositionArrowButtons = (dispatch: AnimationStateDispatcher<any>) => {
-    const handleArrowClick = useCallback((mode: 'end' | 'skip', backward?: boolean) => {
-        return (e: React.MouseEvent) => {
-            dispatch({
-                type: mode === 'end' ? 'TO_END' : 'SKIP',
-                backward: backward
-            })
-        }
-    }, [dispatch])
-
+const usePlaybackPositionArrowButtons = (logic: PlaybackControlLogic) => {
+    const {returnToBeginningHandler, backSkipHandler, forwardSkipHandler, jumpToEndHandler} = logic
     const beginningButton = useMemo(() => 
-        <span onMouseDown={handleArrowClick('end', true)} title="Return to beginning">
+        <span onMouseDown={returnToBeginningHandler} title="Return to beginning">
             <FontAwesomeIcon icon={faFastBackward} />
-        </span>, [handleArrowClick])
+        </span>, [returnToBeginningHandler])
 
     const backSkipButton = useMemo(() => 
-        <span onMouseDown={handleArrowClick('skip', true)} title="Return to beginning">
+        <span onMouseDown={backSkipHandler} title="Return to beginning">
             <FontAwesomeIcon icon={faBackward} />
-        </span>, [handleArrowClick])
+        </span>, [backSkipHandler])
 
     const forwardSkipButton = useMemo(() => 
-        <span onMouseDown={handleArrowClick('skip')} title="Skip forward">
+        <span onMouseDown={forwardSkipHandler} title="Skip forward">
             <FontAwesomeIcon icon={faForward} />
-        </span>, [handleArrowClick])
+        </span>, [forwardSkipHandler])
 
     const endButton = useMemo(() => 
-        <span onMouseDown={handleArrowClick('end')} title="Skip to end">
+        <span onMouseDown={jumpToEndHandler} title="Skip to end">
             <FontAwesomeIcon icon={faFastForward} />
-        </span>, [handleArrowClick])
+        </span>, [jumpToEndHandler])
 
 
     return { beginningButton, backSkipButton, forwardSkipButton, endButton }

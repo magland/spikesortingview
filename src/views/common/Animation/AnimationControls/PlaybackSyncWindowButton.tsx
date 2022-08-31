@@ -1,32 +1,28 @@
 import { faLink, faLinkSlash } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useCallback, useMemo } from 'react'
-import { AnimationStateDispatcher } from 'views/common/Animation/AnimationStateReducer'
+import { useMemo } from 'react'
+import { PlaybackButtonLogicCallback } from './PlaybackControlButtonLogic'
 
 
 export const SYNC_BUTTON = "syncButton"
 
 type PlaybackSyncButtonProps = {
-    dispatch: AnimationStateDispatcher<any>
+    syncWindowHandler: PlaybackButtonLogicCallback
     isSynced: boolean
 }
 
 const PlaybackSyncWindowButton = (props: PlaybackSyncButtonProps) => {
-    const { dispatch, isSynced } = props
-
-    const toggleWindowSyncHandler = useCallback((e: React.MouseEvent) => {
-        dispatch({ type: 'TOGGLE_WINDOW_SYNC' })
-    }, [dispatch])
+    const { syncWindowHandler, isSynced } = props
 
     const syncButton = useMemo(() => 
-        <span onMouseDown={toggleWindowSyncHandler}
+        <span onMouseDown={syncWindowHandler}
           title={isSynced
             ? "Unsync playback bar from global time range"
             : "Sync playback bar to global time range"}
         >
             {isSynced ? <FontAwesomeIcon icon={faLink} /> : <FontAwesomeIcon icon={faLinkSlash} />}
         </span>
-        , [isSynced, toggleWindowSyncHandler])
+        , [isSynced, syncWindowHandler])
 
     return syncButton
 }
