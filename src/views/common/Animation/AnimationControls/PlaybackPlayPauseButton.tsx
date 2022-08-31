@@ -18,7 +18,7 @@ const PlaybackPlayPauseButton = (props: PlaybackPlayPauseButtonProps) => {
 
     const button = useMemo(() => {
         return (
-            <span onMouseDown={playPauseHandler} title="Play/pause">
+            <span onMouseDown={playPauseHandler} title="Play/pause (space bar)">
                 {playPauseIcon}
             </span>
         )
