@@ -1,23 +1,16 @@
 import { faPause, faPlay } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import '../AnimationControlButtonStyles.css'
-import { AnimationStateDispatcher } from '../AnimationStateReducer'
+import { PlaybackButtonLogicCallback } from './PlaybackControlButtonLogic'
 
 type PlaybackPlayPauseButtonProps = {
-    dispatch: AnimationStateDispatcher<any>
+    playPauseHandler: PlaybackButtonLogicCallback
     isPlaying: boolean
 }
 
-
 const PlaybackPlayPauseButton = (props: PlaybackPlayPauseButtonProps) => {
-    const { dispatch, isPlaying } = props
-
-    const handlePlayPauseClick = useCallback((e: React.MouseEvent) => {
-        dispatch({
-            type: 'TOGGLE_PLAYBACK'
-        })
-    }, [dispatch])
+    const { playPauseHandler, isPlaying } = props
 
     const playPauseIcon = useMemo(() => {
         return isPlaying ? <FontAwesomeIcon icon={faPause} /> : <FontAwesomeIcon icon={faPlay} />
@@ -25,11 +18,11 @@ const PlaybackPlayPauseButton = (props: PlaybackPlayPauseButtonProps) => {
 
     const button = useMemo(() => {
         return (
-            <span onMouseDown={handlePlayPauseClick} title="Play/pause">
+            <span onMouseDown={playPauseHandler} title="Play/pause (space bar)">
                 {playPauseIcon}
             </span>
         )
-    }, [handlePlayPauseClick, playPauseIcon])
+    }, [playPauseHandler, playPauseIcon])
 
     return button
 }

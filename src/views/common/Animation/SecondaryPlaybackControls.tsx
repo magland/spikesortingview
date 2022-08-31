@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import AnimationControlButtonContainer from './AnimationControlButtonContainer'
 import PlaybackBookmarkButton, { BOOKMARK_BUTTON } from './AnimationControls/PlaybackBookmarkButton'
+import { PlaybackControlLogic } from './AnimationControls/PlaybackControlButtonLogic'
 import PlaybackCropWindowButton, { CROP_BUTTON } from './AnimationControls/PlaybackCropWindowButton'
 import PlaybackSyncWindowButton, { SYNC_BUTTON } from './AnimationControls/PlaybackSyncWindowButton'
 import { ControlFeatures } from './AnimationPlaybackControls'
-import { AnimationStateDispatcher } from './AnimationStateReducer'
 
 
 const perButtonRightButtonSpacingPx = 35
@@ -12,12 +12,12 @@ const perButtonRightButtonSpacingPx = 35
 type SecondaryControlButtonsProps = {
     width: number
     height: number
-    dispatch: AnimationStateDispatcher<any>
+    logic: PlaybackControlLogic
     ui?: ControlFeatures
 }
 
 const GetSecondaryPlaybackControls = (props: SecondaryControlButtonsProps) => {
-    const { width, height, dispatch, ui } = props
+    const { width, height, logic, ui } = props
 
     const rightButtonCount = useMemo(() => {
         return (ui?.optionalButtons?.length || 0)
@@ -26,9 +26,9 @@ const GetSecondaryPlaybackControls = (props: SecondaryControlButtonsProps) => {
 
     const selectedButtons = useMemo(() => new Set(ui?.optionalButtons), [ui?.optionalButtons])
     // TODO: Consider if this could result in building expensive buttons that aren't actually used.
-    const syncButton = PlaybackSyncWindowButton({dispatch, isSynced: (ui?.isSynced ?? false)})
+    const syncButton = PlaybackSyncWindowButton({syncWindowHandler: logic.syncWindowHandler, isSynced: (ui?.isSynced ?? false)})
     const cropButton = PlaybackCropWindowButton({
-        dispatch,
+        cropWindowHandler: logic.cropWindowHandler,
         isSynced: (ui?.isSynced ?? false),
         isCropped: (ui?.isCropped ?? false),
         willCrop: (ui?.couldCrop ?? false)
