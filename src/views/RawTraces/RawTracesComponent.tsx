@@ -58,6 +58,12 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const panelSpacing = 0
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
     const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
+    const maxNumPoints = 1e8 / numChannels
+
+    const zoomInRequired = useMemo(() => {
+        const numPoints = ((visibleTimeEndSeconds || 0) - (visibleTimeStartSeconds || 0)) * samplingFrequency
+        return numPoints > maxNumPoints
+    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, samplingFrequency, maxNumPoints])
 
     useEffect(() => {
         setSpentALotOfTimeAtThisView(false)
@@ -99,13 +105,13 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const highestDs = useMemo(() => {
         let ds = 1
         while (true) {
-            if (ds * chunkSize >= numFrames) {
+            if ((ds * chunkSize >= numFrames) || (ds * chunkSize >= maxNumPoints)) { 
                 break
             }
             ds = ds * 3
         }
         return ds
-    }, [chunkSize, numFrames])
+    }, [chunkSize, numFrames, maxNumPoints])
 
     const chunkTop = useMemo(() => {
         return chunkCache.get({ds: highestDs, i: 0})
@@ -126,6 +132,10 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
         valueRanges.forEach(x => {adjustSpan(x, maxSpan)})
         return valueRanges
     }, [numChannels, chunkTop])
+
+    const paintZoomInRequired = useCallback((context: CanvasRenderingContext2D, props: any) => {
+        context.fillText('Zoom in to view traces', 20, 20)
+    }, [])
 
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
         context.strokeStyle = props.color
@@ -208,7 +218,18 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
         }
     ), [chunkCache, chunkSize])
 
-    const pixelPanels = useMemo(() => {
+    const pixelPanels: {
+        key: string,
+        label: string,
+        props: PanelProps | any,
+        paint: (context: CanvasRenderingContext2D, props: PanelProps) => void
+    }[] = useMemo(() => {
+        if (zoomInRequired) return [{
+            key: 'zoom-in-required',
+            label: '',
+            props: {},
+            paint: paintZoomInRequired
+        }]
         const pixelPanels: {
             key: string,
             label: string,
@@ -276,7 +297,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
         }
 
         return pixelPanels
-    }, [getTraceValues, paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor, numChannels, numFrames, chunkSize, width, spentALotOfTimeAtThisView])
+    }, [getTraceValues, paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor, numChannels, numFrames, chunkSize, width, spentALotOfTimeAtThisView, zoomInRequired, paintZoomInRequired])
 
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
 
