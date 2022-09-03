@@ -1,10 +1,7 @@
-import { Button, Checkbox } from "@material-ui/core";
+import { Checkbox } from "@material-ui/core";
 import { SortingCuration, useSortingCuration } from "contexts/SortingCurationContext";
 import { useSelectedUnitIds } from "contexts/UnitSelection/UnitSelectionContext";
-import { storeFileData } from "figurl/getFileData";
-import { useUrlState } from "figurl/UrlStateContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import { stringifyDeterministicWithSortedKeys } from "views/common/SortableTableWidget/useMemoCompare";
 import { SortingCuration2ViewData } from "./SortingCuration2ViewData";
 
 type Props = {
@@ -45,15 +42,15 @@ const SortingCuration2View: FunctionComponent<Props> = ({width, height}) => {
             }
         }
     }, [selectedUnitIds, sortingCurationDispatch])
-    const {updateUrlState} = useUrlState()
-    const handleSaveSelection = useCallback(() => {
-        ;(async () => {
-            const curationUri = await storeFileData(stringifyDeterministicWithSortedKeys(sortingCuration || {}))
-            updateUrlState({
-                curation: curationUri
-            })
-        })()
-    }, [sortingCuration, updateUrlState])
+    // const {updateUrlState} = useUrlState()
+    // const handleSaveSelection = useCallback(() => {
+    //     ;(async () => {
+    //         const curationUri = await storeFileData(stringifyDeterministicWithSortedKeys(sortingCuration || {}))
+    //         updateUrlState({
+    //             curation: curationUri
+    //         })
+    //     })()
+    // }, [sortingCuration, updateUrlState])
     return (
         <div style={{position: 'absolute', width, height, overflowY: 'auto'}}>
             <h3>Curation</h3>
@@ -84,9 +81,10 @@ const SortingCuration2View: FunctionComponent<Props> = ({width, height}) => {
                 }
             </div>
             <hr />
-            <div>
+            {/* hide this button for now */}
+            {/* <div>
                 <Button onClick={handleSaveSelection}>Save curation</Button>
-            </div>
+            </div> */}
         </div>
     )
 }
