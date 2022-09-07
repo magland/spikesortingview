@@ -1,4 +1,4 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas'
+import { BaseCanvas } from 'libraries/FigurlCanvas'
 import React, { FunctionComponent, useCallback, useRef } from 'react'
 import useDraggableScrubber from './AnimationControls/useDraggableScrubber'
 import usePlaybackBarGeometry from './AnimationControls/usePlaybackBarGeometry'

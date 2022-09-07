@@ -1,5 +1,5 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'FigurlCanvas/Geometry'
+import { BaseCanvas } from 'libraries/FigurlCanvas'
+import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'libraries/FigurlCanvas'
 import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/AverageWaveforms'
 import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
 import { colorForUnitId } from 'libraries/UnitColors'

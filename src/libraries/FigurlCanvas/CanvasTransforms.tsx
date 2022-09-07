@@ -1,4 +1,4 @@
-import { Margins } from 'FigurlCanvas/Geometry'
+import { Margins } from 'libraries/FigurlCanvas'
 import { matrix, Matrix } from 'mathjs'
 import { useMemo } from 'react'
 

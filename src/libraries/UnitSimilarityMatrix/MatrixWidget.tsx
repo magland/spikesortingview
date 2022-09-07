@@ -1,4 +1,4 @@
-import BaseCanvas from "FigurlCanvas/BaseCanvas";
+import { BaseCanvas } from "libraries/FigurlCanvas";
 import { FunctionComponent, useCallback, useMemo, useState } from "react";
 import { AffineTransform, applyAffineTransform, applyAffineTransformInv, createAffineTransform, identityAffineTransform, inverseAffineTransform, multAffineTransforms } from "./AffineTransform";
 

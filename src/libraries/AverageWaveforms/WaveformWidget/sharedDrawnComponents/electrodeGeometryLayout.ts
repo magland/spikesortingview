@@ -1,5 +1,5 @@
-import funcToTransform from "FigurlCanvas/funcToTransform"
-import { getHeight, getWidth, RectangularRegion, TransformationMatrix, transformPoints, Vec2 } from "FigurlCanvas/Geometry"
+import { funcToTransform } from "libraries/FigurlCanvas"
+import { getHeight, getWidth, RectangularRegion, TransformationMatrix, transformPoints, Vec2 } from "libraries/FigurlCanvas"
 import { min, norm } from "mathjs"
 import { defaultMaxPixelRadius, Electrode, PixelSpaceElectrode } from './ElectrodeGeometry'
 import { getArrayMax, getArrayMin } from "./utility"

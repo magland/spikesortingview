@@ -1,4 +1,4 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas';
+import { BaseCanvas } from 'libraries/FigurlCanvas';
 import { useMemo } from 'react';
 import { PixelHighlightSpanSet } from './TimeScrollViewSpans';
 

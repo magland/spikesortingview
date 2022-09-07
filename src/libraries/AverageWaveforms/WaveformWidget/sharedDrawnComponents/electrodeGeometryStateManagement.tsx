@@ -1,5 +1,5 @@
-import { DragAction, dragReducer, DragState } from 'FigurlCanvas/DragCanvas'
-import { pointSpanToRegion, Vec2 } from "FigurlCanvas/Geometry"
+import { DragAction, dragReducer, DragState } from 'libraries/FigurlCanvas'
+import { pointSpanToRegion, Vec2 } from "libraries/FigurlCanvas"
 import { Electrode, LayoutMode, PixelSpaceElectrode } from './ElectrodeGeometry'
 import { computeElectrodeLocations, getDraggedElectrodeIds, getElectrodeAtPoint, xMargin as xMarginDefault } from './electrodeGeometryLayout'
 

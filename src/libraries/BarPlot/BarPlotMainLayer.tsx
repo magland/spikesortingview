@@ -1,4 +1,4 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas';
+import { BaseCanvas } from 'libraries/FigurlCanvas';
 import React, { FunctionComponent } from 'react';
 import { Margins } from './BarPlot';
 

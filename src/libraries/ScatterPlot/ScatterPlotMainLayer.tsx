@@ -1,4 +1,4 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas';
+import { BaseCanvas } from 'libraries/FigurlCanvas';
 import { FunctionComponent } from 'react';
 import { Margins, ScatterPlotMarker } from './ScatterPlot';
 

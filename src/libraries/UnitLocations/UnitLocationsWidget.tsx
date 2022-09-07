@@ -1,6 +1,6 @@
 import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
-import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'FigurlCanvas/Geometry'
+import { BaseCanvas } from 'libraries/FigurlCanvas'
+import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'libraries/FigurlCanvas'
 import { colorForUnitId } from 'libraries/UnitColors'
 import { idToNum, useSelectedUnitIds } from 'libraries/UnitSelectionContext'
 import { useCallback, useMemo } from 'react'

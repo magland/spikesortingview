@@ -1,5 +1,5 @@
-import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { TransformationMatrix, transformPoints, Vec2 } from 'FigurlCanvas/Geometry'
+import { BaseCanvas } from 'libraries/FigurlCanvas'
+import { TransformationMatrix, transformPoints, Vec2 } from 'libraries/FigurlCanvas'
 import { matrix } from "mathjs"
 import { useMemo } from 'react'
 import { LayoutMode, PixelSpaceElectrode } from './sharedDrawnComponents/ElectrodeGeometry'

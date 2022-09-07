@@ -1,4 +1,4 @@
-import { Vec2, Vec4 } from "FigurlCanvas/Geometry"
+import { Vec2, Vec4 } from "libraries/FigurlCanvas"
 import { useCallback, useReducer } from "react"
 import dragSelectReducer from "./dragSelectReducer"
 
