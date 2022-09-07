@@ -1,9 +1,10 @@
 import { AutocorrelogramsView } from 'libraries/Autocorrelograms';
+import { ConfusionMatrixView } from 'libraries/ConfusionMatrix';
 import { CrossCorrelogramsView } from 'libraries/CrossCorrelograms';
+import { UnitSimilarityMatrixView } from 'libraries/UnitSimilarityMatrix';
 import { FunctionComponent } from 'react';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
-import ConfusionMatrixView from 'views/ConfusionMatrix/ConfusionMatrixView';
 import ConsoleView from 'views/Console/ConsoleView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
 import EpochsView from 'views/Epochs/EpochsView';
@@ -29,7 +30,6 @@ import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageCompone
 import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
 import UnitLocationsView from 'views/UnitLocations/UnitLocationsView';
 import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
-import UnitSimilarityMatrixView from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import { ViewData } from './ViewData';
 

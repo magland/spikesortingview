@@ -1,13 +1,12 @@
-import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
-import { rectangularRegionsIntersect, RectangularRegion, transformPoint, Vec2, Vec4 } from 'FigurlCanvas/Geometry'
+import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'FigurlCanvas/Geometry'
+import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
 import { colorForUnitId } from 'libraries/UnitColors'
 import { idToNum, useSelectedUnitIds } from 'libraries/UnitSelectionContext'
+import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform, useWheelZoom } from 'libraries/UnitSimilarityMatrix'
 import { useCallback, useMemo } from 'react'
 import { computeElectrodeLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import useDragSelectLayer from 'views/UnitLocations/useDragSelectLayer'
-import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform } from 'views/UnitSimilarityMatrix/AffineTransform'
-import { useWheelZoom } from 'views/UnitSimilarityMatrix/MatrixWidget'
 import { defaultColors, ElectrodeColors } from '../AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryPainting'
 
 export const defaultMaxPixelRadius = 25

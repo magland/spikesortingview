@@ -1,7 +1,6 @@
 import { INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from 'libraries/UnitSelectionContext'
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import BottomToolbar from 'views/UnitSimilarityMatrix/BottomToolbar'
-import MatrixWidget from '../UnitSimilarityMatrix/MatrixWidget'
+import {MatrixWidget, BottomToolbar} from 'libraries/UnitSimilarityMatrix'
 import { ConfusionMatrixViewData } from './ConfusionMatrixViewData'
 
 type Props = {

@@ -1,9 +1,10 @@
 import { isOneOf } from 'figurl/viewInterface/validateObject'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/Autocorrelograms"
+import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/ConfusionMatrix'
 import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/CrossCorrelograms'
+import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/UnitSimilarityMatrix'
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
-import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'views/ConfusionMatrix/ConfusionMatrixViewData'
 import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
 import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
@@ -29,7 +30,6 @@ import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/Tile
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
 import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
 import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'views/UnitMetricsGraph/UnitMetricsGraphViewData'
-import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixViewData'
 import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
 
 export type ViewData =
