@@ -98,6 +98,20 @@ export const isFileDownloadProgressMessage = (x: any): x is FileDownloadProgress
     })
 }
 
+// messageToFrontend
+
+export type MessageToFrontendMessage = {
+    type: 'messageToFrontend',
+    message: any
+}
+
+export const isMessageToFrontendMessage = (x: any): x is MessageToFrontendMessage => {
+    return validateObject(x, {
+        type: isEqualTo('messageToFrontend'),
+        message: () => (true)
+    })
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 
 export type MessageToChild =
@@ -105,7 +119,8 @@ export type MessageToChild =
     NewFeedMessagesMessage |
     TaskStatusUpdateMessage |
     SetCurrentUserMessage |
-    FileDownloadProgressMessage
+    FileDownloadProgressMessage |
+    MessageToFrontendMessage
 
 export const isMessageToChild = (x: any): x is MessageToChild => {
     return isOneOf([
@@ -113,6 +128,7 @@ export const isMessageToChild = (x: any): x is MessageToChild => {
         isNewFeedMessagesMessage,
         isTaskStatusUpdateMessage,
         isSetCurrentUserMessage,
-        isFileDownloadProgressMessage
+        isFileDownloadProgressMessage,
+        isMessageToFrontendMessage
     ])(x)
 }

@@ -3,6 +3,7 @@ import { matrix, multiply } from 'mathjs'
 import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
+import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView'
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
@@ -95,7 +96,7 @@ const paintPanel = (context: CanvasRenderingContext2D, props: PanelProps) => {
     context.setLineDash([]);
 
     for (let unit of props.units) {
-        context.fillStyle = colorForUnitId(unit.unitId)
+        context.fillStyle = colorForUnitId(idToNum(unit.unitId))
         for (let i=0; i<unit.pixelTimes.length; i++) {
             const x = unit.pixelTimes[i]
             const y = unit.pixelAmplitudes[i]

@@ -20,6 +20,8 @@ export const handleFigurlResponse = (msg: FigurlResponseMessage) => {
     }
 }
 
+export const figureId = queryParams.figureId || 'undefined'
+
 const sendRequestToParent = async (request: FigurlRequest) => {
     return new Promise((resolve, reject) => {
         const requestId = randomAlphaString(10)
@@ -33,7 +35,7 @@ const sendRequestToParent = async (request: FigurlRequest) => {
         }
         const msg: FigurlRequestMessage = {
             type: 'figurlRequest',
-            figureId: queryParams.figureId || 'undefined',
+            figureId,
             requestId,
             request
         }

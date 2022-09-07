@@ -17,11 +17,26 @@ export const isFigurlRequestMessage = (x: any): x is FigurlRequestMessage => {
     })
 }
 
+export type MessageToBackendMessage = {
+    type: 'messageToBackend',
+    figureId: string
+    message: any
+}
+
+export const isMessageToBackendMessage = (x: any): x is MessageToBackendMessage => {
+    return validateObject(x, {
+        type: isEqualTo('messageToBackend'),
+        figureId: isString,
+        message: () => (true)
+    })
+}
+
 export type MessageToParent =
-    FigurlRequestMessage
+    FigurlRequestMessage | MessageToBackendMessage
 
 export const isMessageToParent = (x: any): x is MessageToParent => {
     return isOneOf([
-        isFigurlRequestMessage
+        isFigurlRequestMessage,
+        isMessageToBackendMessage
     ])(x)
 }
