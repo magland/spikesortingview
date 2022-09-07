@@ -1,17 +1,14 @@
-import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
-import { INITIALIZE_UNITS } from 'contexts/UnitSelection/UnitSelectionContext';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import { PlotGrid, PGPlot } from 'libraries/PlotGrid';
+import { idToNum, INITIALIZE_UNITS, sortIds } from 'libraries/UnitSelectionContext';
+import {Splitter} from 'libraries/Splitter';
 import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
-import CorrelogramPlot from 'views/Autocorrelograms/CorrelogramPlot';
-import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
-import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
+import {CorrelogramPlot} from 'libraries/Autocorrelograms';
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
-import { ToolbarItem } from 'views/common/Toolbars';
-import VerticalScrollView from 'views/common/VerticalScrollView';
-import ViewToolbar from 'views/common/ViewToolbar';
-import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import { CrossCorrelogramData, CrossCorrelogramsViewData } from './CrossCorrelogramsViewData';
+import { colorForUnitId } from 'libraries/UnitColors';
+import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
+import { VerticalScrollView } from 'libraries/VerticalScrollView';
 
 type Props = {
     data: CrossCorrelogramsViewData

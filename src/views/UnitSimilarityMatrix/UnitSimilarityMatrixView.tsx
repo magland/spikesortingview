@@ -1,6 +1,5 @@
-import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext'
+import { INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from 'libraries/UnitSelectionContext'
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import { sortIds } from 'views/UnitsTable/UnitsTableView'
 import BottomToolbar from './BottomToolbar'
 import MatrixWidget from './MatrixWidget'
 import { UnitSimilarityMatrixViewData } from './UnitSimilarityMatrixViewData'

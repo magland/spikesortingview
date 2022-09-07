@@ -1,15 +1,12 @@
-import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
 import { useUnitMetricSelection } from 'contexts/UnitMetricSelectionContext';
-import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import { PGPlot, PlotGrid } from 'libraries/PlotGrid';
+import { Splitter } from 'libraries/Splitter';
+import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from 'libraries/UnitSelectionContext';
+import { VerticalScrollView } from 'libraries/VerticalScrollView';
+import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
-import { ToolbarItem } from 'views/common/Toolbars';
-import VerticalScrollView from 'views/common/VerticalScrollView';
-import ViewToolbar from 'views/common/ViewToolbar';
 import { determinePlotSizeForSquareMatrixGrid } from 'views/CrossCorrelograms/CrossCorrelogramsView';
-import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import UnitMetricPlot, { UnitMetricPlotProps } from './UnitMetricPlot';
 import { UMGMetric, UnitMetricsGraphViewData } from './UnitMetricsGraphViewData';
 

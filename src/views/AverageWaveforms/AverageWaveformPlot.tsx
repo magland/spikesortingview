@@ -1,6 +1,6 @@
 import RecordingSelectionContext, { useRecordingSelection } from 'contexts/RecordingSelectionContext';
+import { idToNum } from 'libraries/UnitSelectionContext';
 import { FunctionComponent, useMemo } from 'react';
-import { idToNum } from './AverageWaveformsView';
 import ElectrodeGeometry from './WaveformWidget/sharedDrawnComponents/ElectrodeGeometry';
 import { WaveformColors } from './WaveformWidget/WaveformPlot';
 import WaveformWidget from './WaveformWidget/WaveformWidget';

@@ -1,9 +1,9 @@
-import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import { PGPlot, PlotGrid } from 'libraries/PlotGrid';
+import { Splitter } from 'libraries/Splitter';
+import { sortIds } from 'libraries/UnitSelectionContext';
 import { FunctionComponent, useMemo } from 'react';
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
-import { sortIds } from 'views/UnitsTable/UnitsTableView';
 import LiveCrossCorrelogramPlot from './LiveCrossCorrelogramPlot';
 import { LiveCrossCorrelogramsViewData } from './LiveCrossCorrelogramsViewData';
 

@@ -1,6 +1,6 @@
 import { PanDirection, ZoomDirection } from 'contexts/RecordingSelectionContext'
+import { ToolbarItem } from 'libraries/ViewToolbar'
 import { FaArrowLeft, FaArrowRight, FaSearchMinus, FaSearchPlus } from 'react-icons/fa'
-import { ToolbarItem } from './Toolbars'
 
 interface TimeWidgetToolbarProps {
     zoomRecordingSelection: (direction: ZoomDirection, factor?: number) => void

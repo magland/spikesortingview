@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo, useState } from 'react'
 import { computeElectrodesFromIdsAndLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
-import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar'
+import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'libraries/ViewToolbar'
 import { UnitLocationsViewData } from './UnitLocationsViewData'
 import UnitLocationsWidget from './UnitLocationsWidget'
 

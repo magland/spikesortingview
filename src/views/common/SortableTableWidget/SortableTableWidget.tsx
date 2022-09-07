@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableContainer } from '@material-ui/core';
-import { allUnitSelectionState, voidClickHandler } from 'contexts/UnitSelection/UnitSelectionFunctions';
+import { allUnitSelectionState, voidClickHandler } from 'libraries/UnitSelectionContext';
 import { FunctionComponent, useCallback, useEffect, useMemo } from 'react';
 import './SortableTableWidget.css';
 import SortableTableWidgetContentRow from './SortableTableWidgetContentRow';

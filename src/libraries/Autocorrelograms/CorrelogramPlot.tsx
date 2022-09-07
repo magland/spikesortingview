@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useMemo } from 'react';
-import BarPlot, { BarPlotBar } from '../common/BarPlot/BarPlot';
-import { BarPlotTick } from '../common/BarPlot/BarPlotMainLayer';
+import { BarPlot, BarPlotBar, BarPlotTick } from 'libraries/BarPlot';
 
 type Props = {
     binEdgesSec: number[] | undefined,

@@ -1,5 +1,5 @@
 import { isOneOf } from 'figurl/viewInterface/validateObject'
-import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
+import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/Autocorrelograms"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"

@@ -1,6 +1,6 @@
 import { SortingCuration } from 'contexts/SortingCurationContext';
+import { colorForUnitId } from 'libraries/UnitColors';
 import { FunctionComponent } from "react";
-import colorForUnitId from "views/common/ColorHandling/colorForUnitId";
 import './SortableTableWidget.css';
 
 

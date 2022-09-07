@@ -1,6 +1,6 @@
+import { colorForUnitId } from "libraries/UnitColors";
+import { idToNum } from "libraries/UnitSelectionContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import { idToNum } from "views/AverageWaveforms/AverageWaveformsView";
-import colorForUnitId from "views/common/ColorHandling/colorForUnitId";
 import ScatterPlot, { ScatterPlotMarker } from '../common/ScatterPlot/ScatterPlot';
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";
 

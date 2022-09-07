@@ -1,5 +1,5 @@
 import { FaArrowDown, FaArrowUp, FaRegTimesCircle } from 'react-icons/fa'
-import { ToolbarItem } from './Toolbars'
+import { ToolbarItem } from 'libraries/ViewToolbar'
 
 interface AmplitudeScaleToolbarProps {
     ampScaleFactor: number

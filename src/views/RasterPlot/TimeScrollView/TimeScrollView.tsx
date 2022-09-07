@@ -1,12 +1,12 @@
 import { defaultZoomScaleFactor, useTimeFocus, useTimeRange } from 'contexts/RecordingSelectionContext';
+import { Splitter } from 'libraries/Splitter';
+import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
+import { Divider } from 'libraries/ViewToolbar/Toolbars';
 import { abs, matrix, Matrix, multiply } from 'mathjs';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { TimeseriesLayoutOpts } from 'View';
 import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
 import TimeWidgetToolbarEntries, { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
-import { Divider, ToolbarItem } from 'views/common/Toolbars';
-import ViewToolbar from 'views/common/ViewToolbar';
 import { HighlightIntervalSet } from './TimeScrollViewData';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVCursorLayer from './TSVCursorLayer';

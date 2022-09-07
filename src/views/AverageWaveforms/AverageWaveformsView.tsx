@@ -1,16 +1,14 @@
-import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
-import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
+import { PlotGrid, PGPlot } from '../../libraries/PlotGrid';
+import { INITIALIZE_UNITS, useSelectedUnitIds, sortIds, idToNum } from '../../libraries/UnitSelectionContext';
 import { mean } from 'mathjs';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import Splitter from '../../libraries/Splitter/Splitter';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
-import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
-import { ToolbarItem } from 'views/common/Toolbars';
-import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
-import VerticalScrollView from 'views/common/VerticalScrollView';
-import ViewToolbar from 'views/common/ViewToolbar';
-import { sortIds } from 'views/UnitsTable/UnitsTableView';
+import colorForUnitId from '../../libraries/UnitColors/colorForUnitId';
+import { ToolbarItem, ViewToolbar } from '../../libraries/ViewToolbar';
+import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from '../../libraries/ViewToolbar';
+import {VerticalScrollView} from '../../libraries/VerticalScrollView';
 import AverageWaveformPlot, { AverageWaveformPlotProps } from './AverageWaveformPlot';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
 
@@ -260,33 +258,5 @@ const subtractChannelMeans = (waveform: number[][]): number[][] => {
 }
 
 const computeMean = (ary: number[]) => ary.length > 0 ? mean(ary) : 0
-
-export const idToNum = (a: any): number => {
-    if (typeof(a) === 'number') return a
-    else if (typeof(a) === 'string') {
-        const b = stripLeadingNonNumeric(a)
-        try {
-            const x = parseFloat(b)
-            if (!isNaN(x)) return x
-            else return 0
-        }
-        catch {
-            return 0
-        }
-    }
-    else return 0
-}
-
-const stripLeadingNonNumeric = (a: string) => {
-    let i = 0
-    while ((i < a.length) && (isNonNumeric(a[i]))) {
-        i ++
-    }
-    return a.slice(i)
-}
-
-const isNonNumeric = (a: string) => {
-    return isNaN(parseFloat(a))
-}
 
 export default AverageWaveformsView

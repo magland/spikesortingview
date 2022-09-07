@@ -1,5 +1,5 @@
 import { Grid } from '@material-ui/core';
-import { voidClickHandler } from 'contexts/UnitSelection/UnitSelectionFunctions';
+import { voidClickHandler } from '../UnitSelectionContext';
 import React, { FunctionComponent, useMemo } from 'react';
 import ReactVisibilitySensor from 'react-visibility-sensor';
 

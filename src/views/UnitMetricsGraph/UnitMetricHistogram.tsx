@@ -1,9 +1,8 @@
+import { determineTickLocationsMsec } from "libraries/Autocorrelograms";
+import { BarPlot, BarPlotBar, BarPlotTick, BarPlotVerticalLine } from "libraries/BarPlot";
+import { colorForUnitId } from "libraries/UnitColors";
+import { idToNum } from "libraries/UnitSelectionContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import { determineTickLocationsMsec } from "views/Autocorrelograms/CorrelogramPlot";
-import { idToNum } from "views/AverageWaveforms/AverageWaveformsView";
-import BarPlot, { BarPlotBar } from "views/common/BarPlot/BarPlot";
-import { BarPlotTick, BarPlotVerticalLine } from "views/common/BarPlot/BarPlotMainLayer";
-import colorForUnitId from "views/common/ColorHandling/colorForUnitId";
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";
 
 export type UnitMetricHistogramProps = {

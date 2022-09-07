@@ -1,8 +1,8 @@
 import { MuiThemeProvider } from '@material-ui/core';
 import RecordingSelectionContext, { defaultRecordingSelection, recordingSelectionReducer } from 'contexts/RecordingSelectionContext';
-import UnitSelectionContext, { defaultUnitSelection, unitSelectionReducer } from 'contexts/UnitSelection/UnitSelectionContext';
 import { getFigureData, useWindowDimensions } from 'figurl';
 import SetupUrlState from 'figurl/SetupUrlState';
+import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from 'libraries/UnitSelectionContext';
 import { useEffect, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';

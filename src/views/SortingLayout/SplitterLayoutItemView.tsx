@@ -1,4 +1,4 @@
-import Splitter from "MountainWorkspace/components/Splitter/Splitter"
+import { Splitter } from "libraries/Splitter"
 import { FunctionComponent, useMemo } from "react"
 import { computeSizes } from "./BoxLayoutItemView"
 import LayoutItemView from "./LayoutItemView"

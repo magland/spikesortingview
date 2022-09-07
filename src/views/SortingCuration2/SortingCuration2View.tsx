@@ -1,6 +1,6 @@
 import { Checkbox } from "@material-ui/core";
 import { SortingCuration, useSortingCuration } from "contexts/SortingCurationContext";
-import { useSelectedUnitIds } from "contexts/UnitSelection/UnitSelectionContext";
+import { useSelectedUnitIds } from "libraries/UnitSelectionContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { SortingCuration2ViewData } from "./SortingCuration2ViewData";
 

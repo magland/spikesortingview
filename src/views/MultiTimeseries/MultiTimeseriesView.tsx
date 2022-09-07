@@ -1,7 +1,7 @@
 import { useTimeRange } from 'contexts/RecordingSelectionContext';
+import { ViewToolbar } from 'libraries/ViewToolbar';
 import React, { FunctionComponent, useMemo } from 'react';
 import TimeWidgetToolbarEntries from 'views/common/TimeWidgetToolbarEntries';
-import ViewToolbar from "views/common/ViewToolbar";
 import { MultiTimeseriesViewData } from './MultiTimeseriesViewData';
 import ViewWrapper from './ViewWrapper';
 

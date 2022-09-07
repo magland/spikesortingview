@@ -1,15 +1,11 @@
-import PlotGrid, { PGPlot } from 'components/PlotGrid/PlotGrid';
-import { INITIALIZE_UNITS, useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
-import colorForUnitId from 'views/common/ColorHandling/colorForUnitId';
-import { ToolbarItem } from 'views/common/Toolbars';
-import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar';
-import VerticalScrollView from 'views/common/VerticalScrollView';
-import ViewToolbar from 'views/common/ViewToolbar';
-import { sortIds } from 'views/UnitsTable/UnitsTableView';
+import PlotGrid, { PGPlot } from '../PlotGrid/PlotGrid';
+import { Splitter } from '../Splitter';
+import { colorForUnitId } from '../UnitColors';
+import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '../UnitSelectionContext';
+import { VerticalScrollView } from '../VerticalScrollView';
+import { defaultUnitsTableBottomToolbarOptions, ToolbarItem, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions, ViewToolbar } from '../ViewToolbar';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';
 import CorrelogramPlot from './CorrelogramPlot';
 

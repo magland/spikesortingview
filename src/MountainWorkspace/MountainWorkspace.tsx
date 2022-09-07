@@ -1,6 +1,5 @@
 import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
 import Expandable from './components/Expandable/Expandable';
-import Splitter from './components/Splitter/Splitter';
 import React, { FunctionComponent, useCallback, useReducer } from 'react';
 import openViewsReducer from './openViewsReducer';
 import MWViewContainer from './MWContainer';
@@ -8,6 +7,7 @@ import MWViewLauncher from './MWViewLauncher';
 import { MWView, MWViewPlugin } from './MWViewPlugin';
 import MWViewWidget from './MWViewWidget';
 import MWCurationControl from './MWCurationControl';
+import { Splitter } from 'libraries/Splitter';
 
 type Props = {
     viewPlugins: MWViewPlugin[]

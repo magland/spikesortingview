@@ -1,5 +1,5 @@
 import { useUnitMetricSelection } from 'contexts/UnitMetricSelectionContext';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import {Splitter} from 'libraries/Splitter';
 import { FunctionComponent, useEffect } from 'react';
 import UnitMetricSelectionWidget from './UnitMetricSelectionWidget';
 import UnitMetricsGraphViewChild from './UnitMetricsGraphViewChild';

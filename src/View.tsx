@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import AutocorrelogramsView from 'views/Autocorrelograms/AutocorrelogramsView';
+import {AutocorrelogramsView} from 'libraries/Autocorrelograms';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import ConsoleView from 'views/Console/ConsoleView';

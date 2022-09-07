@@ -1,11 +1,11 @@
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter'
 import React, { FunctionComponent, useMemo, useState } from 'react'
 import { computeElectrodesFromIdsAndLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
-import UnitsTableBottomToolbar, { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'views/common/UnitsTableBottomToolbar'
+import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'libraries/ViewToolbar'
 import { SpikeLocationsViewData } from './SpikeLocationsViewData'
 import SpikeLocationsWidget from './SpikeLocationsWidget'
+import { Splitter } from 'libraries/Splitter'
 
 type Props = {
     data: SpikeLocationsViewData

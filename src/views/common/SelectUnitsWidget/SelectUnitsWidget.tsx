@@ -1,12 +1,10 @@
-import { INITIALIZE_UNITS, UnitSelectionAction } from 'contexts/UnitSelection/UnitSelectionContext';
-import { SortingRule } from 'contexts/UnitSelection/UnitSelectionTypes';
+import { idToNum, INITIALIZE_UNITS, sortIds, UnitSelectionAction } from 'libraries/UnitSelectionContext';
+import { SortingRule } from 'libraries/UnitSelectionContext';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
-import { idToNum } from 'views/AverageWaveforms/AverageWaveformsView';
 import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'views/common/SortableTableWidget/ColorPatchUnitIdLabel';
 import SortableTableWidget from 'views/common/SortableTableWidget/SortableTableWidget';
 import { SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
-import { sortIds } from 'views/UnitsTable/UnitsTableView';
 
 
 export type SelectUnitsWidgetProps = {
