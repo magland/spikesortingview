@@ -1,10 +1,11 @@
 import { Checkbox } from '@material-ui/core'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/RecordingSelectionContext'
-import { matrix, multiply } from 'mathjs'
-import React, { FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
+import TimeScrollView, { TimeScrollViewPanel } from 'views/common/TimeScrollView/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import useFetchCache from './useFetchCache'
 
 export type FetchSegmentQuery = {
@@ -100,8 +101,8 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
 
     const visibleLinearPositions: number[] | undefined = useMemo(() => {
         if (!linearPositions) return undefined
-        if (!visibleTimeStartSeconds) return undefined
-        if (!visibleTimeEndSeconds) return undefined
+        if (visibleTimeStartSeconds === undefined) return undefined
+        if (visibleTimeEndSeconds === undefined) return undefined
         const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
         const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
         return linearPositions.slice(i1, i2)
@@ -112,12 +113,10 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     const panelCount = 1
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
-    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
+    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, margins.left)
 
     const pixelTimes = useMemo(() => {
-        const augmentedVisibleTimesMatrix = matrix([ [t1, t2], new Array(2).fill(1) ])
-        return multiply(timeToPixelMatrix, augmentedVisibleTimesMatrix).valueOf() as number[]
+        return convert1dDataSeries([t1, t2], timeToPixelMatrix)
     }, [t1, t2, timeToPixelMatrix])
 
     const {minValue, maxValue} = useMemo(() => {
@@ -194,7 +193,6 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     }, [paintPanel])
     
     const height2 = linearPositions ? height - 50 : height
-
     return (
         <div>
             <TimeScrollView

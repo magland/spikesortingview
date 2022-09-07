@@ -1,6 +1,5 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas';
-import React, { useMemo } from 'react';
-import { paintPanels } from './paint';
+import { useMemo } from 'react';
 import { TimeScrollViewPanel } from './TimeScrollView';
 
 export type MainLayerProps<T extends {[key: string]: any}> = {
@@ -11,6 +10,19 @@ export type MainLayerProps<T extends {[key: string]: any}> = {
     width: number
     height: number
 }
+
+const paintPanels = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: MainLayerProps<T>) => {
+    const {margins, panels, perPanelOffset } = props
+    context.resetTransform()
+    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+    context.translate(margins.left, margins.top)
+    for (let i = 0; i < panels.length; i++) {
+        const p = panels[i]
+        p.paint(context, p.props)
+        context.translate(0, perPanelOffset)
+    }
+}
+
 
 const TSVMainLayer = <T extends {[key: string]: any}>(props: MainLayerProps<T>) => {
     const {width, height, panels, panelHeight, perPanelOffset, margins} = props

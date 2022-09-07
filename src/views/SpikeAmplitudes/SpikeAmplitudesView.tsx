@@ -3,14 +3,15 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries
 import { Splitter } from 'libraries/Splitter'
 import { colorForUnitId } from 'libraries/UnitColors'
 import { idToNum } from 'libraries/UnitSelectionContext'
-import { matrix, multiply } from 'mathjs'
 import { FunctionComponent, useMemo, useState } from 'react'
+import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
 import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
 import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
-import useYAxisTicks from 'views/common/TimeScrollView/YAxisTicks'
+import TimeScrollView, { TimeScrollViewPanel } from 'views/common/TimeScrollView/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
+import useYAxisTicks, { useProjectedYAxisTicks } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
 type Props = {
@@ -118,7 +119,6 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
     const panelCount = 1
     const toolbarWidth = timeseriesLayoutOpts?.hideTimeAxis ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     const maxNumPointsPerUnit = 5000
 
@@ -150,29 +150,29 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
         return {yMin, yMax}
     }, [series])
 
-    const pixelTransform = use2dPanelDataToPixelMatrix(
-        pixelsPerSecond,
-        visibleTimeStartSeconds,
-        amplitudeRange.yMin,
-        amplitudeRange.yMax,
-        ampScaleFactor,
-        panelHeight,
-        true
-    )
+    const pixelTransform = use2dScalingMatrix({
+        totalPixelWidth: panelWidth,
+        totalPixelHeight: panelHeight,
+        dataXMin: visibleTimeStartSeconds,
+        dataXMax: visibleTimeEndSeconds,
+        dataYMin: amplitudeRange.yMin,
+        dataYMax: amplitudeRange.yMax,
+        yScaleFactor: ampScaleFactor,
+    })
 
+    // TODO: Figure out how to encapsulate y-axis management into timescrollview
     const yTicks = useYAxisTicks({ datamin: amplitudeRange.yMin, datamax: amplitudeRange.yMax, userSpecifiedZoom: ampScaleFactor, pixelHeight: panelHeight })
     const yTickSet = useProjectedYAxisTicks(yTicks, pixelTransform)
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
+        const pixelZero = getYAxisPixelZero(pixelTransform)
         return [{
             key: `amplitudes`,
             label: ``,
             props: {
-                // After the matrix multiplication, index [1][0] is the first (here only) element of the y-series.
-                pixelZero: (multiply(pixelTransform, matrix([[0], [0], [1]])).valueOf() as number[][])[1][0],
+                pixelZero,
                 units: series.map(S => {
-                    const augmentedPoints = matrix([S.times, S.amplitudes, new Array(S.times.length).fill(1) ])
-                    const pixelPoints = multiply(pixelTransform, augmentedPoints).valueOf() as number[][]
+                    const pixelPoints = convert2dDataSeries(pixelTransform, [S.times, S.amplitudes])
                     return {
                         unitId: S.unitId,
                         pixelTimes: pixelPoints[0],
@@ -185,13 +185,14 @@ const SpikeAmplitudesViewChild: FunctionComponent<ChildProps> = ({data, timeseri
     }, [series, pixelTransform])
 
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
+    const extraButtons = useMemo(() => {return { aboveDefault: scalingActions }}, [scalingActions])
 
     const content = series.length > 0 ? (
         <TimeScrollView
             margins={margins}
             panels={panels}
             panelSpacing={panelSpacing}
-            optionalActionsAboveDefault={scalingActions}
+            optionalActions={extraButtons}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             yTickSet={yTickSet}
             width={width}
