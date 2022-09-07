@@ -1,8 +1,9 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
-import { paintAxes } from './paint';
-import { TimeScrollViewPanel, TimeTick } from './TimeScrollView';
+import { TimeTick } from './TimeAxisTicks';
+import { TimeScrollViewPanel } from './TimeScrollView';
+import { paintAxes } from './TSVPaintAxes';
 
 export type TSVAxesLayerProps<T extends {[key: string]: any}> = {
     panels: TimeScrollViewPanel<T>[]
