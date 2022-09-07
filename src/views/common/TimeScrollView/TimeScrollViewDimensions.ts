@@ -1,4 +1,4 @@
-import { useTimeFocus } from 'contexts/RecordingSelectionContext';
+import { useTimeFocus } from 'libraries/RecordingSelectionContext';
 import { Matrix } from 'mathjs';
 import { useMemo } from 'react';
 import { convert1dDataSeries } from 'util/pointProjection';

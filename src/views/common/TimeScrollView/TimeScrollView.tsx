@@ -1,11 +1,11 @@
-import { useTimeRange } from 'contexts/RecordingSelectionContext';
-import Splitter from 'MountainWorkspace/components/Splitter/Splitter';
+import { useTimeRange } from 'libraries/RecordingSelectionContext';
+import { Splitter } from 'libraries/Splitter';
 import { useEffect, useMemo, useRef } from 'react';
 import { use1dScalingMatrix } from 'util/pointProjection';
 import { TimeseriesLayoutOpts } from 'View';
 import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
-import ViewToolbar from 'views/common/ViewToolbar';
+import { ViewToolbar } from 'libraries/ViewToolbar';
 import { useTimeTicks } from './TimeAxisTicks';
 import useActionToolbar, { OptionalToolbarActions } from './TimeScrollViewActionsToolbar';
 import { HighlightIntervalSet } from './TimeScrollViewData';

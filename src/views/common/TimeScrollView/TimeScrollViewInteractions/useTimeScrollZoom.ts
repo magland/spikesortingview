@@ -1,4 +1,4 @@
-import { defaultZoomScaleFactor, ZoomDirection } from 'contexts/RecordingSelectionContext';
+import { defaultZoomScaleFactor, ZoomDirection } from 'libraries/RecordingSelectionContext';
 import { abs } from 'mathjs';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'util/rateLimiters';

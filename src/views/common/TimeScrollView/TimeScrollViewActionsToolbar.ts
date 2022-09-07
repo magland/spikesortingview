@@ -1,7 +1,7 @@
-import { useTimeRange } from 'contexts/RecordingSelectionContext';
+import { useTimeRange } from 'libraries/RecordingSelectionContext';
 import { useMemo } from 'react';
 import TimeWidgetToolbarEntries from 'views/common/TimeWidgetToolbarEntries';
-import { Divider, ToolbarItem } from 'views/common/Toolbars';
+import { Divider, ToolbarItem } from 'libraries/ViewToolbar';
 
 export type OptionalToolbarActions = {
     aboveDefault?: ToolbarItem[]
