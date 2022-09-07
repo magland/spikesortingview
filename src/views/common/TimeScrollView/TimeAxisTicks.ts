@@ -1,6 +1,6 @@
-import { matrix, Matrix, multiply } from 'mathjs';
+import { Matrix } from 'mathjs';
 import { useMemo } from 'react';
-import { getScaleFrom1dScalingMatrix } from 'util/pointProjection';
+import { convert1dDataSeries, getScaleFrom1dScalingMatrix } from 'util/pointProjection';
 
 export type TimeTick = {
     value: number
@@ -112,11 +112,8 @@ export const useTimeTicks = (startTimeSec: number | undefined, endTimeSec: numbe
                 })
             }
         }
-        const augmentedTimes = matrix([ret.map(tick => tick.value), new Array(ret.length).fill(1) ])
-        const tickPositions = multiply(timeToPixelMatrix, augmentedTimes).valueOf() as number[]
+        const tickPositions = convert1dDataSeries(ret.map(tick => tick.value), timeToPixelMatrix)
         tickPositions.forEach((t, i) => ret[i].pixelXposition = t)
         return ret as TimeTick[]
     }, [startTimeSec, endTimeSec, timeToPixelMatrix])
 }
-
-// TODO: UNIFY MATRIX MULT CODE
