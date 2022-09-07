@@ -1,10 +1,8 @@
-import { idToNum, INITIALIZE_UNITS, sortIds, UnitSelectionAction } from 'libraries/UnitSelectionContext';
-import { SortingRule } from 'libraries/UnitSelectionContext';
 import { useSortingCuration } from 'contexts/SortingCurationContext';
+import { SortableTableWidget, SortableTableWidgetRow } from 'libraries/SortableTableWidget';
+import { idToNum, INITIALIZE_UNITS, sortIds, SortingRule, UnitSelectionAction } from 'libraries/UnitSelectionContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
-import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'views/common/SortableTableWidget/ColorPatchUnitIdLabel';
-import SortableTableWidget from 'views/common/SortableTableWidget/SortableTableWidget';
-import { SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
+import { ColorPatchUnitIdLabel, ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'libraries/SortableTableWidget';
 
 
 export type SelectUnitsWidgetProps = {

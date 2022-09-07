@@ -4,8 +4,11 @@ import { ConfusionMatrixView } from 'libraries/ConfusionMatrix';
 import { CrossCorrelogramsView } from 'libraries/CrossCorrelograms';
 import { ElectrodeGeometryView } from 'libraries/ElectrodeGeometry';
 import { MarkdownView } from 'libraries/Markdown';
+import { SortingCurationView } from 'libraries/SortingCuration';
+import { SortingCuration2View } from 'libraries/SortingCuration2';
 import { SummaryView } from 'libraries/Summary';
 import { UnitSimilarityMatrixView } from 'libraries/UnitSimilarityMatrix';
+import { UnitsTableView } from 'libraries/UnitsTable';
 import { FunctionComponent } from 'react';
 import CompositeView from 'views/Composite/CompositeView';
 import ConsoleView from 'views/Console/ConsoleView';
@@ -20,8 +23,6 @@ import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
 import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import RawTracesView from 'views/RawTraces/RawTracesView';
-import {SortingCurationView} from 'libraries/SortingCuration';
-import {SortingCuration2View} from 'libraries/SortingCuration2';
 import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
 import SortingSelectionView from 'views/SortingSelection/SortingSelectionView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
@@ -30,7 +31,6 @@ import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageCompone
 import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
 import UnitLocationsView from 'views/UnitLocations/UnitLocationsView';
 import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
-import UnitsTableView from 'views/UnitsTable/UnitsTableView';
 import { ViewData } from './ViewData';
 
 export type TimeseriesLayoutOpts = {

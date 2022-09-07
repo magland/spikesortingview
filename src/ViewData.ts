@@ -30,7 +30,7 @@ import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/Tile
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
 import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
 import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'views/UnitMetricsGraph/UnitMetricsGraphViewData'
-import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
+import { isUnitsTableViewData, UnitsTableViewData } from "libraries/UnitsTable"
 
 export type ViewData =
     AutocorrelogramsViewData |

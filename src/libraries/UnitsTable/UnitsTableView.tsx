@@ -1,12 +1,10 @@
 import { useSortingCuration } from 'contexts/SortingCurationContext';
-import { idToNum, INITIALIZE_UNITS, UNIQUE_SELECT_FIRST, UNIQUE_SELECT_LAST, UNIQUE_SELECT_NEXT, UNIQUE_SELECT_PREVIOUS, useSelectedUnitIds } from '../../libraries/UnitSelectionContext';
+import { ColorPatchUnitIdLabel, ColorPatchUnitLabelProps, mergeGroupForUnitId, SortableTableWidget, SortableTableWidgetColumn, SortableTableWidgetRow } from 'libraries/SortableTableWidget';
 import { sortIds } from 'libraries/UnitSelectionContext';
-import React, { FunctionComponent, KeyboardEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
-import { SortableTableWidgetColumn, SortableTableWidgetRow } from 'views/common/SortableTableWidget/SortableTableWidgetTypes';
-import ColorPatchUnitIdLabel, { ColorPatchUnitLabelProps, mergeGroupForUnitId } from '../common/SortableTableWidget/ColorPatchUnitIdLabel';
-import SortableTableWidget from '../common/SortableTableWidget/SortableTableWidget';
-import { UnitsTableViewData } from './UnitsTableViewData';
 import { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions } from 'libraries/ViewToolbar';
+import React, { FunctionComponent, KeyboardEventHandler, useCallback, useEffect, useMemo, useState } from 'react';
+import { idToNum, INITIALIZE_UNITS, UNIQUE_SELECT_FIRST, UNIQUE_SELECT_LAST, UNIQUE_SELECT_NEXT, UNIQUE_SELECT_PREVIOUS, useSelectedUnitIds } from '../../libraries/UnitSelectionContext';
+import { UnitsTableViewData } from './UnitsTableViewData';
 
 type Props = {
     data: UnitsTableViewData
