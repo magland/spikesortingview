@@ -6,7 +6,7 @@ import { VerticalScrollView } from 'libraries/VerticalScrollView';
 import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { determinePlotSizeForSquareMatrixGrid } from 'views/CrossCorrelograms/CrossCorrelogramsView';
+import { determinePlotSizeForSquareMatrixGrid } from 'libraries/CrossCorrelograms';
 import UnitMetricPlot, { UnitMetricPlotProps } from './UnitMetricPlot';
 import { UMGMetric, UnitMetricsGraphViewData } from './UnitMetricsGraphViewData';
 

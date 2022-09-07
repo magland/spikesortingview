@@ -1,4 +1,4 @@
-import RecordingSelectionContext, { useRecordingSelection } from 'contexts/RecordingSelectionContext';
+import { RecordingSelectionContext, useRecordingSelection } from 'libraries/RecordingSelectionContext';
 import { idToNum } from 'libraries/UnitSelectionContext';
 import { FunctionComponent, useMemo } from 'react';
 import ElectrodeGeometry from './WaveformWidget/sharedDrawnComponents/ElectrodeGeometry';

@@ -1,4 +1,4 @@
-import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/RecordingSelectionContext'
 import { colorForUnitId } from 'libraries/UnitColors'
 import { matrix, multiply } from 'mathjs'
 import { FunctionComponent, useCallback, useMemo } from 'react'

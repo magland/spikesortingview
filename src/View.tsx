@@ -1,13 +1,17 @@
+import { AutocorrelogramsView } from 'libraries/Autocorrelograms';
+import { CrossCorrelogramsView } from 'libraries/CrossCorrelograms';
 import { FunctionComponent } from 'react';
-import {AutocorrelogramsView} from 'libraries/Autocorrelograms';
 import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
+import ConfusionMatrixView from 'views/ConfusionMatrix/ConfusionMatrixView';
 import ConsoleView from 'views/Console/ConsoleView';
-import CrossCorrelogramsView from 'views/CrossCorrelograms/CrossCorrelogramsView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';
 import EpochsView from 'views/Epochs/EpochsView';
 import LiveCrossCorrelogramsView from 'views/LiveCrossCorrelograms/LiveCrossCorrelogramsView';
+import LiveEvaluateFunctionView from 'views/LiveEvaluateFunction/LiveEvaluateFunctionView';
 import LivePositionPdfPlotView from 'views/LivePositionPdfPlot/LivePositionPdfPlotView';
+import LiveTracesView from 'views/LiveTraces/LiveTracesView';
+import MarkdownView from 'views/Markdown/MarkdownView';
 import MountainLayoutView from 'views/MountainLayout/MountainLayoutView';
 import MultiTimeseriesView from 'views/MultiTimeseries/MultiTimeseriesView';
 import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
@@ -15,23 +19,19 @@ import PositionPlotView from 'views/PositionPlot/PositionPlotView';
 import RasterPlotView from 'views/RasterPlot/RasterPlotView';
 import RawTracesView from 'views/RawTraces/RawTracesView';
 import SortingCurationView from 'views/SortingCuration/SortingCurationView';
+import SortingCuration2View from 'views/SortingCuration2/SortingCuration2View';
 import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
+import SortingSelectionView from 'views/SortingSelection/SortingSelectionView';
 import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
+import SpikeLocationsView from 'views/SpikeLocations/SpikeLocationsView';
 import SummaryView from 'views/Summary/SummaryView';
+import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageComponent';
 import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
 import UnitLocationsView from 'views/UnitLocations/UnitLocationsView';
+import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
 import UnitSimilarityMatrixView from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixView';
 import UnitsTableView from 'views/UnitsTable/UnitsTableView';
-import MarkdownView from 'views/Markdown/MarkdownView';
 import { ViewData } from './ViewData';
-import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
-import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageComponent';
-import SortingCuration2View from 'views/SortingCuration2/SortingCuration2View';
-import SortingSelectionView from 'views/SortingSelection/SortingSelectionView';
-import SpikeLocationsView from 'views/SpikeLocations/SpikeLocationsView';
-import ConfusionMatrixView from 'views/ConfusionMatrix/ConfusionMatrixView';
-import LiveEvaluateFunctionView from 'views/LiveEvaluateFunction/LiveEvaluateFunctionView';
-import LiveTracesView from 'views/LiveTraces/LiveTracesView';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean

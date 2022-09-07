@@ -1,4 +1,4 @@
-import { PanDirection, ZoomDirection } from 'contexts/RecordingSelectionContext'
+import { PanDirection, ZoomDirection } from 'libraries/RecordingSelectionContext'
 import { ToolbarItem } from 'libraries/ViewToolbar'
 import { FaArrowLeft, FaArrowRight, FaSearchMinus, FaSearchPlus } from 'react-icons/fa'
 

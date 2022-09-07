@@ -1,4 +1,4 @@
-import { useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useTimeRange } from 'libraries/RecordingSelectionContext'
 import { matrix, multiply } from 'mathjs'
 import React, { FunctionComponent, useCallback, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'

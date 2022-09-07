@@ -1,4 +1,4 @@
-import { useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
+import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
 import DragCanvas, { DragAction, handleMouseDownIfDragging, handleMouseMoveIfDragging, handleMouseUpIfDragging } from 'FigurlCanvas/DragCanvas'
 import { Vec2 } from 'FigurlCanvas/Geometry'

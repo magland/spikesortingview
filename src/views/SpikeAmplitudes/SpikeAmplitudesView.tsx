@@ -1,4 +1,4 @@
-import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/RecordingSelectionContext'
 import { Splitter } from 'libraries/Splitter'
 import { colorForUnitId } from 'libraries/UnitColors'
 import { idToNum } from 'libraries/UnitSelectionContext'

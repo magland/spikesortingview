@@ -1,6 +1,6 @@
-import { useRecordingSelectionTimeInitialization, useTimeFocus } from 'contexts/RecordingSelectionContext'
 import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from 'FigurlCanvas/CanvasTransforms'
 import { Margins } from 'FigurlCanvas/Geometry'
+import { useRecordingSelectionTimeInitialization, useTimeFocus } from 'libraries/RecordingSelectionContext'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
 import React, { FunctionComponent, useCallback, useEffect, useMemo } from "react"
 import { BOOKMARK_BUTTON } from 'views/common/Animation/AnimationControls/PlaybackBookmarkButton'

@@ -1,4 +1,4 @@
-import { useTimeRange } from 'contexts/RecordingSelectionContext';
+import { useTimeRange } from 'libraries/RecordingSelectionContext';
 import { ViewToolbar } from 'libraries/ViewToolbar';
 import React, { FunctionComponent, useMemo } from 'react';
 import TimeWidgetToolbarEntries from 'views/common/TimeWidgetToolbarEntries';

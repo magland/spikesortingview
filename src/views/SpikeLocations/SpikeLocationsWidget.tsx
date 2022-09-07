@@ -1,4 +1,4 @@
-import { useSelectedElectrodes } from 'contexts/RecordingSelectionContext'
+import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
 import BaseCanvas from 'FigurlCanvas/BaseCanvas'
 import { rectangularRegionsIntersect, RectangularRegion, transformPoint, Vec2, Vec4 } from 'FigurlCanvas/Geometry'
 import { colorForUnitId } from 'libraries/UnitColors'

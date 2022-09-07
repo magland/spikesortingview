@@ -1,4 +1,4 @@
-import { defaultZoomScaleFactor, useTimeFocus, useTimeRange } from 'contexts/RecordingSelectionContext';
+import { defaultZoomScaleFactor, useTimeFocus, useTimeRange } from 'libraries/RecordingSelectionContext';
 import { Splitter } from 'libraries/Splitter';
 import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
 import { Divider } from 'libraries/ViewToolbar/Toolbars';
