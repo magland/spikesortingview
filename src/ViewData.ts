@@ -5,6 +5,8 @@ import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/Co
 import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/CrossCorrelograms'
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/ElectrodeGeometry"
 import { isMarkdownViewData, MarkdownViewData } from 'libraries/Markdown'
+import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/SortingCuration'
+import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/SortingCuration2'
 import { isSummaryViewData, SummaryViewData } from "libraries/Summary"
 import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/UnitSimilarityMatrix'
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
@@ -20,8 +22,6 @@ import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/Positi
 import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isRawTracesViewData, RawTracesViewData } from "views/RawTraces/RawTracesViewData"
-import { isSortingCurationViewData, SortingCurationViewData } from 'views/SortingCuration/SortingCurationViewData'
-import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'views/SortingCuration2/SortingCuration2ViewData'
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
 import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"

@@ -3,7 +3,7 @@ import { SortingCuration, useSortingCuration } from "contexts/SortingCurationCon
 import { useUrlState } from "figurl/UrlStateContext";
 import { useSelectedUnitIds } from "libraries/UnitSelectionContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import { getAbbreviatedUnitIdsString, getAllLabelChoices } from "views/SortingCuration2/SortingCuration2View";
+import { getAbbreviatedUnitIdsString, getAllLabelChoices } from "libraries/SortingCuration2";
 import { SortingSelectionViewData } from "./SortingSelectionViewData";
 
 type Props = {
