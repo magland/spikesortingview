@@ -57,13 +57,13 @@ export const useThrottledPan = (refs: PanUpdateRefs, panRecordingSelectionDeltaT
 }
 
 
-const resetPanStateAnchor = (ref: PanStateRef, mouseX: number, time: number, cancel: () => void) => {
+const resetPanStateAnchor = (ref: PanStateRef, mouseX: number, time: number, cancelPendingPan: () => void) => {
     ref.current.anchorTime = time
     ref.current.anchorX = mouseX
     ref.current.panning = false
     ref.current.pannedX = undefined
     ref.current.pannedTime = undefined
-    cancel()
+    cancelPendingPan()
 }
 
 
@@ -75,9 +75,9 @@ const startPanning = (ref: PanStateRef, mouseX: number) => {
 }
 
 
-const clearPanState = (ref: PanStateRef, cancel: () => void) => {
+const clearPanState = (ref: PanStateRef, cancelPendingPan: () => void) => {
     ref.current = {}
-    cancel()
+    cancelPendingPan()
 }
 
 
