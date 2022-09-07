@@ -7,6 +7,8 @@ import { MarkdownView } from 'libraries/Markdown';
 import { SortingCurationView } from 'libraries/SortingCuration';
 import { SortingCuration2View } from 'libraries/SortingCuration2';
 import { SummaryView } from 'libraries/Summary';
+import { UnitLocationsView } from 'libraries/UnitLocations';
+import { UnitMetricsGraphView } from 'libraries/UnitMetricsGraph';
 import { UnitSimilarityMatrixView } from 'libraries/UnitSimilarityMatrix';
 import { UnitsTableView } from 'libraries/UnitsTable';
 import { FunctionComponent } from 'react';
@@ -29,8 +31,6 @@ import SpikeAmplitudesView from 'views/SpikeAmplitudes/SpikeAmplitudesView';
 import SpikeLocationsView from 'views/SpikeLocations/SpikeLocationsView';
 import { TiledImageComponent } from 'views/TiledImageComponent/TiledImageComponent';
 import TrackPositionAnimationView from 'views/TrackPositionAnimation/TrackPositionAnimationView';
-import UnitLocationsView from 'views/UnitLocations/UnitLocationsView';
-import UnitMetricsGraphView from 'views/UnitMetricsGraph/UnitMetricsGraphView';
 import { ViewData } from './ViewData';
 
 export type TimeseriesLayoutOpts = {

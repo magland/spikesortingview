@@ -1,7 +1,7 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas';
 import { Vec2, Vec4 } from 'FigurlCanvas/Geometry';
+import { useDragSelectLayer } from 'libraries/UnitLocations';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
-import useDragSelectLayer from 'views/UnitLocations/useDragSelectLayer';
 import BarPlotMainLayer, { BarBox, BarPlotTick, BarPlotVerticalLine } from './BarPlotMainLayer';
 
 export type BarPlotBar = {

@@ -3,10 +3,10 @@ import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, V
 import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/AverageWaveforms'
 import { useSelectedElectrodes } from 'libraries/RecordingSelectionContext'
 import { colorForUnitId } from 'libraries/UnitColors'
+import { useDragSelectLayer } from 'libraries/UnitLocations'
 import { idToNum, useSelectedUnitIds } from 'libraries/UnitSelectionContext'
 import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform, useWheelZoom } from 'libraries/UnitSimilarityMatrix'
 import { useCallback, useMemo } from 'react'
-import useDragSelectLayer from 'views/UnitLocations/useDragSelectLayer'
 
 export const defaultMaxPixelRadius = 25
 const circle = 2 * Math.PI

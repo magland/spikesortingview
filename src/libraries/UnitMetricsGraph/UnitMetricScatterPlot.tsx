@@ -1,7 +1,7 @@
 import { colorForUnitId } from "libraries/UnitColors";
 import { idToNum } from "libraries/UnitSelectionContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import ScatterPlot, { ScatterPlotMarker } from '../common/ScatterPlot/ScatterPlot';
+import { ScatterPlot, ScatterPlotMarker } from 'libraries/ScatterPlot';
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";
 
 export type UnitMetricScatterPlotProps = {

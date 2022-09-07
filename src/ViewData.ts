@@ -28,8 +28,8 @@ import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeA
 import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
 import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/TiledImageComponent'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
-import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
-import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'views/UnitMetricsGraph/UnitMetricsGraphViewData'
+import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/UnitLocations'
+import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/UnitMetricsGraph'
 import { isUnitsTableViewData, UnitsTableViewData } from "libraries/UnitsTable"
 
 export type ViewData =
