@@ -6,18 +6,27 @@ import { LayoutItem, SLView } from "./SortingLayoutViewData"
 import SplitterLayoutItemView from "./SplitterLayoutItemView"
 import TabLayoutItemView from "./TabLayoutItemView"
 
-type Props = {
-    layoutItem: LayoutItem
-    views: SLView[]
+export type ViewComponentProps = {
+    data: any
+    timeseriesLayoutOpts?: any
     width: number
     height: number
 }
 
-const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, height}) => {
+type Props = {
+    layoutItem: LayoutItem
+    views: SLView[]
+    ViewComponent: FunctionComponent<ViewComponentProps>
+    width: number
+    height: number
+}
+
+const LayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent, views, width, height}) => {
     return (
         layoutItem.type === 'Box' ? (
             <BoxLayoutItemView
                 layoutItem={layoutItem}
+                ViewComponent={ViewComponent}
                 views={views}
                 width={width}
                 height={height}
@@ -25,6 +34,7 @@ const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, hei
         ) : layoutItem.type === 'Splitter' ? (
             <SplitterLayoutItemView
                 layoutItem={layoutItem}
+                ViewComponent={ViewComponent}
                 views={views}
                 width={width}
                 height={height}
@@ -32,6 +42,7 @@ const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, hei
         ) : layoutItem.type === 'Mountain' ? (
             <MountainLayoutItemView
                 layoutItem={layoutItem}
+                ViewComponent={ViewComponent}
                 views={views}
                 width={width}
                 height={height}
@@ -39,6 +50,7 @@ const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, hei
         ) : layoutItem.type === 'TabLayout' ? (
             <TabLayoutItemView
                 layoutItem={layoutItem}
+                ViewComponent={ViewComponent}
                 views={views}
                 width={width}
                 height={height}
@@ -46,6 +58,7 @@ const LayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, hei
         ) : layoutItem.type === 'View' ? (
             <IndividualLayoutItemView
                 layoutItem={layoutItem}
+                ViewComponent={ViewComponent}
                 views={views}
                 width={width}
                 height={height}

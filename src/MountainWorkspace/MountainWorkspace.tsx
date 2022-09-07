@@ -8,10 +8,12 @@ import { MWView, MWViewPlugin } from './MWViewPlugin';
 import MWViewWidget from './MWViewWidget';
 import MWCurationControl from './MWCurationControl';
 import { Splitter } from 'libraries/Splitter';
+import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 
 type Props = {
     viewPlugins: MWViewPlugin[]
     viewProps: {[key: string]: any}
+    ViewComponent: FunctionComponent<ViewComponentProps>
     hideCurationControl?: boolean
     controlViewPlugins: MWViewPlugin[]
     width: number
@@ -20,7 +22,7 @@ type Props = {
 
 const initialLeftPanelWidth = 320
 
-const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins, viewProps, hideCurationControl, controlViewPlugins}) => {
+const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins, ViewComponent, viewProps, hideCurationControl, controlViewPlugins}) => {
     const [openViews, openViewsDispatch] = useReducer(openViewsReducer, [])
 
     const launchIcon = <span style={{color: 'gray'}}><OpenInBrowserIcon /></span>
@@ -78,6 +80,7 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
                         <Expandable key={v.name} icon={launchIcon} label={v.label} defaultExpanded={true} unmountOnExit={false}>
                             <MWViewWrapper
                                 viewPlugin={v}
+                                ViewComponent={ViewComponent}
                             />
                         </Expandable>
                     ))
@@ -106,6 +109,7 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
 
 type WrapperProps = {
     viewPlugin: MWViewPlugin
+    ViewComponent: FunctionComponent<ViewComponentProps>
 }
 
 const MWViewWrapper: FunctionComponent<WrapperProps> = ({ viewPlugin }) => {

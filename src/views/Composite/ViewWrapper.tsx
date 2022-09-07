@@ -1,16 +1,17 @@
 import { useFileData } from 'figurl';
 import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
 import { FunctionComponent, useEffect, useState } from 'react';
-import View from 'View';
+import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 
 type Props = {
     figureDataSha1?: Sha1Hash // old
     figureDataUri?: string //new
+    ViewComponent: FunctionComponent<ViewComponentProps>
     width: number
     height: number
 }
 
-const ViewWrapper: FunctionComponent<Props> = ({ figureDataSha1, figureDataUri, width, height }) => {
+const ViewWrapper: FunctionComponent<Props> = ({ figureDataSha1, figureDataUri, ViewComponent, width, height }) => {
     const sha1OrUri = figureDataSha1 ? figureDataSha1.toString() : figureDataUri
     if (!sha1OrUri) throw Error('No figureDataSha1 or figureDataUri in ViewWrapper')
     const { fileData: figureData, progress, errorMessage } = useFileData(sha1OrUri)
@@ -31,7 +32,7 @@ const ViewWrapper: FunctionComponent<Props> = ({ figureDataSha1, figureDataUri, 
         )
     }
     return (
-        <View
+        <ViewComponent
             data={figureData}
             width={width}
             height={height}

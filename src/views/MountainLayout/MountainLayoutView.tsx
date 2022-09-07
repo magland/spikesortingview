@@ -3,41 +3,44 @@ import SortingCurationContext, { sortingCurationReducer } from 'contexts/Sorting
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
 import getMutable from 'figurl/getMutable';
 import MountainWorkspace from 'MountainWorkspace/MountainWorkspace';
-import React, { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
+import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 import { MountainLayoutViewData } from './MountainLayoutViewData';
 import ViewWrapper from './ViewWrapper';
 
 type Props = {
     data: MountainLayoutViewData
+    ViewComponent: FunctionComponent<ViewComponentProps>
     hideCurationControl?: boolean
     width: number
     height: number
 }
 
-const MountainLayoutView: FunctionComponent<Props> = ({data, hideCurationControl, width, height}) => {
+const MountainLayoutView: FunctionComponent<Props> = ({data, ViewComponent, hideCurationControl, width, height}) => {
     const viewPlugins = useMemo(() => (
         data.views.map((view, ii) => ({
             name: `view-${ii}`,
             label: view.label,
             component: ViewWrapper,
             singleton: true,
-            additionalProps: {figureDataSha1: view.figureDataSha1, figureDataUri: view.figureDataUri}
+            additionalProps: {figureDataSha1: view.figureDataSha1, figureDataUri: view.figureDataUri, ViewComponent}
         }))
-    ), [data.views])
+    ), [data.views, ViewComponent])
     const controlViewPlugins = useMemo(() => (
         (data.controls || []).map((view, ii) => ({
             name: `control-${ii}`,
             label: view.label,
             component: ViewWrapper,
             singleton: true,
-            additionalProps: {figureDataSha1: view.figureDataSha1, figureDataUri: view.figureDataUri}
+            additionalProps: {figureDataSha1: view.figureDataSha1, figureDataUri: view.figureDataUri, ViewComponent}
         }))
-    ), [data.controls])
+    ), [data.controls, ViewComponent])
     const viewProps = useMemo(() => ({}), [])
     const content = (
         <MountainWorkspace
             viewPlugins={viewPlugins}
             viewProps={viewProps}
+            ViewComponent={ViewComponent}
             hideCurationControl={hideCurationControl}
             controlViewPlugins={controlViewPlugins}
             width={width}

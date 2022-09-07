@@ -1,14 +1,16 @@
 import React, { FunctionComponent, useMemo } from 'react';
+import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 import { CompositeViewData } from './CompositeViewData';
 import ViewWrapper from './ViewWrapper';
 
 type Props = {
     data: CompositeViewData
+    ViewComponent: FunctionComponent<ViewComponentProps>
     width: number
     height: number
 }
 
-const CompositeView: FunctionComponent<Props> = ({data, width, height}) => {
+const CompositeView: FunctionComponent<Props> = ({data, ViewComponent, width, height}) => {
     const divStyle: React.CSSProperties = useMemo(() => ({
         width,
         height,
@@ -27,6 +29,7 @@ const CompositeView: FunctionComponent<Props> = ({data, width, height}) => {
                         <ViewWrapper
                             figureDataSha1={view.figureDataSha1} // old
                             figureDataUri={view.figureDataUri} // new
+                            ViewComponent={ViewComponent}
                             width={width}
                             height={H}
                         />

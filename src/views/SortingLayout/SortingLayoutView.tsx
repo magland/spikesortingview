@@ -9,6 +9,7 @@ import { feedIdForUri } from 'views/MountainLayout/MountainLayoutView';
 import { onMessageFromBackend, sendMessageToBackend } from 'figurl/customMessages';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
+import View from 'View'
 
 type Props = {
     data: SortingLayoutViewData
@@ -121,6 +122,7 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
         <UnitMetricSelectionContext.Provider value={{unitMetricSelection, unitMetricSelectionDispatch}}>
             <LayoutItemView
                 layoutItem={layout}
+                ViewComponent={View}
                 views={views}
                 width={width}
                 height={height}

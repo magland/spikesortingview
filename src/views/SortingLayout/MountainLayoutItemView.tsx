@@ -1,16 +1,18 @@
 import { FunctionComponent, useMemo } from "react"
 import MountainLayoutView from "views/MountainLayout/MountainLayoutView"
 import { MLViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
+import { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 
 type Props = {
     layoutItem: LayoutItem
+    ViewComponent: FunctionComponent<ViewComponentProps>
     views: SLView[]
     width: number
     height: number
 }
 
-const MountainLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, height}) => {
+const MountainLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent, views, width, height}) => {
     if (layoutItem.type !== 'Mountain') {
         throw Error('Unexpected')
     }
@@ -53,6 +55,7 @@ const MountainLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, wi
     return (
         <MountainLayoutView
             data={data}
+            ViewComponent={ViewComponent}
             hideCurationControl={true}
             width={width}
             height={height}

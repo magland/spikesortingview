@@ -1,17 +1,18 @@
 import { useFileData } from "figurl";
 import { FunctionComponent, useEffect, useState } from "react";
-import View from 'View';
 import ProgressComponent from "../common/ProgressComponent";
+import { ViewComponentProps } from "./LayoutItemView";
 import { LayoutItem, SLView } from "./SortingLayoutViewData";
 
 type Props = {
     layoutItem: LayoutItem
+    ViewComponent: FunctionComponent<ViewComponentProps>
     views: SLView[]
     width: number
     height: number
 }  
 
-const IndividualLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, height}) => {
+const IndividualLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent, views, width, height}) => {
     if (layoutItem.type !== 'View') {
         throw Error('Unexpected')
     }
@@ -42,7 +43,7 @@ const IndividualLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, 
         )
     }
     return (
-        <View
+        <ViewComponent
             data={figureData}
             width={width}
             height={height}

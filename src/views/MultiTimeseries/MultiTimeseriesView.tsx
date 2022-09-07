@@ -2,16 +2,18 @@ import { useTimeRange } from 'libraries/RecordingSelectionContext';
 import { ViewToolbar } from 'libraries/ViewToolbar';
 import React, { FunctionComponent, useMemo } from 'react';
 import TimeWidgetToolbarEntries from 'views/common/TimeWidgetToolbarEntries';
+import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 import { MultiTimeseriesViewData } from './MultiTimeseriesViewData';
 import ViewWrapper from './ViewWrapper';
 
 type Props = {
     data: MultiTimeseriesViewData
+    ViewComponent: FunctionComponent<ViewComponentProps>
     width: number
     height: number
 }
 
-const MultiTimeseriesView: FunctionComponent<Props> = ({data, width, height}) => {
+const MultiTimeseriesView: FunctionComponent<Props> = ({data, ViewComponent, width, height}) => {
     const divStyle: React.CSSProperties = useMemo(() => ({
         width,
         height,
@@ -47,6 +49,7 @@ const MultiTimeseriesView: FunctionComponent<Props> = ({data, width, height}) =>
                             label={panel.label}
                             figureDataSha1={panel.figureDataSha1} // old
                             figureDataUri={panel.figureDataUri} // new
+                            ViewComponent={ViewComponent}
                             isBottomPanel={ii === (data.panels.length - 1)}
                             width={width}
                             height={Math.floor(unit_height * (panel?.relativeHeight ?? 1))}

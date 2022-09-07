@@ -54,10 +54,10 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <RasterPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
     }
     else if (data.type === 'Composite') {
-        return <CompositeView data={data} width={width} height={height} />
+        return <CompositeView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'MultiTimeseries') {
-        return <MultiTimeseriesView data={data} width={width} height={height} />
+        return <MultiTimeseriesView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'AverageWaveforms') {
         return <AverageWaveformsView data={data} width={width} height={height} />
@@ -69,7 +69,7 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <SummaryView data={data} width={width} height={height} />
     }
     else if (data.type === 'MountainLayout') {
-        return <MountainLayoutView data={data} width={width} height={height} />
+        return <MountainLayoutView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'SpikeAmplitudes') {
         return <SpikeAmplitudesView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />

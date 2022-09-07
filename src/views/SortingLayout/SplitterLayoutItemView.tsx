@@ -1,17 +1,18 @@
 import { Splitter } from "libraries/Splitter"
 import { FunctionComponent, useMemo } from "react"
 import { computeSizes } from "./BoxLayoutItemView"
-import LayoutItemView from "./LayoutItemView"
+import LayoutItemView, { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 
 type Props = {
     layoutItem: LayoutItem
+    ViewComponent: FunctionComponent<ViewComponentProps>
     views: SLView[]
     width: number
     height: number
 }
 
-const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, height}) => {
+const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent, views, width, height}) => {
     if (layoutItem.type !== 'Splitter') {
         throw Error('Unexpected')
     }
@@ -52,6 +53,7 @@ const SplitterLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, wi
                         <LayoutItemView
                             key={ii}
                             layoutItem={item}
+                            ViewComponent={ViewComponent}
                             views={views}
                             width={0} // filled in by splitter
                             height={0} // filled in by splitter

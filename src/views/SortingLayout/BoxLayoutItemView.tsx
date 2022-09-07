@@ -1,9 +1,10 @@
 import React, { FunctionComponent, useMemo } from "react"
-import LayoutItemView from "./LayoutItemView"
+import LayoutItemView, { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 
 type Props = {
     layoutItem: LayoutItem
+    ViewComponent: FunctionComponent<ViewComponentProps>
     views: SLView[]
     width: number
     height: number
@@ -61,7 +62,7 @@ export const computeSizes = (
 }
     
 
-const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, height}) => {
+const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent, views, width, height}) => {
     if (layoutItem.type !== 'Box') {
         throw Error('Unexpected')
     }
@@ -132,6 +133,7 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, 
                         <div key={i} style={{position: 'absolute', left: p.left, top: p.top, width: p.width, height: p.height}}>
                             <LayoutItemView
                                 layoutItem={item}
+                                ViewComponent={ViewComponent}
                                 views={views}
                                 width={p.width}
                                 height={p.height}

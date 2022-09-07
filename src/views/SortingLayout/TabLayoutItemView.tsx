@@ -1,16 +1,17 @@
 import { FunctionComponent, useMemo } from "react"
 import TabWidget from "TabWidget/TabWidget"
-import LayoutItemView from "./LayoutItemView"
+import LayoutItemView, { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 
 type Props = {
     layoutItem: LayoutItem
+    ViewComponent: FunctionComponent<ViewComponentProps>
     views: SLView[]
     width: number
     height: number
 }
 
-const TabLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, height}) => {
+const TabLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent, views, width, height}) => {
     if (layoutItem.type !== 'TabLayout') {
         throw Error('Unexpected')
     }
@@ -33,6 +34,7 @@ const TabLayoutItemView: FunctionComponent<Props> = ({layoutItem, views, width, 
                     <LayoutItemView
                         key={ii}
                         layoutItem={item}
+                        ViewComponent={ViewComponent}
                         views={views}
                         width={0} // filled in by tab widget
                         height={0} // filled in by tab widget
