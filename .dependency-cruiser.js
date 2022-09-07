@@ -21,6 +21,16 @@ module.exports = {
       }
     },
     {
+      name: 'no-library-external-dependencies',
+      from: {
+        path: "^src/libraries/.+"
+      },
+      to: {
+        path: "^src/.+",
+        pathNot: ["^src/libraries/.+", "^src/figurl/.+"]
+      }
+    },
+    {
       name: 'no-figurl-innards',
       severity: "ignore",
       from: {

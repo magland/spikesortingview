@@ -1,13 +1,13 @@
 import { useFileData } from "figurl";
-import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { ProgressComponent } from "libraries/ProgressComponent";
+import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { ViewComponentProps } from "./LayoutItemView";
-import { LayoutItem, SLView } from "./SortingLayoutViewData";
+import { LayoutItem, MLView } from "./MainLayoutViewData";
 
 type Props = {
     layoutItem: LayoutItem
     ViewComponent: FunctionComponent<ViewComponentProps>
-    views: SLView[]
+    views: MLView[]
     width: number
     height: number
 }  
