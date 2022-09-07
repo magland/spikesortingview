@@ -1,7 +1,7 @@
 import { defaultZoomScaleFactor, useTimeFocus, useTimeRange } from 'libraries/RecordingSelectionContext';
 import { Splitter } from 'libraries/Splitter';
 import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
-import { Divider } from 'libraries/ViewToolbar/Toolbars';
+import { Divider } from 'libraries/ViewToolbar';
 import { abs, matrix, Matrix, multiply } from 'mathjs';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { TimeseriesLayoutOpts } from 'View';

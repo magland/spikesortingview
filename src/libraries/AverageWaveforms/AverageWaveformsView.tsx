@@ -1,16 +1,15 @@
-import { PlotGrid, PGPlot } from '../../libraries/PlotGrid';
-import { INITIALIZE_UNITS, useSelectedUnitIds, sortIds, idToNum } from '../../libraries/UnitSelectionContext';
+import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries';
 import { mean } from 'mathjs';
-import Splitter from '../../libraries/Splitter/Splitter';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import colorForUnitId from '../../libraries/UnitColors/colorForUnitId';
-import { ToolbarItem, ViewToolbar } from '../../libraries/ViewToolbar';
-import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from '../../libraries/ViewToolbar';
-import {VerticalScrollView} from '../../libraries/VerticalScrollView';
+import { PGPlot, PlotGrid } from '../../libraries/PlotGrid';
+import { Splitter } from '../../libraries/Splitter';
+import { colorForUnitId } from '../../libraries/UnitColors';
+import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '../../libraries/UnitSelectionContext';
+import { VerticalScrollView } from '../../libraries/VerticalScrollView';
+import { defaultUnitsTableBottomToolbarOptions, ToolbarItem, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions, ViewToolbar } from '../../libraries/ViewToolbar';
 import AverageWaveformPlot, { AverageWaveformPlotProps } from './AverageWaveformPlot';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
-import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries';
 
 type Props = {
     data: AverageWaveformsViewData

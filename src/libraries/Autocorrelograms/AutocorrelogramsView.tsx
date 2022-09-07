@@ -1,6 +1,6 @@
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import PlotGrid, { PGPlot } from '../PlotGrid/PlotGrid';
+import { PGPlot, PlotGrid } from '../PlotGrid';
 import { Splitter } from '../Splitter';
 import { colorForUnitId } from '../UnitColors';
 import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '../UnitSelectionContext';
