@@ -1,4 +1,4 @@
-import validateObject, { isArrayOf, isEqualTo, isJSONObject, isNumber, isString } from 'figurl/viewInterface/validateObject';
+import { validateObject, isArrayOf, isEqualTo, isJSONObject, isNumber, isString } from 'figurl';
 import { FunctionComponent, useMemo, useState } from 'react';
 import DeckGLComponent from './DeckGLComponent/DeckGLComponent';
 import LeftPanel from './LeftPanel';

@@ -21,6 +21,28 @@ module.exports = {
       }
     },
     {
+      name: 'no-figurl-innards',
+      severity: "ignore",
+      from: {
+        path: "^src/.+",
+        pathNot: "^src/figurl/.+"
+      },
+      to: {
+        path: "^src/figurl/.+",
+        pathNot: ["^src/figurl/index.ts"]
+      }
+    },
+    {
+      name: 'no-figurl-external-dependencies',
+      from: {
+        path: "^src/figurl/.+"
+      },
+      to: {
+        path: "^src/.+",
+        pathNot: ["^src/figurl/.+"]
+      }
+    },
+    {
       name: 'not-to-unresolvable',
       comment:
         "This module depends on a module that cannot be found ('resolved to disk'). If it's an npm " +

@@ -1,4 +1,4 @@
-import { useFileData } from 'figurl/getFileData';
+import { useFileData } from 'figurl';
 import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
 import { FunctionComponent, useEffect, useState } from 'react';
 import View from 'View';

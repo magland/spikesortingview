@@ -1,4 +1,4 @@
-import { useFileData } from 'figurl/getFileData';
+import { useFileData } from 'figurl';
 import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
 import React, { FunctionComponent, useMemo } from 'react';
 import View, { TimeseriesLayoutOpts } from 'View';

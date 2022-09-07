@@ -1,5 +1,5 @@
 import { validateObject } from "figurl";
-import { isArrayOf, isEqualTo, isNumber, isString, optional } from "figurl/viewInterface/validateObject";
+import { isArrayOf, isEqualTo, isNumber, isString, optional } from "figurl";
 
 export type PositionFrame = {
     x: number

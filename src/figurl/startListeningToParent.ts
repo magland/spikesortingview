@@ -6,7 +6,7 @@ import { handleSetCurrentUser } from "./useSignedIn"
 import { isMessageToParent } from "./viewInterface/MessageToParentTypes"
 import { GetFigureDataResponse, GetFileDataResponse } from "./viewInterface/FigurlRequestTypes"
 import { handleFileDownloadProgress } from "./getFileData"
-import { handleMessageFromBackend } from "views/SortingLayout/customMessages"
+import { handleMessageFromBackend } from "./customMessages"
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())
