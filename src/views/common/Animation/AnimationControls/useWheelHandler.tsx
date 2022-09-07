@@ -29,10 +29,11 @@ const wheelUpdate: DebounceThrottleUpdater<WheelStateProperties, WheelStateRefs>
 const wheelResolver: DebounceThrottleResolver<WheelStateRefs, WheelResolverProps> = (refs, props) => {
     const { dispatch } = props
     if (refs.wheelCount.current !== 0) {
+        const roundedSteps = refs.wheelCount.current > 0 ? Math.ceil(refs.wheelCount.current) : Math.floor(refs.wheelCount.current)
         dispatch({
             type: 'SKIP',
             backward: refs.wheelCount.current < 0,
-            fineSteps: Math.abs(refs.wheelCount.current),
+            fineSteps: Math.abs(roundedSteps),
             frameByFrame: refs.useFineWheel.current
         })
     }
@@ -54,7 +55,7 @@ const useWheelHandler = (dispatch: AnimationStateDispatcher<any>) => {
     const wheelHandler = useCallback((e: React.WheelEvent) => {
         if (e.deltaY === 0) return
         const useFineWheel = e.shiftKey
-        const wheelCount = e.deltaY > 0 ? 1 : -1
+        const wheelCount = e.deltaY/100
         throttledUpdater({useFineWheel, wheelCount})
     }, [throttledUpdater])
 

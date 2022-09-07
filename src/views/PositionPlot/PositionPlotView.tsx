@@ -1,11 +1,12 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/RecordingSelectionContext'
-import { colorForUnitId } from 'libraries/UnitColors'
-import { matrix, multiply } from 'mathjs'
 import { FunctionComponent, useCallback, useMemo } from 'react'
+import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
-import useYAxisTicks from 'views/common/TimeScrollView/YAxisTicks'
+import { colorForUnitId } from 'libraries/UnitColors'
+import TimeScrollView, { TimeScrollViewPanel } from 'views/common/TimeScrollView/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
+import useYAxisTicks, { useProjectedYAxisTicks } from 'views/common/TimeScrollView/YAxisTicks'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
-import TimeScrollView, { getYAxisPixelZero, TimeScrollViewPanel, use2dPanelDataToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useProjectedYAxisTicks, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {
@@ -42,7 +43,6 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
     const panelCount = 1
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -79,9 +79,6 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         }
     }, [panelWidth])
 
-    // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    // const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
-
     const series = useMemo(() => {
         const series: {dimensionIndex: number, times: number[], values: number[]}[] = []
         if ((visibleTimeStartSeconds === undefined) || (visibleTimeEndSeconds === undefined)) {
@@ -117,17 +114,17 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         return {yMin, yMax}
     }, [series])
 
-    const pixelTransform = use2dPanelDataToPixelMatrix(
-        pixelsPerSecond,
-        visibleTimeStartSeconds,
-        valueRange.yMin,
-        valueRange.yMax,
-        1,
-        panelHeight,
-        true
-    )
+    const pixelTransform = use2dScalingMatrix({
+        totalPixelWidth: panelWidth,
+        totalPixelHeight: panelHeight,
+        // margins have already been accounted for since we use a panel-oriented scaling function here
+        dataXMin: visibleTimeStartSeconds,
+        dataXMax: visibleTimeEndSeconds,
+        dataYMin: valueRange.yMin,
+        dataYMax: valueRange.yMax
+    })
 
-    // TODO: All this computational stuff should probably get pushed to the TimeScrollView...
+    // TODO: y-axis management should probably get pushed to the TimeScrollView...
     const yTicks = useYAxisTicks({ datamin: valueRange.yMin, datamax: valueRange.yMax, pixelHeight: panelHeight })
     const yTickSet = useProjectedYAxisTicks(yTicks, pixelTransform)
     
@@ -137,8 +134,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         // and we could even separate out the time series values (which are repeated). But probably not worth it.
         // TODO: ought to profile these two versions
         const pixelData = series.map(s => {
-            const augmentedPoints = matrix([ s.times, s.values, new Array(s.times.length).fill(1) ])
-            const pixelPoints = multiply(pixelTransform, augmentedPoints).valueOf() as number[][]
+            const pixelPoints = convert2dDataSeries(pixelTransform, [s.times, s.values])
             return {
                 dimensionIndex: s.dimensionIndex,
                 dimensionLabel: dimensionLabels[s.dimensionIndex],

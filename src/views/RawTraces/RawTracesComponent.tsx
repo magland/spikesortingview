@@ -1,12 +1,13 @@
-import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/RecordingSelectionContext'
-import { colorForUnitId } from 'libraries/UnitColors'
-import { matrix, multiply } from 'mathjs'
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
+import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
+import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries'
+import { colorForUnitId } from 'libraries/UnitColors'
+import TimeScrollView from 'views/common/TimeScrollView/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import useFetchCache from 'views/PositionPdfPlot/useFetchCache'
-import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from '../RasterPlot/TimeScrollView/TimeScrollView'
 
 type Props = {
     startTimeSec: number
@@ -57,7 +58,6 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     const panelCount = numChannels
     const panelSpacing = 0
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
     const maxNumPoints = 5e7 / numChannels
 
     const zoomInRequired = useMemo(() => {
@@ -186,7 +186,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     }, [])
 
     // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
+    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     const getTraceValues = useMemo(() => (
         (ds: number, ich: number, iStart: number, iEnd: number) => {
@@ -269,8 +269,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
         for (let i=ii1; i<=ii2; i++) {
             times.push(startTimeSec + i * ds / samplingFrequency)
         }
-        const augmentedTimesMatrix = matrix([ times, new Array(times.length).fill(1) ])
-        const pixelTimes = multiply(timeToPixelMatrix, augmentedTimesMatrix).valueOf() as number[]
+        const pixelTimes = convert1dDataSeries(times, timeToPixelMatrix)
         for (let ich = 0; ich < numChannels; ich ++) {
             const pixelValuesMin: number[] = []
             const pixelValuesMax: number[] | undefined = ds === 1 ? undefined : []
@@ -302,6 +301,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     }, [getTraceValues, paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor, numChannels, numFrames, chunkSize, width, spentALotOfTimeAtThisView, zoomInRequired, paintZoomInRequired])
 
     const scalingActions = useMemo(() => AmplitudeScaleToolbarEntries({ampScaleFactor, setAmpScaleFactor}), [ampScaleFactor])
+    const optionalActions = useMemo(() => { return { aboveDefault: scalingActions}}, [scalingActions])
 
     return visibleTimeStartSeconds === undefined
     ? (<div>Loading...</div>)
@@ -311,7 +311,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
             panels={pixelPanels}
             panelSpacing={panelSpacing}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
-            optionalActionsAboveDefault={scalingActions}
+            optionalActions={optionalActions}
             width={width}
             height={height}
         />
