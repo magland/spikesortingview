@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import MVCurationControl from '../../MountainWorkspace/MWCurationControl';
+import { MVCurationControl } from 'libraries/MountainWorkspace';
 import { SortingCurationViewData } from './SortingCurationViewData';
 
 type Props = {

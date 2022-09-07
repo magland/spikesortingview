@@ -1,8 +1,8 @@
-import SortingCurationAction from 'contexts/SortingCurationAction';
-import SortingCurationContext, { sortingCurationReducer } from 'contexts/SortingCurationContext';
+import { SortingCurationAction } from 'libraries/SortingCurationContext';
+import { SortingCurationContext, sortingCurationReducer } from 'libraries/SortingCurationContext';
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
 import getMutable from 'figurl/getMutable';
-import MountainWorkspace from 'MountainWorkspace/MountainWorkspace';
+import { MountainWorkspace } from 'libraries/MountainWorkspace';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 import { MountainLayoutViewData } from './MountainLayoutViewData';

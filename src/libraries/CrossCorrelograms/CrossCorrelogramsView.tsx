@@ -3,8 +3,8 @@ import { idToNum, INITIALIZE_UNITS, sortIds } from 'libraries/UnitSelectionConte
 import {Splitter} from 'libraries/Splitter';
 import React, { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import {CorrelogramPlot} from 'libraries/Autocorrelograms';
-import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget';
-import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds';
+import { LockableSelectUnitsWidget } from 'libraries/SelectUnitsWidget';
+import { useLocalSelectedUnitIds } from 'libraries/SelectUnitsWidget';
 import { CrossCorrelogramData, CrossCorrelogramsViewData } from './CrossCorrelogramsViewData';
 import { colorForUnitId } from 'libraries/UnitColors';
 import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';

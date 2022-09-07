@@ -1,4 +1,4 @@
-import { useSortingCuration } from 'contexts/SortingCurationContext';
+import { useSortingCuration } from 'libraries/SortingCurationContext';
 import { ColorPatchUnitIdLabel, ColorPatchUnitLabelProps, mergeGroupForUnitId, SortableTableWidget, SortableTableWidgetColumn, SortableTableWidgetRow } from 'libraries/SortableTableWidget';
 import { sortIds } from 'libraries/UnitSelectionContext';
 import { defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions } from 'libraries/ViewToolbar';

@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useMemo, useState } from 'react'
-import LockableSelectUnitsWidget from 'views/common/SelectUnitsWidget/LockableSelectUnitsWidget'
-import useLocalSelectedUnitIds from 'views/common/SelectUnitsWidget/useLocalSelectedUnitIds'
+import { LockableSelectUnitsWidget } from 'libraries/SelectUnitsWidget'
+import { useLocalSelectedUnitIds } from 'libraries/SelectUnitsWidget'
 import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'libraries/ViewToolbar'
 import { SpikeLocationsViewData } from './SpikeLocationsViewData'
 import SpikeLocationsWidget from './SpikeLocationsWidget'

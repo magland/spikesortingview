@@ -1,6 +1,6 @@
-import { useUnitMetricSelection } from "contexts/UnitMetricSelectionContext";
+import { useUnitMetricSelection } from "libraries/UnitMetricSelectionContext";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import NiceTable from '../../components/NiceTable/NiceTable'
+import { NiceTable } from 'libraries/NiceTable'
 
 type Props = {
     width: number

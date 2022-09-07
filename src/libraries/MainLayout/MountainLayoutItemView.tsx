@@ -1,8 +1,8 @@
 import { FunctionComponent, useMemo } from "react"
-import MountainLayoutView from "views/MountainLayout/MountainLayoutView"
-import { MLViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, MLView } from "./MainLayoutViewData"
+import MountainLayout2View from "./MountainLayout2/MountainLayout2View"
+import { MLViewData, MountainLayout2ViewData } from "./MountainLayout2/MountainLayout2ViewData"
 
 type Props = {
     layoutItem: LayoutItem
@@ -18,7 +18,7 @@ const MountainLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewCompo
     }
     const {items, itemProperties} = layoutItem
 
-    const data: MountainLayoutViewData = useMemo(() => {
+    const data: MountainLayout2ViewData = useMemo(() => {
         const views0: MLViewData[] = []
         const controls0: MLViewData[] = []
         for (let i = 0; i < items.length; i++) {
@@ -53,7 +53,7 @@ const MountainLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewCompo
     }, [items, itemProperties, views])
 
     return (
-        <MountainLayoutView
+        <MountainLayout2View
             data={data}
             ViewComponent={ViewComponent}
             hideCurationControl={true}

@@ -1,4 +1,4 @@
-import { useSortingCuration } from 'contexts/SortingCurationContext';
+import { useSortingCuration } from 'libraries/SortingCurationContext';
 import { SortableTableWidget, SortableTableWidgetRow } from 'libraries/SortableTableWidget';
 import { idToNum, INITIALIZE_UNITS, sortIds, SortingRule, UnitSelectionAction } from 'libraries/UnitSelectionContext';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
