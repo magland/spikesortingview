@@ -1,10 +1,11 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'contexts/RecordingSelectionContext'
 import { useSelectedUnitIds } from 'contexts/UnitSelection/UnitSelectionContext'
-import { matrix, multiply } from 'mathjs'
 import { FunctionComponent, useCallback, useMemo } from 'react'
+import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
 import colorForUnitId from 'views/common/ColorHandling/colorForUnitId'
-import TimeScrollView, { use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollView'
+import TimeScrollView from 'views/common/TimeScrollView/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import { RasterPlotViewData } from './RasterPlotViewData'
 
@@ -34,7 +35,6 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
     const panelCount = useMemo(() => data.plots.length, [data.plots])
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
@@ -50,26 +50,20 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
         context.stroke()
     }, [panelHeight])
 
-    // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
+    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     const maxPointsPerUnit = 3000
 
     const pixelPanels = useMemo(() => (data.plots.sort((p1, p2) => (p1.unitId - p2.unitId)).map(plot => {
         const filteredSpikes = plot.spikeTimesSec.filter(t => (visibleTimeStartSeconds !== undefined) && (visibleTimeStartSeconds <= t) && (visibleTimeEndSeconds !== undefined) && (t <= visibleTimeEndSeconds))
-        const augmentedSpikesMatrix = matrix([ filteredSpikes, new Array(filteredSpikes.length).fill(1) ])
-
-        // augmentedSpikesMatrix is a 2 x n matrix; each col vector is [time, 1]. The multiplication below gives an
-        // n x 1 matrix (n = number of spikes). valueOf() yields the data as a simple array.
-        const pixelSpikes = multiply(timeToPixelMatrix, augmentedSpikesMatrix).valueOf() as number[]
-        const pixelSpikes2 = subsampleIfNeeded(pixelSpikes, maxPointsPerUnit)
+        const pixelSpikes = subsampleIfNeeded(convert1dDataSeries(filteredSpikes, timeToPixelMatrix), maxPointsPerUnit)
 
         return {
             key: `${plot.unitId}`,
             label: `${plot.unitId}`,
             props: {
                 color: colorForUnitId(plot.unitId),
-                pixelSpikes: pixelSpikes2
+                pixelSpikes: pixelSpikes
             },
             paint: paintPanel
         }
@@ -83,7 +77,6 @@ const RasterPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, w
             panels={pixelPanels}
             panelSpacing={panelSpacing}
             selectedPanelKeys={selectedUnitIds}
-            setSelectedPanelKeys={() => {}}
             highlightSpans={data.highlightIntervals}
             timeseriesLayoutOpts={timeseriesLayoutOpts}
             width={width}

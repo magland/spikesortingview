@@ -1,3 +1,4 @@
+import { matrix, Matrix, multiply } from 'mathjs'
 import { useMemo } from 'react'
 
 type YAxisProps = {
@@ -120,5 +121,23 @@ const useYAxisTicks = (props: YAxisProps) => {
         return { ticks: steps, datamin: _dataMin, datamax: _dataMax }
     }, [datamax, datamin, yZoom, pixelHeight])
 }
+
+// TODO: UNIFY MATRIX MULT CODE
+export const useProjectedYAxisTicks = (ticks: TickSet, transform: Matrix) => {
+    // transform is assumed to be the output of our use2dPanelDataToPixelMatrix
+    return useMemo(() => {
+        const _ticks = ticks.ticks
+        const augmentedValues = matrix([
+            new Array(_ticks.length).fill(0),
+            _ticks.map(t => t.dataValue),
+            new Array(_ticks.length).fill(1)])
+        const pixelValues = (multiply(transform, augmentedValues).valueOf() as number[][])[1]
+        return {
+            ...ticks,
+            ticks: _ticks.map((t, ii) => {return {...t, pixelValue: pixelValues[ii]}})
+        }
+    }, [ticks, transform])
+}
+
 
 export default useYAxisTicks

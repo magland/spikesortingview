@@ -1,49 +1,9 @@
 import { TickSet } from "views/common/TimeScrollView/YAxisTicks";
-import { TimeScrollViewPanel, TimeTick } from "./TimeScrollView";
+import { TimeTick } from "./TimeAxisTicks";
+import { TimeScrollViewPanel } from "./TimeScrollView";
 import { TSVAxesLayerProps } from "./TSVAxesLayer";
-import { TSVHighlightLayerProps } from './TSVHighlightLayer';
-import { MainLayerProps } from "./TSVMainLayer";
-
-export const paintPanels = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: MainLayerProps<T>) => {
-    const {margins, panels, perPanelOffset } = props
-    context.resetTransform()
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    context.translate(margins.left, margins.top)
-    for (let i = 0; i < panels.length; i++) {
-        const p = panels[i]
-        p.paint(context, p.props)
-        context.translate(0, perPanelOffset)
-    }
-}
 
 const highlightedRowFillStyle = '#c5e1ff' // TODO: This should be standardized across the application
-
-// some nice purples: [161, 87, 201], or darker: [117, 56, 150]
-// dark blue: 0, 30, 255
-const defaultSpanHighlightColor = [0, 30, 255]
-
-export const paintSpanHighlights = (context: CanvasRenderingContext2D, props: TSVHighlightLayerProps) => {
-    const { height, margins, highlightSpans } = props
-    context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-    if (!highlightSpans || highlightSpans.length === 0) { return }
-
-    const visibleHeight = height - margins.bottom - margins.top
-    const zeroHeight = margins.top
-    highlightSpans.forEach(h => {
-        const definedColor = h.color || defaultSpanHighlightColor
-        const [r, g, b, a] = [...definedColor]
-        if (a) context.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`
-
-        h.pixelSpans.forEach((span) => {
-            if (!a) {
-                const alpha = span.width < 2 ? 1 : 0.2
-                context.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`
-            }
-            context.fillRect(span.start, zeroHeight, span.width, visibleHeight)
-        })
-    })
-}
-
 
 export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': Set<number | string>}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
@@ -61,7 +21,6 @@ export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderi
     paintPanelLabels(context, panels, margins.left, margins.top, perPanelOffset, panelHeight)
 }
 
-// TODO: This logic is highly similar to paintTimeTicks. Try to unify.
 const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisYCoordinate: number, yAxisXCoordinate: number, plotRightPx: number, topMargin: number) => {
     const labelOffsetFromGridline = 2
     const gridlineLeftEdge = yAxisXCoordinate - 5

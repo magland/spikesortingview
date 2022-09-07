@@ -1,8 +1,9 @@
 import { useTimeRange } from 'contexts/RecordingSelectionContext'
-import { matrix, multiply } from 'mathjs'
 import { FunctionComponent, useCallback, useMemo } from 'react'
+import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
-import TimeScrollView, { TimeScrollViewPanel, use1dTimeToPixelMatrix, usePanelDimensions, usePixelsPerSecond, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollView'
+import TimeScrollView, { TimeScrollViewPanel } from 'views/common/TimeScrollView/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
 import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
 import { EpochData, EpochsViewData } from './EpochsViewData'
 
@@ -36,12 +37,10 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
     const panelCount = 1
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
-    const pixelsPerSecond = usePixelsPerSecond(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     const { epochs } = data
 
-    // Here we convert the native (time-based spike registry) data to pixel dimensions based on the per-panel allocated space.
-    const timeToPixelMatrix = use1dTimeToPixelMatrix(pixelsPerSecond, visibleTimeStartSeconds)
+    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
 
     const pixelEpochs = useMemo(() => { 
         const ret: {startPixel: number, endPixel: number, epoch: EpochData}[] = []
@@ -50,8 +49,7 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
         }
         for (let epoch of epochs) {
             if ((epoch.startTime <= visibleTimeEndSeconds) && (epoch.endTime >= visibleTimeStartSeconds)) {
-                const augmentedTimes = matrix([[epoch.startTime, epoch.endTime], new Array(2).fill(1) ])
-                const pixelTimes = multiply(timeToPixelMatrix, augmentedTimes).valueOf() as number[]
+                const pixelTimes = convert1dDataSeries([epoch.startTime, epoch.endTime], timeToPixelMatrix)
                 ret.push({
                     startPixel: pixelTimes[0],
                     endPixel: pixelTimes[1],
