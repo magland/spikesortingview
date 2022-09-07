@@ -7,8 +7,12 @@ import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "librarie
 import { isMarkdownViewData, MarkdownViewData } from 'libraries/Markdown'
 import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/SortingCuration'
 import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/SortingCuration2'
+import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'libraries/SpikeLocations'
 import { isSummaryViewData, SummaryViewData } from "libraries/Summary"
+import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/UnitLocations'
+import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/UnitMetricsGraph'
 import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/UnitSimilarityMatrix'
+import { isUnitsTableViewData, UnitsTableViewData } from "libraries/UnitsTable"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
 import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
@@ -23,14 +27,10 @@ import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isRawTracesViewData, RawTracesViewData } from "views/RawTraces/RawTracesViewData"
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
-import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
+import { isSortingSelectionViewData, SortingSelectionViewData } from 'libraries/SortingSelection'
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
-import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
 import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/TiledImageComponent'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
-import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/UnitLocations'
-import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/UnitMetricsGraph'
-import { isUnitsTableViewData, UnitsTableViewData } from "libraries/UnitsTable"
 
 export type ViewData =
     AutocorrelogramsViewData |
