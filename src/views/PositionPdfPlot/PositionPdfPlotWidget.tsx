@@ -72,6 +72,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
     const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions, segmentSize, multiscaleFactor)
     const [showLinearPositionsOverlay, setShowLinearPositionsOverlay] = useState<boolean>(false)
+    const height2 = linearPositions ? height - 50 : height
 
     const {downsampleFactor, i1, i2} = useMemo(() => {
         if (visibleTimeStartSeconds === undefined) return {downsampleFactor: 1, i1: 0, i2: 0}
@@ -112,7 +113,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
 
     const panelCount = 1
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
-    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
+    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height2, panelCount, panelSpacing, margins)
     const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, margins.left)
 
     const pixelTimes = useMemo(() => {
@@ -179,7 +180,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         }
         context.save()
         context.scale((pixelTimes[1] - pixelTimes[0]) / imageData.width, panelHeight / imageData.height)
-        context.drawImage(canvas, pixelTimes[0], 0)
+        context.drawImage(canvas, 0, 0)
         context.restore()
     }, [pixelTimes, panelHeight, imageData, visibleLinearPositions, showLinearPositionsOverlay, downsampleFactor])
 
@@ -192,7 +193,6 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
         }]
     }, [paintPanel])
     
-    const height2 = linearPositions ? height - 50 : height
     return (
         <div>
             <TimeScrollView
