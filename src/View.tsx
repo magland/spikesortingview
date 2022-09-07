@@ -3,6 +3,7 @@ import { AverageWaveformsView } from 'libraries/AverageWaveforms';
 import { ConfusionMatrixView } from 'libraries/ConfusionMatrix';
 import { CrossCorrelogramsView } from 'libraries/CrossCorrelograms';
 import { ElectrodeGeometryView } from 'libraries/ElectrodeGeometry';
+import { MainLayoutView } from 'libraries/MainLayout';
 import { MarkdownView } from 'libraries/Markdown';
 import { SortingCurationView } from 'libraries/SortingCuration';
 import { SortingCuration2View } from 'libraries/SortingCuration2';
@@ -142,6 +143,9 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     }
     else if (data.type === 'LiveTraces') {
         return <LiveTracesView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'MainLayout') {
+        return <MainLayoutView data={data} ViewComponent={View} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
