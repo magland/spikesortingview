@@ -65,7 +65,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const perPanelOffset = panelHeight + panelSpacing
 
     const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, definedMargins.left)
-    const focusTimeInPixels = useFocusTimeInPixels(timeToPixelMatrix, (visibleTimeStartSeconds ?? 0))
+    const focusTimeInPixels = useFocusTimeInPixels(timeToPixelMatrix)
 
     const timeTicks = useTimeTicks(visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix)
 

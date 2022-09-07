@@ -61,10 +61,10 @@ export const usePanelDimensions = (width: number, height: number, panelCount: nu
     }, [width, height, panelCount, panelSpacing, margins])
 }
 
-export const useFocusTimeInPixels = (timeToPixelMatrix: Matrix, visibleTimeStartSeconds: number) => {
+export const useFocusTimeInPixels = (timeToPixelMatrix: Matrix) => {
     const {focusTime} = useTimeFocus()
     return useMemo(() => {
-        if (focusTime === undefined || visibleTimeStartSeconds === undefined) return undefined
+        if (focusTime === undefined) return undefined
         return convert1dDataSeries([focusTime], timeToPixelMatrix)[0]
-    }, [timeToPixelMatrix, focusTime, visibleTimeStartSeconds])
+    }, [timeToPixelMatrix, focusTime])
 }
