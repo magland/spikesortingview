@@ -20,7 +20,7 @@ const ViewWrapper: FunctionComponent<Props> = ({ label, figureDataSha1, figureDa
     if (!sha1OrUri) throw Error('No figureDataSha1 or figureDataUri in ViewWrapper')
     const { fileData: figureData, errorMessage } = useFileData(sha1OrUri)
 
-    const timeseriesLayoutOpts: TimeseriesLayoutOpts = useMemo(() => {
+    const opts: TimeseriesLayoutOpts = useMemo(() => {
         return {
             hideToolbar: true,
             hideTimeAxis: !isBottomPanel,
@@ -34,7 +34,7 @@ const ViewWrapper: FunctionComponent<Props> = ({ label, figureDataSha1, figureDa
     const content = figureData ? (
         <ViewComponent
             data={figureData}
-            timeseriesLayoutOpts={timeseriesLayoutOpts}
+            opts={opts}
             width={contentWidth}
             height={height}
         />

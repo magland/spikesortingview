@@ -3,7 +3,7 @@ import { RecordingSelectionContext, defaultRecordingSelection, recordingSelectio
 import { getFigureData, useWindowDimensions } from 'figurl';
 import SetupUrlState from 'figurl/SetupUrlState';
 import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from 'libraries/UnitSelectionContext';
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useMemo, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';
 import View from './View';
@@ -31,6 +31,8 @@ function App() {
     })
   }, [])
 
+  const opts = useMemo(() => ({}), [])
+
   if (errorMessage) {
     return <div style={{color: 'red'}}>{errorMessage}</div>
   }
@@ -46,6 +48,7 @@ function App() {
           <SetupUrlState>
             <View
               data={data}
+              opts={opts}
               width={width - 10}
               height={height - 5}
             />

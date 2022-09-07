@@ -1,6 +1,6 @@
 import { useFileData } from 'figurl';
 import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 
 type Props = {
@@ -22,6 +22,8 @@ const ViewWrapper: FunctionComponent<Props> = ({ figureDataSha1, figureDataUri, 
         })
     }, [progress])
 
+    const opts = useMemo(() => ({}), [])
+
     if (!figureData) {
         return (
             <div style={{ width, height }}>
@@ -34,6 +36,7 @@ const ViewWrapper: FunctionComponent<Props> = ({ figureDataSha1, figureDataUri, 
     return (
         <ViewComponent
             data={figureData}
+            opts={opts}
             width={width}
             height={height}
         />

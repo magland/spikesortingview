@@ -8,7 +8,7 @@ import TabLayoutItemView from "./TabLayoutItemView"
 
 export type ViewComponentProps = {
     data: any
-    timeseriesLayoutOpts?: any
+    opts: any // get passed to the view
     width: number
     height: number
 }

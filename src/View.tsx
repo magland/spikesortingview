@@ -41,17 +41,17 @@ export type TimeseriesLayoutOpts = {
 
 type Props = {
     data: ViewData
-    timeseriesLayoutOpts?: TimeseriesLayoutOpts
+    opts: any
     width: number
     height: number
 }
 
-const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOpts}) => {
+const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     if (data.type === 'Autocorrelograms') {
         return <AutocorrelogramsView data={data} width={width} height={height} />
     }
     else if (data.type === 'RasterPlot') {
-        return <RasterPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <RasterPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'Composite') {
         return <CompositeView data={data} ViewComponent={View} width={width} height={height} />
@@ -72,31 +72,31 @@ const View: FunctionComponent<Props> = ({data, width, height, timeseriesLayoutOp
         return <MountainLayoutView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'SpikeAmplitudes') {
-        return <SpikeAmplitudesView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <SpikeAmplitudesView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'ElectrodeGeometry') {
         return <ElectrodeGeometryView data={data} width={width} height={height} />
     }
     else if (data.type === 'PositionPlot') {
-        return <PositionPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <PositionPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'LiveCrossCorrelograms') {
         return <LiveCrossCorrelogramsView data={data} width={width} height={height} />
     }
     else if (data.type === 'PositionPdfPlot') {
-        return <PositionPdfPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <PositionPdfPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'LivePositionPdfPlot') {
-        return <LivePositionPdfPlotView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <LivePositionPdfPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'Epochs') {
-        return <EpochsView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <EpochsView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'Console') {
         return <ConsoleView data={data} width={width} height={height} />
     }
     else if (data.type === 'RawTraces') {
-        return <RawTracesView data={data} timeseriesLayoutOpts={timeseriesLayoutOpts} width={width} height={height} />
+        return <RawTracesView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
     }
     else if (data.type === 'TrackAnimation') {
         return <TrackPositionAnimationView data={data} width={width} height={height} />

@@ -1,5 +1,5 @@
 import { useFileData } from "figurl";
-import { FunctionComponent, useEffect, useState } from "react";
+import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import ProgressComponent from "../common/ProgressComponent";
 import { ViewComponentProps } from "./LayoutItemView";
 import { LayoutItem, SLView } from "./SortingLayoutViewData";
@@ -28,6 +28,8 @@ const IndividualLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewCom
         })
     }, [progress])
 
+    const opts = useMemo(() => ({}), [])
+
     if (!figureData) {
         return (
             <div style={{ width, height }}>
@@ -45,6 +47,7 @@ const IndividualLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewCom
     return (
         <ViewComponent
             data={figureData}
+            opts={opts}
             width={width}
             height={height}
         />
