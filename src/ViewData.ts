@@ -1,9 +1,9 @@
 import { isOneOf } from 'figurl/viewInterface/validateObject'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/Autocorrelograms"
+import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/AverageWaveforms"
 import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/ConfusionMatrix'
 import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/CrossCorrelograms'
 import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/UnitSimilarityMatrix'
-import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"

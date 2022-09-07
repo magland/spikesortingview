@@ -1,9 +1,9 @@
 import { AutocorrelogramsView } from 'libraries/Autocorrelograms';
+import { AverageWaveformsView } from 'libraries/AverageWaveforms';
 import { ConfusionMatrixView } from 'libraries/ConfusionMatrix';
 import { CrossCorrelogramsView } from 'libraries/CrossCorrelograms';
 import { UnitSimilarityMatrixView } from 'libraries/UnitSimilarityMatrix';
 import { FunctionComponent } from 'react';
-import AverageWaveformsView from 'views/AverageWaveforms/AverageWaveformsView';
 import CompositeView from 'views/Composite/CompositeView';
 import ConsoleView from 'views/Console/ConsoleView';
 import ElectrodeGeometryView from 'views/ElectrodeGeometry/ElectrodeGeometryView';

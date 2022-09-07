@@ -4,11 +4,10 @@ import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformP
 import { colorForUnitId } from 'libraries/UnitColors'
 import { idToNum, useSelectedUnitIds } from 'libraries/UnitSelectionContext'
 import { useCallback, useMemo } from 'react'
-import { computeElectrodeLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
 import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform } from 'libraries/UnitSimilarityMatrix'
 import { useWheelZoom } from 'libraries/UnitSimilarityMatrix'
-import { defaultColors, ElectrodeColors } from '../AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryPainting'
 import useDragSelectLayer from './useDragSelectLayer'
+import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/AverageWaveforms'
 
 export const defaultMaxPixelRadius = 25
 const circle = 2 * Math.PI

@@ -1,6 +1,5 @@
 import React, { FunctionComponent } from 'react'
-import ElectrodeGeometry from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/ElectrodeGeometry'
-import { computeElectrodesFromIdsAndLocations } from 'views/AverageWaveforms/WaveformWidget/sharedDrawnComponents/electrodeGeometryLayout'
+import {computeElectrodesFromIdsAndLocations, ElectrodeGeometry} from 'libraries/AverageWaveforms'
 import { ElectrodeGeometryViewData } from './ElectrodeGeometryViewData'
 
 type ElectrodeGeometryViewProps = {

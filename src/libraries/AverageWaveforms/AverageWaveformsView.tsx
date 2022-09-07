@@ -4,13 +4,13 @@ import { mean } from 'mathjs';
 import Splitter from '../../libraries/Splitter/Splitter';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import AmplitudeScaleToolbarEntries from 'views/common/AmplitudeScaleToolbarEntries';
 import colorForUnitId from '../../libraries/UnitColors/colorForUnitId';
 import { ToolbarItem, ViewToolbar } from '../../libraries/ViewToolbar';
 import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from '../../libraries/ViewToolbar';
 import {VerticalScrollView} from '../../libraries/VerticalScrollView';
 import AverageWaveformPlot, { AverageWaveformPlotProps } from './AverageWaveformPlot';
 import { AverageWaveformsViewData } from './AverageWaveformsViewData';
+import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries';
 
 type Props = {
     data: AverageWaveformsViewData
