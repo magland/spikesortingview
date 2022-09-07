@@ -3,16 +3,17 @@ import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/AverageWaveforms"
 import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/ConfusionMatrix'
 import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/CrossCorrelograms'
+import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/ElectrodeGeometry"
+import { isMarkdownViewData, MarkdownViewData } from 'libraries/Markdown'
+import { isSummaryViewData, SummaryViewData } from "libraries/Summary"
 import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/UnitSimilarityMatrix'
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
-import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
 import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
 import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'views/LiveEvaluateFunction/LiveEvaluateFunctionView'
 import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "views/LivePositionPdfPlot/LivePositionPdfPlotViewData"
 import { isLiveTracesViewData, LiveTracesViewData } from 'views/LiveTraces/LiveTracesViewData'
-import { isMarkdownViewData, MarkdownViewData } from 'views/Markdown/MarkdownView'
 import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
 import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "views/MultiTimeseries/MultiTimeseriesViewData"
 import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
@@ -25,7 +26,6 @@ import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLay
 import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
-import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
 import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/TiledImageComponent'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
 import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
