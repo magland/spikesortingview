@@ -1,6 +1,6 @@
 import { Matrix } from 'mathjs';
 import { useMemo } from 'react';
-import { convert1dDataSeries, getScaleFrom1dScalingMatrix } from 'util/pointProjection';
+import { convert1dDataSeries, getScaleFrom1dScalingMatrix } from 'libraries/util-point-projection';
 
 export type TimeTick = {
     value: number

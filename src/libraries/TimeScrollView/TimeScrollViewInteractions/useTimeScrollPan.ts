@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react';
-import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'util/rateLimiters';
+import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'libraries/util-rate-limiters';
 
 export type PanState = {
     anchorTime?: number,

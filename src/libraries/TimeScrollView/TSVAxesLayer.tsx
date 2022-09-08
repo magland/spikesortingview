@@ -1,6 +1,6 @@
 import { BaseCanvas } from 'libraries/figurl-canvas';
 import { useMemo } from 'react';
-import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
+import { TickSet } from './YAxisTicks';
 import { TimeTick } from './TimeAxisTicks';
 import { TimeScrollViewPanel } from './TimeScrollView';
 import { paintAxes } from './TSVPaintAxes';

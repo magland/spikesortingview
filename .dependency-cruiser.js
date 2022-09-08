@@ -1,4 +1,8 @@
 /** @type {import('dependency-cruiser').IConfiguration} */
+
+var fontsize = "20";
+var fontcolor = "black";
+
 module.exports = {
   forbidden: [
     {
@@ -96,6 +100,42 @@ module.exports = {
     },
     tsConfig: {
       fileName: 'tsconfig.json'
-    }
+    },
+    reporterOptions: {
+      dot: {
+        theme: {
+          // don't use default theme
+          replace: false,
+          // vertical orientation TD or LR
+          graph: {
+            rankdir: "LR",
+            splines: "true", // true or ortho (ortho takes a while for large jobs)
+            fontsize: "14"
+          },
+          modules: [
+            {
+              criteria: {source: "^src/libraries/view-"},
+              attributes: {fillcolor: 'lightblue', fontcolor, color: 'gray', fontsize}
+            },
+            {
+              criteria: {source: "^src/libraries/context-"},
+              attributes: {fillcolor: 'pink', fontcolor, color: 'gray', fontsize}
+            },
+            {
+              criteria: {source: "^src/libraries/util-"},
+              attributes: {fillcolor: 'lightgreen', fontcolor, color: 'gray', fontsize}
+            },
+            {
+              criteria: {source: "^src/libraries/component-"},
+              attributes: {fillcolor: 'thistle', fontcolor, color: 'gray', fontsize}
+            },
+            {
+              criteria: {source: "^src/libraries"},
+              attributes: {fillcolor: 'lightgray', fontcolor, color: 'gray', fontsize}
+            }
+          ]
+        },
+      },
+    },
   }
 };

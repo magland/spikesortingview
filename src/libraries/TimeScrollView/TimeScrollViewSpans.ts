@@ -1,5 +1,5 @@
 import { Matrix } from 'mathjs';
-import { usePointWidthsFromIntervals } from 'util/pointProjection';
+import { usePointWidthsFromIntervals } from 'libraries/util-point-projection';
 import { HighlightIntervalSet } from './TimeScrollViewData';
 
 

@@ -1,6 +1,6 @@
 import { validateObject } from "libraries/util-validate-object"
 import { isArrayOf, isEqualTo, isNumber, optional } from "libraries/util-validate-object"
-import { HighlightIntervalSet, isHighlightIntervalSet } from 'views/common/TimeScrollView/TimeScrollViewData'
+import { HighlightIntervalSet, isHighlightIntervalSet } from 'libraries/TimeScrollView'
 
 type RPPlotData = {
     unitId: number

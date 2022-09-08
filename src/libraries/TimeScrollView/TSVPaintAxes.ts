@@ -1,4 +1,4 @@
-import { TickSet } from "views/common/TimeScrollView/YAxisTicks";
+import { TickSet } from "./YAxisTicks";
 import { TimeTick } from "./TimeAxisTicks";
 import { TimeScrollViewPanel } from "./TimeScrollView";
 import { TSVAxesLayerProps } from "./TSVAxesLayer";

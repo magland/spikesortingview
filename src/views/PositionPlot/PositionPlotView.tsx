@@ -1,12 +1,12 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
 import { FunctionComponent, useCallback, useMemo } from 'react'
-import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'util/pointProjection'
+import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
 import { colorForUnitId } from 'libraries/util-unit-colors'
-import TimeScrollView, { TimeScrollViewPanel } from 'views/common/TimeScrollView/TimeScrollView'
-import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
-import useYAxisTicks, { useProjectedYAxisTicks } from 'views/common/TimeScrollView/YAxisTicks'
-import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
+import { TimeScrollView, TimeScrollViewPanel } from 'libraries/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'libraries/TimeScrollView'
+import { useYAxisTicks, useProjectedYAxisTicks } from 'libraries/TimeScrollView'
+import { DefaultToolbarWidth } from 'libraries/TimeScrollView'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {

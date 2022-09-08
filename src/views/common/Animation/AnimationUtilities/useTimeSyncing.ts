@@ -1,6 +1,6 @@
 import React, { useCallback, useMemo, useRef } from "react"
 import useBinarySearchTree, { BstSearchFn, BstSearchResult } from "util/bst"
-import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from "util/rateLimiters"
+import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from "libraries/util-rate-limiters"
 import { AnimationState, AnimationStateAction } from "views/common/Animation/AnimationStateReducer"
 
 

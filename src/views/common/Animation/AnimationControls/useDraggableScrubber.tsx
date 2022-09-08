@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useRef } from 'react'
-import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'util/rateLimiters'
+import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'libraries/util-rate-limiters'
 import { AnimationStateDispatcher } from '../AnimationStateReducer'
 import { LogicalBarInterpreter } from './usePlaybackBarGeometry'
 

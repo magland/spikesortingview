@@ -1,6 +1,6 @@
 import { useTimeRange } from 'libraries/context-recording-selection';
 import { useMemo } from 'react';
-import TimeWidgetToolbarEntries from 'views/common/TimeWidgetToolbarEntries';
+import { TimeWidgetToolbarEntries } from 'libraries/TimeScrollView';
 import { Divider, ToolbarItem } from 'libraries/ViewToolbar';
 
 export type OptionalToolbarActions = {

@@ -1,10 +1,10 @@
 import { useTimeRange } from 'libraries/context-recording-selection';
 import { Splitter } from 'libraries/component-splitter';
 import { useEffect, useMemo, useRef } from 'react';
-import { use1dScalingMatrix } from 'util/pointProjection';
+import { use1dScalingMatrix } from 'libraries/util-point-projection';
 import { TimeseriesLayoutOpts } from 'View';
-import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
-import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries';
+import { TickSet } from './YAxisTicks';
+import { DefaultToolbarWidth } from 'libraries/TimeScrollView';
 import { ViewToolbar } from 'libraries/ViewToolbar';
 import { useTimeTicks } from './TimeAxisTicks';
 import useActionToolbar, { OptionalToolbarActions } from './TimeScrollViewActionsToolbar';

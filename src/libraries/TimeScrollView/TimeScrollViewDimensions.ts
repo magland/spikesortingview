@@ -1,7 +1,7 @@
 import { useTimeFocus } from 'libraries/context-recording-selection';
 import { Matrix } from 'mathjs';
 import { useMemo } from 'react';
-import { convert1dDataSeries } from 'util/pointProjection';
+import { convert1dDataSeries } from 'libraries/util-point-projection';
 import { TimeseriesLayoutOpts } from 'View';
 
 type PartialMargins = {

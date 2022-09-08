@@ -1,7 +1,7 @@
 import { defaultZoomScaleFactor, ZoomDirection } from 'libraries/context-recording-selection';
 import { abs } from 'mathjs';
 import React, { useCallback, useMemo, useRef } from 'react';
-import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'util/rateLimiters';
+import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from 'libraries/util-rate-limiters';
 
 type ZoomStateProperties = {
     zoomsCount: number

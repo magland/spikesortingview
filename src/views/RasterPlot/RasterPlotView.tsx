@@ -1,12 +1,12 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
 import { useSelectedUnitIds } from 'libraries/context-unit-selection'
 import { FunctionComponent, useCallback, useMemo } from 'react'
-import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
+import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
 import { colorForUnitId } from 'libraries/util-unit-colors'
-import TimeScrollView from 'views/common/TimeScrollView/TimeScrollView'
-import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
-import { DefaultToolbarWidth } from 'views/common/TimeWidgetToolbarEntries'
+import { TimeScrollView } from 'libraries/TimeScrollView'
+import { usePanelDimensions, useTimeseriesMargins } from 'libraries/TimeScrollView'
+import { DefaultToolbarWidth } from 'libraries/TimeScrollView'
 import { RasterPlotViewData } from './RasterPlotViewData'
 
 type Props = {
