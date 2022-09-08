@@ -51,6 +51,8 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
 
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
 
+    const [isDataLoading, setDataLoading] = useState<boolean>(false)
+
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
@@ -241,7 +243,10 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
 
         if (visibleTimeStartSeconds === undefined) return pixelPanels
         if (visibleTimeEndSeconds === undefined) return  pixelPanels
-        if (valueRanges === undefined) return pixelPanels
+        if (valueRanges === undefined) {
+            setDataLoading(true)
+            return pixelPanels
+        }
 
         let i1 = Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency)
         let i2 = Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency)
@@ -270,6 +275,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
             times.push(startTimeSec + i * ds / samplingFrequency)
         }
         const pixelTimes = convert1dDataSeries(times, timeToPixelMatrix)
+        let everythingNaN = true
         for (let ich = 0; ich < numChannels; ich ++) {
             const pixelValuesMin: number[] = []
             const pixelValuesMax: number[] | undefined = ds === 1 ? undefined : []
@@ -277,6 +283,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
             for (let i=ii1; i<=ii2; i++) {
                 const valMin = minValues[i - ii1] * ampScaleFactor
                 const vMin = panelHeight * (valMin - valueRanges[ich].min) / (valueRanges[ich].max - valueRanges[ich].min)
+                if (!isNaN(vMin)) everythingNaN = false
                 pixelValuesMin.push(vMin)
                 if ((maxValues) && (pixelValuesMax)) {
                     const valMax = maxValues[i - ii1] * ampScaleFactor
@@ -296,6 +303,7 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
                 paint: paintPanel
             })
         }
+        setDataLoading(everythingNaN)
 
         return pixelPanels
     }, [getTraceValues, paintPanel, samplingFrequency, startTimeSec, timeToPixelMatrix, visibleTimeStartSeconds, visibleTimeEndSeconds, panelHeight, valueRanges, ampScaleFactor, numChannels, numFrames, chunkSize, width, spentALotOfTimeAtThisView, zoomInRequired, paintZoomInRequired])
@@ -306,15 +314,22 @@ const RawTracesComponent: FunctionComponent<Props> = ({startTimeSec, samplingFre
     return visibleTimeStartSeconds === undefined
     ? (<div>Loading...</div>)
     : (
-        <TimeScrollView
-            margins={margins}
-            panels={pixelPanels}
-            panelSpacing={panelSpacing}
-            timeseriesLayoutOpts={timeseriesLayoutOpts}
-            optionalActions={optionalActions}
-            width={width}
-            height={height}
-        />
+        <div style={{position: 'absolute', left: 0, top: 0, width, height}}>
+            <div style={{position: 'absolute', left: 0, top: 0, width, height, marginLeft: 200}}>
+                {isDataLoading ? <h3 style={{color: 'gray'}}>Loading data...</h3> : <span />}
+            </div>
+            <div style={{position: 'absolute', left: 0, top: 0, width, height}}>
+                <TimeScrollView
+                    margins={margins}
+                    panels={pixelPanels}
+                    panelSpacing={panelSpacing}
+                    timeseriesLayoutOpts={timeseriesLayoutOpts}
+                    optionalActions={optionalActions}
+                    width={width}
+                    height={height}
+                />
+            </div>
+        </div>
     )
 }
 
