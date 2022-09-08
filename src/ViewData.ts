@@ -1,18 +1,18 @@
 import { isOneOf } from 'figurl/viewInterface/validateObject'
-import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/Autocorrelograms"
-import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/AverageWaveforms"
-import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/ConfusionMatrix'
-import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/CrossCorrelograms'
-import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/ElectrodeGeometry"
-import { isMarkdownViewData, MarkdownViewData } from 'libraries/Markdown'
-import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/SortingCuration'
-import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/SortingCuration2'
-import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'libraries/SpikeLocations'
-import { isSummaryViewData, SummaryViewData } from "libraries/Summary"
-import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/UnitLocations'
-import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/UnitMetricsGraph'
-import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/UnitSimilarityMatrix'
-import { isUnitsTableViewData, UnitsTableViewData } from "libraries/UnitsTable"
+import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/view-autocorrelograms"
+import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"
+import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/view-confusion-matrix'
+import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/view-cross-correlograms'
+import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/view-electrode-geometry"
+import { isMarkdownViewData, MarkdownViewData } from 'libraries/view-markdown'
+import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/view-sorting-curation'
+import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/view-sorting-curation-2'
+import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'libraries/view-spike-locations'
+import { isSummaryViewData, SummaryViewData } from "libraries/view-summary"
+import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/view-unit-locations'
+import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/view-unit-metrics-graph'
+import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/view-unit-similarity-matrix'
+import { isUnitsTableViewData, UnitsTableViewData } from "libraries/view-units-table"
 import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
 import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
 import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
@@ -27,11 +27,11 @@ import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot
 import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
 import { isRawTracesViewData, RawTracesViewData } from "views/RawTraces/RawTracesViewData"
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
-import { isSortingSelectionViewData, SortingSelectionViewData } from 'libraries/SortingSelection'
+import { isSortingSelectionViewData, SortingSelectionViewData } from 'libraries/view-sorting-selection'
 import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
 import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/TiledImageComponent'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
-import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/MainLayout'
+import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/view-main-layout'
 
 export type ViewData =
     AutocorrelogramsViewData |

@@ -1,4 +1,4 @@
-import { useTimeRange } from 'libraries/RecordingSelectionContext'
+import { useTimeRange } from 'libraries/context-recording-selection'
 import { FunctionComponent, useCallback, useMemo } from 'react'
 import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'

@@ -1,5 +1,5 @@
-import { COPY_STATE, defaultUnitSelection, unitSelectionReducer, useSelectedUnitIds } from 'libraries/UnitSelectionContext';
-import { getCheckboxClickHandlerGenerator } from 'libraries/UnitSelectionContext';
+import { COPY_STATE, defaultUnitSelection, unitSelectionReducer, useSelectedUnitIds } from 'libraries/context-unit-selection';
+import { getCheckboxClickHandlerGenerator } from 'libraries/context-unit-selection';
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 
 // In practice we freeze the controls when the local selection is being used, but this component could theoretically support a separate selector.

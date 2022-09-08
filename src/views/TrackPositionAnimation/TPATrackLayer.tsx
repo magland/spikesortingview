@@ -1,4 +1,4 @@
-import { BaseCanvas } from 'libraries/FigurlCanvas'
+import { BaseCanvas } from 'libraries/figurl-canvas'
 import { FunctionComponent, useMemo } from 'react'
 
 export type TrackLayerProps = {

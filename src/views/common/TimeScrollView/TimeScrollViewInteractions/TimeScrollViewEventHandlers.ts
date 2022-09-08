@@ -1,4 +1,4 @@
-import { useTimeFocus, useTimeRange } from 'libraries/RecordingSelectionContext';
+import { useTimeFocus, useTimeRange } from 'libraries/context-recording-selection';
 import React, { useCallback } from 'react';
 import { clearDivFocus, divExists, setDivFocus } from './divRefHandling';
 import useTimeScrollPan, { PanUpdateProperties } from './useTimeScrollPan';

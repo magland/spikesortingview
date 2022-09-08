@@ -1,4 +1,4 @@
-import { Splitter } from "libraries/Splitter"
+import { Splitter } from "libraries/component-splitter"
 import { FunctionComponent, useMemo } from "react"
 import { computeSizes } from "./BoxLayoutItemView"
 import LayoutItemView, { ViewComponentProps } from "./LayoutItemView"

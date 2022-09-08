@@ -1,5 +1,5 @@
 import { FunctionComponent, useMemo } from "react"
-import { TabWidget } from "libraries/TabWidget"
+import { TabWidget } from "libraries/component-tab-widget"
 import LayoutItemView, { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 

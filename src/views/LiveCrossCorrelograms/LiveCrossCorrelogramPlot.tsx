@@ -1,5 +1,5 @@
 import { TaskStatusView, useCalculationTask } from 'figurl';
-import { CorrelogramPlot } from 'libraries/Autocorrelograms';
+import { CorrelogramPlot } from 'libraries/view-autocorrelograms';
 import { FunctionComponent } from 'react';
 
 type Props = {

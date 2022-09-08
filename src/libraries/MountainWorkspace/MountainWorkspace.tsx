@@ -7,7 +7,7 @@ import MWViewLauncher from './MWViewLauncher';
 import { MWView, MWViewPlugin } from './MWViewPlugin';
 import MWViewWidget from './MWViewWidget';
 import MWCurationControl from './MWCurationControl';
-import { Splitter } from 'libraries/Splitter';
+import { Splitter } from 'libraries/component-splitter';
 import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 
 type Props = {

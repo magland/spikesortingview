@@ -1,5 +1,5 @@
-import { SortingCurationAction } from 'libraries/SortingCurationContext';
-import { SortingCurationContext, sortingCurationReducer } from 'libraries/SortingCurationContext';
+import { SortingCurationAction } from 'libraries/context-sorting-curation';
+import { SortingCurationContext, sortingCurationReducer } from 'libraries/context-sorting-curation';
 import { initiateTask, useFeedReducer, useSignedIn } from 'figurl';
 import getMutable from 'figurl/getMutable';
 import { MountainWorkspace } from 'libraries/MountainWorkspace';

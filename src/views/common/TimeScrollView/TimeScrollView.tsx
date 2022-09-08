@@ -1,5 +1,5 @@
-import { useTimeRange } from 'libraries/RecordingSelectionContext';
-import { Splitter } from 'libraries/Splitter';
+import { useTimeRange } from 'libraries/context-recording-selection';
+import { Splitter } from 'libraries/component-splitter';
 import { useEffect, useMemo, useRef } from 'react';
 import { use1dScalingMatrix } from 'util/pointProjection';
 import { TimeseriesLayoutOpts } from 'View';

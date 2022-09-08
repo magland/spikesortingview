@@ -1,6 +1,6 @@
 import { Grid, Paper } from '@material-ui/core';
-import { DESELECT_ALL, useSelectedUnitIds } from 'libraries/UnitSelectionContext';
-import { SortingCuration, useSortingCuration } from 'libraries/SortingCurationContext';
+import { DESELECT_ALL, useSelectedUnitIds } from 'libraries/context-unit-selection';
+import { SortingCuration, useSortingCuration } from 'libraries/context-sorting-curation';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import sizeMe, { SizeMeProps } from 'react-sizeme';
 

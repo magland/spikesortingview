@@ -1,6 +1,6 @@
-import { PGPlot, PlotGrid } from 'libraries/PlotGrid';
-import { Splitter } from 'libraries/Splitter';
-import { sortIds } from 'libraries/UnitSelectionContext';
+import { PGPlot, PlotGrid } from 'libraries/component-plot-grid';
+import { Splitter } from 'libraries/component-splitter';
+import { sortIds } from 'libraries/context-unit-selection';
 import { FunctionComponent, useMemo } from 'react';
 import { LockableSelectUnitsWidget } from 'libraries/SelectUnitsWidget';
 import { useLocalSelectedUnitIds } from 'libraries/SelectUnitsWidget';

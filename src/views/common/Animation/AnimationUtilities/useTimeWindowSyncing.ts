@@ -1,4 +1,4 @@
-import { useTimeRange } from 'libraries/RecordingSelectionContext'
+import { useTimeRange } from 'libraries/context-recording-selection'
 import React, { useEffect } from "react"
 import { AnimationState, AnimationStateAction } from 'views/common/Animation/AnimationStateReducer'
 import { useTimeLookupFn } from 'views/common/Animation/AnimationUtilities/useTimeSyncing'

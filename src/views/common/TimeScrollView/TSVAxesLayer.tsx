@@ -1,4 +1,4 @@
-import { BaseCanvas } from 'libraries/FigurlCanvas';
+import { BaseCanvas } from 'libraries/figurl-canvas';
 import { useMemo } from 'react';
 import { TickSet } from 'views/common/TimeScrollView/YAxisTicks';
 import { TimeTick } from './TimeAxisTicks';
