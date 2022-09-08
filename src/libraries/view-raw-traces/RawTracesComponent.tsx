@@ -7,7 +7,7 @@ import { colorForUnitId } from 'libraries/util-unit-colors'
 import { TimeScrollView } from 'libraries/component-time-scroll-view'
 import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
 import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
-import useFetchCache from 'views/PositionPdfPlot/useFetchCache'
+import { useFetchCache } from 'libraries/util-use-fetch-cache'
 
 type Props = {
     startTimeSec: number

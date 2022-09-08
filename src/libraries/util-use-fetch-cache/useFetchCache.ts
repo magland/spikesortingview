@@ -65,11 +65,11 @@ const fetchCacheReducer = (state: FetchCacheState, action: FetchCacheAction): Fe
     }
 }
 
-const queryHash = <QueryType>(query: QueryType) => {
+const queryHash = <QueryType extends ({} | null)>(query: QueryType) => {
     return objectHash(query)
 }
 
-const useFetchCache = <QueryType, ReturnType>(fetchFunction: (query: QueryType) => Promise<any>): FetchCache<QueryType, ReturnType> => {
+const useFetchCache = <QueryType extends ({} | null), ReturnType>(fetchFunction: (query: QueryType) => Promise<any>): FetchCache<QueryType, ReturnType> => {
     const [count, setCount] = useState(0)
     if (count < 0) console.info(count) // just suppress the unused warning (will never print)
     const prevFetchFunction = useRef<(query: QueryType) => Promise<any>>(fetchFunction)

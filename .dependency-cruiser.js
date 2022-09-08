@@ -83,7 +83,7 @@ module.exports = {
       dot: {
         theme: {
           // don't use default theme
-          replace: true,
+          replace: false,
           // vertical orientation TD or LR
           graph: {
             rankdir: "LR",

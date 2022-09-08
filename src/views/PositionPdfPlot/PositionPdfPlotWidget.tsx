@@ -6,7 +6,7 @@ import { TimeseriesLayoutOpts } from 'View'
 import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
 import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
 import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
-import useFetchCache from './useFetchCache'
+import { useFetchCache } from 'libraries/util-use-fetch-cache'
 
 export type FetchSegmentQuery = {
     type: 'fetchSegment'
