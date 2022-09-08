@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "libraries/util-validate-object"
 
 type AverageWaveformData = {
     unitId: number | string

@@ -1,5 +1,5 @@
 import { FigurlRequest, isFigurlRequest } from "./FigurlRequestTypes";
-import validateObject, { isEqualTo, isOneOf, isString } from "./validateObject";
+import { validateObject, isEqualTo, isOneOf, isString } from "libraries/util-validate-object";
 
 export type FigurlRequestMessage = {
     type: 'figurlRequest',

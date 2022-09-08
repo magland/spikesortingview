@@ -1,10 +1,9 @@
-import { useFileData } from 'figurl';
-import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
+import { useFileData } from 'libraries/figurl';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 
 type Props = {
-    figureDataSha1: Sha1Hash // old
+    figureDataSha1: string // old
     figureDataUri: string // new
     ViewComponent: FunctionComponent<ViewComponentProps>
     width: number

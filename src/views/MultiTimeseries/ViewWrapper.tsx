@@ -1,5 +1,4 @@
-import { useFileData } from 'figurl';
-import { Sha1Hash } from 'figurl/viewInterface/kacheryTypes';
+import { useFileData } from 'libraries/figurl';
 import React, { FunctionComponent, useMemo } from 'react';
 import { TimeseriesLayoutOpts } from 'View';
 import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
@@ -7,7 +6,7 @@ import './MultiTimeseriesView.css';
 
 type Props = {
     label: string
-    figureDataSha1?: Sha1Hash // old
+    figureDataSha1?: string // old
     figureDataUri?: string // new
     ViewComponent: FunctionComponent<ViewComponentProps>
     isBottomPanel: boolean

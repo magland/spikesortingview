@@ -1,6 +1,6 @@
 import { FigurlResponse, isFigurlResponse } from "./FigurlRequestTypes";
 import { isUserId, UserId } from "./kacheryTypes";
-import validateObject, { isArrayOf, isEqualTo, isJSONObject, isNumber, isOneOf, isString, JSONObject, optional } from "./validateObject";
+import { validateObject, isArrayOf, isEqualTo, isJSONObject, isNumber, isOneOf, isString, JSONObject, optional } from "libraries/util-validate-object";
 
 export type TaskType = 'calculation' | 'action'
 

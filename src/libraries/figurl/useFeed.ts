@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import feedManager, { Feed } from "./feedManager";
 import { sleepMsec } from "./util/sleepMsec";
 import { messageCount, unscaledDurationMsec } from "./viewInterface/kacheryTypes";
-import { JSONObject } from "./viewInterface/validateObject";
+import { JSONObject } from "libraries/util-validate-object";
 
 export const parseFeedUri = (feedUri: string) => {
     const a = feedUri.split('/')

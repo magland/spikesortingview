@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import validateObject, { isArrayOf, isBoolean, isJSONObject, isNumber, isObject, isObjectOf, isString, JSONObject, JSONValue, optional } from './validateObject';
+import { validateObject, isArrayOf, isBoolean, isJSONObject, isNumber, isObject, isObjectOf, isString, JSONObject, JSONValue, optional } from 'libraries/util-validate-object';
 
 
 const assert = (x: any) => {

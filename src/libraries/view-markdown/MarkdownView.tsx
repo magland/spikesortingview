@@ -1,4 +1,4 @@
-import validateObject, { isEqualTo, isString } from 'figurl/viewInterface/validateObject';
+import { validateObject, isEqualTo, isString } from 'libraries/util-validate-object';
 import { FunctionComponent } from 'react';
 import Markdown from './Markdown/Markdown';
 

@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isString, isArrayOf, isEqualTo, isNumber, isOneOf } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isString, isArrayOf, isEqualTo, isNumber, isOneOf } from "libraries/util-validate-object"
 
 export type UMGMetric = {
     key: string

@@ -1,4 +1,4 @@
-import { TaskStatusView, useCalculationTask } from 'figurl';
+import { TaskStatusView, useCalculationTask } from 'libraries/figurl';
 import { CorrelogramPlot } from 'libraries/view-autocorrelograms';
 import { FunctionComponent } from 'react';
 

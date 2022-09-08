@@ -32,7 +32,7 @@ module.exports = {
     },
     {
       name: 'no-figurl-innards',
-      severity: "ignore",
+      severity: "warn",
       from: {
         path: "^src/.+",
         pathNot: "^src/figurl/.+"

@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isArrayOf, isBoolean, isEqualTo, isNumber, isString, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isString, optional } from "libraries/util-validate-object"
 
 export type PositionPlotViewData = {
     type: 'PositionPlot'

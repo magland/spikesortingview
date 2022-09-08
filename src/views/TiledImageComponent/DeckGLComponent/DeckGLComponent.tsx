@@ -5,7 +5,7 @@ import { load } from '@loaders.gl/core';
 import { ImageLoader } from '@loaders.gl/images';
 import { clamp } from '@math.gl/core';
 import { COORDINATE_SYSTEM, OrthographicView } from 'deck.gl';
-import { getFileDataUrl } from 'figurl/getFileData';
+import { getFileDataUrl } from 'libraries/figurl';
 import React, { FunctionComponent, useMemo } from 'react';
 
 

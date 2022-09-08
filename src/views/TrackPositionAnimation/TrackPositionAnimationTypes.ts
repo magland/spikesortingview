@@ -1,5 +1,5 @@
-import { validateObject } from "figurl";
-import { isArrayOf, isEqualTo, isNumber, isString, optional } from "figurl";
+import { validateObject } from "libraries/util-validate-object";
+import { isArrayOf, isEqualTo, isNumber, isString, optional } from "libraries/util-validate-object";
 
 export type PositionFrame = {
     x: number

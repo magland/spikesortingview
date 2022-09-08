@@ -1,6 +1,6 @@
 import { Button, Checkbox } from "@material-ui/core";
 import { SortingCuration, useSortingCuration } from "libraries/context-sorting-curation";
-import { useUrlState } from "figurl/UrlStateContext";
+import { useUrlState } from "libraries/figurl";
 import { useSelectedUnitIds } from "libraries/context-unit-selection";
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { getAbbreviatedUnitIdsString, getAllLabelChoices } from "libraries/view-sorting-curation-2";

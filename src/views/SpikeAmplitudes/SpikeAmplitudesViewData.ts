@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isArrayOf, isBoolean, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, optional } from "libraries/util-validate-object"
 
 type SAUnitData = {
     unitId: number

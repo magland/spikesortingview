@@ -1,4 +1,4 @@
-import { useFileData } from "figurl";
+import { useFileData } from "libraries/figurl";
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
 import { ProgressComponent } from "libraries/component-progress";
 import { ViewComponentProps } from "./LayoutItemView";

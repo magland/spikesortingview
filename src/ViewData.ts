@@ -1,4 +1,4 @@
-import { isOneOf } from 'figurl/viewInterface/validateObject'
+import { isOneOf } from 'libraries/util-validate-object'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/view-autocorrelograms"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"
 import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/view-confusion-matrix'

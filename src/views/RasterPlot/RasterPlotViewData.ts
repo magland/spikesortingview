@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isEqualTo, isNumber, optional } from "libraries/util-validate-object"
 import { HighlightIntervalSet, isHighlightIntervalSet } from 'views/common/TimeScrollView/TimeScrollViewData'
 
 type RPPlotData = {

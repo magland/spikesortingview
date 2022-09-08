@@ -1,5 +1,5 @@
-import sendMessageToParent from "figurl/sendMessageToParent"
-import { figureId } from "figurl/sendRequestToParent"
+import sendMessageToParent from "./sendMessageToParent"
+import { figureId } from "./sendRequestToParent"
 
 export const sendMessageToBackend = (message: any) => {
     sendMessageToParent({

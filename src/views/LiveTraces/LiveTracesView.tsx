@@ -1,4 +1,4 @@
-import { runCalculationTaskAsync } from 'figurl'
+import { runCalculationTaskAsync } from 'libraries/figurl'
 import { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import RawTracesComponent from '../RawTraces/RawTracesComponent'

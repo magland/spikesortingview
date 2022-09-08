@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isEqualTo, isNumber, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isEqualTo, isNumber, optional } from "libraries/util-validate-object"
 
 export type LivePositionPdfPlotViewData = {
     type: 'LivePositionPdfPlot'

@@ -1,12 +1,12 @@
 import { SortingCurationAction } from 'libraries/context-sorting-curation';
 import { SortingCurationContext, sortingCurationReducer } from 'libraries/context-sorting-curation';
 import { UnitMetricSelectionContext, unitMetricSelectionReducer } from 'libraries/context-unit-metrics-selection';
-import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn } from 'figurl';
-import { useUrlState } from 'figurl/UrlStateContext';
+import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn } from 'libraries/figurl';
+import { useUrlState } from 'libraries/figurl';
 import { sortIds, useSelectedUnitIds } from 'libraries/context-unit-selection';
 import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
 import { feedIdForUri } from 'views/MountainLayout/MountainLayoutView';
-import { onMessageFromBackend, sendMessageToBackend } from 'figurl/customMessages';
+import { onMessageFromBackend, sendMessageToBackend } from 'libraries/figurl';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
 import View from 'View'

@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isEqualTo, isString } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isEqualTo, isString } from "libraries/util-validate-object"
 
 export type SortingCuration2ViewData = {
     type: 'SortingCuration2'

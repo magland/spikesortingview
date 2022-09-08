@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isArrayOf, isEqualTo, isNumber, isString } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isEqualTo, isNumber, isString } from "libraries/util-validate-object"
 
 export type LiveTracesViewData = {
     type: 'LiveTraces'

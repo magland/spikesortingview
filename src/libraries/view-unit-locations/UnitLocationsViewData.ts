@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "libraries/util-validate-object"
 
 export type UnitLocationsViewData = {
     type: 'UnitLocations'

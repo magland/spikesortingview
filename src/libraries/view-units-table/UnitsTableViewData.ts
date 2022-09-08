@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isString, isArrayOf, isEqualTo, isNumber } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isString, isArrayOf, isEqualTo, isNumber } from "libraries/util-validate-object"
 
 type UTColumn = {
     key: string

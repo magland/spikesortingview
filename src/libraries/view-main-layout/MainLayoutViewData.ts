@@ -1,5 +1,5 @@
-import { validateObject } from "figurl"
-import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, optional } from "figurl/viewInterface/validateObject"
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, optional } from "libraries/util-validate-object"
 import { isString } from "vega"
 
 export type LayoutItem = {
