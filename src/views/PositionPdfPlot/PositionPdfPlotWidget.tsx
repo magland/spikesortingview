@@ -3,9 +3,9 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries
 import { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
-import { TimeScrollView, TimeScrollViewPanel } from 'libraries/TimeScrollView'
-import { usePanelDimensions, useTimeseriesMargins } from 'libraries/TimeScrollView'
-import { DefaultToolbarWidth } from 'libraries/TimeScrollView'
+import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
+import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
+import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
 import useFetchCache from './useFetchCache'
 
 export type FetchSegmentQuery = {

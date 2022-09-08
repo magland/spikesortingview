@@ -1,6 +1,5 @@
 import { FunctionComponent, useMemo } from "react"
-import MountainLayoutView from "views/MountainLayout/MountainLayoutView"
-import { MLViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
+import { MountainLayoutView, MLViewData, MountainLayoutViewData } from "libraries/view-mountain-layout"
 import { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 

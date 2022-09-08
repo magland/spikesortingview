@@ -1,6 +1,6 @@
 import { CircularProgress } from "@material-ui/core";
 import { FunctionComponent } from "react";
-import formatByteCount from "./formatByteCount";
+import { formatByteCount } from "libraries/util-format-byte-count";
 
 type Props = {
     loaded?: number

@@ -5,7 +5,7 @@ import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn } fr
 import { useUrlState } from 'libraries/figurl';
 import { sortIds, useSelectedUnitIds } from 'libraries/context-unit-selection';
 import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
-import { feedIdForUri } from 'views/MountainLayout/MountainLayoutView';
+import { feedIdForUri } from 'libraries/view-mountain-layout';
 import { onMessageFromBackend, sendMessageToBackend } from 'libraries/figurl';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
