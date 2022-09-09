@@ -90,6 +90,7 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
                     ii === 0 ? context.moveTo(x, y) : context.lineTo(x, y)
                 })
                 context.stroke()
+                context.setLineDash([])
             }
             else if (dim.type === 'marker') {
                 context.fillStyle = dim.attributes['color'] ?? 'black'
