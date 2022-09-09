@@ -73,6 +73,7 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
         context.strokeStyle = 'black'
         context.setLineDash([5, 15]);
+        context.lineWidth = 1
         context.beginPath()
         context.moveTo(0, props.pixelZero)
         context.lineTo(panelWidth, props.pixelZero)
