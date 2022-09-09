@@ -14,7 +14,8 @@ type ItemPosition = {
     left: number,
     top: number,
     width: number,
-    height: number
+    height: number,
+    title?: string
 }
 
 export const computeSizes = (
@@ -66,7 +67,7 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent,
     if (layoutItem.type !== 'Box') {
         throw Error('Unexpected')
     }
-    const {direction, scrollbar, items, itemProperties} = layoutItem
+    const {direction, scrollbar, items, itemProperties, showTitles} = layoutItem
     const itemPositions: ItemPosition[] = useMemo(() => {
         if (direction === 'horizontal') {
             const ret: ItemPosition[] = []
@@ -77,7 +78,8 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent,
                     left: x,
                     top: 0,
                     width: itemWidths[i],
-                    height
+                    height,
+                    title: (itemProperties || [])[i]?.title
                 })
                 x += itemWidths[i]
             }
@@ -92,7 +94,8 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent,
                     left: 0,
                     top: y,
                     width,
-                    height: itemHeights[i]
+                    height: itemHeights[i],
+                    title: (itemProperties || [])[i]?.title
                 })
                 y += itemHeights[i]
             }
@@ -124,20 +127,54 @@ const BoxLayoutItemView: FunctionComponent<Props> = ({layoutItem, ViewComponent,
         return ret
     }, [scrollbar, width, height, direction])
 
+    const titleFontSize = direction === 'vertical' ? 25 : 20
+    const titleDim = titleFontSize + 3
     return (
         <div style={divStyle}>
             {
                 items.map((item, i) => {
                     const p = itemPositions[i]
+                    let titleBox = {left: 0, top: 0, width: 0, height: 0}
+                    let itemBox = {left: 0, top: 0, width: p.width, height: p.height}
+                    if (showTitles) {
+                        if (direction === 'horizontal') {
+                            titleBox = {left: 0, top: 0, width: p.width, height: titleDim}
+                            itemBox = {left: 0, top: titleDim, width: p.width, height: p.height - titleDim}
+                        }
+                        else if (direction === 'vertical') {
+                            titleBox = {left: 0, top: 0, width: titleDim, height: p.height}
+                            itemBox = {left: titleDim, top: 0, width: p.width - titleDim, height: p.height}
+                        }
+                    }
+                    const itemView = (
+                        <LayoutItemView
+                            layoutItem={item}
+                            ViewComponent={ViewComponent}
+                            views={views}
+                            width={itemBox.width}
+                            height={itemBox.height}
+                        />
+                    )
+                    const titleRotationStyle: React.CSSProperties = direction === 'horizontal' ? {} : {
+                        writingMode: 'vertical-lr',
+                        transform: 'rotate(-180deg)',
+                    }
                     return (
                         <div key={i} style={{position: 'absolute', left: p.left, top: p.top, width: p.width, height: p.height}}>
-                            <LayoutItemView
-                                layoutItem={item}
-                                ViewComponent={ViewComponent}
-                                views={views}
-                                width={p.width}
-                                height={p.height}
-                            />
+                            {
+                                showTitles ? (
+                                    <span>
+                                        <div style={{position: 'absolute', textAlign: 'center', fontSize: titleFontSize, ...titleBox, ...titleRotationStyle}}>
+                                            {p.title || ''}
+                                        </div>
+                                        <div style={{position: 'absolute', ...itemBox}}>
+                                            {itemView}
+                                        </div>
+                                    </span>
+                                ) : (
+                                    itemView
+                                )
+                            }
                         </div>
                     )
                 })

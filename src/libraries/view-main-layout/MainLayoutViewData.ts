@@ -10,8 +10,10 @@ export type LayoutItem = {
     itemProperties?: {
         minSize?: number
         maxSize?: number
-        stretch?: number    
+        stretch?: number
+        title?: string
     }[]
+    showTitles?: boolean
 } | {
     type: 'Splitter'
     direction: 'horizontal' | 'vertical'
@@ -19,8 +21,10 @@ export type LayoutItem = {
     itemProperties?: {
         minSize?: number
         maxSize?: number
-        stretch?: number    
+        stretch?: number
+        title?: string
     }[]
+    showTitles?: boolean
 } | {
     type: 'Mountain'
     items: LayoutItem[]
@@ -44,22 +48,26 @@ export const isLayoutItem = (x: any): x is LayoutItem => {
         (y: any) => (validateObject(y, {
             type: isEqualTo('Box'),
             direction: isOneOf(['horizontal', 'vertical'].map(s => (isEqualTo(s)))),
+            showTitles: optional(isBoolean),
             scrollbar: optional(isBoolean),
             items: isArrayOf(isLayoutItem),
             itemProperties: optional(isArrayOf(z => (validateObject(z, {
                 minSize: optional(isNumber),
                 maxSize: optional(isNumber),
-                stretch: optional(isNumber)
+                stretch: optional(isNumber),
+                title: optional(isString)
             }))))
         })),
         (y: any) => (validateObject(y, {
             type: isEqualTo('Splitter'),
             direction: isOneOf(['horizontal', 'vertical'].map(s => (isEqualTo(s)))),
+            showTitles: optional(isBoolean),
             items: isArrayOf(isLayoutItem),
             itemProperties: optional(isArrayOf(z => (validateObject(z, {
                 minSize: optional(isNumber),
                 maxSize: optional(isNumber),
-                stretch: optional(isNumber)
+                stretch: optional(isNumber),
+                title: optional(isString)
             }))))
         })),
         (y: any) => (validateObject(y, {

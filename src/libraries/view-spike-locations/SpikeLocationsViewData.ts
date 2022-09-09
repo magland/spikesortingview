@@ -27,7 +27,7 @@ export const isSpikeLocationsViewData = (x: any): x is SpikeLocationsViewData =>
             yLocations: () => (true)
         })),
         xRange: isArrayOf(isNumber),
-        uRange: isArrayOf(isNumber),
+        yRange: isArrayOf(isNumber),
         hideUnitSelector: optional(isBoolean),
         disableAutoRotate: optional(isBoolean)
     })
