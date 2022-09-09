@@ -87,8 +87,9 @@ module.exports = {
           // vertical orientation TD or LR
           graph: {
             rankdir: "LR",
-            splines: "true", // true or ortho (ortho takes a while for large jobs)
-            fontsize: "14"
+            splines: "ortho", // true or ortho (ortho takes a while for large jobs)
+            fontsize: "14",
+            ordering: "out" // see https://github.com/sverweij/dependency-cruiser/issues/659#issuecomment-1241100514
           },
           modules: [
             {
