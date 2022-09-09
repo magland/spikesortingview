@@ -81,8 +81,9 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
 
         props.dimensions.forEach(dim => {
             if (dim.type === 'line') {
-                context.strokeStyle = dim.attributes['color'] || 'black'
-                context.lineWidth = 1.1 // hack--but fixes the 'disappearing lines' issue
+                context.strokeStyle = dim.attributes['color'] ?? 'black'
+                context.lineWidth = dim.attributes['width'] ?? 1.1 // 1.1 hack--but fixes the 'disappearing lines' issue
+                dim.attributes['dash'] && context.setLineDash(dim.attributes['dash'])
                 context.beginPath()
                 dim.pixelTimes.forEach((x, ii) => {
                     const y = dim.pixelValues[ii]
@@ -91,10 +92,21 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
                 context.stroke()
             }
             else if (dim.type === 'marker') {
-                context.fillStyle = dim.attributes['color'] || 'black'
-                dim.pixelTimes.forEach((t, ii) => {
-                    context.fillRect(t - 2, dim.pixelValues[ii] - 2, 4, 4)
-                })
+                context.fillStyle = dim.attributes['color'] ?? 'black'
+                const radius = dim.attributes['radius'] ?? 2
+                const shape = dim.attributes['shape'] ?? 'circle'
+                if (shape === 'circle') {
+                    dim.pixelTimes.forEach((t, ii) => {
+                        context.beginPath()
+                        context.ellipse(t, dim.pixelValues[ii], radius, radius, 0, 0, 2 * Math.PI)
+                        context.fill()
+                    })
+                }
+                else if (shape === 'square') {
+                    dim.pixelTimes.forEach((t, ii) => {
+                        context.fillRect(t - radius, dim.pixelValues[ii] - radius, radius * 2, radius * 2)
+                    })
+                }
             }
         })
     }, [panelWidth])
