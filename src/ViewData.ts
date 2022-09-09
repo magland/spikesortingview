@@ -32,6 +32,8 @@ import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "libraries/vi
 import { isTiledImageData, TiledImageData } from 'libraries/component-tiled-image'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "libraries/view-track-position-animation"
 import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/view-main-layout'
+import { ExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1/ExperimentalSelector1ViewData'
+import { isExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1'
 
 export type ViewData =
     AutocorrelogramsViewData |
@@ -66,7 +68,8 @@ export type ViewData =
     ConfusionMatrixViewData |
     LiveEvaluateFunctionViewData |
     LiveTracesViewData |
-    MainLayoutViewData
+    MainLayoutViewData |
+    ExperimentalSelector1ViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -102,6 +105,7 @@ export const isViewData = (x: any): x is ViewData => {
         isConfusionMatrixViewData,
         isLiveEvaluateFunctionViewData,
         isLiveTracesViewData,
-        isMainLayoutViewData
+        isMainLayoutViewData,
+        isExperimentalSelector1ViewData
     ])(x)
 }

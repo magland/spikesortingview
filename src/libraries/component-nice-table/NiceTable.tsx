@@ -3,19 +3,19 @@ import { Delete, Edit } from "@material-ui/icons";
 import React, { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import './NiceTable.css';
 
-interface Row {
+export type NiceTableRow = {
     key: string
     columnValues: {[key: string]: any}
 }
-interface Col {
+export type NiceTableColumn = {
     key: string
     label: string
     element?: any
 }
 
 interface Props {
-    rows: Row[],
-    columns: Col[],
+    rows: NiceTableRow[],
+    columns: NiceTableColumn[],
     onDeleteRow?: (key: string) => void,
     deleteRowLabel?: string,
     onEditRow?: (key: string) => void,

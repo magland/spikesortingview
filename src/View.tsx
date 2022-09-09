@@ -33,6 +33,7 @@ import { SpikeAmplitudesView } from 'libraries/view-spike-amplitudes';
 import { TiledImageComponent } from 'libraries/component-tiled-image';
 import { TrackPositionAnimationView } from 'libraries/view-track-position-animation';
 import { ViewData } from './ViewData';
+import { ExperimentalSelector1View } from 'libraries/view-experimental-selector-1';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -146,6 +147,9 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     }
     else if (data.type === 'MainLayout') {
         return <MainLayoutView data={data} ViewComponent={View} width={width} height={height} />
+    }
+    else if (data.type === 'ExperimentalSelector1') {
+        return <ExperimentalSelector1View data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
