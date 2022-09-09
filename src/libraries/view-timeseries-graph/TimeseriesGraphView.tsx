@@ -119,7 +119,17 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
             return plotSeries
         }
         resolvedSeries.forEach(rs => {
-            const filteredTimeIndices: number[] = rs.t.flatMap((t: number, ii: number) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
+            let filteredTimeIndices: number[] = rs.t.flatMap((t: number, ii: number) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
+
+            // need to prepend an index before and append an index after so that lines get rendered properly
+            if ((filteredTimeIndices[0] || 0) > 0) {
+                filteredTimeIndices = [filteredTimeIndices[0] - 1, ...filteredTimeIndices]
+            }
+            if ((filteredTimeIndices[filteredTimeIndices.length - 1] || rs.t.length) < rs.t.length - 1) {
+                filteredTimeIndices.push(filteredTimeIndices[filteredTimeIndices.length - 1] + 1)
+            }
+            ////////////////////////////////////////////////////////////////////////////////
+
             const filteredTimes = filteredTimeIndices.map(i => rs.t[i])
             const filteredValues = filteredTimeIndices.map(index => rs.y[index])
             plotSeries.push({
