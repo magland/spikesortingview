@@ -34,6 +34,7 @@ import { isTrackAnimationStaticData, TrackAnimationStaticData } from "libraries/
 import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/view-main-layout'
 import { ExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1/ExperimentalSelector1ViewData'
 import { isExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1'
+import { isTimeseriesGraphViewData, TimeseriesGraphViewData } from 'libraries/view-timeseries-graph'
 
 export type ViewData =
     AutocorrelogramsViewData |
@@ -69,7 +70,8 @@ export type ViewData =
     LiveEvaluateFunctionViewData |
     LiveTracesViewData |
     MainLayoutViewData |
-    ExperimentalSelector1ViewData
+    ExperimentalSelector1ViewData |
+    TimeseriesGraphViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -106,6 +108,7 @@ export const isViewData = (x: any): x is ViewData => {
         isLiveEvaluateFunctionViewData,
         isLiveTracesViewData,
         isMainLayoutViewData,
-        isExperimentalSelector1ViewData
+        isExperimentalSelector1ViewData,
+        isTimeseriesGraphViewData
     ])(x)
 }
