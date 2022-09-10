@@ -35,6 +35,7 @@ import { TrackPositionAnimationView } from 'libraries/view-track-position-animat
 import { ViewData } from './ViewData';
 import { ExperimentalSelector1View } from 'libraries/view-experimental-selector-1';
 import { TimeseriesGraphView } from 'libraries/view-timeseries-graph';
+import { Test1View } from 'libraries/view-test-1';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -154,6 +155,9 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     }
     else if (data.type === 'TimeseriesGraph') {
         return <TimeseriesGraphView data={data} width={width} height={height} />
+    }
+    else if (data.type === 'Test1') {
+        return <Test1View data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
