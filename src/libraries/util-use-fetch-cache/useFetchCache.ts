@@ -1,5 +1,5 @@
 import objectHash from 'object-hash'
-import { useEffect, useMemo, useReducer, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react"
 
 export type FetchCache<QueryType, ReturnType> = {
     get: (query: QueryType) => ReturnType | undefined
@@ -65,11 +65,11 @@ const fetchCacheReducer = (state: FetchCacheState, action: FetchCacheAction): Fe
     }
 }
 
-const queryHash = <QueryType extends ({} | null)>(query: QueryType) => {
+const queryHash = <QueryType extends {} | null>(query: QueryType) => {
     return objectHash(query)
 }
 
-const useFetchCache = <QueryType extends ({} | null), ReturnType>(fetchFunction: (query: QueryType) => Promise<any>): FetchCache<QueryType, ReturnType> => {
+const useFetchCache = <QueryType extends {} | null, ReturnType>(fetchFunction: (query: QueryType) => Promise<any>): FetchCache<QueryType, ReturnType> => {
     const [count, setCount] = useState(0)
     if (count < 0) console.info(count) // just suppress the unused warning (will never print)
     const prevFetchFunction = useRef<(query: QueryType) => Promise<any>>(fetchFunction)
@@ -82,7 +82,10 @@ const useFetchCache = <QueryType extends ({} | null), ReturnType>(fetchFunction:
             dispatch({type: 'clear'})
         }
     }, [fetchFunction])
-    const get = useMemo(() => ((query: QueryType) => {
+    // The `get` function depends on the state, so it updates every time a reducer operation
+    // fires. This is intended: updating the `get` is how we trigger consumers that a fetch
+    // operation has completed and there's new data available in the cache.
+    const get = useCallback((query: QueryType) => {
         const h = queryHash(query)
         const v = state.data[h]
         if ((v === undefined) && (!state.activeFetches[h])) {
@@ -92,7 +95,7 @@ const useFetchCache = <QueryType extends ({} | null), ReturnType>(fetchFunction:
             }
         }
         return v
-    }), [state.data, state.activeFetches])
+    }, [state.data, state.activeFetches])
     const fetch = useMemo(() => ((query: QueryType) => {
         const h = queryHash(query)
         const val = state.data[h]
