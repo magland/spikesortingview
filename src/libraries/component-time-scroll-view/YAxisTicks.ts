@@ -1,5 +1,6 @@
-import { matrix, Matrix, multiply } from 'mathjs'
+import { Matrix } from 'mathjs'
 import { useMemo } from 'react'
+import { convert2dDataSeries } from 'libraries/util-point-projection'
 
 type YAxisProps = {
     datamin?: number
@@ -122,19 +123,21 @@ const useYAxisTicks = (props: YAxisProps) => {
     }, [datamax, datamin, yZoom, pixelHeight])
 }
 
-// TODO: UNIFY MATRIX MULT CODE
+/**
+ * Returns a set of labeled y-axis ticks/grid line locations, projected into the pixel drawing space.
+ * @param ticks The set of vertical/data-axis tick marks to draw.
+ * @param transform Output of pointProjection.use2dScalingMatrix(); a transform matrix mapping the native
+ * unit space into the two-dimensional pixel space. (The x portion will be ignored, though.)
+ * @returns Structured set of y-axis ticks ready for painting on the canvas.
+ */
 export const useProjectedYAxisTicks = (ticks: TickSet, transform: Matrix) => {
-    // transform is assumed to be the output of our use2dPanelDataToPixelMatrix
     return useMemo(() => {
         const _ticks = ticks.ticks
-        const augmentedValues = matrix([
-            new Array(_ticks.length).fill(0),
-            _ticks.map(t => t.dataValue),
-            new Array(_ticks.length).fill(1)])
-        const pixelValues = (multiply(transform, augmentedValues).valueOf() as number[][])[1]
+        const pixelPoints = convert2dDataSeries(transform, [new Array(_ticks.length).fill(0), _ticks.map(t => t.dataValue)])
+        const pixelYValues = pixelPoints[1]
         return {
             ...ticks,
-            ticks: _ticks.map((t, ii) => {return {...t, pixelValue: pixelValues[ii]}})
+            ticks: _ticks.map((t, ii) => {return {...t, pixelValue: pixelYValues[ii]}})
         }
     }, [ticks, transform])
 }
