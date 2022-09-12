@@ -107,7 +107,11 @@ const useTimeScrollEventHandlers = (leftMargin: number, panelWidth: number, divR
     const handleMouseMove = useMouseMoveHandler(divRef, clickReader, startPan, setPanUpdate)
     const handleMouseLeave = useMouseLeaveHandler(divRef, clearPan)
 
-    return {handleMouseUp, handleMouseMove, handleMouseDown, handleMouseLeave}
+    const handlers = useMemo(() => {
+        return {handleMouseUp, handleMouseMove, handleMouseDown, handleMouseLeave}
+    }, [handleMouseUp, handleMouseMove, handleMouseDown, handleMouseLeave])
+
+    return handlers
 }
 
 export default useTimeScrollEventHandlers

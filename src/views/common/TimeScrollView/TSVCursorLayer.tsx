@@ -1,5 +1,5 @@
 import BaseCanvas from 'FigurlCanvas/BaseCanvas';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 export type TSVCursorLayerProps = {
     timeRange: [number, number]
