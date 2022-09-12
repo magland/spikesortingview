@@ -78,17 +78,16 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
 
     // TODO: It'd be nice to show some sort of visual indication of how much zoom has been requested,
 
-    const content = (
-        <div
-            style={{width: width - toolbarWidth, height, position: 'relative'}}
-            onWheel={handleWheel}
-            onMouseDown={handleMouseDown}
-            onMouseUp={handleMouseUp}
-            onMouseMove={handleMouseMove}
-            onMouseOut={handleMouseLeave}
-        >
+    const effectiveWidth = useMemo(() => width - toolbarWidth, [width, toolbarWidth])
+
+    const style = useMemo(() => {
+        return {width: effectiveWidth, height, position: 'relative'} as any as React.CSSProperties},
+        [effectiveWidth, height])
+
+    const axesLayer = useMemo(() => {
+        return (
             <TSVAxesLayer<T>
-                width={width - toolbarWidth}
+                width={effectiveWidth}
                 height={height}
                 panels={panels}
                 panelHeight={panelHeight}
@@ -98,32 +97,68 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeTicks={timeTicks}
                 yTickSet={yTickSet}
                 margins={definedMargins}
-                hideTimeAxis={hideTimeAxis}
-            />
+                hideTimeAxis={hideTimeAxis} 
+            />)
+    }, [effectiveWidth, height, panels, panelHeight, perPanelOffset, selectedPanelKeys,
+        timeRange, timeTicks, yTickSet, definedMargins, hideTimeAxis])
+
+    const mainLayer = useMemo(() => {
+        return (
             <TSVMainLayer<T>
-                width={width - toolbarWidth}
+                width={effectiveWidth}
                 height={height}
                 panels={panels}
                 panelHeight={panelHeight}
                 perPanelOffset={perPanelOffset}
                 margins={definedMargins}
             />
-            <TSVHighlightLayer
-                width={width - toolbarWidth}
-                height={height}
-                highlightSpans={pixelHighlightSpans}
-                margins={definedMargins}
-            />
+        )
+    }, [effectiveWidth, height, panels, panelHeight, perPanelOffset, definedMargins])
+
+    const highlightLayer = useMemo(() => {
+        return (
+            pixelHighlightSpans.length > 0
+            ? <TSVHighlightLayer
+                    width={effectiveWidth}
+                    height={height}
+                    highlightSpans={pixelHighlightSpans}
+                    margins={definedMargins}
+              />
+            : <div />
+        )
+    }, [effectiveWidth, height, pixelHighlightSpans, definedMargins])
+
+    const cursorLayer = useMemo(() => {
+        return (
             <TSVCursorLayer
-                width={width - toolbarWidth}
+                width={effectiveWidth}
                 height={height}
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
             />
-        </div>
-    )
+        )
+    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels])
 
+    const content = useMemo(() => {
+        return (
+            <div
+                style={style}
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                onMouseOut={handleMouseLeave}
+            >
+                {axesLayer}
+                {mainLayer}
+                {highlightLayer}
+                {cursorLayer}
+            </div>
+        )
+    }, [style, handleWheel, handleMouseDown, handleMouseUp, handleMouseMove, handleMouseLeave,
+        axesLayer, mainLayer, highlightLayer, cursorLayer])
+    
     if (hideToolbar) {
         return (
             <div ref={divRef}>
