@@ -10,6 +10,9 @@ import theme from './theme';
 import View from './View';
 import { isViewData, ViewData } from './ViewData';
 
+const urlSearchParams = new URLSearchParams(window.location.search)
+const queryParams = Object.fromEntries(urlSearchParams.entries())
+
 function App() {
   const [data, setData] = useState<ViewData>()
   const [errorMessage, setErrorMessage] = useState<string>()
@@ -19,17 +22,25 @@ function App() {
   const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
 
   useEffect(() => {
-    getFigureData().then((data: any) => {
-      if (!isViewData(data)) {
-        setErrorMessage(`Invalid figure data`)
-        console.error('Invalid figure data', data)
-        return
-      }
-      setData(data)
-    }).catch((err: any) => {
-      setErrorMessage(`Error getting figure data`)
-      console.error(`Error getting figure data`, err)
-    })
+    if (queryParams.test === '1') {
+      // To test the Test1View without using the figurl parent
+      // for example, with no internet connection,
+      // use http://localhost:3000?test=1
+      setData({type: 'Test1'})
+    }
+    else {
+      getFigureData().then((data: any) => {
+        if (!isViewData(data)) {
+          setErrorMessage(`Invalid figure data`)
+          console.error('Invalid figure data', data)
+          return
+        }
+        setData(data)
+      }).catch((err: any) => {
+        setErrorMessage(`Error getting figure data`)
+        console.error(`Error getting figure data`, err)
+      })
+    }
   }, [])
 
   const opts = useMemo(() => ({}), [])

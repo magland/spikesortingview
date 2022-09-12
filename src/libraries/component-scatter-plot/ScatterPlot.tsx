@@ -1,6 +1,6 @@
 import { BaseCanvas } from 'libraries/figurl-canvas';
 import { rectangularRegionsIntersect, Vec2, Vec4 } from 'libraries/figurl-canvas';
-import { useDragSelectLayer } from 'libraries/view-unit-locations';
+import { useDragSelectLayer } from 'libraries/util-drag-select';
 import { FunctionComponent, useCallback, useMemo } from 'react';
 import ScatterPlotMainLayer from './ScatterPlotMainLayer';
 

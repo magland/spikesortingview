@@ -1,6 +1,6 @@
 import { Vec2, Vec4 } from "libraries/figurl-canvas"
+import { dragSelectReducer } from "libraries/util-drag-select"
 import { useCallback, useReducer } from "react"
-import dragSelectReducer from "./dragSelectReducer"
 
 const useDragSelectLayer = (width: number, height: number, handleSelectRect: (r: Vec4, o: {ctrlKey: boolean, shiftKey: boolean}) => void, handleClickPoint: (p: Vec2, o: {ctrlKey: boolean, shiftKey: boolean}) => void) => {
     const [dragSelectState, dragSelectStateDispatch] = useReducer(dragSelectReducer, {})

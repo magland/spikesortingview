@@ -3,6 +3,7 @@ import { Vec2, Vec4 } from "libraries/figurl-canvas"
 export type DragSelectState = {
     isActive?: boolean,  // whether we are in an active dragging state
     dragAnchor?: Vec2, // The position where dragging began (pixels)
+    dragPosition?: Vec2, // The position where dragging ends (pixels)
     dragRect?: Vec4,   // The drag rect. [0],[1] are the upper left corner, [2], [3] are width & height.
 }
 
@@ -26,6 +27,7 @@ export const dragSelectReducer = (state: DragSelectState, action: DragSelectActi
             ...state,
             isActive: false,
             dragAnchor: point,
+            dragPosition: point,
             dragRect: undefined
         }
     } else if (action.type === 'DRAG_MOUSE_UP') {
@@ -33,6 +35,7 @@ export const dragSelectReducer = (state: DragSelectState, action: DragSelectActi
             ...state,
             isActive: false,
             dragAnchor: undefined,
+            dragPosition: undefined,
             dragRect: undefined
         }
     } else if (action.type === 'DRAG_MOUSE_MOVE') {
@@ -46,14 +49,16 @@ export const dragSelectReducer = (state: DragSelectState, action: DragSelectActi
         if (state.isActive) {
             return {
                 ...state,
-                dragRect: newDragRect
+                dragRect: newDragRect,
+                dragPosition: [action.point[0], action.point[1]]
             }
         }
         else if ((newDragRect[2] >= 10) || (newDragRect[3] >= 10)) {
             return {
                 ...state,
                 isActive: true,
-                dragRect: newDragRect
+                dragRect: newDragRect,
+                dragPosition: [action.point[0], action.point[1]]
             }
         }
         else {

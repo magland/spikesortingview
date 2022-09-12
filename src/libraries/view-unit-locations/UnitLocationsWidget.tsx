@@ -6,7 +6,7 @@ import { idToNum, useSelectedUnitIds } from 'libraries/context-unit-selection'
 import { useCallback, useMemo } from 'react'
 import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform } from 'libraries/view-unit-similarity-matrix'
 import { useWheelZoom } from 'libraries/view-unit-similarity-matrix'
-import useDragSelectLayer from './useDragSelectLayer'
+import { useDragSelectLayer } from 'libraries/util-drag-select'
 import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/view-average-waveforms'
 
 export const defaultMaxPixelRadius = 25
