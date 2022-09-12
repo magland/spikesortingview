@@ -71,14 +71,15 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
     // but simplifies the prop list a bit.
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
-        context.strokeStyle = 'black'
-        context.setLineDash([5, 15]);
-        context.lineWidth = 1
-        context.beginPath()
-        context.moveTo(0, props.pixelZero)
-        context.lineTo(panelWidth, props.pixelZero)
-        context.stroke()
-        context.setLineDash([]);
+        // don't display dashed zero line (Eric's request)
+        // context.strokeStyle = 'black'
+        // context.setLineDash([5, 15]);
+        // context.lineWidth = 1
+        // context.beginPath()
+        // context.moveTo(0, props.pixelZero)
+        // context.lineTo(panelWidth, props.pixelZero)
+        // context.stroke()
+        // context.setLineDash([]);
 
         props.dimensions.forEach(dim => {
             if (dim.type === 'line') {
@@ -111,7 +112,7 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
                 }
             }
         })
-    }, [panelWidth])
+    }, [])
 
     const plotSeries = useMemo(() => {
         const plotSeries: {type: string, times: number[], values: number[], attributes: {[key: string]: any}}[] = []
