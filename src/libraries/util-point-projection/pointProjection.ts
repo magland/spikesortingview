@@ -142,15 +142,10 @@ export const usePointWidthsFromIntervals = (scalingMatrix: Matrix, data: number[
 }
 
 
-const applyPixelMargins = (props: ScalingProps) => {
-    const {totalPixelWidth, totalPixelHeight, pixelMargins} = props
-    // const invert = !dontInvertY
-
+const applyPixelMargins = (totalPixelWidth: number, totalPixelHeight: number, pixelMargins?: PartialMargins) => {
     const pixelXMin = pixelMargins?.left ?? 0
-    // const pixelYMin = invert ? pixelMargins?.top ?? 0 : pixelMargins?.bottom ?? 0 // TODO: confirm this
     const pixelYMin = pixelMargins?.top ?? 0
     const pixelXMax = totalPixelWidth - (pixelMargins?.right ?? 0)
-    // const pixelYMax = totalPixelHeight - (invert ? (pixelMargins?.bottom ?? 0) : (pixelMargins?.top ?? 0))
     const pixelYMax = totalPixelHeight - (pixelMargins?.bottom ?? 0)
 
     return { xMin: pixelXMin, xMax: pixelXMax, yMin: pixelYMin, yMax: pixelYMax }
@@ -249,8 +244,8 @@ const matrixFromScaleOffset = (scale: scaleOffset, xScaleFactor: number, yScaleF
 
 
 /**
- * For a given data range in 2 dimensions, computes a 2 x 3 matrix which can left-multiply an augmented
- * data vector to map the data points into pixel space.
+ * For a given data range in 2 dimensions, computes a (memoized) 2 x 3 matrix which can left-multiply
+ * an augmented data vector to map the data points into pixel space.
  * This is appropriate for use with 2D data (in x and y).
  * Graphics convention places y=0 at the top of the window with increasing y values moving lower in
  * the drawing space. This is probably not what you want, so by default the transformation matrix
@@ -285,25 +280,30 @@ const matrixFromScaleOffset = (scale: scaleOffset, xScaleFactor: number, yScaleF
  * @returns A 2d scaling matrix which maps native data points into a desired drawing space.
  */
 export const use2dScalingMatrix = (props: ScalingProps) => {
-    // NOTE scaling may make us draw in the margins!!!! Think about this
     const {positiveYGrowsDownward, preserveAspectRatio} = props
-    const invert = !positiveYGrowsDownward
+    const {totalPixelWidth, totalPixelHeight, pixelMargins} = props
     const {dataXMin, dataXMax, dataYMin, dataYMax, yScaleFactor, xScaleFactor} = props
-    if (dataXMin === undefined || dataXMax === undefined || dataYMin === undefined || dataYMax === undefined) {
-        console.warn("Attempt to compute pixel projection matrix with undefined data elements. Mapping to null.")
-        return matrix([[0, 0, 0], [0, 0, 0]])
-    }
-    if (dataXMin === dataXMax && dataYMin === dataYMax) {
-        console.warn("Attempt to compute pixel projection matrix, but data has 0 width in both dimensions. Mapping to null.")
-        return matrix([[0, 0, 0], [0, 0, 0]])
-    }
-    
-    const _pixelDims = applyPixelMargins(props)
-    const dataDims = { xMin: dataXMin, xMax: dataXMax, yMin: dataYMin, yMax: dataYMax }
-    const scale = computeScales(_pixelDims, dataDims, invert, (preserveAspectRatio ?? false))
-    
-    const xform = matrixFromScaleOffset(scale, (xScaleFactor ?? 1), ((yScaleFactor ?? 1) * (invert ? -1 : 1)) )
-    return xform
+    const xformMatrix = useMemo(() => {
+        // NOTE scaling may make us draw in the margins!!!! Think about this
+        const invert = !positiveYGrowsDownward
+        if (dataXMin === undefined || dataXMax === undefined || dataYMin === undefined || dataYMax === undefined) {
+            console.warn("Attempt to compute pixel projection matrix with undefined data elements. Mapping to null.")
+            return matrix([[0, 0, 0], [0, 0, 0]])
+        }
+        if (dataXMin === dataXMax && dataYMin === dataYMax) {
+            console.warn("Attempt to compute pixel projection matrix, but data has 0 width in both dimensions. Mapping to null.")
+            return matrix([[0, 0, 0], [0, 0, 0]])
+        }
+        
+        const _pixelDims = applyPixelMargins(totalPixelWidth, totalPixelHeight, pixelMargins)
+        const dataDims = { xMin: dataXMin, xMax: dataXMax, yMin: dataYMin, yMax: dataYMax }
+        const scale = computeScales(_pixelDims, dataDims, invert, (preserveAspectRatio ?? false))
+        
+        const xform = matrixFromScaleOffset(scale, (xScaleFactor ?? 1), ((yScaleFactor ?? 1) * (invert ? -1 : 1)) )
+        return xform
+    }, [positiveYGrowsDownward, preserveAspectRatio, dataXMin, dataXMax, dataYMin, dataYMax,
+        totalPixelWidth, totalPixelHeight, pixelMargins, yScaleFactor, xScaleFactor])
+    return xformMatrix
 }
 
 
