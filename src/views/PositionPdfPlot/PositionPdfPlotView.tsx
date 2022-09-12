@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useMemo } from 'react'
+import { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import { PositionPdfPlotViewData } from './PositionPdfPlotViewData'
 import PositionPdfPlotWidget, { FetchSegmentQuery } from './PositionPdfPlotWidget'
