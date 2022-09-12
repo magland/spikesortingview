@@ -19,7 +19,7 @@ export type Margins = {
 }
 
 
-export const defaultMargins = {
+const defaultMargins: Margins = {
     left: 30,
     right: 20,
     top: 20,
@@ -63,8 +63,9 @@ export const usePanelDimensions = (width: number, height: number, panelCount: nu
 
 export const useFocusTimeInPixels = (timeToPixelMatrix: Matrix) => {
     const {focusTime} = useTimeFocus()
-    return useMemo(() => {
+    const pixelTime = useMemo(() => {
         if (focusTime === undefined) return undefined
         return convert1dDataSeries([focusTime], timeToPixelMatrix)[0]
     }, [timeToPixelMatrix, focusTime])
+    return pixelTime
 }
