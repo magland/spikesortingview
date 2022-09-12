@@ -1,7 +1,6 @@
 import { Checkbox } from '@material-ui/core'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/RecordingSelectionContext'
 import { FunctionComponent, useCallback, useMemo, useState } from 'react'
-import { convert1dDataSeries, use1dScalingMatrix } from 'util/pointProjection'
 import { TimeseriesLayoutOpts } from 'View'
 import TimeScrollView, { TimeScrollViewPanel } from 'views/common/TimeScrollView/TimeScrollView'
 import { usePanelDimensions, useTimeseriesMargins } from 'views/common/TimeScrollView/TimeScrollViewDimensions'
@@ -30,12 +29,20 @@ type Props = {
 }
 
 type PanelProps = {
+    offscreenCanvas?: HTMLCanvasElement
 }
 
 const panelSpacing = 4
 
-const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise<number[][]>, numTimepoints: number, numPositions: number, segmentSize: number, multiscaleFactor: number) => {
+const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise<number[][]>, numPositions: number, segmentSize: number) => {
     const fetchSegmentCache = useFetchCache<FetchSegmentQuery, number[][]>(fetchSegment)
+    // The fetch cache cannot be memoized, because the 'get' depends on the state.
+    // Thus it is updated every time the cache updates, including asynchronously.
+    // Alternative: consider reworking this hook to A) be able to answer subset queries without
+    // triggering a new query (e.g. if we have range (60, 120), we can return range (60, 100) at
+    // the same downsample level without a new query) and B) using a callback to populate the
+    // data rather than returning a function that returns the data (so that there won't be a need
+    // to use a lookup-function update as the trigger for a rerender/data refresh).
     const get = useCallback((i1: number, i2: number, downsampleFactor: number) => {
         const s1 = Math.floor(i1 / segmentSize)
         const s2 = Math.ceil(i2 / segmentSize)
@@ -55,13 +62,7 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
         }
         return ret
     }, [fetchSegmentCache, numPositions, segmentSize])
-    return {
-        get,
-        numTimepoints,
-        numPositions,
-        segmentSize,
-        multiscaleFactor
-    }
+    return { get }
 }
 
 const emptyPanelSelection = new Set<number | string>()
@@ -70,56 +71,43 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
     const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
-    const dataModel = usePositionPdfDataModel(fetchSegment, numTimepoints, numPositions, segmentSize, multiscaleFactor)
+    const dataModel = usePositionPdfDataModel(fetchSegment, numPositions, segmentSize)
     const [showLinearPositionsOverlay, setShowLinearPositionsOverlay] = useState<boolean>(false)
-    const height2 = linearPositions ? height - 50 : height
+    
+    const rangeStartSample = useMemo(() => {
+        return visibleTimeStartSeconds === undefined ? 0 : Math.max(0, Math.floor(visibleTimeStartSeconds - startTimeSec) * samplingFrequency)
+    }, [visibleTimeStartSeconds, startTimeSec, samplingFrequency])
+    const rangeEndSample = useMemo(() => {
+        return visibleTimeEndSeconds === undefined ? 0 : Math.min(numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
+    }, [visibleTimeEndSeconds, numTimepoints, startTimeSec, samplingFrequency])
 
-    const {downsampleFactor, i1, i2} = useMemo(() => {
-        if (visibleTimeStartSeconds === undefined) return {downsampleFactor: 1, i1: 0, i2: 0}
-        if (visibleTimeEndSeconds === undefined) return {downsampleFactor: 1, i1: 0, i2: 0}
-        const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
-        const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
-        let downsampleFactor: number = 1
-        while ((i2 - i1) / (downsampleFactor * dataModel.multiscaleFactor) > width) {
-            downsampleFactor *= dataModel.multiscaleFactor
-        }
-        return {downsampleFactor, i1, i2}
-    }, [dataModel, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds, width])
+    const downsampleFactor = useMemo(() => {
+        if (visibleTimeStartSeconds === undefined || visibleTimeEndSeconds === undefined) return 1
+        const target = (rangeEndSample - rangeStartSample)/width
+        const factor = Math.ceil(Math.log(target)/Math.log(multiscaleFactor))
+        return Math.pow(multiscaleFactor, factor)
+    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, rangeEndSample, rangeStartSample, width, multiscaleFactor])
 
-    const {visibleValues, t1, t2} = useMemo(() => {
-        if (visibleTimeStartSeconds === undefined) return {visibleValues: undefined, t1: 0, t2: 0}
-        if (visibleTimeEndSeconds === undefined) return {visibleValues: undefined, t1: 0, t2: 0}
-        
-        if (i2 <= i1) return {visibleValues: undefined, t1: 0, t2: 0}
-        
-        const j1 = Math.floor(i1 / downsampleFactor)
-        const j2 = Math.ceil(i2 / downsampleFactor)
+    const visibleValues = useMemo(() => {
+        if (visibleTimeStartSeconds === undefined) return undefined
+        if (visibleTimeEndSeconds === undefined) return undefined
+        if (rangeEndSample <= rangeStartSample) return undefined
+
+        const j1 = Math.floor(rangeStartSample / downsampleFactor)
+        const j2 = Math.ceil(rangeEndSample / downsampleFactor)
         const visibleValues = dataModel.get(j1, j2, downsampleFactor)
-        const t1 = startTimeSec + j1 * downsampleFactor / samplingFrequency
-        const t2 = startTimeSec + j2 * downsampleFactor / samplingFrequency
-        return {visibleValues, t1, t2}
-    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, startTimeSec, samplingFrequency, downsampleFactor, i1, i2])
-
+        return visibleValues
+    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, downsampleFactor, rangeStartSample, rangeEndSample])
+    
     const visibleLinearPositions: number[] | undefined = useMemo(() => {
         if (!linearPositions) return undefined
         if (visibleTimeStartSeconds === undefined) return undefined
         if (visibleTimeEndSeconds === undefined) return undefined
         const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
-        const i2 = Math.min(dataModel.numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
+        const i2 = Math.min(numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
         return linearPositions.slice(i1, i2)
-    }, [dataModel.numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds])
-
-    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
-
-    const panelCount = 1
-    const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
-    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height2, panelCount, panelSpacing, margins)
-    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, margins.left)
-
-    const pixelTimes = useMemo(() => {
-        return convert1dDataSeries([t1, t2], timeToPixelMatrix)
-    }, [t1, t2, timeToPixelMatrix])
-
+    }, [numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds])
+    
     const {minValue, maxValue} = useMemo(() => {
         if (!visibleValues) return {minValue: 0, maxValue: 0}
         return {
@@ -127,47 +115,54 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
             maxValue: max(visibleValues.map(a => (max(a)))),
         }
     }, [visibleValues])
-
+    
     const imageData = useMemo(() => {
         if (!visibleValues) return undefined
         if (minValue === undefined) return undefined
         if (maxValue === undefined) return undefined
-        const N1 = visibleValues.length
-        const N2 = visibleValues[0].length
-        const imageData = new ImageData(N1, N2)
-        let i = 0
-        for (let i2=0; i2<N2; i2++) {
-            for (let i1=0; i1<N1; i1++) {
-                const vv = visibleValues[i1][N2 - 1 - i2]
-                if (vv !== undefined) {
-                    const v = (vv - minValue) / (maxValue - minValue)
-                    const col = colorForValue(v)
-                    imageData.data[i + 0] = col[0]
-                    imageData.data[i + 1] = col[1]
-                    imageData.data[i + 2] = col[2]
-                    imageData.data[i + 3] = 255
-                }
-                else {
-                    imageData.data[i + 0] = 0
-                    imageData.data[i + 1] = 0
-                    imageData.data[i + 2] = 0
-                    imageData.data[i + 3] = 0
-                }
-                i += 4
+        const totalTimePoints = visibleValues.length
+        const totalLinearPositionBuckets = visibleValues[0].length
+        const data = []
+        const colorForValue = getColorForValueFn(minValue, maxValue)
+        // We need to do a non-obvious transpose on the input data, because the input
+        // is structured as [timeCode][linearPositionBucket] -- i.e. the left-most array index
+        // describes the time point, which should be the x-axis on the visualization.
+        // Unfortunately, this corresponds to a column-major order, while our graphics need
+        // to be described as a one-dimensional array in row-major order (i.e. subsequent entries
+        // move across rows from left to right), and we also need to invert the y-axis. So
+        // we do a manual double loop here instead of just a flatmap().
+        for (let positionIndex = totalLinearPositionBuckets - 1; positionIndex >= 0; positionIndex--) {
+            for (let timeIndex = 0; timeIndex < totalTimePoints; timeIndex++) {
+                const value = visibleValues[timeIndex][positionIndex]
+                data.push(colorForValue(value))
             }
         }
+        const clampedData = Uint8ClampedArray.from(data.flat())
+        const imageData = new ImageData(clampedData, totalTimePoints)
         return imageData
     }, [visibleValues, minValue, maxValue])
+    
+    const margins = useTimeseriesMargins(timeseriesLayoutOpts)
+    const adjustedHeight = linearPositions ? height - 50 : height // leave an additional margin for the checkbox if we have linear positions to display
+    const panelCount = 1
+    const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
+    const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, adjustedHeight, panelCount, panelSpacing, margins)
+    
+    const canvas = useMemo(() => {
+        return document.createElement('canvas')
+    }, [])
 
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
+        const canvas = props.offscreenCanvas
+        if (canvas === undefined) return
         if (!imageData) return
-        // Draw scaled version of image
-        // See: https://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
-        const canvas = document.createElement('canvas')
+        if (canvas === undefined)  return
         canvas.width = imageData.width
         canvas.height = imageData.height
         const c = canvas.getContext('2d')
         if (!c) return
+        
+        c.clearRect(0, 0, canvas.width, canvas.height)
         c.putImageData(imageData, 0, 0)
         if ((showLinearPositionsOverlay) && (visibleLinearPositions)) {
             c.fillStyle = 'white'
@@ -178,20 +173,22 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
                 c.fillRect(xx - 0.5, yy + 0.5, 1, 1)
             }
         }
-        context.save()
-        context.scale((pixelTimes[1] - pixelTimes[0]) / imageData.width, panelHeight / imageData.height)
-        context.drawImage(canvas, 0, 0)
-        context.restore()
-    }, [pixelTimes, panelHeight, imageData, visibleLinearPositions, showLinearPositionsOverlay, downsampleFactor])
+        // Draw scaled version of image
+        // See: https://stackoverflow.com/questions/3448347/how-to-scale-an-imagedata-in-html-canvas
+
+        // Scaling the offscreen canvas can be done when it's drawn in, which avoids having to deal with transforms and some margin issues.
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+        context.drawImage(canvas, 0, 0, panelWidth, panelHeight)
+    }, [imageData, showLinearPositionsOverlay, visibleLinearPositions, downsampleFactor, panelWidth, panelHeight])
 
     const panels: TimeScrollViewPanel<PanelProps>[] = useMemo(() => {
         return [{
             key: `pdf`,
             label: ``,
-            props: {} as PanelProps,
+            props: {offscreenCanvas: canvas} as PanelProps,
             paint: paintPanel
         }]
-    }, [paintPanel])
+    }, [paintPanel, canvas])
     
     return (
         <div>
@@ -202,7 +199,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
                 selectedPanelKeys={emptyPanelSelection}
                 timeseriesLayoutOpts={timeseriesLayoutOpts}
                 width={width}
-                height={height2}
+                height={adjustedHeight}
             />
             {
                 linearPositions && (
@@ -230,9 +227,23 @@ export const allocate1d = (N: number, value: number | undefined) => {
     return ret
 }
 
-const colorForValue = (v: number) => {
-    const a = Math.max(0, Math.min(255, Math.floor(v * 255) * 3))
-    return [a, a, 60]
+/**
+ * Given a range of values, generates a function that maps a (possibly undefined)
+ * value in that range into an RGBA color value whose R and G intensities are
+ * in (0, 255) and proportional to the value's position within the range.
+ * The generated function returns black transparent pixels for undefined values.
+ * @param min Lowest value in the data range.
+ * @param max Highest value in the data range.
+ * @returns Convenience function to convert values to proportionally colored pixels.
+ */
+const getColorForValueFn = (min: number, max: number) => {
+    const theScale = 255 / (max - min)
+    return (v: number | undefined) => {
+        if (v === undefined) return [0, 0, 0, 0]
+        const proportion = (v - min) * theScale
+        const intensity = Math.max(0, Math.min(255, 3 * Math.floor(proportion)))
+        return [intensity, intensity, 60, 255]
+    }
 }
 
 const min = (a: (number | undefined)[]) => {

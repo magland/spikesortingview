@@ -1,5 +1,5 @@
 import { runCalculationTaskAsync } from 'figurl'
-import React, { FunctionComponent, useMemo } from 'react'
+import { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import PositionPdfPlotWidget, { FetchSegmentQuery } from 'views/PositionPdfPlot/PositionPdfPlotWidget'
 import { LivePositionPdfPlotViewData } from './LivePositionPdfPlotViewData'
