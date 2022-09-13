@@ -2,16 +2,16 @@ import { useCallback, useReducer } from "react"
 import { Scene2dObject } from "./Scene2d"
 
 type Scene2dObjectsAction = {
-    type: 'add',
+    type: 'add', // add a new object to the list
     object: Scene2dObject
 } | {
-    type: 'clear'
+    type: 'clear' // clear the list
 } | {
-    type: 'setObjectPosition'
+    type: 'setObjectPosition' // set the position of an object (relevant for markers and lines, not connectors)
     objectId: string
     position: {x: number, y: number}
 } | {
-    type: 'setSelectedObjects',
+    type: 'setSelectedObjects', // set the list of selected objects
     objectIds: string[]
 }
 
@@ -39,6 +39,7 @@ const setObjectPosition = (o: Scene2dObject, p: {x: number, y: number}) => {
     return {...o, ...p}
 }
 
+// A list of scene2d objects, with actions for clearing, adding, setting positions, selecting, etc.
 const useScene2dObjects = () => {
     const [objects, objectsDispatch] = useReducer(scene2dObjectsReducer, [])
 

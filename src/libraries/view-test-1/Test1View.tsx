@@ -1,6 +1,10 @@
 import { Scene2d, Scene2dObject, useScene2dObjects } from 'libraries/component-scene2d';
+import { randomObjectId } from 'libraries/component-scene2d';
 import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { Test1ViewData } from './Test1ViewData';
+
+// https://figurl.org/f?v=gs://figurl/spikesortingview-9&d=sha1://309f3b0131934091301c3e75669138a2e04e9240&label=Test1
+// https://figurl.org/f?v=http://localhost:3000&d=sha1://309f3b0131934091301c3e75669138a2e04e9240&label=Test1
 
 type Props = {
     data: Test1ViewData
@@ -38,30 +42,37 @@ for (let i = 0; i < 20; i ++) {
 }
 
 const Test1View: FunctionComponent<Props> = ({width, height}) => {
+    // objects is the list of scene objects
     const {objects, clearObjects, addObject, setObjectPosition, setSelectedObjects} = useScene2dObjects()
+
     useEffect(() => {
+        // initialize the list
         clearObjects()
         for (let o of initialObjects) {
             addObject(o)
         }
     }, [clearObjects, addObject])
     const handleClickObject = useCallback((objectId: string, e: React.MouseEvent) => {
+        // select an object when it is clicked
         console.info('CLICK', objectId, e.ctrlKey, e.shiftKey)
         setSelectedObjects([objectId])
     }, [setSelectedObjects])
     const handleDragObject = useCallback((objectId: string, p: {x: number, y: number}, e: React.MouseEvent) => {
+        // change object position when it is dragged
         console.info('DRAG OBJECT', objectId, p, e.ctrlKey, e.shiftKey)
         setObjectPosition(objectId, p)
     }, [setObjectPosition])
     const handleSelectObjects = useCallback((objectIds: string[], e: React.MouseEvent | undefined) => {
+        // select a list of objects when selected using a drag rect
         console.info('SELECT OBJECTS', objectIds, e?.ctrlKey, e?.shiftKey)
         setSelectedObjects(objectIds)
     }, [setSelectedObjects])
     const handleClick = useCallback((p: {x: number, y: number}, e: React.MouseEvent) => {
+        // when canvas is clicked, add a marker object at that location
         console.info('CLICK', p, e.ctrlKey, e.shiftKey)
         setSelectedObjects([])
         addObject({
-            objectId: randomAlphaString(10),
+            objectId: randomObjectId(),
             type: 'marker',
             clickable: true,
             draggable: true,
@@ -69,6 +80,7 @@ const Test1View: FunctionComponent<Props> = ({width, height}) => {
             attributes: {shape: 'square', fillColor: 'purple', radius: 6}
         })
     }, [setSelectedObjects, addObject])
+
     return (
         <Scene2d
             width={width}
@@ -80,18 +92,6 @@ const Test1View: FunctionComponent<Props> = ({width, height}) => {
             onClick={handleClick}
         />
     )
-}
-
-const randomAlphaString = (num_chars: number) => {
-    if (!num_chars) {
-        /* istanbul ignore next */
-        throw Error('randomAlphaString: num_chars needs to be a positive integer.')
-    }
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    for (var i = 0; i < num_chars; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    return text;
 }
 
 export default Test1View
