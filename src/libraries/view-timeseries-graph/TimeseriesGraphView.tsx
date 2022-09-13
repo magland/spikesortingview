@@ -28,7 +28,7 @@ const panelSpacing = 4
 const emptyPanelSelection = new Set<number | string>()
 
 const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {datasets, series} = data
+    const {datasets, series, timeOffset} = data
 
     const resolvedSeries = useMemo(() => (
         series.map(s => {
@@ -57,8 +57,8 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
     ), [resolvedSeries])
 
     // This component ignores timeOffset except in the following two hooks
-    useRecordingSelectionTimeInitialization(minTime, maxTime, 0)
-    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange(0) // timeOffset is subtracted from start and end after getting from the global state
+    useRecordingSelectionTimeInitialization(minTime, maxTime, timeOffset || 0)
+    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange(timeOffset || 0) // timeOffset is subtracted from start and end after getting from the global state
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 

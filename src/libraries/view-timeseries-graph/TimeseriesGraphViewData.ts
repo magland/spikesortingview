@@ -1,4 +1,4 @@
-import { isEqualTo, validateObject } from "libraries/util-validate-object"
+import { isEqualTo, isNumber, optional, validateObject } from "libraries/util-validate-object"
 import { isString } from "mathjs"
 
 
@@ -18,6 +18,7 @@ export type TimeseriesGraphViewData = {
     type: 'TimeseriesGraph',
     datasets: Dataset[],
     series: Series[]
+    timeOffset?: number
 }
 
 export const isTimeseriesGraphViewData = (x: any): x is TimeseriesGraphViewData => {
@@ -32,6 +33,7 @@ export const isTimeseriesGraphViewData = (x: any): x is TimeseriesGraphViewData 
             dataset: isString,
             encoding: () => (true),
             attributes: () => (true)
-        }))
+        })),
+        timeOffset: optional(isNumber)
     }, {allowAdditionalFields: true})
 }
