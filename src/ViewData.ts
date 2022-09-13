@@ -1,36 +1,42 @@
-import { isOneOf } from 'figurl/viewInterface/validateObject'
-import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "views/Autocorrelograms/AutocorrelogramsViewData"
-import { AverageWaveformsViewData, isAverageWaveformsViewData } from "views/AverageWaveforms/AverageWaveformsViewData"
-import { CompositeViewData, isCompositeViewData } from "views/Composite/CompositeViewData"
-import { ConsoleViewData, isConsoleViewData } from "views/Console/ConsoleViewData"
-import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'views/CrossCorrelograms/CrossCorrelogramsViewData'
-import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "views/ElectrodeGeometry/ElectrodeGeometryViewData"
-import { EpochsViewData, isEpochsViewData } from "views/Epochs/EpochsViewData"
-import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "views/LiveCrossCorrelograms/LiveCrossCorrelogramsViewData"
-import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "views/LivePositionPdfPlot/LivePositionPdfPlotViewData"
-import { isMarkdownViewData, MarkdownViewData } from 'views/Markdown/MarkdownView'
-import { isMountainLayoutViewData, MountainLayoutViewData } from "views/MountainLayout/MountainLayoutViewData"
-import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "views/MultiTimeseries/MultiTimeseriesViewData"
-import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "views/PositionPdfPlot/PositionPdfPlotViewData"
-import { isPositionPlotViewData, PositionPlotViewData } from "views/PositionPlot/PositionPlotViewData"
-import { isRasterPlotViewData, RasterPlotViewData } from "views/RasterPlot/RasterPlotViewData"
-import { isRawTracesViewData, RawTracesViewData } from "views/RawTraces/RawTracesViewData"
-import { isSortingCurationViewData, SortingCurationViewData } from 'views/SortingCuration/SortingCurationViewData'
-import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'views/SortingCuration2/SortingCuration2ViewData'
-import { isSortingLayoutViewData, SortingLayoutViewData } from 'views/SortingLayout/SortingLayoutViewData'
-import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "views/SpikeAmplitudes/SpikeAmplitudesViewData"
-import { isSummaryViewData, SummaryViewData } from "views/Summary/SummaryViewData"
-import { isTiledImageData, TiledImageData } from 'views/TiledImageComponent/TiledImageComponent'
-import { isTrackAnimationStaticData, TrackAnimationStaticData } from "views/TrackPositionAnimation/TrackPositionAnimationTypes"
-import { isUnitLocationsViewData, UnitLocationsViewData } from 'views/UnitLocations/UnitLocationsViewData'
-import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'views/UnitMetricsGraph/UnitMetricsGraphViewData'
-import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'views/UnitSimilarityMatrix/UnitSimilarityMatrixViewData'
-import { isUnitsTableViewData, UnitsTableViewData } from "views/UnitsTable/UnitsTableViewData"
-import { isSortingSelectionViewData, SortingSelectionViewData } from 'views/SortingSelection/SortingSelectionViewData'
-import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'views/SpikeLocations/SpikeLocationsViewData'
-import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'views/ConfusionMatrix/ConfusionMatrixViewData'
-import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'views/LiveEvaluateFunction/LiveEvaluateFunctionView'
-import { isLiveTracesViewData, LiveTracesViewData } from 'views/LiveTraces/LiveTracesViewData'
+import { isOneOf } from 'libraries/util-validate-object'
+import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/view-autocorrelograms"
+import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"
+import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/view-confusion-matrix'
+import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/view-cross-correlograms'
+import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/view-electrode-geometry"
+import { isMarkdownViewData, MarkdownViewData } from 'libraries/view-markdown'
+import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/view-sorting-curation'
+import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/view-sorting-curation-2'
+import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'libraries/view-spike-locations'
+import { isSummaryViewData, SummaryViewData } from "libraries/view-summary"
+import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/view-unit-locations'
+import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/view-unit-metrics-graph'
+import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/view-unit-similarity-matrix'
+import { isUnitsTableViewData, UnitsTableViewData } from "libraries/view-units-table"
+import { CompositeViewData, isCompositeViewData } from "libraries/view-composite"
+import { ConsoleViewData, isConsoleViewData } from "libraries/view-console"
+import { EpochsViewData, isEpochsViewData } from "libraries/view-epochs"
+import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "libraries/view-live-cross-correlograms"
+import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'libraries/view-live-evaluate-function'
+import { isLivePositionPdfPlotViewData, LivePositionPdfPlotViewData } from "libraries/view-position-pdf-plot"
+import { isLiveTracesViewData, LiveTracesViewData } from 'libraries/view-live-traces'
+import { isMountainLayoutViewData, MountainLayoutViewData } from "libraries/view-mountain-layout"
+import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "libraries/view-multi-timeseries"
+import { isPositionPdfPlotViewData, PositionPdfPlotViewData } from "libraries/view-position-pdf-plot"
+import { isPositionPlotViewData, PositionPlotViewData } from "libraries/view-position-plot"
+import { isRasterPlotViewData, RasterPlotViewData } from "libraries/view-raster-plot"
+import { isRawTracesViewData, RawTracesViewData } from "libraries/view-raw-traces"
+import { isSortingLayoutViewData, SortingLayoutViewData } from 'libraries/view-sorting-layout'
+import { isSortingSelectionViewData, SortingSelectionViewData } from 'libraries/view-sorting-selection'
+import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "libraries/view-spike-amplitudes"
+import { isTiledImageData, TiledImageData } from 'libraries/component-tiled-image'
+import { isTrackAnimationStaticData, TrackAnimationStaticData } from "libraries/view-track-position-animation"
+import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/view-main-layout'
+import { ExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1/ExperimentalSelector1ViewData'
+import { isExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1'
+import { isTimeseriesGraphViewData, TimeseriesGraphViewData } from 'libraries/view-timeseries-graph'
+import { Test1ViewData } from 'libraries/view-test-1/Test1ViewData'
+import { isTest1ViewData } from 'libraries/view-test-1'
 
 export type ViewData =
     AutocorrelogramsViewData |
@@ -64,7 +70,11 @@ export type ViewData =
     SpikeLocationsViewData |
     ConfusionMatrixViewData |
     LiveEvaluateFunctionViewData |
-    LiveTracesViewData
+    LiveTracesViewData |
+    MainLayoutViewData |
+    ExperimentalSelector1ViewData |
+    TimeseriesGraphViewData |
+    Test1ViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -99,6 +109,10 @@ export const isViewData = (x: any): x is ViewData => {
         isSpikeLocationsViewData,
         isConfusionMatrixViewData,
         isLiveEvaluateFunctionViewData,
-        isLiveTracesViewData
+        isLiveTracesViewData,
+        isMainLayoutViewData,
+        isExperimentalSelector1ViewData,
+        isTimeseriesGraphViewData,
+        isTest1ViewData
     ])(x)
 }
