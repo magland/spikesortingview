@@ -1,11 +1,9 @@
 import { Checkbox } from '@material-ui/core'
+import { DefaultToolbarWidth, TimeScrollView, TimeScrollViewPanel, usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
-import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
-import { TimeseriesLayoutOpts } from 'View'
-import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
-import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
-import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
 import { useFetchCache } from 'libraries/util-use-fetch-cache'
+import { FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { TimeseriesLayoutOpts } from 'View'
 
 export type FetchSegmentQuery = {
     type: 'fetchSegment'
