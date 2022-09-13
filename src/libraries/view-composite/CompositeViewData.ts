@@ -1,0 +1,35 @@
+import { validateObject } from "libraries/util-validate-object"
+import { isArrayOf, isEqualTo, isNumber, isOneOf, optional } from "libraries/util-validate-object"
+import { isString } from "vega"
+
+type CVViewData = {
+    label: string
+    type: string
+    figureDataSha1?: string // old
+    figureDataUri?: string // new
+    defaultHeight?: number
+}
+
+const isCVViewData = (x: any): x is CVViewData => {
+    return validateObject(x, {
+        label: isString,
+        type: isString,
+        figureDataSha1: optional(isString), // old
+        figureDataUri: optional(isString), // new
+        defaultHeight: optional(isNumber)
+    })
+}
+
+export type CompositeViewData = {
+    type: 'Composite'
+    layout: 'default'
+    views: CVViewData[]
+}
+
+export const isCompositeViewData = (x: any): x is CompositeViewData => {
+    return validateObject(x, {
+        type: isEqualTo('Composite'),
+        layout: isOneOf([isEqualTo('default')]),
+        views: isArrayOf(isCVViewData)
+    })
+}
