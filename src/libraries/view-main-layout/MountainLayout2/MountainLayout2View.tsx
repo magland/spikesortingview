@@ -1,6 +1,6 @@
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 import { MountainWorkspace } from 'libraries/MountainWorkspace';
 import { FunctionComponent, useMemo } from 'react';
-import { ViewComponentProps } from '../LayoutItemView';
 import { MountainLayout2ViewData } from './MountainLayout2ViewData';
 import ViewWrapper from './ViewWrapper';
 

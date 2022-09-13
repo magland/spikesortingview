@@ -21,14 +21,14 @@ import { ConsoleView } from 'libraries/view-console';
 import { EpochsView } from 'libraries/view-epochs';
 import { LiveCrossCorrelogramsView } from 'libraries/view-live-cross-correlograms';
 import { LiveEvaluateFunctionView } from 'libraries/view-live-evaluate-function';
-import LivePositionPdfPlotView from 'views/LivePositionPdfPlot/LivePositionPdfPlotView';
+import { LivePositionPdfPlotView } from 'libraries/view-position-pdf-plot';
 import { LiveTracesView } from 'libraries/view-live-traces';
 import { MountainLayoutView } from 'libraries/view-mountain-layout';
 import { MultiTimeseriesView } from 'libraries/view-multi-timeseries';
-import PositionPdfPlotView from 'views/PositionPdfPlot/PositionPdfPlotView';
+import { PositionPdfPlotView } from 'libraries/view-position-pdf-plot';
 import { PositionPlotView } from 'libraries/view-position-plot';
 import { RawTracesView } from 'libraries/view-raw-traces';
-import SortingLayoutView from 'views/SortingLayout/SortingLayoutView';
+import { SortingLayoutView } from 'libraries/view-sorting-layout';
 import { SpikeAmplitudesView } from 'libraries/view-spike-amplitudes';
 import { TiledImageComponent } from 'libraries/component-tiled-image';
 import { TrackPositionAnimationView } from 'libraries/view-track-position-animation';
@@ -106,7 +106,7 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
         return <TrackPositionAnimationView data={data} width={width} height={height} />
     }
     else if (data.type === 'SortingLayout') {
-        return <SortingLayoutView data={data} width={width} height={height} />
+        return <SortingLayoutView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'CrossCorrelograms') {
         return <CrossCorrelogramsView data={data} width={width} height={height} />

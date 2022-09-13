@@ -1,7 +1,8 @@
 import { FunctionComponent, useMemo } from "react"
 import { TabWidget } from "libraries/component-tab-widget"
-import LayoutItemView, { ViewComponentProps } from "./LayoutItemView"
+import LayoutItemView from "./LayoutItemView"
 import { LayoutItem, MLView } from "./MainLayoutViewData"
+import { ViewComponentProps } from "libraries/core-view-component-props"
 
 type Props = {
     layoutItem: LayoutItem

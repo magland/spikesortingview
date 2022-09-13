@@ -1,6 +1,6 @@
 import { useFileData } from 'libraries/figurl';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
-import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 
 type Props = {
     figureDataSha1: string // old

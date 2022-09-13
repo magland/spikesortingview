@@ -5,13 +5,7 @@ import MountainLayoutItemView from "./MountainLayoutItemView"
 import { LayoutItem, MLView } from "./MainLayoutViewData"
 import SplitterLayoutItemView from "./SplitterLayoutItemView"
 import TabLayoutItemView from "./TabLayoutItemView"
-
-export type ViewComponentProps = {
-    data: any
-    opts: any // get passed to the view
-    width: number
-    height: number
-}
+import { ViewComponentProps } from "libraries/core-view-component-props"
 
 type Props = {
     layoutItem: LayoutItem

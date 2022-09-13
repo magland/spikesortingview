@@ -1,5 +1,5 @@
+import { ViewComponentProps } from "libraries/core-view-component-props"
 import { FunctionComponent, useMemo } from "react"
-import { ViewComponentProps } from "./LayoutItemView"
 import { LayoutItem, MLView } from "./MainLayoutViewData"
 import MountainLayout2View from "./MountainLayout2/MountainLayout2View"
 import { MLViewData, MountainLayout2ViewData } from "./MountainLayout2/MountainLayout2ViewData"

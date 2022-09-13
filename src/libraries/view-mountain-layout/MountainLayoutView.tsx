@@ -4,7 +4,7 @@ import { initiateTask, useFeedReducer, useSignedIn } from 'libraries/figurl';
 import { getMutable } from 'libraries/figurl';
 import { MountainWorkspace } from 'libraries/MountainWorkspace';
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react';
-import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 import { MountainLayoutViewData } from './MountainLayoutViewData';
 import ViewWrapper from './ViewWrapper';
 

@@ -2,7 +2,7 @@ import { useTimeRange } from 'libraries/context-recording-selection';
 import { ViewToolbar } from 'libraries/ViewToolbar';
 import React, { FunctionComponent, useMemo } from 'react';
 import { TimeWidgetToolbarEntries } from 'libraries/component-time-scroll-view';
-import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 import { MultiTimeseriesViewData } from './MultiTimeseriesViewData';
 import ViewWrapper from './ViewWrapper';
 

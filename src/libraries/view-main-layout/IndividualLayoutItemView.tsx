@@ -1,8 +1,8 @@
 import { useFileData } from "libraries/figurl";
 import { ProgressComponent } from "libraries/component-progress";
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { ViewComponentProps } from "./LayoutItemView";
 import { LayoutItem, MLView } from "./MainLayoutViewData";
+import { ViewComponentProps } from "libraries/core-view-component-props";
 
 type Props = {
     layoutItem: LayoutItem

@@ -1,5 +1,6 @@
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 import { FunctionComponent } from 'react';
-import LayoutItemView, { ViewComponentProps } from './LayoutItemView';
+import LayoutItemView from './LayoutItemView';
 import { MainLayoutViewData } from './MainLayoutViewData';
 
 type Props = {

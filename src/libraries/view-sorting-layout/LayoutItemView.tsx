@@ -1,3 +1,4 @@
+import { ViewComponentProps } from "libraries/core-view-component-props"
 import { FunctionComponent } from "react"
 import BoxLayoutItemView from "./BoxLayoutItemView"
 import IndividualLayoutItemView from "./IndividualLayoutItemView"
@@ -5,13 +6,6 @@ import MountainLayoutItemView from "./MountainLayoutItemView"
 import { LayoutItem, SLView } from "./SortingLayoutViewData"
 import SplitterLayoutItemView from "./SplitterLayoutItemView"
 import TabLayoutItemView from "./TabLayoutItemView"
-
-export type ViewComponentProps = {
-    data: any
-    opts: any // get passed to the view
-    width: number
-    height: number
-}
 
 type Props = {
     layoutItem: LayoutItem

@@ -9,15 +9,16 @@ import { feedIdForUri } from 'libraries/view-mountain-layout';
 import { onMessageFromBackend, sendMessageToBackend } from 'libraries/figurl';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
-import View from 'View'
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 
 type Props = {
     data: SortingLayoutViewData
+    ViewComponent: FunctionComponent<ViewComponentProps>
     width: number
     height: number
 }
 
-const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
+const SortingLayoutView: FunctionComponent<Props> = ({data, ViewComponent, width, height}) => {
     const {layout, views} = data
 
     const {state: sortingCuration} = useFeedReducer({feedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
@@ -122,7 +123,7 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, width, height}) => {
         <UnitMetricSelectionContext.Provider value={{unitMetricSelection, unitMetricSelectionDispatch}}>
             <LayoutItemView
                 layoutItem={layout}
-                ViewComponent={View}
+                ViewComponent={ViewComponent}
                 views={views}
                 width={width}
                 height={height}

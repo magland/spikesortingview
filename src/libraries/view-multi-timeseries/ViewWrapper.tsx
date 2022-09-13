@@ -1,7 +1,7 @@
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 import { useFileData } from 'libraries/figurl';
 import React, { FunctionComponent, useMemo } from 'react';
 import { TimeseriesLayoutOpts } from 'View';
-import { ViewComponentProps } from 'views/SortingLayout/LayoutItemView';
 import './MultiTimeseriesView.css';
 
 type Props = {

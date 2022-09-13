@@ -31,7 +31,7 @@ module.exports = {
       },
       to: {
         path: "^src/.+",
-        pathNot: ["^src/libraries/.+", "^src/figurl/.+"]
+        pathNot: ["^src/libraries/.+"]
       }
     },
     {
