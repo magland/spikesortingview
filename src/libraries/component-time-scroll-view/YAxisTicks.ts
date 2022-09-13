@@ -71,12 +71,12 @@ const makeStep = (raw: number, base: number, scale: number): Step => {
     const trimmed = raw - (TRUNCATE_UNCHANGED_HIGHER_ORDER_DIGITS ? base : 0)
     const scaled = Math.trunc(trimmed * Math.pow(10, -scale))
     const isMajor = scaled % 10 === 0
-    const label =  Math.abs(scale) > 3 ? `${(scaled/10).toFixed(1)}e${scale + 1}` : `${scaled * Math.pow(10, scale)}`
+    const label =  Math.abs(scale) > 3 ? `${(scaled/10).toFixed(1)}e${scale + 1}` : `${Math.round(scaled * Math.pow(10, scale) * 1e9) / 1e9}` // use precision rounding
     return {label, isMajor, dataValue: raw}
 }
 
 const enumerateScaledSteps = (base: number, datamin: number, datamax: number, stepsize: number, scale: number): Step[] => {
-    const stepValues = range(datamin, datamax, stepsize, base)
+    const stepValues = range(datamin, datamax, stepsize, base).map(v => (Math.round(v * 1e9) / 1e9)) // use precision rounding
     const invariantAboveRange = computeInvariant(datamin, datamax)
     const steps = stepValues.map(v => makeStep(v, invariantAboveRange, scale))
 
