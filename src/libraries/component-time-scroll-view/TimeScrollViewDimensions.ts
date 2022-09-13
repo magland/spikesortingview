@@ -34,19 +34,31 @@ export const useDefinedMargins = (margins: Margins | undefined): Margins => {
 
 export const useTimeseriesMargins = (timeseriesLayoutOpts: TimeseriesLayoutOpts | undefined, manualMargins?: PartialMargins | undefined): Margins => {
     return useMemo(() => {
-        const {hideTimeAxis, hideToolbar, useYAxis } = timeseriesLayoutOpts || {}
-        const yAxisLeftMargin = useYAxis ? 20 : 0
-        const defaultMargins = hideToolbar ? {
-                    left: 30 + yAxisLeftMargin,
-                    right: 20,
-                    top: 20,
-                    bottom: hideTimeAxis ? 20 : 50
-                } : {
-                    left: 20 + yAxisLeftMargin,
-                    right: 20,
-                    top: 10,
-                    bottom: hideTimeAxis ? 0 : 40
-                }
+        // const {hideTimeAxis, hideToolbar, useYAxis } = timeseriesLayoutOpts || {}
+        const {hideTimeAxis } = timeseriesLayoutOpts || {}
+        // Let's not have this depend on useYAxis for now
+        // because we want all time plots to line up
+        // const yAxisLeftMargin = useYAxis ? 20 : 0
+
+        // Not sure why this should depend on hide Toolbar
+        // const defaultMargins = hideToolbar ? {
+        //             left: 30 + yAxisLeftMargin,
+        //             right: 20,
+        //             top: 20,
+        //             bottom: hideTimeAxis ? 20 : 50
+        //         } : {
+        //             left: 20 + yAxisLeftMargin,
+        //             right: 20,
+        //             top: 10,
+        //             bottom: hideTimeAxis ? 0 : 40
+        //         }
+
+        const defaultMargins = {
+            left: 40, // this is probably too much space - but we'll err on the side of too large until we figure out a better solution
+            right: 20,
+            top: 20,
+            bottom: hideTimeAxis ? 20 : 50
+        }
         return { ...defaultMargins, ...manualMargins}
     }, [timeseriesLayoutOpts, manualMargins])
 }

@@ -25,18 +25,21 @@ const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisY
     const labelOffsetFromGridline = 2
     const gridlineLeftEdge = yAxisXCoordinate - 5
     const labelRightEdge = gridlineLeftEdge - labelOffsetFromGridline
-    const { datamax, datamin, ticks } = tickSet
+    // const { datamax, datamin, ticks } = tickSet
+    const { ticks } = tickSet
     context.fillStyle = 'black'
     context.textAlign = 'right'
-    // Range-end labels
-    const stringMax = datamax.toString()
-    const printMax = stringMax.substring(0, 5).search(".") === -1 ? 5 : 6
-    const stringMin = datamin.toString()
-    const printMin = stringMin.substring(0, 5).search(".") === -1 ? 5 : 6
-    context.textBaseline = 'bottom'
-    context.fillText(stringMax.substring(0, printMax), labelRightEdge, topMargin)
-    context.textBaseline = 'top'
-    context.fillText(datamin.toString().substring(0, printMin), labelRightEdge, xAxisYCoordinate)
+
+    // We no longer show the min/max labels
+        // Range-end labels
+        // const stringMax = datamax.toString()
+        // const printMax = stringMax.substring(0, 5).search(".") === -1 ? 5 : 6
+        // const stringMin = datamin.toString()
+        // const printMin = stringMin.substring(0, 5).search(".") === -1 ? 5 : 6
+        // context.textBaseline = 'bottom'
+        // context.fillText(stringMax.substring(0, printMax), labelRightEdge, topMargin)
+        // context.textBaseline = 'top'
+        // context.fillText(datamin.toString().substring(0, printMin), labelRightEdge, xAxisYCoordinate)
 
     context.textBaseline = 'middle'
     ticks.forEach(tick => {
