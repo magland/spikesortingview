@@ -57,7 +57,7 @@ export const useTimeseriesMargins = (timeseriesLayoutOpts: TimeseriesLayoutOpts 
             left: 40, // this is probably too much space - but we'll err on the side of too large until we figure out a better solution
             right: 20,
             top: 20,
-            bottom: hideTimeAxis ? 20 : 50
+            bottom: hideTimeAxis ? 20 : 20
         }
         return { ...defaultMargins, ...manualMargins}
     }, [timeseriesLayoutOpts, manualMargins])

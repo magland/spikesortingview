@@ -1,6 +1,6 @@
 import { Checkbox } from '@material-ui/core'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
-import { FunctionComponent, useCallback, useMemo, useState } from 'react'
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
 import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
@@ -62,7 +62,7 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
         }
         return ret
     }, [fetchSegmentCache, numPositions, segmentSize])
-    return { get }
+    return useMemo(() => ({ get }), [get])
 }
 
 const emptyPanelSelection = new Set<number | string>()
@@ -143,7 +143,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
     }, [visibleValues, minValue, maxValue])
     
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
-    const adjustedHeight = linearPositions ? height - 50 : height // leave an additional margin for the checkbox if we have linear positions to display
+    const adjustedHeight = linearPositions ? height - 30 : height // leave an additional margin for the checkbox if we have linear positions to display
     const panelCount = 1
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, adjustedHeight, panelCount, panelSpacing, margins)
@@ -204,7 +204,7 @@ const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTim
             {
                 linearPositions && (
                     <span>
-                        <Checkbox checked={showLinearPositionsOverlay} onClick={() => {setShowLinearPositionsOverlay(a => (!a))}} />
+                        <Checkbox style={{paddingTop: 0, paddingBottom: 5}} checked={showLinearPositionsOverlay} onClick={() => {setShowLinearPositionsOverlay(a => (!a))}} />
                         Show actual position overlay
                     </span>
                 )
