@@ -1,4 +1,4 @@
-import { useTimeFocus, useTimeRange } from 'libraries/context-recording-selection';
+import { useTimeFocus } from 'libraries/context-recording-selection';
 import { convert1dDataSeries } from 'libraries/util-point-projection';
 import { Matrix } from 'mathjs';
 import { useMemo } from 'react';
@@ -74,14 +74,11 @@ export const usePanelDimensions = (width: number, height: number, panelCount: nu
 }
 
 export const useFocusTimeInPixels = (timeToPixelMatrix: Matrix) => {
-    const {focusTime} = useTimeFocus()
-    const {visibleTimeStartSeconds, visibleTimeEndSeconds} = useTimeRange()
+    const {focusTime, focusTimeIsVisible} = useTimeFocus()
     const pixelTime = useMemo(() => {
-        if (focusTime === undefined) return undefined
-        if ((focusTime < (visibleTimeStartSeconds || 0)) || (focusTime > (visibleTimeEndSeconds || 0))) {
-            return undefined
-        }
-        return convert1dDataSeries([focusTime], timeToPixelMatrix)[0]
-    }, [timeToPixelMatrix, focusTime, visibleTimeStartSeconds, visibleTimeEndSeconds])
+        return (focusTime !== undefined && focusTimeIsVisible)
+            ? convert1dDataSeries([focusTime], timeToPixelMatrix)[0]
+            : undefined
+    }, [timeToPixelMatrix, focusTime, focusTimeIsVisible])
     return pixelTime
 }

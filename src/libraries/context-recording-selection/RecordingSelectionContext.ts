@@ -135,8 +135,12 @@ export const useTimeFocus = () => {
             focusTimeSec: timeForFraction(fraction)
         })
     }, [recordingSelectionDispatch, timeForFraction])
+    const focusTimeIsVisible = recordingSelection.focusTimeSeconds !== undefined
+                               && recordingSelection.focusTimeSeconds <= (recordingSelection.visibleTimeEndSeconds || 0)
+                               && recordingSelection.focusTimeSeconds >= (recordingSelection.visibleTimeStartSeconds || 0)
     return {
         focusTime: recordingSelection.focusTimeSeconds,
+        focusTimeIsVisible,
         setTimeFocus,
         setTimeFocusFraction,
         timeForFraction
