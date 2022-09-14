@@ -1,5 +1,6 @@
 import { BaseCanvas, pointInRect, RectangularRegion, Vec4 } from "libraries/figurl-canvas";
 import { dragSelectReducer } from "libraries/util-drag-select";
+import { randomAlphaString } from "libraries/util-random-string";
 import React, { FunctionComponent, useCallback, useEffect, useReducer, useState } from "react";
 
 // properties common to all Scene2dObject types
@@ -375,18 +376,6 @@ const pointInObject = (o: Scene2dObject, p: {x: number, y: number}) => {
 	else return false
 }
 
-export const randomObjectId = () => (randomAlphaString(10))
-
-const randomAlphaString = (num_chars: number) => {
-    if (!num_chars) {
-        /* istanbul ignore next */
-        throw Error('randomAlphaString: num_chars needs to be a positive integer.')
-    }
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    for (var i = 0; i < num_chars; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    return text;
-}
+export const createObjectId = () => (randomAlphaString(10))
 
 export default Scene2d

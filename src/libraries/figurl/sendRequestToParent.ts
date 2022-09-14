@@ -2,6 +2,7 @@ import { FigurlRequest, FigurlResponse } from "./viewInterface/FigurlRequestType
 import { FigurlResponseMessage } from "./viewInterface/MessageToChildTypes";
 import { FigurlRequestMessage } from "./viewInterface/MessageToParentTypes";
 import sendMessageToParent from "./sendMessageToParent";
+import { randomAlphaString } from "libraries/util-random-string";
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())
@@ -41,18 +42,6 @@ const sendRequestToParent = async (request: FigurlRequest) => {
         }
         sendMessageToParent(msg)
     })
-}
-
-const randomAlphaString = (num_chars: number) => {
-    if (!num_chars) {
-        /* istanbul ignore next */
-        throw Error('randomAlphaString: num_chars needs to be a positive integer.')
-    }
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    for (var i = 0; i < num_chars; i++)
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    return text;
 }
 
 export default sendRequestToParent

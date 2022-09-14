@@ -1,6 +1,6 @@
 import { UserId } from "./viewInterface/kacheryTypes"
-import randomAlphaString from "./util/randomAlphaString"
 import { useEffect, useState } from "react"
+import { randomAlphaString } from "libraries/util-random-string"
 
 type UserInfo = {userId?: UserId, googleIdToken?: string}
 
