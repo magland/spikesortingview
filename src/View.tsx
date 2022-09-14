@@ -1,4 +1,5 @@
 import { TiledImageComponent } from 'libraries/component-tiled-image';
+import { AnnotationsView } from 'libraries/view-annotations';
 import { AutocorrelogramsView } from 'libraries/view-autocorrelograms';
 import { AverageWaveformsView } from 'libraries/view-average-waveforms';
 import { CompositeView } from 'libraries/view-composite';
