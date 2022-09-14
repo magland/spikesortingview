@@ -1,5 +1,5 @@
 import { Scene2d, Scene2dObject, useScene2dObjects } from 'libraries/component-scene2d';
-import { randomObjectId } from 'libraries/component-scene2d';
+import { createObjectId } from 'libraries/component-scene2d';
 import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { Test1ViewData } from './Test1ViewData';
 
@@ -72,7 +72,7 @@ const Test1View: FunctionComponent<Props> = ({width, height}) => {
         console.info('CLICK', p, e.ctrlKey, e.shiftKey)
         setSelectedObjects([])
         addObject({
-            objectId: randomObjectId(),
+            objectId: createObjectId(),
             type: 'marker',
             clickable: true,
             draggable: true,
