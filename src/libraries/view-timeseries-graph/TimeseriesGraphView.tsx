@@ -72,12 +72,14 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
         if (!opts) {
             opts = {location: 'northeast'} // for testing
         }
+        const seriesToInclude = series.filter(s => (s.title))
+        if (seriesToInclude.length === 0) return
         const {location} = opts
         const entryHeight = 18
         const entryFontSize = 12
         const symbolWidth = 50
         const legendWidth = 200
-        const legendHeight = 20 + series.length * entryHeight
+        const legendHeight = 20 + seriesToInclude.length * entryHeight
         const R = location === 'northwest' ? {x: 20, y: 20, w: legendWidth, h: legendHeight} :
                   location === 'northeast' ? {x: panelWidth - legendWidth - 20, y: 20, w: legendWidth, h: legendHeight} : undefined
         if (!R) return //unexpected
@@ -87,9 +89,9 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
         context.fillRect(R.x, R.y, R.w, R.h)
         context.strokeRect(R.x, R.y, R.w, R.h)
 
-        for (let i = 0; i < series.length; i++) {
+        for (let i = 0; i < seriesToInclude.length; i++) {
             const y0 = R.y + 10 + i * entryHeight
-            const s = series[i]
+            const s = seriesToInclude[i]
             if (s.title) {
                 const symbolRect = {x: R.x + 10, y: y0, w: symbolWidth, h: entryHeight}
                 const titleRect = {x: R.x + 10 + symbolWidth + 10, y: y0, w: legendWidth - 10 - 10 - symbolWidth - 10, h: entryHeight}
