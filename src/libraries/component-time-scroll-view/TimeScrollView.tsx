@@ -65,7 +65,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const perPanelOffset = panelHeight + panelSpacing
 
     const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, definedMargins.left)
-    const focusTimeInPixels = useFocusTimeInPixels(timeToPixelMatrix)
+    const {focusTimeInPixels, focusTimeIntervalInPixels} = useFocusTimeInPixels(timeToPixelMatrix)
 
     const timeTicks = useTimeTicks(visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix)
 
@@ -136,9 +136,10 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
+                focusTimeIntervalPixels={focusTimeIntervalInPixels}
             />
         )
-    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels])
+    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels, focusTimeIntervalInPixels])
 
     const content = useMemo(() => {
         return (
@@ -150,10 +151,10 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 onMouseMove={handleMouseMove}
                 onMouseOut={handleMouseLeave}
             >
+                {cursorLayer}
                 {axesLayer}
                 {mainLayer}
                 {highlightLayer}
-                {cursorLayer}
             </div>
         )
     }, [style, handleWheel, handleMouseDown, handleMouseUp, handleMouseMove, handleMouseLeave,
