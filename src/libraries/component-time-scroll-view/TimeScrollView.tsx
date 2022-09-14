@@ -151,10 +151,10 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 onMouseMove={handleMouseMove}
                 onMouseOut={handleMouseLeave}
             >
-                {cursorLayer}
                 {axesLayer}
                 {mainLayer}
                 {highlightLayer}
+                {cursorLayer}
             </div>
         )
     }, [style, handleWheel, handleMouseDown, handleMouseUp, handleMouseMove, handleMouseLeave,

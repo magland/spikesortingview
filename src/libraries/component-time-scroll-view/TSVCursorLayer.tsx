@@ -16,12 +16,18 @@ const paintCursor = (context: CanvasRenderingContext2D, props: TSVCursorLayerPro
 
     // focus time interval
     if (focusTimeIntervalPixels !== undefined) {
-        context.fillStyle = 'rgb(255, 225, 225)'
-        context.fillRect(focusTimeIntervalPixels[0], margins.top, focusTimeIntervalPixels[1] - focusTimeIntervalPixels[0], context.canvas.height - margins.bottom - margins.top)
+        context.fillStyle = 'rgba(255, 225, 225, 0.4)'
+        context.strokeStyle = 'rgba(150, 50, 50, 0.9)'
+        const x = focusTimeIntervalPixels[0]
+        const y = margins.top
+        const w = focusTimeIntervalPixels[1] - focusTimeIntervalPixels[0]
+        const h = context.canvas.height - margins.bottom - margins.top
+        context.fillRect(x, y, w, h)
+        context.strokeRect(x, y, w, h)
     }
 
     // focus time
-    if (focusTimePixels !== undefined) {
+    if ((focusTimePixels !== undefined) && (focusTimeIntervalPixels === undefined)) {
         context.strokeStyle = 'red'
         context.beginPath()
         context.moveTo(focusTimePixels, margins.top)

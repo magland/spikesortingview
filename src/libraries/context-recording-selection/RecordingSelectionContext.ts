@@ -355,7 +355,7 @@ const setFocusTime = (state: RecordingSelection, action: SetFocusTimeRecordingSe
         if (t0 !== undefined) {
             const t1 = Math.min(t0, focusTimeSec)
             const t2 = Math.max(t0, focusTimeSec)
-            newState = {...newState, focusTimeIntervalSeconds: [t1, t2]}
+            newState = {...newState, focusTimeSeconds: state.focusTimeSeconds, focusTimeIntervalSeconds: [t1, t2]}
         }
     }
     return selectionIsValid(newState) ? newState : state
