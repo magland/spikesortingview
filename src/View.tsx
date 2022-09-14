@@ -36,6 +36,7 @@ import { ViewData } from './ViewData';
 import { ExperimentalSelector1View } from 'libraries/view-experimental-selector-1';
 import { TimeseriesGraphView } from 'libraries/view-timeseries-graph';
 import { Test1View } from 'libraries/view-test-1';
+import { AnnotationsView } from 'libraries/view-annotations';
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -158,6 +159,9 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     }
     else if (data.type === 'Test1') {
         return <Test1View data={data} width={width} height={height} />
+    }
+    else if (data.type === 'Annotations') {
+        return <AnnotationsView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)

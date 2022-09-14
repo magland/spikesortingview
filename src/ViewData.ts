@@ -37,6 +37,7 @@ import { isExperimentalSelector1ViewData } from 'libraries/view-experimental-sel
 import { isTimeseriesGraphViewData, TimeseriesGraphViewData } from 'libraries/view-timeseries-graph'
 import { Test1ViewData } from 'libraries/view-test-1/Test1ViewData'
 import { isTest1ViewData } from 'libraries/view-test-1'
+import { AnnotationsViewData, isAnnotationsViewData } from 'libraries/view-annotations'
 
 export type ViewData =
     AutocorrelogramsViewData |
@@ -74,7 +75,8 @@ export type ViewData =
     MainLayoutViewData |
     ExperimentalSelector1ViewData |
     TimeseriesGraphViewData |
-    Test1ViewData
+    Test1ViewData |
+    AnnotationsViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -113,6 +115,7 @@ export const isViewData = (x: any): x is ViewData => {
         isMainLayoutViewData,
         isExperimentalSelector1ViewData,
         isTimeseriesGraphViewData,
-        isTest1ViewData
+        isTest1ViewData,
+        isAnnotationsViewData
     ])(x)
 }
