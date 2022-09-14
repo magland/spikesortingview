@@ -43,7 +43,7 @@ const AnnotationsView: FunctionComponent<Props> = ({data, width, height}) => {
                         element: <EditableTextField onChange={newLabel => setAnnotationLabel(a.annotationId, newLabel)} value={a.label} />
                     },
                     time: {
-                        element: <Hyperlink onClick={() => recordingSelectionDispatch({type: 'setFocusTime', focusTimeSec: a.timeSec})}>{a.timeSec}</Hyperlink>
+                        element: <Hyperlink onClick={() => recordingSelectionDispatch({type: 'setFocusTime', focusTimeSec: a.timeSec, autoScrollVisibleTimeRange: true})}>{a.timeSec}</Hyperlink>
                     }
                 }
             }

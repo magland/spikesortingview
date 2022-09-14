@@ -38,10 +38,10 @@ export const selectionIsValid = (r: RecordingSelection) => {
     // we can get away with just comparing visible start to recording start and visible end to recording end.
     // (b/c if visEnd < recStart, then visStart < recStart; if visStart > recEnd, then visEnd > recEnd.)
     if (r.visibleTimeStartSeconds < r.recordingStartTimeSeconds || r.recordingEndTimeSeconds < r.visibleTimeEndSeconds) return false
-    if (r.focusTimeSeconds) {
-        // if set, focus time must be within the visible window
-        if (r.focusTimeSeconds < r.visibleTimeStartSeconds || r.focusTimeSeconds > r.visibleTimeEndSeconds) return false
-    }
+    // if (r.focusTimeSeconds) {
+    //     // if set, focus time must be within the visible window
+    //     if (r.focusTimeSeconds < r.visibleTimeStartSeconds || r.focusTimeSeconds > r.visibleTimeEndSeconds) return false
+    // }
 
     return true
 }
@@ -250,7 +250,8 @@ const panTimeHelper = (state: RecordingSelection, panDisplacementSeconds: number
     } else {
         return state
     }
-    const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
+    const keepFocus = true
+    // const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
     const focus = keepFocus ? state.focusTimeSeconds : undefined
 
     // Avoid creating new object if we didn't actually change anything
