@@ -1,4 +1,5 @@
 import { Button } from '@material-ui/core';
+import { Hyperlink } from 'libraries/component-hyperlink';
 import { NiceTable } from 'libraries/component-nice-table';
 import { NiceTableColumn, NiceTableRow } from 'libraries/component-nice-table/NiceTable';
 import { useAnnotations } from 'libraries/context-annotations';
@@ -9,7 +10,6 @@ import { JSONStringifyDeterministic } from 'libraries/MountainWorkspace';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { AnnotationsViewData } from './AnnotationsViewData';
 import EditableTextField from './EditableTextField';
-import Hyperlink from './Hyperlink';
 
 type Props = {
     data: AnnotationsViewData
