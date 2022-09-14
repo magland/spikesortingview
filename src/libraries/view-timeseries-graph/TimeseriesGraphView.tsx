@@ -28,7 +28,7 @@ const panelSpacing = 4
 const emptyPanelSelection = new Set<number | string>()
 
 const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {datasets, series, timeOffset} = data
+    const {datasets, series, legendOpts, timeOffset} = data
 
     const resolvedSeries = useMemo(() => (
         series.map(s => {
@@ -67,6 +67,61 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
     const toolbarWidth = timeseriesLayoutOpts?.hideToolbar ? 0 : DefaultToolbarWidth
     const { panelWidth, panelHeight } = usePanelDimensions(width - toolbarWidth, height, panelCount, panelSpacing, margins)
 
+    const paintLegend = useCallback((context: CanvasRenderingContext2D) => {
+        let opts = legendOpts
+        if (!opts) {
+            opts = {location: 'northeast'} // for testing
+        }
+        const {location} = opts
+        const entryHeight = 25
+        const entryFontSize = 14
+        const symbolWidth = 50
+        const legendWidth = 200
+        const legendHeight = 20 + series.length * entryHeight
+        const R = location === 'northwest' ? {x: 20, y: 20, w: legendWidth, h: legendHeight} :
+                  location === 'northeast' ? {x: panelWidth - legendWidth - 20, y: 20, w: legendWidth, h: legendHeight} : undefined
+        if (!R) return //unexpected
+        context.fillStyle = 'white'
+        context.strokeStyle = 'gray'
+        context.lineWidth = 1.5
+        context.fillRect(R.x, R.y, R.w, R.h)
+        context.strokeRect(R.x, R.y, R.w, R.h)
+
+        for (let i = 0; i < series.length; i++) {
+            const y0 = R.y + 10 + i * entryHeight
+            const s = series[i]
+            
+            const symbolRect = {x: R.x + 10, y: y0, w: symbolWidth, h: entryHeight}
+            const titleRect = {x: R.x + 10 + symbolWidth + 10, y: y0, w: legendWidth - 10 - 10 - symbolWidth - 10, h: entryHeight}
+            const title = s.title || 'untitled'
+            context.fillStyle = 'black'
+            context.font = `${entryFontSize}px Arial`
+            context.fillText(title, titleRect.x, titleRect.y + titleRect.h / 2 + entryFontSize / 2 - 2)
+            if (s.type === 'line') {
+                applyLineAttributes(context, s.attributes)
+                context.beginPath()
+                context.moveTo(symbolRect.x, symbolRect.y + symbolRect.h / 2)
+                context.lineTo(symbolRect.x + symbolRect.w, symbolRect.y + symbolRect.h / 2)
+                context.stroke()
+                context.setLineDash([])
+            }
+            else if (s.type === 'marker') {
+                applyMarkerAttributes(context, s.attributes)
+                const radius = entryHeight * 0.3
+                const shape = s.attributes['shape'] ?? 'circle'
+                const center = {x: symbolRect.x + symbolRect.w / 2, y: symbolRect.y + symbolRect.h / 2}
+                if (shape === 'circle') {
+                    context.beginPath()
+                    context.ellipse(center.x, center.y, radius, radius, 0, 0, 2 * Math.PI)
+                    context.fill()
+                }
+                else if (shape === 'square') {
+                    context.fillRect(center.x - radius, center.y - radius, radius * 2, radius * 2)
+                }
+            }
+        }
+    }, [legendOpts, series, panelWidth])
+
     // We need to have the panelHeight before we can use it in the paint function.
     // By using a callback, we avoid having to complicate the props passed to the painting function; it doesn't make a big difference
     // but simplifies the prop list a bit.
@@ -83,9 +138,7 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
 
         props.dimensions.forEach(dim => {
             if (dim.type === 'line') {
-                context.strokeStyle = dim.attributes['color'] ?? 'black'
-                context.lineWidth = dim.attributes['width'] ?? 1.1 // 1.1 hack--but fixes the 'disappearing lines' issue
-                dim.attributes['dash'] && context.setLineDash(dim.attributes['dash'])
+                applyLineAttributes(context, dim.attributes)
                 context.beginPath()
                 dim.pixelTimes.forEach((x, ii) => {
                     const y = dim.pixelValues[ii]
@@ -95,7 +148,7 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
                 context.setLineDash([])
             }
             else if (dim.type === 'marker') {
-                context.fillStyle = dim.attributes['color'] ?? 'black'
+                applyMarkerAttributes(context, dim.attributes)
                 const radius = dim.attributes['radius'] ?? 2
                 const shape = dim.attributes['shape'] ?? 'circle'
                 if (shape === 'circle') {
@@ -112,7 +165,9 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
                 }
             }
         })
-    }, [])
+
+        paintLegend(context)
+    }, [paintLegend])
 
     const plotSeries = useMemo(() => {
         const plotSeries: {type: string, times: number[], values: number[], attributes: {[key: string]: any}}[] = []
@@ -197,6 +252,16 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
         />
     )
     return content
+}
+
+const applyLineAttributes = (context: CanvasRenderingContext2D, attributes: any) => {
+    context.strokeStyle = attributes['color'] ?? 'black'
+    context.lineWidth = attributes['width'] ?? 1.1 // 1.1 hack--but fixes the 'disappearing lines' issue
+    attributes['dash'] && context.setLineDash(attributes['dash'])
+}
+
+const applyMarkerAttributes = (context: CanvasRenderingContext2D, attributes: any) => {
+    context.fillStyle = attributes['color'] ?? 'black'
 }
 
 const min = (a: number[]) => {
