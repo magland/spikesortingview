@@ -2,7 +2,7 @@ import { Splitter } from 'libraries/component-splitter';
 import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view';
 import { useAnnotations } from 'libraries/context-annotations';
 import { useTimeRange } from 'libraries/context-recording-selection';
-import { use1dScalingMatrix } from 'libraries/util-point-projection';
+import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection';
 import { ViewToolbar } from 'libraries/ViewToolbar';
 import { useEffect, useMemo, useRef } from 'react';
 import { TimeseriesLayoutOpts } from 'View';
@@ -144,14 +144,17 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
 
     const {annotations} = useAnnotations()
     const annotationLayer = useMemo(() => {
+        const pixelTimepointAnnotations = annotations.filter(x => (x.type === 'timepoint')).map(x => ({
+            pixelTime: convert1dDataSeries([x.timeSec], timeToPixelMatrix)[0],
+            annotation: x
+        }))
         return (
             <TSVAnnotationLayer
                 width={effectiveWidth}
                 height={height}
                 timeRange={timeRange}
-                timeToPixelMatrix={timeToPixelMatrix}
+                pixelTimepointAnnotations={pixelTimepointAnnotations}
                 margins={definedMargins}
-                annotations={annotations}
             />
         )
     }, [annotations, definedMargins, effectiveWidth, height, timeRange, timeToPixelMatrix])
