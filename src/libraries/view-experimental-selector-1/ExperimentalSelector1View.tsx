@@ -1,10 +1,10 @@
 import { Button } from '@material-ui/core';
+import { Hyperlink } from 'libraries/component-hyperlink';
 import { NiceTable } from 'libraries/component-nice-table';
 import { NiceTableColumn, NiceTableRow } from 'libraries/component-nice-table/NiceTable';
 import { useRecordingSelection } from 'libraries/context-recording-selection';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { ExperimentalSelector1ViewData } from './ExperimentalSelector1ViewData';
-import Hyperlink from './Hyperlink';
 
 type Props = {
     data: ExperimentalSelector1ViewData

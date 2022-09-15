@@ -1,11 +1,11 @@
-import { useTimeRange } from 'libraries/context-recording-selection';
 import { Splitter } from 'libraries/component-splitter';
-import { useEffect, useMemo, useRef } from 'react';
-import { use1dScalingMatrix } from 'libraries/util-point-projection';
-import { TimeseriesLayoutOpts } from 'View';
-import { TickSet } from './YAxisTicks';
 import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view';
+import { useAnnotations } from 'libraries/context-annotations';
+import { useTimeRange } from 'libraries/context-recording-selection';
+import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection';
 import { ViewToolbar } from 'libraries/ViewToolbar';
+import { useEffect, useMemo, useRef } from 'react';
+import { TimeseriesLayoutOpts } from 'View';
 import { useTimeTicks } from './TimeAxisTicks';
 import useActionToolbar, { OptionalToolbarActions } from './TimeScrollViewActionsToolbar';
 import { HighlightIntervalSet } from './TimeScrollViewData';
@@ -13,10 +13,12 @@ import { Margins, useDefinedMargins, useFocusTimeInPixels, usePanelDimensions } 
 import useTimeScrollEventHandlers, { suppressWheelScroll } from './TimeScrollViewInteractions/TimeScrollViewEventHandlers';
 import useTimeScrollZoom from './TimeScrollViewInteractions/useTimeScrollZoom';
 import { filterAndProjectHighlightSpans } from './TimeScrollViewSpans';
+import TSVAnnotationLayer from './TSVAnnotationLayer';
 import TSVAxesLayer from './TSVAxesLayer';
 import TSVCursorLayer from './TSVCursorLayer';
 import TSVHighlightLayer from './TSVHighlightLayer';
 import TSVMainLayer from './TSVMainLayer';
+import { TickSet } from './YAxisTicks';
 
 
 export type TimeScrollViewPanel<T extends {[key: string]: any}> = {
@@ -66,7 +68,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const perPanelOffset = panelHeight + panelSpacing
 
     const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, definedMargins.left)
-    const focusTimeInPixels = useFocusTimeInPixels(timeToPixelMatrix)
+    const {focusTimeInPixels, focusTimeIntervalInPixels} = useFocusTimeInPixels(timeToPixelMatrix)
 
     const timeTicks = useTimeTicks(visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix)
 
@@ -138,9 +140,38 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
+                focusTimeIntervalPixels={focusTimeIntervalInPixels}
             />
         )
-    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels])
+    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels, focusTimeIntervalInPixels])
+
+    const {annotations} = useAnnotations()
+    const annotationLayer = useMemo(() => {
+        const pixelTimepointAnnotations = annotations.filter(x => (x.type === 'timepoint')).map(x => {
+            if (x.type !== 'timepoint') throw Error('Unexpected')
+            return {
+                pixelTime: convert1dDataSeries([x.timeSec], timeToPixelMatrix)[0],
+                annotation: x
+            }
+        })
+        const pixelTimeIntervalAnnotations = annotations.filter(x => (x.type === 'time-interval')).map(x => {
+            if (x.type !== 'time-interval') throw Error('Unexpected')
+            return {
+                pixelTimeInterval: convert1dDataSeries(x.timeIntervalSec, timeToPixelMatrix) as [number, number],
+                annotation: x
+            }
+        })
+        return (
+            <TSVAnnotationLayer
+                width={effectiveWidth}
+                height={height}
+                timeRange={timeRange}
+                pixelTimepointAnnotations={pixelTimepointAnnotations}
+                pixelTimeIntervalAnnotations={pixelTimeIntervalAnnotations}
+                margins={definedMargins}
+            />
+        )
+    }, [annotations, definedMargins, effectiveWidth, height, timeRange, timeToPixelMatrix])
 
     const content = useMemo(() => {
         return (
@@ -152,6 +183,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 onMouseMove={handleMouseMove}
                 onMouseOut={handleMouseLeave}
             >
+                {annotationLayer}
                 {axesLayer}
                 {mainLayer}
                 {highlightLayer}
@@ -159,7 +191,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
             </div>
         )
     }, [style, handleWheel, handleMouseDown, handleMouseUp, handleMouseMove, handleMouseLeave,
-        axesLayer, mainLayer, highlightLayer, cursorLayer])
+        annotationLayer, axesLayer, mainLayer, highlightLayer, cursorLayer])
     
     if (hideToolbar) {
         return (

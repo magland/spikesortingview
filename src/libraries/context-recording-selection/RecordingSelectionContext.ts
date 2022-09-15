@@ -4,6 +4,7 @@ export type RecordingSelection = {
     recordingStartTimeSeconds?: number
     recordingEndTimeSeconds?: number
     focusTimeSeconds?: number
+    focusTimeIntervalSeconds?: [number, number]
     visibleTimeStartSeconds?: number
     visibleTimeEndSeconds?: number
     selectedElectrodeIds: (number | string)[]
@@ -38,10 +39,10 @@ export const selectionIsValid = (r: RecordingSelection) => {
     // we can get away with just comparing visible start to recording start and visible end to recording end.
     // (b/c if visEnd < recStart, then visStart < recStart; if visStart > recEnd, then visEnd > recEnd.)
     if (r.visibleTimeStartSeconds < r.recordingStartTimeSeconds || r.recordingEndTimeSeconds < r.visibleTimeEndSeconds) return false
-    if (r.focusTimeSeconds) {
-        // if set, focus time must be within the visible window
-        if (r.focusTimeSeconds < r.visibleTimeStartSeconds || r.focusTimeSeconds > r.visibleTimeEndSeconds) return false
-    }
+    // if (r.focusTimeSeconds) {
+    //     // if set, focus time must be within the visible window
+    //     if (r.focusTimeSeconds < r.visibleTimeStartSeconds || r.focusTimeSeconds > r.visibleTimeEndSeconds) return false
+    // }
 
     return true
 }
@@ -124,19 +125,25 @@ export const useTimeFocus = () => {
             autoScrollVisibleTimeRange: o.autoScrollVisibleTimeRange
         })
     }, [recordingSelectionDispatch])
-    const setTimeFocusFraction = useCallback((fraction: number) => {
+    const setTimeFocusFraction = useCallback((fraction: number, opts: {event: React.MouseEvent}) => {
         if (fraction > 1 || fraction < 0) {
             console.warn(`Attempt to set time focus to fraction outside range 0-1 (${fraction})`)
             return
         }
-        
+    
         recordingSelectionDispatch({
             type: 'setFocusTime',
-            focusTimeSec: timeForFraction(fraction)
+            focusTimeSec: timeForFraction(fraction),
+            shiftKey: opts.event.shiftKey
         })
     }, [recordingSelectionDispatch, timeForFraction])
+    const focusTimeIsVisible = recordingSelection.focusTimeSeconds !== undefined
+                               && recordingSelection.focusTimeSeconds <= (recordingSelection.visibleTimeEndSeconds || 0)
+                               && recordingSelection.focusTimeSeconds >= (recordingSelection.visibleTimeStartSeconds || 0)
     return {
         focusTime: recordingSelection.focusTimeSeconds,
+        focusTimeIsVisible,
+        focusTimeInterval: recordingSelection.focusTimeIntervalSeconds,
         setTimeFocus,
         setTimeFocusFraction,
         timeForFraction
@@ -187,6 +194,13 @@ type ZoomRecordingSelectionAction = {
 type SetFocusTimeRecordingSelectionAction = {
     type: 'setFocusTime',
     focusTimeSec: number,
+    shiftKey?: boolean
+    autoScrollVisibleTimeRange?: boolean
+}
+
+type SetFocusTimeIntervalRecordingSelectionAction = {
+    type: 'setFocusTimeInterval',
+    focusTimeIntervalSec: [number, number],
     autoScrollVisibleTimeRange?: boolean
 }
 
@@ -196,7 +210,7 @@ type SetSelectedElectrodeIdsRecordingSelectionAction = {
 }
 
 export type RecordingSelectionAction = InitializeRecordingSelectionTimesAction  | PanRecordingSelectionAction
-    | PanRecordingSelectionDeltaTAction | ZoomRecordingSelectionAction | SetFocusTimeRecordingSelectionAction | SetSelectedElectrodeIdsRecordingSelectionAction
+    | PanRecordingSelectionDeltaTAction | ZoomRecordingSelectionAction | SetFocusTimeRecordingSelectionAction | SetFocusTimeIntervalRecordingSelectionAction | SetSelectedElectrodeIdsRecordingSelectionAction
 
 export const recordingSelectionReducer = (state: RecordingSelection, action: RecordingSelectionAction): RecordingSelection => {
     if (action.type === 'initializeRecordingSelectionTimes') {
@@ -209,6 +223,8 @@ export const recordingSelectionReducer = (state: RecordingSelection, action: Rec
         return zoomTime(state, action)
     } else if (action.type === 'setFocusTime') {
         return setFocusTime(state, action)
+    } else if (action.type === 'setFocusTimeInterval') {
+        return setFocusTimeInterval(state, action)
     } else if (action.type === 'setSelectedElectrodeIds') {
         return setSelectedElectrodeIds(state, action)
     } else {
@@ -250,7 +266,8 @@ const panTimeHelper = (state: RecordingSelection, panDisplacementSeconds: number
     } else {
         return state
     }
-    const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
+    const keepFocus = true
+    // const keepFocus = state.focusTimeSeconds && state.focusTimeSeconds > newStart && state.focusTimeSeconds < newEnd
     const focus = keepFocus ? state.focusTimeSeconds : undefined
 
     // Avoid creating new object if we didn't actually change anything
@@ -325,14 +342,48 @@ const zoomTime = (state: RecordingSelection, action: ZoomRecordingSelectionActio
 }
 
 const setFocusTime = (state: RecordingSelection, action: SetFocusTimeRecordingSelectionAction): RecordingSelection => {
-    const {focusTimeSec, autoScrollVisibleTimeRange} = action
-    const newState = { ...state, focusTimeSeconds: focusTimeSec }
+    const {focusTimeSec, shiftKey, autoScrollVisibleTimeRange} = action
+    let newState: RecordingSelection = { ...state, focusTimeSeconds: focusTimeSec, focusTimeIntervalSeconds: undefined }
     if (autoScrollVisibleTimeRange) {
         if ((state.visibleTimeStartSeconds !== undefined) && (state.visibleTimeEndSeconds !== undefined)) {
             if ((focusTimeSec < state.visibleTimeStartSeconds) || (focusTimeSec > state.visibleTimeEndSeconds)) {
                 const span = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
                 newState.visibleTimeStartSeconds = focusTimeSec - span / 2
                 newState.visibleTimeEndSeconds = focusTimeSec + span / 2
+                if (newState.visibleTimeEndSeconds > (state.recordingEndTimeSeconds || 0)) {
+                    const delta = (state.recordingEndTimeSeconds || 0) - newState.visibleTimeEndSeconds
+                    newState.visibleTimeStartSeconds += delta
+                    newState.visibleTimeEndSeconds += delta
+                }
+                if (newState.visibleTimeStartSeconds < (state.recordingStartTimeSeconds || 0)) {
+                    const delta = (state.recordingStartTimeSeconds || 0) - newState.visibleTimeStartSeconds
+                    newState.visibleTimeStartSeconds += delta
+                    newState.visibleTimeEndSeconds += delta
+                }
+            }
+        }
+    }
+    if (shiftKey) {
+        const t0 = state.focusTimeSeconds
+        if (t0 !== undefined) {
+            const t1 = Math.min(t0, focusTimeSec)
+            const t2 = Math.max(t0, focusTimeSec)
+            newState = {...newState, focusTimeSeconds: state.focusTimeSeconds, focusTimeIntervalSeconds: [t1, t2]}
+        }
+    }
+    return selectionIsValid(newState) ? newState : state
+}
+
+const setFocusTimeInterval = (state: RecordingSelection, action: SetFocusTimeIntervalRecordingSelectionAction): RecordingSelection => {
+    const {focusTimeIntervalSec, autoScrollVisibleTimeRange} = action
+    let newState: RecordingSelection = { ...state, focusTimeIntervalSeconds: focusTimeIntervalSec }
+    if (autoScrollVisibleTimeRange) {
+        const t0 = (action.focusTimeIntervalSec[0] + action.focusTimeIntervalSec[1]) / 2
+        if ((state.visibleTimeStartSeconds !== undefined) && (state.visibleTimeEndSeconds !== undefined)) {
+            if ((t0 < state.visibleTimeStartSeconds) || (t0 > state.visibleTimeEndSeconds)) {
+                const span = state.visibleTimeEndSeconds - state.visibleTimeStartSeconds
+                newState.visibleTimeStartSeconds = t0 - span / 2
+                newState.visibleTimeEndSeconds = t0 + span / 2
                 if (newState.visibleTimeEndSeconds > (state.recordingEndTimeSeconds || 0)) {
                     const delta = (state.recordingEndTimeSeconds || 0) - newState.visibleTimeEndSeconds
                     newState.visibleTimeStartSeconds += delta

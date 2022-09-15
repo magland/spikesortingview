@@ -54,11 +54,11 @@ const useMouseLeaveHandler = (divRef: DivRef, clearPanState: () => void) => {
 }
 
 
-const useClickHandler = (divRef: DivRef, clickReader: ClickReader, setTimeFocusFraction: (fraction: number) => void) => {
+const useClickHandler = (divRef: DivRef, clickReader: ClickReader, setTimeFocusFraction: (fraction: number, opts: {event: React.MouseEvent}) => void) => {
     const handler = useCallback((e: React.MouseEvent) => {
         if (divExists(divRef)) {
             const {fraction} = clickReader(e)
-            setTimeFocusFraction(fraction)
+            setTimeFocusFraction(fraction, {event: e})
             setDivFocus(divRef)
         }
     }, [clickReader, setTimeFocusFraction, divRef])

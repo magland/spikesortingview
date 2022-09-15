@@ -1,4 +1,5 @@
 import { TiledImageComponent } from 'libraries/component-tiled-image';
+import { AnnotationsView } from 'libraries/view-annotations';
 import { AutocorrelogramsView } from 'libraries/view-autocorrelograms';
 import { AverageWaveformsView } from 'libraries/view-average-waveforms';
 import { CompositeView } from 'libraries/view-composite';
@@ -157,6 +158,9 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     }
     else if (data.type === 'Test1') {
         return <Test1View data={data} width={width} height={height} />
+    }
+    else if (data.type === 'Annotations') {
+        return <AnnotationsView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)
