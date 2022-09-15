@@ -5,9 +5,9 @@ import { TSVAxesLayerProps } from "./TSVAxesLayer";
 
 const highlightedRowFillStyle = '#c5e1ff' // TODO: This should be standardized across the application
 
-export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': Set<number | string>}) => {
+export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderingContext2D, props: TSVAxesLayerProps<T> & {'selectedPanelKeys': Set<number | string>, showYMinMaxLabels: boolean}) => {
     // I've left the timeRange in the props list since we will probably want to display something with it at some point
-    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, yTickSet, timeTicks, hideTimeAxis} = props
+    const {width, height, margins, panels, panelHeight, perPanelOffset, selectedPanelKeys, yTickSet, timeTicks, hideTimeAxis, showYMinMaxLabels} = props
     context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
     const xAxisVerticalPosition = height - margins.bottom
@@ -16,30 +16,30 @@ export const paintAxes = <T extends {[key: string]: any}>(context: CanvasRenderi
         context.strokeStyle = 'black'
         drawLine(context, margins.left, xAxisVerticalPosition, width - margins.right, xAxisVerticalPosition)
     }
-    yTickSet && paintYTicks(context, yTickSet, xAxisVerticalPosition, margins.left, width - margins.right, margins.top)
+    yTickSet && paintYTicks(context, yTickSet, xAxisVerticalPosition, margins.left, width - margins.right, margins.top, showYMinMaxLabels)
     paintPanelHighlights(context, panels, selectedPanelKeys, margins.top, width, perPanelOffset, panelHeight)
     paintPanelLabels(context, panels, margins.left, margins.top, perPanelOffset, panelHeight)
 }
 
-const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisYCoordinate: number, yAxisXCoordinate: number, plotRightPx: number, topMargin: number) => {
+const paintYTicks = (context: CanvasRenderingContext2D, tickSet: TickSet, xAxisYCoordinate: number, yAxisXCoordinate: number, plotRightPx: number, topMargin: number, showYMinMaxLabels: boolean) => {
     const labelOffsetFromGridline = 2
     const gridlineLeftEdge = yAxisXCoordinate - 5
     const labelRightEdge = gridlineLeftEdge - labelOffsetFromGridline
-    // const { datamax, datamin, ticks } = tickSet
-    const { ticks } = tickSet
+    const { datamax, datamin, ticks } = tickSet
     context.fillStyle = 'black'
     context.textAlign = 'right'
 
-    // We no longer show the min/max labels
+    if (showYMinMaxLabels) {
         // Range-end labels
-        // const stringMax = datamax.toString()
-        // const printMax = stringMax.substring(0, 5).search(".") === -1 ? 5 : 6
-        // const stringMin = datamin.toString()
-        // const printMin = stringMin.substring(0, 5).search(".") === -1 ? 5 : 6
-        // context.textBaseline = 'bottom'
-        // context.fillText(stringMax.substring(0, printMax), labelRightEdge, topMargin)
-        // context.textBaseline = 'top'
-        // context.fillText(datamin.toString().substring(0, printMin), labelRightEdge, xAxisYCoordinate)
+        const stringMax = datamax.toString()
+        const printMax = stringMax.substring(0, 5).search(".") === -1 ? 5 : 6
+        const stringMin = datamin.toString()
+        const printMin = stringMin.substring(0, 5).search(".") === -1 ? 5 : 6
+        context.textBaseline = 'bottom'
+        context.fillText(stringMax.substring(0, printMax), labelRightEdge, topMargin)
+        context.textBaseline = 'top'
+        context.fillText(datamin.toString().substring(0, printMin), labelRightEdge, xAxisYCoordinate)
+    }
 
     context.textBaseline = 'middle'
     ticks.forEach(tick => {

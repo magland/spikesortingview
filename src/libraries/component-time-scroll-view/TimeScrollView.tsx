@@ -38,6 +38,7 @@ type TimeScrollViewProps<T extends {[key: string]: any}> = {
     optionalActions?: OptionalToolbarActions
     timeseriesLayoutOpts?: TimeseriesLayoutOpts
     yTickSet?: TickSet
+    showYMinMaxLabels?: boolean
 }
 
 const emptyPanelSelection = new Set<number | string>()
@@ -50,7 +51,7 @@ const emptyPanelSelection = new Set<number | string>()
 // expects to consume, since the code will successfully infer that this is a FunctionComponent that
 // takes a TimeScrollViewProps.
 const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewProps<T>) => {
-    const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActions, timeseriesLayoutOpts, highlightSpans, yTickSet } = props
+    const { margins, panels, panelSpacing, selectedPanelKeys, width, height, optionalActions, timeseriesLayoutOpts, highlightSpans, yTickSet, showYMinMaxLabels } = props
     const { hideToolbar, hideTimeAxis } = timeseriesLayoutOpts || {}
     const divRef = useRef<HTMLDivElement | null>(null)
     
@@ -97,10 +98,11 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeTicks={timeTicks}
                 yTickSet={yTickSet}
                 margins={definedMargins}
-                hideTimeAxis={hideTimeAxis} 
+                hideTimeAxis={hideTimeAxis}
+                showYMinMaxLabels={showYMinMaxLabels}
             />)
     }, [effectiveWidth, height, panels, panelHeight, perPanelOffset, selectedPanelKeys,
-        timeRange, timeTicks, yTickSet, definedMargins, hideTimeAxis])
+        timeRange, timeTicks, yTickSet, definedMargins, hideTimeAxis, showYMinMaxLabels])
 
     const mainLayer = useMemo(() => {
         return (
