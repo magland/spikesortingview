@@ -105,3 +105,24 @@ The entry point to the project is [src/index.tsx](./src/index.tsx) which imports
 ## Create-React-App
 
 This project was created by [Create-React-App](https://create-react-app.dev/) which manages the project configuration, including the Webpack configuration. The developer will be saved from a very large number of headaches, so we should do whatever we can to avoid [ejecting](https://stackoverflow.com/questions/48308936/what-does-this-react-scripts-eject-command-do).
+
+## Deploying the HTML bundle
+
+While developing locally is a lovely experience, eventually you will want others to see what you have created. This is just a matter of (a) building the bundle and (b) uploading it to a Google Cloud Storage Bucket. An example script for doing this is [devel/deploy.sh](./devel/deploy.sh). In fact this is the script used to deploy the production version (you need to have permission to upload to that bucket). When you want someone to see some changes you have made, you will probably want to upload to a different bucket, or to a different target directory in the production bucket. Then, when you share the URL, just be sure to redefine the `v` query parameter to point to your bundle.
+
+## Creating a new View
+
+Here, we'll assume you are creating a new view called Starlight.
+
+1. Create a new folder in [src/libraries](./src/libraries) named `view-starlight`.
+1. Create three files in this folder: `index.ts`, `StarlightViewData.ts`, and `StarlightView.tsx`.
+1. Define the data spec and the functionality for your view component. To get started, use [src/libraries/view-console/](./src/libraries/view-console) as an example/template.
+1. Add your view to [src/ViewData.ts](./src/ViewData.ts) and [src/View.tsx](./src/View.tsx).
+
+To test this out, you'll need to generate a figURL from a Python script. Make a copy of [devel/dev_example.py](./devel/dev_example.py) and modify it to reflect your new View (you'll at least need to change the 'type' variable).
+
+When you run the script, you'll get a figURL printed in the terminal. If you open that in the browser, you'll see an error message, because the cloud HTML bundle does not yet include your new view. Change the `v` query parameter in the URL to point to your local development server (`http://localhost:3000`) and you should be able to see your new view in action.
+
+Once you have developed and tested your new view, you can incorporate it into the project by making pull requests to this repo and to the sortingview repo. On the sortingview side, you'll need to add your View class to the `sortingview/views` folder and edit `__init__.py` in that folder.
+
+Congratulations, you have contributed a View to spikesortingview!
