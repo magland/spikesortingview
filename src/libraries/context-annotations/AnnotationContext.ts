@@ -7,6 +7,11 @@ export type Annotation = {
     annotationId: string
     label: string
     timeSec: number
+} | {
+    type: 'time-interval'
+    annotationId: string
+    label: string
+    timeIntervalSec: [number, number]
 }
 
 export type AnnotationState = {

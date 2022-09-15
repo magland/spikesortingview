@@ -67,7 +67,7 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
     const perPanelOffset = panelHeight + panelSpacing
 
     const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds, definedMargins.left)
-    const focusTimeInPixels = useFocusTimeInPixels(timeToPixelMatrix)
+    const {focusTimeInPixels, focusTimeIntervalInPixels} = useFocusTimeInPixels(timeToPixelMatrix)
 
     const timeTicks = useTimeTicks(visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix)
 
@@ -138,22 +138,34 @@ const TimeScrollView = <T extends {[key: string]: any}> (props: TimeScrollViewPr
                 timeRange={timeRange}
                 margins={definedMargins}
                 focusTimePixels={focusTimeInPixels}
+                focusTimeIntervalPixels={focusTimeIntervalInPixels}
             />
         )
-    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels])
+    }, [effectiveWidth, height, timeRange, definedMargins, focusTimeInPixels, focusTimeIntervalInPixels])
 
     const {annotations} = useAnnotations()
     const annotationLayer = useMemo(() => {
-        const pixelTimepointAnnotations = annotations.filter(x => (x.type === 'timepoint')).map(x => ({
-            pixelTime: convert1dDataSeries([x.timeSec], timeToPixelMatrix)[0],
-            annotation: x
-        }))
+        const pixelTimepointAnnotations = annotations.filter(x => (x.type === 'timepoint')).map(x => {
+            if (x.type !== 'timepoint') throw Error('Unexpected')
+            return {
+                pixelTime: convert1dDataSeries([x.timeSec], timeToPixelMatrix)[0],
+                annotation: x
+            }
+        })
+        const pixelTimeIntervalAnnotations = annotations.filter(x => (x.type === 'time-interval')).map(x => {
+            if (x.type !== 'time-interval') throw Error('Unexpected')
+            return {
+                pixelTimeInterval: convert1dDataSeries(x.timeIntervalSec, timeToPixelMatrix) as [number, number],
+                annotation: x
+            }
+        })
         return (
             <TSVAnnotationLayer
                 width={effectiveWidth}
                 height={height}
                 timeRange={timeRange}
                 pixelTimepointAnnotations={pixelTimepointAnnotations}
+                pixelTimeIntervalAnnotations={pixelTimeIntervalAnnotations}
                 margins={definedMargins}
             />
         )
