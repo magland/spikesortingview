@@ -12,7 +12,7 @@ https://figurl.org/f?v=gs://figurl/spikesortingview-8&d=sha1://1e667e92ee3be76c8
 
 The `d` query parameter points to the data object, and the `v` query parameter points to the HTML bundle in the cloud, which is the compiled version of this project.
 
-When the visualizations in this package are improved, a new HTML bundle is generated and uploaded to the cloud bucket. If there are no breaking changes to the data spec, then it overwrites the existing bundle, and all visualizations (past, present, and future) will point to the improved view. However, if there are breaking changes, then a new version should be created, for example `gs://figurl/spikesortingview-8` becomes `gs://figurl/spikesortingview-9`. The sortingview Python package should then be updated to conform with the new data spec and to point to the new version of the HTML bundle.
+When the visualizations in this package are improved, a new HTML bundle is generated and uploaded to the cloud bucket. If there are no breaking changes to the data spec, the developer should not increment the deploy version so that it overwrites the existing bundle, and all visualizations (past, present, and future) will point to the improved view. However, if there are breaking changes, then a new version should be created, for example `gs://figurl/spikesortingview-8` becomes `gs://figurl/spikesortingview-9`. The sortingview Python package should then be updated to conform with the new data spec and to point to the new version of the HTML bundle.
 
 For a more in-depth description of how figurl works, see the [figurl docs](https://github.com/flatironinstitute/figurl).
 
