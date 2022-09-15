@@ -50,7 +50,7 @@ const TSVAnnotationLayer = (props: TSVAnnotationLayerProps) => {
             context.lineTo(t, context.canvas.height - margins.bottom)
             context.stroke()
         }
-    }, [margins, pixelTimepointAnnotations])
+    }, [margins, pixelTimepointAnnotations, pixelTimeIntervalAnnotations])
 
     return (
         <BaseCanvas
