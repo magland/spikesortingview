@@ -1,6 +1,9 @@
 import { isEqualTo, isNumber, optional, validateObject } from "libraries/util-validate-object"
 import { isString } from "mathjs"
 
+type LegendOpts = {
+    location: 'northwest' | 'northeast'
+}
 
 type Dataset = {
     name: string
@@ -10,6 +13,7 @@ type Dataset = {
 type Series = {
     type: string
     dataset: string
+    title?: string
     encoding: {[key: string]: any}
     attributes: {[key: string]: any}
 }
@@ -19,6 +23,7 @@ export type TimeseriesGraphViewData = {
     datasets: Dataset[],
     series: Series[]
     timeOffset?: number
+    legendOpts?: LegendOpts
 }
 
 export const isTimeseriesGraphViewData = (x: any): x is TimeseriesGraphViewData => {
@@ -32,8 +37,12 @@ export const isTimeseriesGraphViewData = (x: any): x is TimeseriesGraphViewData 
             type: isString,
             dataset: isString,
             encoding: () => (true),
-            attributes: () => (true)
+            attributes: () => (true),
+            title: optional(isString)
         })),
-        timeOffset: optional(isNumber)
+        timeOffset: optional(isNumber),
+        legendOpts: optional((y: any) => validateObject(y, {
+            location: isString
+        }))
     }, {allowAdditionalFields: true})
 }
