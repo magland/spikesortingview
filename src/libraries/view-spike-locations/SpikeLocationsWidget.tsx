@@ -1,5 +1,5 @@
-import { BaseCanvas } from 'libraries/figurl-canvas'
-import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'libraries/figurl-canvas'
+import { BaseCanvas } from '@figurl/figurl-canvas'
+import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from '@figurl/figurl-canvas'
 import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/view-average-waveforms'
 import { useSelectedElectrodes } from 'libraries/context-recording-selection'
 import { colorForUnitId } from 'libraries/util-unit-colors'

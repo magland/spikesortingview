@@ -1,4 +1,4 @@
-import { BaseCanvas } from 'libraries/figurl-canvas';
+import { BaseCanvas } from '@figurl/figurl-canvas';
 import React, { useMemo } from 'react';
 
 export type TSVCursorLayerProps = {

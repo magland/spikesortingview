@@ -1,6 +1,6 @@
 import { useSelectedElectrodes } from 'libraries/context-recording-selection'
-import { BaseCanvas } from 'libraries/figurl-canvas'
-import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'libraries/figurl-canvas'
+import { BaseCanvas } from '@figurl/figurl-canvas'
+import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from '@figurl/figurl-canvas'
 import { colorForUnitId } from 'libraries/util-unit-colors'
 import { idToNum, useSelectedUnitIds } from 'libraries/context-unit-selection'
 import { useCallback, useMemo } from 'react'

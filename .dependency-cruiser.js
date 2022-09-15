@@ -89,7 +89,7 @@ module.exports = {
             rankdir: "LR",
             splines: "ortho", // true or ortho (ortho takes a while for large jobs)
             fontsize: "14",
-            ordering: "out" // see https://github.com/sverweij/dependency-cruiser/issues/659#issuecomment-1241100514
+            ordering: "" // see https://github.com/sverweij/dependency-cruiser/issues/659#issuecomment-1241100514
           },
           modules: [
             {

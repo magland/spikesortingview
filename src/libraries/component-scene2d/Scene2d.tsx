@@ -1,4 +1,4 @@
-import { BaseCanvas, pointInRect, RectangularRegion, Vec4 } from "libraries/figurl-canvas";
+import { BaseCanvas, pointInRect, RectangularRegion, Vec4 } from "@figurl/figurl-canvas";
 import { dragSelectReducer } from "libraries/util-drag-select";
 import { randomAlphaString } from "libraries/util-random-string";
 import React, { FunctionComponent, useCallback, useEffect, useReducer, useState } from "react";

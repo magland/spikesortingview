@@ -1,0 +1,24 @@
+{
+  "name": "@figurl/figurl-canvas",
+  "version": "0.1.5",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist/**/*", "src/**/*"],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "keywords": [],
+  "author": "Jeremy Magland",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/react": "^18.0.20",
+    "typescript": "^4.8.3"
+  },
+  "dependencies": {
+    "mathjs": "^11.2.1",
+    "react": "^18.2.0"
+  }
+}

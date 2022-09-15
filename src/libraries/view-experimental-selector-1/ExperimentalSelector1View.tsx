@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core';
-import { Hyperlink } from 'libraries/component-hyperlink';
+import { Hyperlink } from '@figurl/component-hyperlink';
 import { NiceTable } from 'libraries/component-nice-table';
 import { NiceTableColumn, NiceTableRow } from 'libraries/component-nice-table/NiceTable';
 import { useRecordingSelection } from 'libraries/context-recording-selection';

@@ -1,5 +1,5 @@
-import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from 'libraries/figurl-canvas'
-import { Margins } from 'libraries/figurl-canvas'
+import { TwoDTransformProps, use2DTransformationMatrix, useAspectTrimming } from '@figurl/figurl-canvas'
+import { Margins } from '@figurl/figurl-canvas'
 import { useRecordingSelectionTimeInitialization, useTimeFocus } from 'libraries/context-recording-selection'
 import { matrix, Matrix, multiply, transpose } from 'mathjs'
 import React, { FunctionComponent, useCallback, useEffect, useMemo } from "react"

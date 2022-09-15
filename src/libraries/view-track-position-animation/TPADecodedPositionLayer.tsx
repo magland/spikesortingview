@@ -1,4 +1,4 @@
-import { BaseCanvas, DrawFn } from 'libraries/figurl-canvas'
+import { BaseCanvas, DrawFn } from '@figurl/figurl-canvas'
 import { FunctionComponent, useCallback } from 'react'
 import { inferno, magma, plasma, viridis } from 'scale-color-perceptual'
 import { DecodedPositionFramePx } from './TrackPositionAnimationTypes'

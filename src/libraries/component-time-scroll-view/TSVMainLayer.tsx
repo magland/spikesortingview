@@ -1,4 +1,4 @@
-import { BaseCanvas } from 'libraries/figurl-canvas';
+import { BaseCanvas } from '@figurl/figurl-canvas';
 import { useMemo } from 'react';
 import { TimeScrollViewPanel } from './TimeScrollView';
 

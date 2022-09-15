@@ -1,4 +1,4 @@
-import { Vec2, Vec4 } from "libraries/figurl-canvas"
+import { Vec2, Vec4 } from "@figurl/figurl-canvas"
 
 export type DragSelectState = {
     isActive?: boolean,  // whether we are in an active dragging state
