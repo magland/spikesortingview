@@ -43,7 +43,7 @@ const TSVAnnotationLayer = (props: TSVAnnotationLayerProps) => {
         for (let x of pixelTimepointAnnotations) {
             // at some point, we may want to do something with the annotation label
             const t = x.pixelTime
-            context.strokeStyle = 'rgb(240, 200, 100)'
+            context.strokeStyle = 'rgb(200, 250, 0)'
             context.lineWidth = 3.5
             context.beginPath()
             context.moveTo(t, margins.top)
