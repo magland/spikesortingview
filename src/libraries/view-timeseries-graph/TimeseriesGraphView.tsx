@@ -79,6 +79,7 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
         const entryFontSize = 12
         const symbolWidth = 50
         const legendWidth = 200
+        const margin = 10
         const legendHeight = 20 + seriesToInclude.length * entryHeight
         const R = location === 'northwest' ? {x: 20, y: 20, w: legendWidth, h: legendHeight} :
                   location === 'northeast' ? {x: panelWidth - legendWidth - 20, y: 20, w: legendWidth, h: legendHeight} : undefined
@@ -89,40 +90,37 @@ const TimeseriesGraphView: FunctionComponent<Props> = ({data, timeseriesLayoutOp
         context.fillRect(R.x, R.y, R.w, R.h)
         context.strokeRect(R.x, R.y, R.w, R.h)
 
-        for (let i = 0; i < seriesToInclude.length; i++) {
-            const y0 = R.y + 10 + i * entryHeight
-            const s = seriesToInclude[i]
-            if (s.title) {
-                const symbolRect = {x: R.x + 10, y: y0, w: symbolWidth, h: entryHeight}
-                const titleRect = {x: R.x + 10 + symbolWidth + 10, y: y0, w: legendWidth - 10 - 10 - symbolWidth - 10, h: entryHeight}
-                const title = s.title || 'untitled'
-                context.fillStyle = 'black'
-                context.font = `${entryFontSize}px Arial`
-                context.fillText(title, titleRect.x, titleRect.y + titleRect.h / 2 + entryFontSize / 2)
-                if (s.type === 'line') {
-                    applyLineAttributes(context, s.attributes)
+        seriesToInclude.forEach((s, i) => {
+            const y0 = R.y + margin + i * entryHeight
+            const symbolRect = {x: R.x + margin, y: y0, w: symbolWidth, h: entryHeight}
+            const titleRect = {x: R.x + margin + symbolWidth + margin, y: y0, w: legendWidth - margin - margin - symbolWidth - margin, h: entryHeight}
+            const title = s.title || 'untitled'
+            context.fillStyle = 'black'
+            context.font = `${entryFontSize}px Arial`
+            context.fillText(title, titleRect.x, titleRect.y + titleRect.h / 2 + entryFontSize / 2)
+            if (s.type === 'line') {
+                applyLineAttributes(context, s.attributes)
+                context.beginPath()
+                context.moveTo(symbolRect.x, symbolRect.y + symbolRect.h / 2)
+                context.lineTo(symbolRect.x + symbolRect.w, symbolRect.y + symbolRect.h / 2)
+                context.stroke()
+                context.setLineDash([])
+            }
+            else if (s.type === 'marker') {
+                applyMarkerAttributes(context, s.attributes)
+                const radius = entryHeight * 0.3
+                const shape = s.attributes['shape'] ?? 'circle'
+                const center = {x: symbolRect.x + symbolRect.w / 2, y: symbolRect.y + symbolRect.h / 2}
+                if (shape === 'circle') {
                     context.beginPath()
-                    context.moveTo(symbolRect.x, symbolRect.y + symbolRect.h / 2)
-                    context.lineTo(symbolRect.x + symbolRect.w, symbolRect.y + symbolRect.h / 2)
-                    context.stroke()
-                    context.setLineDash([])
+                    context.ellipse(center.x, center.y, radius, radius, 0, 0, 2 * Math.PI)
+                    context.fill()
                 }
-                else if (s.type === 'marker') {
-                    applyMarkerAttributes(context, s.attributes)
-                    const radius = entryHeight * 0.3
-                    const shape = s.attributes['shape'] ?? 'circle'
-                    const center = {x: symbolRect.x + symbolRect.w / 2, y: symbolRect.y + symbolRect.h / 2}
-                    if (shape === 'circle') {
-                        context.beginPath()
-                        context.ellipse(center.x, center.y, radius, radius, 0, 0, 2 * Math.PI)
-                        context.fill()
-                    }
-                    else if (shape === 'square') {
-                        context.fillRect(center.x - radius, center.y - radius, radius * 2, radius * 2)
-                    }
+                else if (shape === 'square') {
+                    context.fillRect(center.x - radius, center.y - radius, radius * 2, radius * 2)
                 }
             }
-        }
+        })
     }, [legendOpts, series, panelWidth])
 
     // We need to have the panelHeight before we can use it in the paint function.
