@@ -1,5 +1,6 @@
 import { isTiledImageData, TiledImageData } from 'libraries/component-tiled-image'
 import { isOneOf } from 'libraries/util-validate-object'
+import { AnnotationsViewData, isAnnotationsViewData } from 'libraries/view-annotations'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/view-autocorrelograms"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"
 import { CompositeViewData, isCompositeViewData } from "libraries/view-composite"
@@ -71,7 +72,8 @@ export type ViewData =
     MainLayoutViewData |
     ExperimentalSelector1ViewData |
     TimeseriesGraphViewData |
-    Test1ViewData
+    Test1ViewData |
+    AnnotationsViewData
 
 export const isViewData = (x: any): x is ViewData => {
     return isOneOf([
@@ -110,6 +112,7 @@ export const isViewData = (x: any): x is ViewData => {
         isMainLayoutViewData,
         isExperimentalSelector1ViewData,
         isTimeseriesGraphViewData,
-        isTest1ViewData
+        isTest1ViewData,
+        isAnnotationsViewData
     ])(x)
 }

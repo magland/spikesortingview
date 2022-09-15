@@ -1,7 +1,7 @@
 import { useTimeFocus } from 'libraries/context-recording-selection';
+import { convert1dDataSeries } from 'libraries/util-point-projection';
 import { Matrix } from 'mathjs';
 import { useMemo } from 'react';
-import { convert1dDataSeries } from 'libraries/util-point-projection';
 import { TimeseriesLayoutOpts } from 'View';
 
 type PartialMargins = {
@@ -74,10 +74,11 @@ export const usePanelDimensions = (width: number, height: number, panelCount: nu
 }
 
 export const useFocusTimeInPixels = (timeToPixelMatrix: Matrix) => {
-    const {focusTime} = useTimeFocus()
+    const {focusTime, focusTimeIsVisible} = useTimeFocus()
     const pixelTime = useMemo(() => {
-        if (focusTime === undefined) return undefined
-        return convert1dDataSeries([focusTime], timeToPixelMatrix)[0]
-    }, [timeToPixelMatrix, focusTime])
+        return (focusTime !== undefined && focusTimeIsVisible)
+            ? convert1dDataSeries([focusTime], timeToPixelMatrix)[0]
+            : undefined
+    }, [timeToPixelMatrix, focusTime, focusTimeIsVisible])
     return pixelTime
 }

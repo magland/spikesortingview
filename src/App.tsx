@@ -8,6 +8,7 @@ import './localStyles.css';
 import theme from './theme';
 import View from './View';
 import { isViewData, ViewData } from './ViewData';
+import { SetupAnnotations } from 'libraries/context-annotations';
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())
@@ -56,14 +57,16 @@ function App() {
     <MuiThemeProvider theme={theme}>
       <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
         <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
-          <SetupUrlState>
-            <View
-              data={data}
-              opts={opts}
-              width={width - 10}
-              height={height - 5}
-            />
-          </SetupUrlState>
+          <SetupAnnotations>
+            <SetupUrlState>
+              <View
+                data={data}
+                opts={opts}
+                width={width - 10}
+                height={height - 5}
+              />
+            </SetupUrlState>
+          </SetupAnnotations>
         </UnitSelectionContext.Provider>
       </RecordingSelectionContext.Provider>
     </MuiThemeProvider>
