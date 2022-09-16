@@ -4,8 +4,8 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
-    "@figurl/component-hyperlink": "0.1.2",
-    "@figurl/figurl-canvas": "0.1.5",
+    "@figurl/component-hyperlink": "0.1.3",
+    "@figurl/figurl-canvas": "0.1.6",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-regular-svg-icons": "^6.1.2",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
