@@ -1,10 +1,10 @@
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';
-import { PGPlot, PlotGrid } from '../component-plot-grid';
-import { Splitter } from '../component-splitter';
-import { colorForUnitId } from '../util-unit-colors';
+import { PGPlot, PlotGrid } from '@figurl/core-components';
+import { Splitter } from '@figurl/core-components';
+import { colorForUnitId } from '@figurl/core-utils';
 import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '../context-unit-selection';
-import { VerticalScrollView } from '../component-vertical-scroll-view';
+import { VerticalScrollView } from '@figurl/core-components';
 import { defaultUnitsTableBottomToolbarOptions, ToolbarItem, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions, ViewToolbar } from '../ViewToolbar';
 import { AutocorrelogramsViewData } from './AutocorrelogramsViewData';
 import CorrelogramPlot from './CorrelogramPlot';

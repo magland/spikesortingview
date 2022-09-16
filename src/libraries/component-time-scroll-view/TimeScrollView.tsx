@@ -1,4 +1,4 @@
-import { Splitter } from 'libraries/component-splitter';
+import { Splitter } from '@figurl/core-components';
 import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view';
 import { useAnnotations } from 'libraries/context-annotations';
 import { useTimeRange } from 'libraries/context-recording-selection';

@@ -1,4 +1,4 @@
-import { Splitter } from "libraries/component-splitter"
+import { Splitter } from "@figurl/core-components"
 import { ViewComponentProps } from "libraries/core-view-component-props"
 import { FunctionComponent, useMemo } from "react"
 import { computeSizes } from "./BoxLayoutItemView"

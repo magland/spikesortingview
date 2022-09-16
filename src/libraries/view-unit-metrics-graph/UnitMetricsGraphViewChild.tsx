@@ -1,8 +1,8 @@
 import { useUnitMetricSelection } from 'libraries/context-unit-metrics-selection';
-import { PGPlot, PlotGrid } from 'libraries/component-plot-grid';
-import { Splitter } from 'libraries/component-splitter';
+import { PGPlot, PlotGrid } from '@figurl/core-components';
+import { Splitter } from '@figurl/core-components';
 import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from 'libraries/context-unit-selection';
-import { VerticalScrollView } from 'libraries/component-vertical-scroll-view';
+import { VerticalScrollView } from '@figurl/core-components';
 import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa';

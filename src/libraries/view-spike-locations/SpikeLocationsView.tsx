@@ -4,7 +4,7 @@ import { useLocalSelectedUnitIds } from 'libraries/SelectUnitsWidget'
 import { UnitsTableBottomToolbar, defaultUnitsTableBottomToolbarOptions, UnitsTableBottomToolbarOptions } from 'libraries/ViewToolbar'
 import { SpikeLocationsViewData } from './SpikeLocationsViewData'
 import SpikeLocationsWidget from './SpikeLocationsWidget'
-import { Splitter } from 'libraries/component-splitter'
+import { Splitter } from '@figurl/core-components'
 import { computeElectrodesFromIdsAndLocations } from 'libraries/view-average-waveforms'
 
 type Props = {

@@ -1,4 +1,4 @@
-import { getFileData, useUrlState } from "libraries/figurl";
+import { getFileData, useUrlState } from "@figurl/interface";
 import { FunctionComponent, PropsWithChildren, useEffect, useMemo, useReducer, useRef } from "react";
 import AnnotationsContext, { annotationReducer, defaultAnnotationState } from "./AnnotationContext";
 

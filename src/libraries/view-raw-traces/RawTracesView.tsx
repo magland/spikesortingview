@@ -1,4 +1,4 @@
-import { getFileData } from 'libraries/figurl'
+import { getFileData } from '@figurl/interface'
 import { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import RawTracesComponent from './RawTracesComponent'

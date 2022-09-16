@@ -4,6 +4,9 @@
   "private": true,
   "homepage": "./",
   "dependencies": {
+    "@figurl/core-components": "magland/figurl-core-components.git#0.1.1",
+    "@figurl/core-utils": "magland/figurl-core-utils.git#0.1.0",
+    "@figurl/interface": "magland/figurl-interface.git#0.1.1",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-regular-svg-icons": "^6.1.2",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",

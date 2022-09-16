@@ -1,4 +1,4 @@
-import { useUrlState } from 'libraries/figurl'
+import { useUrlState } from '@figurl/interface'
 import React, { useCallback } from 'react'
 import { AnimationState, AnimationStateAction } from 'libraries/util-animation'
 

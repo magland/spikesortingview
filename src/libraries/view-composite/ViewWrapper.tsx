@@ -1,4 +1,4 @@
-import { useFileData } from 'libraries/figurl';
+import { useFileData } from '@figurl/interface';
 import { FunctionComponent, useEffect, useMemo, useState } from 'react';
 import { ViewComponentProps } from 'libraries/core-view-component-props';
 

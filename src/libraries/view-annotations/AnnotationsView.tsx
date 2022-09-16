@@ -1,11 +1,11 @@
 import { Button } from '@material-ui/core';
-import { Hyperlink } from 'libraries/component-hyperlink';
-import { NiceTable } from 'libraries/component-nice-table';
-import { NiceTableColumn, NiceTableRow } from 'libraries/component-nice-table';
+import { Hyperlink } from '@figurl/core-components';
+import { NiceTable } from '@figurl/core-components';
+import { NiceTableColumn, NiceTableRow } from '@figurl/core-components';
 import { useAnnotations } from 'libraries/context-annotations';
 import { useRecordingSelection } from 'libraries/context-recording-selection';
-import { useUrlState } from 'libraries/figurl';
-import { storeFileData } from 'libraries/figurl';
+import { useUrlState } from '@figurl/interface';
+import { storeFileData } from '@figurl/interface';
 import { JSONStringifyDeterministic } from 'libraries/MountainWorkspace';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { AnnotationsViewData } from './AnnotationsViewData';

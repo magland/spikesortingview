@@ -1,5 +1,5 @@
 import { SortingCuration } from 'libraries/context-sorting-curation';
-import { colorForUnitId } from 'libraries/util-unit-colors';
+import { colorForUnitId } from '@figurl/core-utils';
 import { FunctionComponent } from "react";
 import './SortableTableWidget.css';
 

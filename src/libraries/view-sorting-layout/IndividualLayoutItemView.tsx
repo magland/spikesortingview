@@ -1,6 +1,6 @@
-import { useFileData } from "libraries/figurl";
+import { useFileData } from "@figurl/interface";
 import { FunctionComponent, useEffect, useMemo, useState } from "react";
-import { ProgressComponent } from "libraries/component-progress";
+import { ProgressComponent } from "@figurl/core-components";
 import { LayoutItem, SLView } from "./SortingLayoutViewData";
 import { ViewComponentProps } from "libraries/core-view-component-props";
 

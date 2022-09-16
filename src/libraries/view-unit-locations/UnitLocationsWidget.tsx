@@ -1,12 +1,12 @@
 import { useSelectedElectrodes } from 'libraries/context-recording-selection'
-import { BaseCanvas } from 'libraries/figurl-canvas'
-import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from 'libraries/figurl-canvas'
-import { colorForUnitId } from 'libraries/util-unit-colors'
+import { BaseCanvas } from '@figurl/core-components'
+import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from '@figurl/core-components'
+import { colorForUnitId } from '@figurl/core-utils'
 import { idToNum, useSelectedUnitIds } from 'libraries/context-unit-selection'
 import { useCallback, useMemo } from 'react'
 import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform } from 'libraries/view-unit-similarity-matrix'
 import { useWheelZoom } from 'libraries/view-unit-similarity-matrix'
-import { useDragSelectLayer } from 'libraries/util-drag-select'
+import { useDragSelectLayer } from '@figurl/core-utils'
 import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/view-average-waveforms'
 
 export const defaultMaxPixelRadius = 25

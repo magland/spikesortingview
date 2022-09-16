@@ -3,11 +3,11 @@ import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 're
 import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
 import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries'
-import { colorForUnitId } from 'libraries/util-unit-colors'
+import { colorForUnitId } from '@figurl/core-utils'
 import { TimeScrollView } from 'libraries/component-time-scroll-view'
 import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
 import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
-import { useFetchCache } from 'libraries/util-use-fetch-cache'
+import { useFetchCache } from '@figurl/core-utils'
 
 type Props = {
     startTimeSec: number

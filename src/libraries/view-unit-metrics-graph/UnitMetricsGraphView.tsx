@@ -1,5 +1,5 @@
 import { useUnitMetricSelection } from 'libraries/context-unit-metrics-selection';
-import {Splitter} from 'libraries/component-splitter';
+import {Splitter} from '@figurl/core-components';
 import { FunctionComponent, useEffect } from 'react';
 import UnitMetricSelectionWidget from './UnitMetricSelectionWidget';
 import UnitMetricsGraphViewChild from './UnitMetricsGraphViewChild';

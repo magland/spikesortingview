@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isEqualTo, isNumber, isOneOf, isString, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/core-utils"
+import { isArrayOf, isEqualTo, isNumber, isOneOf, isString, optional } from "@figurl/core-utils"
 
 export type UnitSimilarityMatrixViewData = {
     type: 'UnitSimilarityMatrix'

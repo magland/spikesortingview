@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isEqualTo } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/core-utils"
+import { isEqualTo } from "@figurl/core-utils"
 
 export type SortingSelectionViewData = {
     type: 'SortingSelection'

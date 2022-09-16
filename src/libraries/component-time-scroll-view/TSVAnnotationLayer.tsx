@@ -1,5 +1,5 @@
 import { Annotation } from 'libraries/context-annotations';
-import { BaseCanvas } from 'libraries/figurl-canvas';
+import { BaseCanvas } from '@figurl/core-components';
 import { useCallback } from 'react';
 
 type PixelTimepointAnnotation = {

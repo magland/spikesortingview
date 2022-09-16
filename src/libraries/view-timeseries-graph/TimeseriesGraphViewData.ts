@@ -1,4 +1,4 @@
-import { isEqualTo, isNumber, optional, validateObject } from "libraries/util-validate-object"
+import { isEqualTo, isNumber, optional, validateObject } from "@figurl/core-utils"
 import { isString } from "mathjs"
 
 type LegendOpts = {

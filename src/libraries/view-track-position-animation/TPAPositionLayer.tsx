@@ -1,4 +1,4 @@
-import { BaseCanvas } from "libraries/figurl-canvas"
+import { BaseCanvas } from "@figurl/core-components"
 import { cos, sin } from "mathjs"
 import { FunctionComponent } from "react"
 import { PositionFrame } from "./TrackPositionAnimationTypes"

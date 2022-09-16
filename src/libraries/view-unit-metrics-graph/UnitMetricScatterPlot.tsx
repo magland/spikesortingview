@@ -1,7 +1,7 @@
-import { colorForUnitId } from "libraries/util-unit-colors";
+import { colorForUnitId } from "@figurl/core-utils";
 import { idToNum } from "libraries/context-unit-selection";
 import { FunctionComponent, useCallback, useMemo } from "react";
-import { ScatterPlot, ScatterPlotMarker } from 'libraries/component-scatter-plot';
+import { ScatterPlot, ScatterPlotMarker } from '@figurl/core-components';
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";
 
 export type UnitMetricScatterPlotProps = {

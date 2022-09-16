@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isEqualTo, isNumber, isOneOf, isString } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/core-utils"
+import { isArrayOf, isEqualTo, isNumber, isOneOf, isString } from "@figurl/core-utils"
 
 type AutocorrelogramData = {
     unitId: number | string

@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isEqualTo, isNumber, isOneOf, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/core-utils"
+import { isArrayOf, isEqualTo, isNumber, isOneOf, optional } from "@figurl/core-utils"
 import { isString } from "vega"
 
 type CVViewData = {

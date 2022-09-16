@@ -1,6 +1,6 @@
 import { determineTickLocationsMsec } from "libraries/view-autocorrelograms";
-import { BarPlot, BarPlotBar, BarPlotTick, BarPlotVerticalLine } from "libraries/component-bar-plot";
-import { colorForUnitId } from "libraries/util-unit-colors";
+import { BarPlot, BarPlotBar, BarPlotTick, BarPlotVerticalLine } from "@figurl/core-components";
+import { colorForUnitId } from "@figurl/core-utils";
 import { idToNum } from "libraries/context-unit-selection";
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";

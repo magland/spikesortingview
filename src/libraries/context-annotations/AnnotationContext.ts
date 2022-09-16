@@ -1,4 +1,4 @@
-import { randomAlphaString } from "libraries/util-random-string"
+import { randomAlphaString } from "@figurl/core-utils"
 import React, { useCallback, useContext, useMemo } from "react"
 import AnnotationAction from "./AnnotationAction"
 

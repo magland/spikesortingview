@@ -1,5 +1,5 @@
-import { PGPlot, PlotGrid } from 'libraries/component-plot-grid';
-import { Splitter } from 'libraries/component-splitter';
+import { PGPlot, PlotGrid } from '@figurl/core-components';
+import { Splitter } from '@figurl/core-components';
 import { sortIds } from 'libraries/context-unit-selection';
 import { FunctionComponent, useMemo } from 'react';
 import { LockableSelectUnitsWidget } from 'libraries/SelectUnitsWidget';

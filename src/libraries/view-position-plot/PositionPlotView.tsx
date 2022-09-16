@@ -2,7 +2,7 @@ import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries
 import { FunctionComponent, useCallback, useMemo } from 'react'
 import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
-import { colorForUnitId } from 'libraries/util-unit-colors'
+import { colorForUnitId } from '@figurl/core-utils'
 import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
 import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
 import { useYAxisTicks, useProjectedYAxisTicks } from 'libraries/component-time-scroll-view'
