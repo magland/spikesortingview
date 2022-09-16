@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isBoolean, isEqualTo, isNumber, isOneOf, isString, optional } from "@figurl/spikesortingview.core-utils"
 
 export type UnitLocationsViewData = {
     type: 'UnitLocations'

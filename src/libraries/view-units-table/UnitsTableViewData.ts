@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isString, isArrayOf, isEqualTo, isNumber } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isString, isArrayOf, isEqualTo, isNumber } from "@figurl/spikesortingview.core-utils"
 
 type UTColumn = {
     key: string

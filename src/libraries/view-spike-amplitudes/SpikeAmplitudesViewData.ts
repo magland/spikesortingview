@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isBoolean, isEqualTo, isNumber, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, optional } from "@figurl/spikesortingview.core-utils"
 
 type SAUnitData = {
     unitId: number

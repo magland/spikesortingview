@@ -1,5 +1,5 @@
 import { isTaskJobStatus, isTaskType, TaskJobStatus, TaskType } from "./MessageToChildTypes"
-import { validateObject, isArrayOf, isEqualTo, isJSONObject, isNull, isOneOf, isString, JSONObject, optional } from "libraries/util-validate-object"
+import { validateObject, isArrayOf, isEqualTo, isJSONObject, isNull, isOneOf, isString, JSONObject, optional } from "@figurl/spikesortingview.core-utils"
 
 // getFigureData
 

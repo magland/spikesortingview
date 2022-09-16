@@ -1,5 +1,5 @@
 import { isTiledImageData, TiledImageData } from 'libraries/component-tiled-image'
-import { isOneOf } from 'libraries/util-validate-object'
+import { isOneOf } from '@figurl/spikesortingview.core-utils'
 import { AnnotationsViewData, isAnnotationsViewData } from 'libraries/view-annotations'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/view-autocorrelograms"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"

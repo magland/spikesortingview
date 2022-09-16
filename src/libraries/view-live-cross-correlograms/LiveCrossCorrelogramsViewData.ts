@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isEqualTo, isNumber, isString } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isArrayOf, isEqualTo, isNumber, isString } from "@figurl/spikesortingview.core-utils"
 
 export type LiveCrossCorrelogramsViewData = {
     type: 'LiveCrossCorrelograms'

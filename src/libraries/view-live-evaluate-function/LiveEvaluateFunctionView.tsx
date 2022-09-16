@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import { TaskStatusView, useCalculationTask } from 'libraries/figurl';
-import { validateObject, isEqualTo, isString } from 'libraries/util-validate-object';
+import { validateObject, isEqualTo, isString } from '@figurl/spikesortingview.core-utils';
 import React, { FunctionComponent, useCallback, useEffect, useState } from 'react';
 
 export type LiveEvaluateFunctionViewData = {

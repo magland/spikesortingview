@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import feedManager, { Feed } from "./feedManager";
 import { sleepMsec } from "./util/sleepMsec";
 import { messageCount, unscaledDurationMsec } from "./viewInterface/kacheryTypes";
-import { JSONObject } from "libraries/util-validate-object";
+import { JSONObject } from "@figurl/spikesortingview.core-utils";
 
 export const parseFeedUri = (feedUri: string) => {
     const a = feedUri.split('/')

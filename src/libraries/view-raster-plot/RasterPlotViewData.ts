@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isEqualTo, isNumber, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isArrayOf, isEqualTo, isNumber, optional } from "@figurl/spikesortingview.core-utils"
 import { HighlightIntervalSet, isHighlightIntervalSet } from 'libraries/component-time-scroll-view'
 
 type RPPlotData = {

@@ -1,6 +1,6 @@
 import { UserId } from "./viewInterface/kacheryTypes"
 import { useEffect, useState } from "react"
-import { randomAlphaString } from "libraries/util-random-string"
+import { randomAlphaString } from "@figurl/spikesortingview.core-utils"
 
 type UserInfo = {userId?: UserId, googleIdToken?: string}
 

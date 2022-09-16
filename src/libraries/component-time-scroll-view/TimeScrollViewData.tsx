@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isNumber, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isArrayOf, isNumber, optional } from "@figurl/spikesortingview.core-utils"
 
 export type HighlightIntervalSet = {
     intervalStarts: number[]

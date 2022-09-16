@@ -1,5 +1,5 @@
 import { FigurlRequest, isFigurlRequest } from "./FigurlRequestTypes";
-import { validateObject, isEqualTo, isOneOf, isString } from "libraries/util-validate-object";
+import { validateObject, isEqualTo, isOneOf, isString } from "@figurl/spikesortingview.core-utils";
 
 export type FigurlRequestMessage = {
     type: 'figurlRequest',

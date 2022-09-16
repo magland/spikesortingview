@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isEqualTo } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isArrayOf, isEqualTo } from "@figurl/spikesortingview.core-utils"
 
 
 export type ConsoleViewData = {

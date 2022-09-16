@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isEqualTo, isString } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isEqualTo, isString } from "@figurl/spikesortingview.core-utils"
 
 export type SortingCuration2ViewData = {
     type: 'SortingCuration2'

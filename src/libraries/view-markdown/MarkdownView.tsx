@@ -1,4 +1,4 @@
-import { validateObject, isEqualTo, isString } from 'libraries/util-validate-object';
+import { validateObject, isEqualTo, isString } from '@figurl/spikesortingview.core-utils';
 import { FunctionComponent } from 'react';
 import Markdown from './Markdown/Markdown';
 

@@ -2,7 +2,7 @@ import { MuiThemeProvider } from '@material-ui/core';
 import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer } from 'libraries/context-recording-selection';
 import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from 'libraries/context-unit-selection';
 import { getFigureData, SetupUrlState } from 'libraries/figurl';
-import { useWindowDimensions } from 'libraries/util-use-window-dimensions';
+import { useWindowDimensions } from '@figurl/spikesortingview.core-utils';
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';

@@ -4,7 +4,7 @@ import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 're
 import { FaMinus, FaPlus } from 'react-icons/fa';
 import { PGPlot, PlotGrid } from '../component-plot-grid';
 import { Splitter } from '../component-splitter';
-import { colorForUnitId } from '../util-unit-colors';
+import { colorForUnitId } from '@figurl/spikesortingview.core-utils';
 import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '../context-unit-selection';
 import { VerticalScrollView } from '../component-vertical-scroll-view';
 import { defaultUnitsTableBottomToolbarOptions, ToolbarItem, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions, ViewToolbar } from '../../libraries/ViewToolbar';

@@ -1,6 +1,6 @@
 import { BaseCanvas, pointInRect, RectangularRegion, Vec4 } from "libraries/figurl-canvas";
-import { dragSelectReducer } from "libraries/util-drag-select";
-import { randomAlphaString } from "libraries/util-random-string";
+import { dragSelectReducer } from "@figurl/spikesortingview.core-utils";
+import { randomAlphaString } from "@figurl/spikesortingview.core-utils";
 import React, { FunctionComponent, useCallback, useEffect, useReducer, useState } from "react";
 
 // properties common to all Scene2dObject types

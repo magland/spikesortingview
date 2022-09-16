@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { validateObject, isArrayOf, isBoolean, isJSONObject, isNumber, isObject, isObjectOf, isString, JSONObject, JSONValue, optional } from 'libraries/util-validate-object';
+import { validateObject, isArrayOf, isBoolean, isJSONObject, isNumber, isObject, isObjectOf, isString, JSONObject, JSONValue, optional } from '@figurl/spikesortingview.core-utils';
 
 
 const assert = (x: any) => {

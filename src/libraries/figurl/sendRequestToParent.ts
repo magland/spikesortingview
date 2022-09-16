@@ -2,7 +2,7 @@ import { FigurlRequest, FigurlResponse } from "./viewInterface/FigurlRequestType
 import { FigurlResponseMessage } from "./viewInterface/MessageToChildTypes";
 import { FigurlRequestMessage } from "./viewInterface/MessageToParentTypes";
 import sendMessageToParent from "./sendMessageToParent";
-import { randomAlphaString } from "libraries/util-random-string";
+import { randomAlphaString } from "@figurl/spikesortingview.core-utils";
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())

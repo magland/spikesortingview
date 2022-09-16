@@ -14,6 +14,6 @@ export { default as useCalculationTask } from './useCalculationTask'
 export { default as useFeed } from './useFeed'
 export { default as useFeedReducer } from './useFeedReducer'
 export { default as useSignedIn } from './useSignedIn'
-export { useWindowDimensions } from 'libraries/util-use-window-dimensions'
+export { useWindowDimensions } from '@figurl/spikesortingview.core-utils'
 
 startListeningToParent()

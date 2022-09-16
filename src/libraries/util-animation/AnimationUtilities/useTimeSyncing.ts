@@ -1,5 +1,5 @@
 import { AnimationState, AnimationStateAction } from "libraries/util-animation"
-import { BstSearchFn, BstSearchResult, useBinarySearchTree } from "libraries/util-bst"
+import { BstSearchFn, BstSearchResult, useBinarySearchTree } from "@figurl/spikesortingview.core-utils"
 import { DebounceThrottleResolver, DebounceThrottleUpdater, useThrottler } from "libraries/util-rate-limiters"
 import React, { useCallback, useMemo, useRef } from "react"
 

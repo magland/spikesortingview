@@ -6,7 +6,7 @@ import {CorrelogramPlot} from 'libraries/view-autocorrelograms';
 import { LockableSelectUnitsWidget } from 'libraries/SelectUnitsWidget';
 import { useLocalSelectedUnitIds } from 'libraries/SelectUnitsWidget';
 import { CrossCorrelogramData, CrossCorrelogramsViewData } from './CrossCorrelogramsViewData';
-import { colorForUnitId } from 'libraries/util-unit-colors';
+import { colorForUnitId } from '@figurl/spikesortingview.core-utils';
 import { ToolbarItem, ViewToolbar } from 'libraries/ViewToolbar';
 import { VerticalScrollView } from 'libraries/component-vertical-scroll-view';
 

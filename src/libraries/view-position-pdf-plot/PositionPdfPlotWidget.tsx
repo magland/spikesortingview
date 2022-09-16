@@ -1,7 +1,7 @@
 import { Checkbox } from '@material-ui/core'
 import { DefaultToolbarWidth, TimeScrollView, TimeScrollViewPanel, usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
-import { useFetchCache } from 'libraries/util-use-fetch-cache'
+import { useFetchCache } from '@figurl/spikesortingview.core-utils'
 import { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 

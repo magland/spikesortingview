@@ -1,4 +1,4 @@
-import { isEqualTo, validateObject } from "libraries/util-validate-object"
+import { isEqualTo, validateObject } from "@figurl/spikesortingview.core-utils"
 
 
 export type AnnotationsViewData = {

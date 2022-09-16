@@ -1,6 +1,6 @@
 import { BaseCanvas } from 'libraries/figurl-canvas';
 import { Vec2, Vec4 } from 'libraries/figurl-canvas';
-import { useDragSelectLayer } from 'libraries/util-drag-select';
+import { useDragSelectLayer } from '@figurl/spikesortingview.core-utils';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import BarPlotMainLayer, { BarBox, BarPlotTick, BarPlotVerticalLine } from './BarPlotMainLayer';
 

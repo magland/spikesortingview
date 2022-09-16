@@ -2,8 +2,8 @@ import sendRequestToParent from "./sendRequestToParent"
 import { isSubscribeToFeedResponse, SubscribeToFeedRequest } from "./viewInterface/FigurlRequestTypes"
 import { DurationMsec, MessageCount } from "./viewInterface/kacheryTypes"
 import { NewFeedMessagesMessage } from "./viewInterface/MessageToChildTypes"
-import { JSONObject } from "libraries/util-validate-object"
-import { randomAlphaString } from "libraries/util-random-string"
+import { JSONObject } from "@figurl/spikesortingview.core-utils"
+import { randomAlphaString } from "@figurl/spikesortingview.core-utils"
 
 export class Feed {
     #localMessages: JSONObject[] = []

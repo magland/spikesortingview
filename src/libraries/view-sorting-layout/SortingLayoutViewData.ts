@@ -1,5 +1,5 @@
-import { validateObject } from "libraries/util-validate-object"
-import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, optional } from "libraries/util-validate-object"
+import { validateObject } from "@figurl/spikesortingview.core-utils"
+import { isArrayOf, isBoolean, isEqualTo, isNumber, isOneOf, optional } from "@figurl/spikesortingview.core-utils"
 import { isString } from "vega"
 
 export type LayoutItem = {

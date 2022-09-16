@@ -1,6 +1,6 @@
 import { CircularProgress } from "@material-ui/core";
 import { FunctionComponent } from "react";
-import { formatByteCount } from "libraries/util-format-byte-count";
+import { formatByteCount } from "@figurl/spikesortingview.core-utils";
 
 type Props = {
     loaded?: number
