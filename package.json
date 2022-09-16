@@ -4,7 +4,10 @@
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist/**/*", "src/**/*"],
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rm -rf dist && tsc",
@@ -14,11 +17,16 @@
   "author": "Jeremy Magland",
   "license": "ISC",
   "devDependencies": {
+    "@types/chroma-js": "^2.1.4",
+    "@types/object-hash": "^2.2.1",
     "@types/react": "^18.0.20",
     "typescript": "^4.8.3"
   },
   "peerDependencies": {
     "react": ">= 18.0.0"
   },
-  "dependencies": {}
+  "dependencies": {
+    "chroma-js": "^2.4.2",
+    "object-hash": "^3.0.0"
+  }
 }
