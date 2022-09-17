@@ -4,7 +4,7 @@ import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libra
 import { useSelectedElectrodes } from 'libraries/context-recording-selection'
 import { colorForUnitId } from '@figurl/core-utils'
 import { useDragSelectLayer } from '@figurl/core-utils'
-import { idToNum, useSelectedUnitIds } from 'libraries/context-unit-selection'
+import { idToNum, useSelectedUnitIds } from '@figurl/spike-sorting-views'
 import { AffineTransform, applyAffineTransform, applyAffineTransformInv, detAffineTransform, useWheelZoom } from 'libraries/view-unit-similarity-matrix'
 import { useCallback, useMemo } from 'react'
 

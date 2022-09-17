@@ -1,16 +1,16 @@
 import { isTiledImageData, TiledImageData } from 'libraries/component-tiled-image'
 import { isOneOf } from '@figurl/core-utils'
 import { AnnotationsViewData, isAnnotationsViewData } from 'libraries/view-annotations'
-import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "libraries/view-autocorrelograms"
+import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "@figurl/spike-sorting-views"
 import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"
 import { CompositeViewData, isCompositeViewData } from "libraries/view-composite"
 import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/view-confusion-matrix'
 import { ConsoleViewData, isConsoleViewData } from "libraries/view-console"
-import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from 'libraries/view-cross-correlograms'
+import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from '@figurl/spike-sorting-views'
 import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/view-electrode-geometry"
 import { EpochsViewData, isEpochsViewData } from "libraries/view-epochs"
 import { ExperimentalSelector1ViewData, isExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1'
-import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "libraries/view-live-cross-correlograms"
+import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "@figurl/spike-sorting-views"
 import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'libraries/view-live-evaluate-function'
 import { isLiveTracesViewData, LiveTracesViewData } from 'libraries/view-live-traces'
 import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/view-main-layout'

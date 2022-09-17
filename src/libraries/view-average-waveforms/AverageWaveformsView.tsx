@@ -5,7 +5,7 @@ import { FaMinus, FaPlus } from 'react-icons/fa';
 import { PGPlot, PlotGrid } from '@figurl/core-components';
 import { Splitter } from '@figurl/core-components';
 import { colorForUnitId } from '@figurl/core-utils';
-import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '../context-unit-selection';
+import { idToNum, INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '@figurl/spike-sorting-views';
 import { VerticalScrollView } from '@figurl/core-components';
 import { defaultUnitsTableBottomToolbarOptions, ToolbarItem, UnitsTableBottomToolbar, UnitsTableBottomToolbarOptions, ViewToolbar } from '../../libraries/ViewToolbar';
 import AverageWaveformPlot, { AverageWaveformPlotProps } from './AverageWaveformPlot';

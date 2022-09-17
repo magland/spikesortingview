@@ -1,5 +1,5 @@
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
-import { useSelectedUnitIds } from 'libraries/context-unit-selection'
+import { useSelectedUnitIds } from '@figurl/spike-sorting-views'
 import { FunctionComponent, useCallback, useMemo } from 'react'
 import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'

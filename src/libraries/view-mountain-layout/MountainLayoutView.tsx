@@ -1,5 +1,5 @@
-import { SortingCurationAction } from 'libraries/context-sorting-curation';
-import { SortingCurationContext, sortingCurationReducer } from 'libraries/context-sorting-curation';
+import { SortingCurationAction } from '@figurl/spike-sorting-views';
+import { SortingCurationContext, sortingCurationReducer } from '@figurl/spike-sorting-views';
 import { initiateTask, useFeedReducer, useSignedIn } from '@figurl/interface';
 import { getMutable } from '@figurl/interface';
 import { MountainWorkspace } from 'libraries/MountainWorkspace';

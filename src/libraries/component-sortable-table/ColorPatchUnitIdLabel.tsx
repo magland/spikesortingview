@@ -1,4 +1,4 @@
-import { SortingCuration } from 'libraries/context-sorting-curation';
+import { SortingCuration } from '@figurl/spike-sorting-views';
 import { colorForUnitId } from '@figurl/core-utils';
 import { FunctionComponent } from "react";
 import './SortableTableWidget.css';

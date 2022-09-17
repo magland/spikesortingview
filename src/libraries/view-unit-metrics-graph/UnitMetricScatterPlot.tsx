@@ -1,5 +1,5 @@
 import { colorForUnitId } from "@figurl/core-utils";
-import { idToNum } from "libraries/context-unit-selection";
+import { idToNum } from "@figurl/spike-sorting-views";
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { ScatterPlot, ScatterPlotMarker } from '@figurl/core-components';
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";

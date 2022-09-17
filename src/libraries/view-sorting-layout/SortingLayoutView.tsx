@@ -1,9 +1,9 @@
-import { SortingCurationAction } from 'libraries/context-sorting-curation';
-import { SortingCurationContext, sortingCurationReducer } from 'libraries/context-sorting-curation';
+import { SortingCurationAction } from '@figurl/spike-sorting-views';
+import { SortingCurationContext, sortingCurationReducer } from '@figurl/spike-sorting-views';
 import { UnitMetricSelectionContext, unitMetricSelectionReducer } from 'libraries/context-unit-metrics-selection';
 import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn } from '@figurl/interface';
 import { useUrlState } from '@figurl/interface';
-import { sortIds, useSelectedUnitIds } from 'libraries/context-unit-selection';
+import { sortIds, useSelectedUnitIds } from '@figurl/spike-sorting-views';
 import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
 import { feedIdForUri } from 'libraries/view-mountain-layout';
 import { onMessageFromBackend, sendMessageToBackend } from '@figurl/interface';

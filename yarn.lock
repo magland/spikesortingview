@@ -1035,7 +1035,7 @@
     core-js-pure "^3.20.2"
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.0.0", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.5", "@babel/runtime@^7.16.3", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.6", "@babel/runtime@^7.18.9", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.3", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
+"@babel/runtime@^7.0.0", "@babel/runtime@^7.10.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.0", "@babel/runtime@^7.12.5", "@babel/runtime@^7.16.3", "@babel/runtime@^7.18.3", "@babel/runtime@^7.18.9", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.5.5", "@babel/runtime@^7.8.3", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.18.9"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.18.9.tgz#b4fcfce55db3d2e5e080d2490f608a3b9f407f4a"
   integrity sha512-lkqXDcvlFT5rvEjiu6+QYO+1GXrEHRo2LOtS7E4GtX5ESIZOgepqsZBVIj6Pv+a6zqsya9VCgiK1KAK4BvJDAw==
@@ -1464,6 +1464,18 @@
     crypto "npm:crypto-browserify"
     path "npm:path-browserify"
     stream "npm:stream-browserify"
+
+"@figurl/spike-sorting-views@https://github.com/magland/figurl-spike-sorting-views/releases/download/0.1.0/figurl-spike-sorting-views-v0.1.0.tgz":
+  version "0.1.0"
+  resolved "https://github.com/magland/figurl-spike-sorting-views/releases/download/0.1.0/figurl-spike-sorting-views-v0.1.0.tgz#be0ad811a73201ea53b9d68e306a4c4662bee4c4"
+  dependencies:
+    "@figurl/core-components" "https://github.com/magland/figurl-core-components/releases/download/0.1.3/figurl-core-components-v0.1.2.tgz"
+    "@figurl/interface" magland/figurl-interface.git#0.1.1
+    "@types/node" "^18.7.18"
+    assert "npm:assert-browserify"
+    buffer "npm:buffer-browserify"
+    crypto "npm:crypto-browserify"
+    react-sizeme "^3.0.2"
 
 "@fortawesome/fontawesome-common-types@6.1.2":
   version "6.1.2"
@@ -4750,7 +4762,7 @@ debug@^3.2.7:
   dependencies:
     ms "^2.1.1"
 
-decimal.js@^10.2.1, decimal.js@^10.3.1:
+decimal.js@^10.2.1:
   version "10.4.0"
   resolved "https://registry.yarnpkg.com/decimal.js/-/decimal.js-10.4.0.tgz#97a7448873b01e92e5ff9117d89a7bca8e63e0fe"
   integrity sha512-Nv6ENEzyPQ6AItkGwLE2PGKinZZ9g59vSh2BeH6NqPu0OTKZ5ruJsVqh/orbAnqXc9pBbgXAIrc2EyaCj8NpGg==
@@ -7814,21 +7826,6 @@ math.gl@^3.6.2:
   dependencies:
     "@math.gl/core" "3.6.3"
 
-mathjs@^10.6.4:
-  version "10.6.4"
-  resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-10.6.4.tgz#1b87a1268781d64f0c8b4e5e1b36cf7ecf58bb05"
-  integrity sha512-omQyvRE1jIy+3k2qsqkWASOcd45aZguXZDckr3HtnTYyXk5+2xpVfC3kATgbO2Srjxlqww3TVdhD0oUdZ/hiFA==
-  dependencies:
-    "@babel/runtime" "^7.18.6"
-    complex.js "^2.1.1"
-    decimal.js "^10.3.1"
-    escape-latex "^1.2.0"
-    fraction.js "^4.2.0"
-    javascript-natural-sort "^0.7.1"
-    seedrandom "^3.0.5"
-    tiny-emitter "^2.1.0"
-    typed-function "^2.1.0"
-
 mathjs@^11.2.1:
   version "11.2.1"
   resolved "https://registry.yarnpkg.com/mathjs/-/mathjs-11.2.1.tgz#725d2e769eb036214530ff532cea4a464efdc75e"
@@ -10755,11 +10752,6 @@ type-is@~1.6.18:
   dependencies:
     media-typer "0.3.0"
     mime-types "~2.1.24"
-
-typed-function@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/typed-function/-/typed-function-2.1.0.tgz#ded6f8a442ba8749ff3fe75bc41419c8d46ccc3f"
-  integrity sha512-bctQIOqx2iVbWGDGPWwIm18QScpu2XRmkC19D8rQGFsjKSgteq/o1hTZvIG/wuDq8fanpBDrLkLq+aEN/6y5XQ==
 
 typed-function@^4.1.0:
   version "4.1.0"

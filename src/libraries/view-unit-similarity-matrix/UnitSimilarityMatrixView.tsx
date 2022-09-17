@@ -1,4 +1,4 @@
-import { INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from 'libraries/context-unit-selection'
+import { INITIALIZE_UNITS, sortIds, useSelectedUnitIds } from '@figurl/spike-sorting-views'
 import { FunctionComponent, useCallback, useEffect, useMemo, useState } from 'react'
 import BottomToolbar from './BottomToolbar'
 import MatrixWidget from './MatrixWidget'

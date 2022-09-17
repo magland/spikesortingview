@@ -1,4 +1,4 @@
-import { SortingRule, UnitSelectionAction } from "libraries/context-unit-selection"
+import { SortingRule, UnitSelectionAction } from "@figurl/spike-sorting-views"
 export interface SortableTableWidgetRow {
     rowId: string | number
     data: {[key: string]: {

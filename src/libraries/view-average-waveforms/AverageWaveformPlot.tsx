@@ -1,5 +1,5 @@
 import { RecordingSelectionContext, useRecordingSelection } from 'libraries/context-recording-selection';
-import { idToNum } from 'libraries/context-unit-selection';
+import { idToNum } from '@figurl/spike-sorting-views';
 import { FunctionComponent, useMemo } from 'react';
 import ElectrodeGeometry from './WaveformWidget/sharedDrawnComponents/ElectrodeGeometry';
 import { WaveformColors } from './WaveformWidget/WaveformPlot';

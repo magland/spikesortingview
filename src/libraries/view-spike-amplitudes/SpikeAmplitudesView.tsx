@@ -2,7 +2,7 @@ import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEnt
 import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
 import { Splitter } from '@figurl/core-components'
 import { colorForUnitId } from '@figurl/core-utils'
-import { idToNum } from 'libraries/context-unit-selection'
+import { idToNum } from '@figurl/spike-sorting-views'
 import { FunctionComponent, useMemo, useState } from 'react'
 import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'

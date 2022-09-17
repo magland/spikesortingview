@@ -1,7 +1,7 @@
-import { determineTickLocationsMsec } from "libraries/view-autocorrelograms";
+import determineTickLocationsMsec from "./determineTickLocationsMsec";
 import { BarPlot, BarPlotBar, BarPlotTick, BarPlotVerticalLine } from "@figurl/core-components";
 import { colorForUnitId } from "@figurl/core-utils";
-import { idToNum } from "libraries/context-unit-selection";
+import { idToNum } from "@figurl/spike-sorting-views";
 import { FunctionComponent, useCallback, useMemo } from "react";
 import { UMGMetric, UMGUnit } from "./UnitMetricsGraphViewData";
 
