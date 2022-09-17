@@ -1428,9 +1428,9 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@figurl/core-components@magland/figurl-core-components.git#0.1.2":
+"@figurl/core-components@https://github.com/magland/figurl-core-components/releases/download/0.1.3/figurl-core-components-v0.1.2.tgz":
   version "0.1.2"
-  resolved "https://codeload.github.com/magland/figurl-core-components/tar.gz/883ffa7db4b811ba6ad70390bdbb979aaab0c77e"
+  resolved "https://github.com/magland/figurl-core-components/releases/download/0.1.3/figurl-core-components-v0.1.2.tgz#1c368d780838ecf17316547f052374439f399ad7"
   dependencies:
     "@figurl/core-utils" magland/figurl-core-utils.git#0.1.0
     "@material-ui/core" "^4.12.4"
