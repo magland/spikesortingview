@@ -1,7 +1,7 @@
 import { BaseCanvas } from '@figurl/core-components'
 import { DragCanvas, DragAction, handleMouseDownIfDragging, handleMouseMoveIfDragging, handleMouseUpIfDragging } from '@figurl/core-components'
 import { Vec2 } from '@figurl/core-components'
-import { useSelectedElectrodes } from 'libraries/context-recording-selection'
+import { useSelectedElectrodes } from '@figurl/timeseries-views'
 import { applyAffineTransform, applyAffineTransformInv, detAffineTransform, useWheelZoom } from 'libraries/view-unit-similarity-matrix'
 import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import { defaultColors, ElectrodeColors, paint } from './electrodeGeometryPainting'

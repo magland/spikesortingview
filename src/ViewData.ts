@@ -12,15 +12,15 @@ import { EpochsViewData, isEpochsViewData } from "libraries/view-epochs"
 import { ExperimentalSelector1ViewData, isExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1'
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "@figurl/spike-sorting-views"
 import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'libraries/view-live-evaluate-function'
-import { isLiveTracesViewData, LiveTracesViewData } from 'libraries/view-live-traces'
-import { isMainLayoutViewData, MainLayoutViewData } from 'libraries/view-main-layout'
+import { isLiveTracesViewData, LiveTracesViewData } from '@figurl/timeseries-views'
+import { isMainLayoutViewData, MainLayoutViewData } from '@figurl/core-views'
 import { isMarkdownViewData, MarkdownViewData } from 'libraries/view-markdown'
 import { isMountainLayoutViewData, MountainLayoutViewData } from "libraries/view-mountain-layout"
 import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "libraries/view-multi-timeseries"
 import { isLivePositionPdfPlotViewData, isPositionPdfPlotViewData, LivePositionPdfPlotViewData, PositionPdfPlotViewData } from "libraries/view-position-pdf-plot"
 import { isPositionPlotViewData, PositionPlotViewData } from "libraries/view-position-plot"
 import { isRasterPlotViewData, RasterPlotViewData } from "libraries/view-raster-plot"
-import { isRawTracesViewData, RawTracesViewData } from "libraries/view-raw-traces"
+import { isRawTracesViewData, RawTracesViewData } from "@figurl/timeseries-views"
 import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/view-sorting-curation'
 import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/view-sorting-curation-2'
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'libraries/view-sorting-layout'
@@ -29,7 +29,7 @@ import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "libraries/vi
 import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'libraries/view-spike-locations'
 import { isSummaryViewData, SummaryViewData } from "libraries/view-summary"
 import { isTest1ViewData, Test1ViewData } from 'libraries/view-test-1'
-import { isTimeseriesGraphViewData, TimeseriesGraphViewData } from 'libraries/view-timeseries-graph'
+import { isTimeseriesGraphViewData, TimeseriesGraphViewData } from '@figurl/timeseries-views'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "libraries/view-track-position-animation"
 import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/view-unit-locations'
 import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/view-unit-metrics-graph'

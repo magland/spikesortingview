@@ -1,7 +1,7 @@
 import { BaseCanvas } from '@figurl/core-components'
 import { RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from '@figurl/core-components'
 import { computeElectrodeLocations, defaultColors, ElectrodeColors } from 'libraries/view-average-waveforms'
-import { useSelectedElectrodes } from 'libraries/context-recording-selection'
+import { useSelectedElectrodes } from '@figurl/timeseries-views'
 import { colorForUnitId } from '@figurl/core-utils'
 import { useDragSelectLayer } from '@figurl/core-utils'
 import { idToNum, useSelectedUnitIds } from '@figurl/spike-sorting-views'

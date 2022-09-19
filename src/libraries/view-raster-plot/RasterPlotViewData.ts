@@ -1,6 +1,6 @@
 import { validateObject } from "@figurl/core-utils"
 import { isArrayOf, isEqualTo, isNumber, optional } from "@figurl/core-utils"
-import { HighlightIntervalSet, isHighlightIntervalSet } from 'libraries/component-time-scroll-view'
+import { HighlightIntervalSet, isHighlightIntervalSet } from '@figurl/timeseries-views'
 
 type RPPlotData = {
     unitId: number

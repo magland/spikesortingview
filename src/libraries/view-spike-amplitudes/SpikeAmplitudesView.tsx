@@ -1,5 +1,5 @@
 import { AmplitudeScaleToolbarEntries } from 'libraries/AmplitudeScaleToolbarEntries'
-import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from '@figurl/timeseries-views'
 import { Splitter } from '@figurl/core-components'
 import { colorForUnitId } from '@figurl/core-utils'
 import { idToNum } from '@figurl/spike-sorting-views'
@@ -8,10 +8,10 @@ import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'libr
 import { TimeseriesLayoutOpts } from 'View'
 import { LockableSelectUnitsWidget } from 'libraries/SelectUnitsWidget'
 import { useLocalSelectedUnitIds } from 'libraries/SelectUnitsWidget'
-import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
-import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
-import { useYAxisTicks, useProjectedYAxisTicks } from 'libraries/component-time-scroll-view'
-import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
+import { TimeScrollView, TimeScrollViewPanel } from '@figurl/timeseries-views'
+import { usePanelDimensions, useTimeseriesMargins } from '@figurl/timeseries-views'
+import { useYAxisTicks, useProjectedYAxisTicks } from '@figurl/timeseries-views'
+import { DefaultToolbarWidth } from '@figurl/timeseries-views'
 import { SpikeAmplitudesViewData } from './SpikeAmplitudesViewData'
 
 type Props = {

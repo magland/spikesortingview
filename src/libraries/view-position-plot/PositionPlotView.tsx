@@ -1,12 +1,12 @@
-import { useRecordingSelectionTimeInitialization, useTimeRange } from 'libraries/context-recording-selection'
+import { useRecordingSelectionTimeInitialization, useTimeRange } from '@figurl/timeseries-views'
 import { FunctionComponent, useCallback, useMemo } from 'react'
 import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
 import { colorForUnitId } from '@figurl/core-utils'
-import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
-import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
-import { useYAxisTicks, useProjectedYAxisTicks } from 'libraries/component-time-scroll-view'
-import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
+import { TimeScrollView, TimeScrollViewPanel } from '@figurl/timeseries-views'
+import { usePanelDimensions, useTimeseriesMargins } from '@figurl/timeseries-views'
+import { useYAxisTicks, useProjectedYAxisTicks } from '@figurl/timeseries-views'
+import { DefaultToolbarWidth } from '@figurl/timeseries-views'
 import { PositionPlotViewData } from './PositionPlotViewData'
 
 type Props = {

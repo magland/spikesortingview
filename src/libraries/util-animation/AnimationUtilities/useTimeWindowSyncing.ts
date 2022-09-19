@@ -1,4 +1,4 @@
-import { useTimeRange } from 'libraries/context-recording-selection'
+import { useTimeRange } from '@figurl/timeseries-views'
 import React, { useEffect } from "react"
 import { AnimationState, AnimationStateAction } from 'libraries/util-animation'
 import { useTimeLookupFn } from 'libraries/util-animation'

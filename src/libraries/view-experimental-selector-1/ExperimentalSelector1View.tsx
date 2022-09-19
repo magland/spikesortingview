@@ -2,7 +2,7 @@ import { Button } from '@material-ui/core';
 import { Hyperlink } from '@figurl/core-components';
 import { NiceTable } from '@figurl/core-components';
 import { NiceTableColumn, NiceTableRow } from '@figurl/core-components';
-import { useRecordingSelection } from 'libraries/context-recording-selection';
+import { useRecordingSelection } from '@figurl/timeseries-views';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { ExperimentalSelector1ViewData } from './ExperimentalSelector1ViewData';
 

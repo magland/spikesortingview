@@ -1,5 +1,5 @@
 import { MuiThemeProvider } from '@material-ui/core';
-import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer } from 'libraries/context-recording-selection';
+import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer } from '@figurl/timeseries-views';
 import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
 import { getFigureData, SetupUrlState } from '@figurl/interface';
 import { useWindowDimensions } from '@figurl/core-utils';
@@ -8,7 +8,7 @@ import './localStyles.css';
 import theme from './theme';
 import View from './View';
 import { isViewData, ViewData } from './ViewData';
-import { SetupAnnotations } from 'libraries/context-annotations';
+import { SetupAnnotations } from '@figurl/timeseries-views';
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())

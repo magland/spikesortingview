@@ -1,4 +1,4 @@
-import { useSelectedElectrodes } from 'libraries/context-recording-selection'
+import { useSelectedElectrodes } from '@figurl/timeseries-views'
 import { BaseCanvas } from '@figurl/core-components'
 import { pointInRect, RectangularRegion, rectangularRegionsIntersect, transformPoint, Vec2, Vec4 } from '@figurl/core-components'
 import { colorForUnitId } from '@figurl/core-utils'

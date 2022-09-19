@@ -1,4 +1,4 @@
-import { RecordingSelectionContext, useRecordingSelection } from 'libraries/context-recording-selection';
+import { RecordingSelectionContext, useRecordingSelection } from '@figurl/timeseries-views';
 import { idToNum } from '@figurl/spike-sorting-views';
 import { FunctionComponent, useMemo } from 'react';
 import ElectrodeGeometry from './WaveformWidget/sharedDrawnComponents/ElectrodeGeometry';
