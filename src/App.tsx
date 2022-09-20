@@ -11,6 +11,8 @@ import View from './View';
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())
 
+// Example: https://www.figurl.org/f?v=http://localhost:3000&d=sha1://c7e0ae023c4c75d9ae85078e459d7fc8daa1224d&label=Track%20position%20animation%20example&s={}
+
 function App() {
   const [data, setData] = useState<any>()
   const [errorMessage, setErrorMessage] = useState<string>()
