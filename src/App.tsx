@@ -1,20 +1,18 @@
-import { MuiThemeProvider } from '@material-ui/core';
-import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer } from '@figurl/timeseries-views';
-import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
-import { getFigureData, SetupUrlState } from '@figurl/interface';
 import { useWindowDimensions } from '@figurl/core-utils';
+import { getFigureData, SetupUrlState } from '@figurl/interface';
+import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
+import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer, SetupAnnotations } from '@figurl/timeseries-views';
+import { MuiThemeProvider } from '@material-ui/core';
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';
 import View from './View';
-import { isViewData, ViewData } from './ViewData';
-import { SetupAnnotations } from '@figurl/timeseries-views';
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())
 
 function App() {
-  const [data, setData] = useState<ViewData>()
+  const [data, setData] = useState<any>()
   const [errorMessage, setErrorMessage] = useState<string>()
   const {width, height} = useWindowDimensions()
 
@@ -30,9 +28,8 @@ function App() {
     }
     else {
       getFigureData().then((data: any) => {
-        if (!isViewData(data)) {
-          setErrorMessage(`Invalid figure data`)
-          console.error('Invalid figure data', data)
+        if (!data) {
+          setErrorMessage('No data in return from getFigureData()')
           return
         }
         setData(data)

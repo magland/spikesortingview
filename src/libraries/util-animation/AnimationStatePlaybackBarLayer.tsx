@@ -1,4 +1,4 @@
-import { BaseCanvas } from '@figurl/core-components'
+import { BaseCanvas } from '@figurl/core-views'
 import React, { FunctionComponent, useCallback, useRef } from 'react'
 import useDraggableScrubber from './AnimationControls/useDraggableScrubber'
 import usePlaybackBarGeometry from './AnimationControls/usePlaybackBarGeometry'

@@ -1,6 +1,6 @@
 import { SortingCurationAction } from '@figurl/spike-sorting-views';
 import { SortingCurationContext, sortingCurationReducer } from '@figurl/spike-sorting-views';
-import { UnitMetricSelectionContext, unitMetricSelectionReducer } from 'libraries/context-unit-metrics-selection';
+import { UnitMetricSelectionContext, unitMetricSelectionReducer } from '@figurl/spike-sorting-views';
 import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn } from '@figurl/interface';
 import { useUrlState } from '@figurl/interface';
 import { sortIds, useSelectedUnitIds } from '@figurl/spike-sorting-views';

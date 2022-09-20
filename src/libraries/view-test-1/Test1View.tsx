@@ -1,5 +1,5 @@
-import { Scene2d, Scene2dObject, useScene2dObjects } from '@figurl/core-components';
-import { createObjectId } from '@figurl/core-components';
+import { Scene2d, Scene2dObject, useScene2dObjects } from '@figurl/core-views';
+import { createObjectId } from '@figurl/core-views';
 import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { Test1ViewData } from './Test1ViewData';
 

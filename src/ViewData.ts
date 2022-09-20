@@ -1,40 +1,40 @@
 import { isTiledImageData, TiledImageData } from 'libraries/component-tiled-image'
 import { isOneOf } from '@figurl/core-utils'
-import { AnnotationsViewData, isAnnotationsViewData } from 'libraries/view-annotations'
+import { AnnotationsViewData, isAnnotationsViewData } from '@figurl/timeseries-views'
 import { AutocorrelogramsViewData, isAutocorrelogramsViewData } from "@figurl/spike-sorting-views"
-import { AverageWaveformsViewData, isAverageWaveformsViewData } from "libraries/view-average-waveforms"
+import { AverageWaveformsViewData, isAverageWaveformsViewData } from "@figurl/spike-sorting-views"
 import { CompositeViewData, isCompositeViewData } from "libraries/view-composite"
-import { ConfusionMatrixViewData, isConfusionMatrixViewData } from 'libraries/view-confusion-matrix'
+import { ConfusionMatrixViewData, isConfusionMatrixViewData } from '@figurl/spike-sorting-views'
 import { ConsoleViewData, isConsoleViewData } from "libraries/view-console"
 import { CrossCorrelogramsViewData, isCrossCorrelogramsViewData } from '@figurl/spike-sorting-views'
-import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "libraries/view-electrode-geometry"
+import { ElectrodeGeometryViewData, isElectrodeGeometryViewData } from "@figurl/spike-sorting-views"
 import { EpochsViewData, isEpochsViewData } from "libraries/view-epochs"
 import { ExperimentalSelector1ViewData, isExperimentalSelector1ViewData } from 'libraries/view-experimental-selector-1'
 import { isLiveCrossCorrelogramsViewData, LiveCrossCorrelogramsViewData } from "@figurl/spike-sorting-views"
 import { isLiveEvaluateFunctionViewData, LiveEvaluateFunctionViewData } from 'libraries/view-live-evaluate-function'
 import { isLiveTracesViewData, LiveTracesViewData } from '@figurl/timeseries-views'
 import { isMainLayoutViewData, MainLayoutViewData } from '@figurl/core-views'
-import { isMarkdownViewData, MarkdownViewData } from 'libraries/view-markdown'
+import { isMarkdownViewData, MarkdownViewData } from '@figurl/core-views'
 import { isMountainLayoutViewData, MountainLayoutViewData } from "libraries/view-mountain-layout"
 import { isMultiTimeseriesViewData, MultiTimeseriesViewData } from "libraries/view-multi-timeseries"
 import { isLivePositionPdfPlotViewData, isPositionPdfPlotViewData, LivePositionPdfPlotViewData, PositionPdfPlotViewData } from "libraries/view-position-pdf-plot"
 import { isPositionPlotViewData, PositionPlotViewData } from "libraries/view-position-plot"
-import { isRasterPlotViewData, RasterPlotViewData } from "libraries/view-raster-plot"
+import { isRasterPlotViewData, RasterPlotViewData } from "@figurl/spike-sorting-views"
 import { isRawTracesViewData, RawTracesViewData } from "@figurl/timeseries-views"
 import { isSortingCurationViewData, SortingCurationViewData } from 'libraries/view-sorting-curation'
-import { isSortingCuration2ViewData, SortingCuration2ViewData } from 'libraries/view-sorting-curation-2'
+import { isSortingCuration2ViewData, SortingCuration2ViewData } from '@figurl/spike-sorting-views'
 import { isSortingLayoutViewData, SortingLayoutViewData } from 'libraries/view-sorting-layout'
 import { isSortingSelectionViewData, SortingSelectionViewData } from 'libraries/view-sorting-selection'
-import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "libraries/view-spike-amplitudes"
-import { isSpikeLocationsViewData, SpikeLocationsViewData } from 'libraries/view-spike-locations'
+import { isSpikeAmplitudesViewData, SpikeAmplitudesViewData } from "@figurl/spike-sorting-views"
+import { isSpikeLocationsViewData, SpikeLocationsViewData } from '@figurl/spike-sorting-views'
 import { isSummaryViewData, SummaryViewData } from "libraries/view-summary"
 import { isTest1ViewData, Test1ViewData } from 'libraries/view-test-1'
 import { isTimeseriesGraphViewData, TimeseriesGraphViewData } from '@figurl/timeseries-views'
 import { isTrackAnimationStaticData, TrackAnimationStaticData } from "libraries/view-track-position-animation"
-import { isUnitLocationsViewData, UnitLocationsViewData } from 'libraries/view-unit-locations'
-import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from 'libraries/view-unit-metrics-graph'
-import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from 'libraries/view-unit-similarity-matrix'
-import { isUnitsTableViewData, UnitsTableViewData } from "libraries/view-units-table"
+import { isUnitLocationsViewData, UnitLocationsViewData } from '@figurl/spike-sorting-views'
+import { isUnitMetricsGraphViewData, UnitMetricsGraphViewData } from '@figurl/spike-sorting-views'
+import { isUnitSimilarityMatrixViewData, UnitSimilarityMatrixViewData } from '@figurl/spike-sorting-views'
+import { isUnitsTableViewData, UnitsTableViewData } from "@figurl/spike-sorting-views"
 
 export type ViewData =
     AutocorrelogramsViewData |
