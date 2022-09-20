@@ -1460,6 +1460,23 @@
     react-visibility-sensor "^5.1.1"
     stream "npm:stream-browserify"
 
+"@figurl/franklab-views@^0.1":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@figurl/franklab-views/-/franklab-views-0.1.0.tgz#01848a615bcded9c96f935d0aecf6b4d637a8a07"
+  integrity sha512-fn5jqRBirkece+RYQD9Kgb2QRdf0ALGj7RhA0Vyit2yhuyFy98i054ZmBwHdMDHsw/a6Nypj8AMssfDnouQCpg==
+  dependencies:
+    "@figurl/core-utils" "^0.1"
+    "@figurl/core-views" "^0.1"
+    "@figurl/interface" "^0.1"
+    "@figurl/spike-sorting-views" "^0.1"
+    "@figurl/timeseries-views" "^0.1"
+    "@types/node" "^18.7.18"
+    assert "npm:assert-browserify"
+    buffer "npm:buffer-browserify"
+    crypto "npm:crypto-browserify"
+    github-markdown-css "^5.1.0"
+    react-select "^5.4.0"
+
 "@figurl/interface@^0.1":
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/@figurl/interface/-/interface-0.1.4.tgz#ec0c3f14eac86f94396b21211586d613f3aed349"

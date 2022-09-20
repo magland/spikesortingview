@@ -13,12 +13,12 @@ import { SortingLayoutView } from 'libraries/view-sorting-layout';
 import { SortingSelectionView } from 'libraries/view-sorting-selection';
 import { SummaryView } from 'libraries/view-summary';
 import { Test1View } from 'libraries/view-test-1';
-import { TrackPositionAnimationView } from 'libraries/view-track-position-animation';
 import { FunctionComponent } from 'react';
 import { isViewData } from 'ViewData';
 import {loadView as loadCoreView} from '@figurl/core-views'
 import {loadView as loadTimeseriesView} from '@figurl/timeseries-views'
 import {loadView as loadSpikeSortingView} from '@figurl/spike-sorting-views'
+import {loadView as loadFranklabView} from '@figurl/franklab-views'
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -34,7 +34,7 @@ type Props = {
 }
 
 const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
-    const viewLoaders = [loadCoreView, loadTimeseriesView, loadSpikeSortingView]
+    const viewLoaders = [loadCoreView, loadTimeseriesView, loadSpikeSortingView, loadFranklabView]
     for (let loadView of viewLoaders) {
         const v = loadView({data, width, height, opts, ViewComponent: View})
         if (v) return v
@@ -69,9 +69,6 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     }
     else if (data.type === 'Console') {
         return <ConsoleView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'TrackAnimation') {
-        return <TrackPositionAnimationView data={data} width={width} height={height} />
     }
     else if (data.type === 'SortingLayout') {
         return <SortingLayoutView data={data} ViewComponent={View} width={width} height={height} />
