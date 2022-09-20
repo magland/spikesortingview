@@ -1,4 +1,4 @@
-import { runCalculationTaskAsync } from 'libraries/figurl'
+import { runCalculationTaskAsync } from '@figurl/interface'
 import React, { FunctionComponent, useMemo } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
 import PositionPdfPlotWidget, { FetchSegmentQuery } from './PositionPdfPlotWidget'

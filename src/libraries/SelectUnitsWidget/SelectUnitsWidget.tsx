@@ -1,6 +1,6 @@
-import { useSortingCuration } from 'libraries/context-sorting-curation';
+import { useSortingCuration } from '@figurl/spike-sorting-views';
 import { SortableTableWidget, SortableTableWidgetRow } from 'libraries/component-sortable-table';
-import { idToNum, INITIALIZE_UNITS, sortIds, SortingRule, UnitSelectionAction } from 'libraries/context-unit-selection';
+import { idToNum, INITIALIZE_UNITS, sortIds, SortingRule, UnitSelectionAction } from '@figurl/spike-sorting-views';
 import React, { FunctionComponent, useEffect, useMemo } from 'react';
 import { ColorPatchUnitIdLabel, ColorPatchUnitLabelProps, mergeGroupForUnitId } from 'libraries/component-sortable-table';
 

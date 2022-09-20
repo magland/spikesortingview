@@ -1,41 +1,24 @@
 import { TiledImageComponent } from 'libraries/component-tiled-image';
-import { AnnotationsView } from 'libraries/view-annotations';
-import { AutocorrelogramsView } from 'libraries/view-autocorrelograms';
-import { AverageWaveformsView } from 'libraries/view-average-waveforms';
 import { CompositeView } from 'libraries/view-composite';
-import { ConfusionMatrixView } from 'libraries/view-confusion-matrix';
 import { ConsoleView } from 'libraries/view-console';
-import { CrossCorrelogramsView } from 'libraries/view-cross-correlograms';
-import { ElectrodeGeometryView } from 'libraries/view-electrode-geometry';
 import { EpochsView } from 'libraries/view-epochs';
 import { ExperimentalSelector1View } from 'libraries/view-experimental-selector-1';
-import { LiveCrossCorrelogramsView } from 'libraries/view-live-cross-correlograms';
 import { LiveEvaluateFunctionView } from 'libraries/view-live-evaluate-function';
-import { LiveTracesView } from 'libraries/view-live-traces';
-import { MainLayoutView } from 'libraries/view-main-layout';
-import { MarkdownView } from 'libraries/view-markdown';
 import { MountainLayoutView } from 'libraries/view-mountain-layout';
 import { MultiTimeseriesView } from 'libraries/view-multi-timeseries';
 import { LivePositionPdfPlotView, PositionPdfPlotView } from 'libraries/view-position-pdf-plot';
 import { PositionPlotView } from 'libraries/view-position-plot';
-import { RasterPlotView } from 'libraries/view-raster-plot';
-import { RawTracesView } from 'libraries/view-raw-traces';
 import { SortingCurationView } from 'libraries/view-sorting-curation';
-import { SortingCuration2View } from 'libraries/view-sorting-curation-2';
 import { SortingLayoutView } from 'libraries/view-sorting-layout';
 import { SortingSelectionView } from 'libraries/view-sorting-selection';
-import { SpikeAmplitudesView } from 'libraries/view-spike-amplitudes';
-import { SpikeLocationsView } from 'libraries/view-spike-locations';
 import { SummaryView } from 'libraries/view-summary';
 import { Test1View } from 'libraries/view-test-1';
-import { TimeseriesGraphView } from 'libraries/view-timeseries-graph';
-import { TrackPositionAnimationView } from 'libraries/view-track-position-animation';
-import { UnitLocationsView } from 'libraries/view-unit-locations';
-import { UnitMetricsGraphView } from 'libraries/view-unit-metrics-graph';
-import { UnitSimilarityMatrixView } from 'libraries/view-unit-similarity-matrix';
-import { UnitsTableView } from 'libraries/view-units-table';
 import { FunctionComponent } from 'react';
-import { ViewData } from './ViewData';
+import { isViewData } from 'ViewData';
+import {loadView as loadCoreView} from '@figurl/core-views'
+import {loadView as loadTimeseriesView} from '@figurl/timeseries-views'
+import {loadView as loadSpikeSortingView} from '@figurl/spike-sorting-views'
+import {loadView as loadFranklabView} from '@figurl/franklab-views'
 
 export type TimeseriesLayoutOpts = {
     hideToolbar?: boolean
@@ -44,30 +27,27 @@ export type TimeseriesLayoutOpts = {
 }
 
 type Props = {
-    data: ViewData
+    data: any
     opts: any
     width: number
     height: number
 }
 
 const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
-    if (data.type === 'Autocorrelograms') {
-        return <AutocorrelogramsView data={data} width={width} height={height} />
+    const viewLoaders = [loadCoreView, loadTimeseriesView, loadSpikeSortingView, loadFranklabView]
+    for (let loadView of viewLoaders) {
+        const v = loadView({data, width, height, opts, ViewComponent: View})
+        if (v) return v
     }
-    else if (data.type === 'RasterPlot') {
-        return <RasterPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
+    if (!isViewData(data)) {
+        console.warn(data)
+        throw Error('Invalid view data')
     }
-    else if (data.type === 'Composite') {
+    if (data.type === 'Composite') {
         return <CompositeView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'MultiTimeseries') {
         return <MultiTimeseriesView data={data} ViewComponent={View} width={width} height={height} />
-    }
-    else if (data.type === 'AverageWaveforms') {
-        return <AverageWaveformsView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'UnitsTable') {
-        return <UnitsTableView data={data} width={width} height={height} />
     }
     else if (data.type === 'Summary') {
         return <SummaryView data={data} width={width} height={height} />
@@ -75,17 +55,8 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     else if (data.type === 'MountainLayout') {
         return <MountainLayoutView data={data} ViewComponent={View} width={width} height={height} />
     }
-    else if (data.type === 'SpikeAmplitudes') {
-        return <SpikeAmplitudesView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
-    }
-    else if (data.type === 'ElectrodeGeometry') {
-        return <ElectrodeGeometryView data={data} width={width} height={height} />
-    }
     else if (data.type === 'PositionPlot') {
         return <PositionPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
-    }
-    else if (data.type === 'LiveCrossCorrelograms') {
-        return <LiveCrossCorrelogramsView data={data} width={width} height={height} />
     }
     else if (data.type === 'PositionPdfPlot') {
         return <PositionPdfPlotView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
@@ -99,68 +70,26 @@ const View: FunctionComponent<Props> = ({data, width, height, opts}) => {
     else if (data.type === 'Console') {
         return <ConsoleView data={data} width={width} height={height} />
     }
-    else if (data.type === 'RawTraces') {
-        return <RawTracesView data={data} timeseriesLayoutOpts={opts} width={width} height={height} />
-    }
-    else if (data.type === 'TrackAnimation') {
-        return <TrackPositionAnimationView data={data} width={width} height={height} />
-    }
     else if (data.type === 'SortingLayout') {
         return <SortingLayoutView data={data} ViewComponent={View} width={width} height={height} />
-    }
-    else if (data.type === 'CrossCorrelograms') {
-        return <CrossCorrelogramsView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'UnitSimilarityMatrix') {
-        return <UnitSimilarityMatrixView data={data} width={width} height={height} />
     }
     else if (data.type === 'SortingCuration') {
         return <SortingCurationView data={data} width={width} height={height} />
     }
-    else if (data.type === 'UnitLocations') {
-        return <UnitLocationsView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'Markdown') {
-        return <MarkdownView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'UnitMetricsGraph') {
-        return <UnitMetricsGraphView data={data} width={width} height={height} />
-    }
     else if (data.type === 'TiledImage') {
         return <TiledImageComponent data={data} width={width} height={height} />
-    }
-    else if (data.type === 'SortingCuration2') {
-        return <SortingCuration2View data={data} width={width} height={height} />
     }
     else if (data.type === 'SortingSelection') {
         return <SortingSelectionView data={data} width={width} height={height} />
     }
-    else if (data.type === 'SpikeLocations') {
-        return <SpikeLocationsView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'ConfusionMatrix') {
-        return <ConfusionMatrixView data={data} width={width} height={height} />
-    }
     else if (data.type === 'LiveEvaluateFunction') {
         return <LiveEvaluateFunctionView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'LiveTraces') {
-        return <LiveTracesView data={data} width={width} height={height} />
-    }
-    else if (data.type === 'MainLayout') {
-        return <MainLayoutView data={data} ViewComponent={View} width={width} height={height} />
     }
     else if (data.type === 'ExperimentalSelector1') {
         return <ExperimentalSelector1View data={data} width={width} height={height} />
     }
-    else if (data.type === 'TimeseriesGraph') {
-        return <TimeseriesGraphView data={data} width={width} height={height} />
-    }
     else if (data.type === 'Test1') {
         return <Test1View data={data} width={width} height={height} />
-    }
-    else if (data.type === 'Annotations') {
-        return <AnnotationsView data={data} width={width} height={height} />
     }
     else {
         console.warn('Unsupported view data', data)

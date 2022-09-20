@@ -1,10 +1,10 @@
-import { useTimeRange } from 'libraries/context-recording-selection'
+import { useTimeRange } from '@figurl/timeseries-views'
 import { FunctionComponent, useCallback, useMemo } from 'react'
 import { convert1dDataSeries, use1dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
-import { TimeScrollView, TimeScrollViewPanel } from 'libraries/component-time-scroll-view'
-import { usePanelDimensions, useTimeseriesMargins } from 'libraries/component-time-scroll-view'
-import { DefaultToolbarWidth } from 'libraries/component-time-scroll-view'
+import { TimeScrollView, TimeScrollViewPanel } from '@figurl/timeseries-views'
+import { usePanelDimensions, useTimeseriesMargins } from '@figurl/timeseries-views'
+import { DefaultToolbarWidth } from '@figurl/timeseries-views'
 import { EpochData, EpochsViewData } from './EpochsViewData'
 
 type Props = {

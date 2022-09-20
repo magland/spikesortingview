@@ -1,8 +1,8 @@
 import { Button } from '@material-ui/core';
-import { Hyperlink } from 'libraries/component-hyperlink';
-import { NiceTable } from 'libraries/component-nice-table';
-import { NiceTableColumn, NiceTableRow } from 'libraries/component-nice-table/NiceTable';
-import { useRecordingSelection } from 'libraries/context-recording-selection';
+import { Hyperlink } from '@figurl/core-views';
+import { NiceTable } from '@figurl/core-views';
+import { NiceTableColumn, NiceTableRow } from '@figurl/core-views';
+import { useRecordingSelection } from '@figurl/timeseries-views';
 import { FunctionComponent, useCallback, useMemo, useState } from 'react';
 import { ExperimentalSelector1ViewData } from './ExperimentalSelector1ViewData';
 

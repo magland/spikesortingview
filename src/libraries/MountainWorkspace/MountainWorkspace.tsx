@@ -7,7 +7,7 @@ import MWViewLauncher from './MWViewLauncher';
 import { MWView, MWViewPlugin } from './MWViewPlugin';
 import MWViewWidget from './MWViewWidget';
 import MWCurationControl from './MWCurationControl';
-import { Splitter } from 'libraries/component-splitter';
+import { Splitter } from '@figurl/core-views';
 import { ViewComponentProps } from 'libraries/core-view-component-props';
 
 type Props = {

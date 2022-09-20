@@ -1,3 +1,4 @@
+import { startListeningToParent } from '@figurl/interface';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import './index.css';
@@ -11,6 +12,8 @@ root.render(
   <App />
   // </React.StrictMode>
 );
+
+startListeningToParent()
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

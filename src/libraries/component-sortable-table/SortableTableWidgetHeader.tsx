@@ -1,7 +1,7 @@
 import { faCaretDown, faCaretUp } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grid, LinearProgress, TableCell, TableHead, TableRow } from '@material-ui/core';
-import { UnitSelectionAction, UnitSelectionState, TOGGLE_SELECT_ALL, UPDATE_SORT_FIELDS, SortingRule } from 'libraries/context-unit-selection';
+import { UnitSelectionAction, UnitSelectionState, TOGGLE_SELECT_ALL, UPDATE_SORT_FIELDS, SortingRule } from '@figurl/spike-sorting-views';
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import './SortableTableWidget.css';
 import SortableTableWidgetCheckbox from './SortableTableWidgetCheckbox';

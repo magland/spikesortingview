@@ -1,20 +1,20 @@
+import { useWindowDimensions } from '@figurl/core-utils';
+import { getFigureData, SetupUrlState } from '@figurl/interface';
+import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
+import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer, SetupAnnotations } from '@figurl/timeseries-views';
 import { MuiThemeProvider } from '@material-ui/core';
-import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer } from 'libraries/context-recording-selection';
-import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from 'libraries/context-unit-selection';
-import { getFigureData, SetupUrlState } from 'libraries/figurl';
-import { useWindowDimensions } from 'libraries/util-use-window-dimensions';
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import './localStyles.css';
 import theme from './theme';
 import View from './View';
-import { isViewData, ViewData } from './ViewData';
-import { SetupAnnotations } from 'libraries/context-annotations';
 
 const urlSearchParams = new URLSearchParams(window.location.search)
 const queryParams = Object.fromEntries(urlSearchParams.entries())
 
+// Example: https://www.figurl.org/f?v=http://localhost:3000&d=sha1://c7e0ae023c4c75d9ae85078e459d7fc8daa1224d&label=Track%20position%20animation%20example&s={}
+
 function App() {
-  const [data, setData] = useState<ViewData>()
+  const [data, setData] = useState<any>()
   const [errorMessage, setErrorMessage] = useState<string>()
   const {width, height} = useWindowDimensions()
 
@@ -30,9 +30,8 @@ function App() {
     }
     else {
       getFigureData().then((data: any) => {
-        if (!isViewData(data)) {
-          setErrorMessage(`Invalid figure data`)
-          console.error('Invalid figure data', data)
+        if (!data) {
+          setErrorMessage('No data in return from getFigureData()')
           return
         }
         setData(data)

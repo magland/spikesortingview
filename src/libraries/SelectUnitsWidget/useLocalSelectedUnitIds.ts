@@ -1,5 +1,5 @@
-import { COPY_STATE, defaultUnitSelection, unitSelectionReducer, useSelectedUnitIds } from 'libraries/context-unit-selection';
-import { getCheckboxClickHandlerGenerator } from 'libraries/context-unit-selection';
+import { COPY_STATE, defaultUnitSelection, unitSelectionReducer, useSelectedUnitIds } from '@figurl/spike-sorting-views';
+import { getCheckboxClickHandlerGenerator } from '@figurl/spike-sorting-views';
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 
 // In practice we freeze the controls when the local selection is being used, but this component could theoretically support a separate selector.
