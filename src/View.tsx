@@ -1,9 +1,9 @@
 import { TiledImageComponent } from 'libraries/component-tiled-image';
-import { AnnotationsView } from 'libraries/view-annotations';
+import { AnnotationsView } from '@figurl/timeseries-views';
 import { AutocorrelogramsView } from '@figurl/spike-sorting-views';
-import { AverageWaveformsView } from 'libraries/view-average-waveforms';
+import { AverageWaveformsView } from '@figurl/spike-sorting-views';
 import { CompositeView } from 'libraries/view-composite';
-import { ConfusionMatrixView } from 'libraries/view-confusion-matrix';
+import { ConfusionMatrixView } from '@figurl/spike-sorting-views';
 import { ConsoleView } from 'libraries/view-console';
 import { CrossCorrelogramsView } from '@figurl/spike-sorting-views';
 import { ElectrodeGeometryView } from 'libraries/view-electrode-geometry';

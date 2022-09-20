@@ -1428,25 +1428,6 @@
     minimatch "^3.1.2"
     strip-json-comments "^3.1.1"
 
-"@figurl/core-components@^0.1":
-  version "0.1.5"
-  resolved "https://registry.yarnpkg.com/@figurl/core-components/-/core-components-0.1.5.tgz#745b267a6074458f64bba69078b42813fb278ec6"
-  integrity sha512-ZXsBvUsvJNkLU3kAP0znvNVpExYo/J7vcK2tbYTpk5bFsivATmUcG3R403NyLqPp8ni8+RLSUc1xC1tbPP6/JA==
-  dependencies:
-    "@figurl/core-utils" "^0.1"
-    "@material-ui/core" "^4.12.4"
-    "@material-ui/icons" "^4.11.3"
-    "@types/node" "^18.7.18"
-    assert "npm:assert-browserify"
-    buffer "npm:buffer-browserify"
-    crypto "npm:crypto-browserify"
-    mathjs "^11.2.1"
-    path "npm:path-browserify"
-    react-draggable "^4.4.5"
-    react-icons "^4.4.0"
-    react-visibility-sensor "^5.1.1"
-    stream "npm:stream-browserify"
-
 "@figurl/core-utils@^0.1":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@figurl/core-utils/-/core-utils-0.1.2.tgz#759f3062967cdcaceed2c05e18d79cffa8c4e296"
@@ -1489,12 +1470,13 @@
     stream "npm:stream-browserify"
 
 "@figurl/spike-sorting-views@^0.1":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@figurl/spike-sorting-views/-/spike-sorting-views-0.1.2.tgz#0e914a28453444ecfc0651219c05335b05dd5b8f"
-  integrity sha512-gWCEHj1ehSEW/+oWYgkGdRkWpYrjpEmleRv4d5sJghDEAymGuGG/H87jElnB5WdVh877d6cKS7WqJ9eOfbaOCQ==
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/@figurl/spike-sorting-views/-/spike-sorting-views-0.1.4.tgz#236255ead4df4357730c38bc8b75b04629284fb0"
+  integrity sha512-h0/2Gu5wFzj/YM7tWnnS5M+ruWgIJXzbpDBD0fhZDIOa/kjlu0i0B8j11MQYrq176bSmv9VDEdE6BFVM6qBSFg==
   dependencies:
-    "@figurl/core-components" "^0.1"
+    "@figurl/core-views" "^0.1"
     "@figurl/interface" "^0.1"
+    "@figurl/timeseries-views" "^0.1"
     "@fortawesome/fontawesome-svg-core" "^6.1.1"
     "@fortawesome/free-regular-svg-icons" "^6.1.2"
     "@fortawesome/free-solid-svg-icons" "^6.1.1"
