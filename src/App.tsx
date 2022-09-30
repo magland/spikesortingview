@@ -1,6 +1,6 @@
 import { useWindowDimensions } from '@figurl/core-utils';
 import { getFigureData, SetupUrlState } from '@figurl/interface';
-import { defaultUnitSelection, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
+import { defaultUnitSelection, SetupSortingCuration, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
 import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer, SetupAnnotations } from '@figurl/timeseries-views';
 import { MuiThemeProvider } from '@material-ui/core';
 import { useEffect, useMemo, useReducer, useState } from 'react';
@@ -58,12 +58,14 @@ function App() {
         <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
           <SetupAnnotations>
             <SetupUrlState>
-              <View
-                data={data}
-                opts={opts}
-                width={width - 10}
-                height={height - 5}
-              />
+              <SetupSortingCuration>
+                <View
+                  data={data}
+                  opts={opts}
+                  width={width - 10}
+                  height={height - 5}
+                />
+              </SetupSortingCuration>
             </SetupUrlState>
           </SetupAnnotations>
         </UnitSelectionContext.Provider>

@@ -1491,9 +1491,9 @@
     stream "npm:stream-browserify"
 
 "@figurl/spike-sorting-views@^0.1":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@figurl/spike-sorting-views/-/spike-sorting-views-0.1.8.tgz#60f916397c09683cb7a8e69866e0cd36be5ff6c0"
-  integrity sha512-OrP4XnjmN6XtWRoiOIqOInAbsnSJxeBDAUqx0hqg+WxC1F5O2caf0aY4mFvr9Enll8A8l6Pou2PwhdFu5zLteA==
+  version "0.1.11"
+  resolved "https://registry.yarnpkg.com/@figurl/spike-sorting-views/-/spike-sorting-views-0.1.11.tgz#2a44a60a8f29045da829522674483a64407850d5"
+  integrity sha512-/TABL1kgLNh/LcDAwEljNSCQH38WHjJs2KGt8fj9yt8vuduN4MdI0QP/D6hMI2BRUTuJz1y+kBo7/MN0+1J1hQ==
   dependencies:
     "@figurl/core-views" "^0.1"
     "@figurl/interface" "^0.1"
@@ -2773,7 +2773,7 @@
   resolved "https://registry.yarnpkg.com/@types/mime/-/mime-3.0.1.tgz#5f8f2bca0a5863cb69bc0b0acd88c96cb1d4ae10"
   integrity sha512-Y4XFY5VJAuw0FgAqPNd6NNoV44jbq9Bz2L7Rh/J6jLTiHBSBJa9fxqQIvkIld4GsoDOcCbvzOUAbLPsSKKg+uA==
 
-"@types/node@*", "@types/node@^18.7.18":
+"@types/node@*":
   version "18.7.18"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.18.tgz#633184f55c322e4fb08612307c274ee6d5ed3154"
   integrity sha512-m+6nTEOadJZuTPkKR/SYK3A2d7FZrgElol9UP1Kae90VVU4a6mxnPuLiIW1m4Cq4gZ/nWb9GrdVXJCoCazDAbg==
@@ -2787,6 +2787,11 @@
   version "16.11.59"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.59.tgz#823f238b9063ccc3b3b7f13186f143a57926c4f6"
   integrity sha512-6u+36Dj3aDzhfBVUf/mfmc92OEdzQ2kx2jcXGdigfl70E/neV21ZHE6UCz4MDzTRcVqGAM27fk+DLXvyDsn3Jw==
+
+"@types/node@^18.7.18":
+  version "18.7.23"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.7.23.tgz#75c580983846181ebe5f4abc40fe9dfb2d65665f"
+  integrity sha512-DWNcCHolDq0ZKGizjx2DZjR/PqsYwAcYUJmfMWqtVU2MBMG5Mo+xFZrhGId5r/O5HOuMPyQEcM6KUBp5lBZZBg==
 
 "@types/object-hash@^2.2.1":
   version "2.2.1"
