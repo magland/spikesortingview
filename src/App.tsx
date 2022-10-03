@@ -1,6 +1,6 @@
 import { useWindowDimensions } from '@figurl/core-utils';
 import { getFigureData, SetupUrlState } from '@figurl/interface';
-import { defaultUnitSelection, SetupSortingCuration, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
+import { defaultUnitSelection, SetupSortingCuration, UnitMetricSelectionContext, unitMetricSelectionReducer, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
 import { defaultRecordingSelection, RecordingSelectionContext, recordingSelectionReducer, SetupAnnotations } from '@figurl/timeseries-views';
 import { MuiThemeProvider } from '@material-ui/core';
 import { useEffect, useMemo, useReducer, useState } from 'react';
@@ -20,6 +20,8 @@ function App() {
 
   const [unitSelection, unitSelectionDispatch] = useReducer(unitSelectionReducer, defaultUnitSelection)
   const [recordingSelection, recordingSelectionDispatch] = useReducer(recordingSelectionReducer, defaultRecordingSelection)
+
+  const [unitMetricSelection, unitMetricSelectionDispatch] = useReducer(unitMetricSelectionReducer, {})
 
   useEffect(() => {
     if (queryParams.test === '1') {
@@ -56,18 +58,20 @@ function App() {
     <MuiThemeProvider theme={theme}>
       <RecordingSelectionContext.Provider value={{recordingSelection, recordingSelectionDispatch}}>
         <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
-          <SetupAnnotations>
-            <SetupUrlState>
-              <SetupSortingCuration>
-                <View
-                  data={data}
-                  opts={opts}
-                  width={width - 10}
-                  height={height - 5}
-                />
-              </SetupSortingCuration>
-            </SetupUrlState>
-          </SetupAnnotations>
+          <UnitMetricSelectionContext.Provider value={{unitMetricSelection, unitMetricSelectionDispatch}}>
+            <SetupAnnotations>
+              <SetupUrlState>
+                <SetupSortingCuration>
+                  <View
+                    data={data}
+                    opts={opts}
+                    width={width - 10}
+                    height={height - 5}
+                  />
+                </SetupSortingCuration>
+              </SetupUrlState>
+            </SetupAnnotations>
+          </UnitMetricSelectionContext.Provider>
         </UnitSelectionContext.Provider>
       </RecordingSelectionContext.Provider>
     </MuiThemeProvider>
