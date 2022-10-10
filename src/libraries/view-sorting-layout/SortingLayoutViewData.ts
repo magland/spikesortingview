@@ -67,7 +67,8 @@ export const isLayoutItem = (x: any): x is LayoutItem => {
             items: isArrayOf(isLayoutItem),
             itemProperties: isArrayOf(z => (validateObject(z, {
                 label: isString,
-                isControl: optional(isBoolean)
+                isControl: optional(isBoolean),
+                controlHeight: optional(isNumber)
             })))
         })),
         (y: any) => (validateObject(y, {
@@ -107,5 +108,5 @@ export const isSortingLayoutViewData = (x: any): x is SortingLayoutViewData => {
         }))),
         layout: isLayoutItem,
         sortingCurationUri: optional(isString)
-    })
+    }, {callback: a => console.log('--- a', a)})
 }
