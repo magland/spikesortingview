@@ -1,4 +1,5 @@
 import { useWindowDimensions } from '@figurl/core-utils';
+import { SetupStyleSettings } from '@figurl/franklab-views';
 import { getFigureData, SetupUrlState } from '@figurl/interface';
 import { defaultUnitSelection, SetupSortingCuration, UnitMetricSelectionContext, unitMetricSelectionReducer, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
 import { SetupAnnotations, SetupRecordingSelection } from '@figurl/timeseries-views';
@@ -61,12 +62,14 @@ function App() {
             <SetupAnnotations>
               <SetupUrlState>
                 <SetupSortingCuration>
-                  <View
-                    data={data}
-                    opts={opts}
-                    width={width - 10}
-                    height={height - 5}
-                  />
+                  <SetupStyleSettings>
+                    <View
+                      data={data}
+                      opts={opts}
+                      width={width - 10}
+                      height={height - 5}
+                    />
+                  </SetupStyleSettings>
                 </SetupSortingCuration>
               </SetupUrlState>
             </SetupAnnotations>
