@@ -19,7 +19,7 @@ const SortingSelectionView: FunctionComponent<Props> = ({width, height}) => {
         orderedUnitIds.filter(x => (selectedUnitIdsSet && selectedUnitIdsSet.has(x))
     )), [selectedUnitIdsSet, orderedUnitIds])
     const labelChoices = useMemo(() => (
-        getAllLabelChoices(sortingCuration)
+        getAllLabelChoices(sortingCuration, undefined)
     ), [sortingCuration])
     const labelSelectedStates = useMemo(() => (
         getLabelSelectedStates(labelChoices, sortingCuration, selectedUnitIds, orderedUnitIds)
