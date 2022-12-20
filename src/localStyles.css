@@ -61,6 +61,11 @@
     border: 3px solid transparent;
 }
 
+.plotCurrentStyle {
+    border: 3px solid darkblue;
+    background-color: #95b1df;
+}
+
 .plotLabelStyle {
     font-weight: bold;
     text-align: center;
