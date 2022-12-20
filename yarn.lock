@@ -1492,9 +1492,9 @@
     stream "npm:stream-browserify"
 
 "@figurl/spike-sorting-views@^0.1":
-  version "0.1.26"
-  resolved "https://registry.yarnpkg.com/@figurl/spike-sorting-views/-/spike-sorting-views-0.1.26.tgz#fd9038fd599d373bb30653f5e1e1c63bf57ccc00"
-  integrity sha512-DYWy20dBMDdc+BTjkYrzaS0lPrIo8zHwLrbeP6Vf/vDY+9AqhhJm1CkJMshYAW4KKZ9BSwGZADFrhKf6/20TKA==
+  version "0.1.27"
+  resolved "https://registry.yarnpkg.com/@figurl/spike-sorting-views/-/spike-sorting-views-0.1.27.tgz#55c2bba9709d5f55d25fbf778fbaf618a62ea543"
+  integrity sha512-RnmrBzW+oN+NuW2oZxVf1g3WwdxZtx6a/q3UH3WRSxaDwfvzvlXFnJ6q2N85TT4/uPcmacJ/78jQfWRiUNIsSg==
   dependencies:
     "@figurl/core-views" "^0.1"
     "@figurl/interface" "^0.1"
@@ -12169,7 +12169,7 @@ y18n@^5.0.5:
   resolved "https://registry.yarnpkg.com/y18n/-/y18n-5.0.8.tgz#7f4934d0f7ca8c56f95314939ddcd2dd91ce1d55"
   integrity sha512-0pfFzegeDWJHJIAmTLRP2DwHjdF5s7jo9tuztdQxAhINCdvS+3nGINqPd00AphqJR/0LhANUS6/+7SCb98YOfA==
 
-yallist@*, yallist@^4.0.0:
+yallist@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-4.0.0.tgz#9bb92790d9c0effec63be73519e11a35019a3a72"
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
