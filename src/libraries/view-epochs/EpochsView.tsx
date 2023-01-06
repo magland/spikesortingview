@@ -29,7 +29,7 @@ const panelSpacing = 4
 const emptyPanelSelection = new Set<number | string>()
 
 const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
-    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
+    const {visibleStartTimeSec, visibleEndTimeSec } = useTimeRange()
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
@@ -40,15 +40,15 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
 
     const { epochs } = data
 
-    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleTimeStartSeconds, visibleTimeEndSeconds)
+    const timeToPixelMatrix = use1dScalingMatrix(panelWidth, visibleStartTimeSec, visibleEndTimeSec)
 
     const pixelEpochs = useMemo(() => { 
         const ret: {startPixel: number, endPixel: number, epoch: EpochData}[] = []
-        if ((visibleTimeStartSeconds === undefined) || (visibleTimeEndSeconds === undefined)) {
+        if ((visibleStartTimeSec === undefined) || (visibleEndTimeSec === undefined)) {
             return ret
         }
         for (let epoch of epochs) {
-            if ((epoch.startTime <= visibleTimeEndSeconds) && (epoch.endTime >= visibleTimeStartSeconds)) {
+            if ((epoch.startTime <= visibleEndTimeSec) && (epoch.endTime >= visibleStartTimeSec)) {
                 const pixelTimes = convert1dDataSeries([epoch.startTime, epoch.endTime], timeToPixelMatrix)
                 ret.push({
                     startPixel: pixelTimes[0],
@@ -58,7 +58,7 @@ const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width
             }
         }
         return ret
-    }, [epochs, visibleTimeStartSeconds, visibleTimeEndSeconds, timeToPixelMatrix])
+    }, [epochs, visibleStartTimeSec, visibleEndTimeSec, timeToPixelMatrix])
 
     const paintPanel = useCallback((context: CanvasRenderingContext2D, props: PanelProps) => {
         context.clearRect(0, 0, panelWidth, panelHeight)

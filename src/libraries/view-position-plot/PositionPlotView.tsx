@@ -1,4 +1,4 @@
-import { useRecordingSelectionTimeInitialization, useTimeRange } from '@figurl/timeseries-views'
+import { useTimeseriesSelectionInitialization, useTimeRange } from '@figurl/timeseries-views'
 import { FunctionComponent, useCallback, useMemo } from 'react'
 import { convert2dDataSeries, getYAxisPixelZero, use2dScalingMatrix } from 'libraries/util-point-projection'
 import { TimeseriesLayoutOpts } from 'View'
@@ -34,8 +34,8 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
     const {timestamps, positions, dimensionLabels, discontinuous, timeOffset} = data
 
     // This component ignores timeOffset except in the following two hooks
-    useRecordingSelectionTimeInitialization(timestamps[0], timestamps[timestamps.length - 1], timeOffset) // timeOffset is added to start and end before setting to the global state
-    const {visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange(timeOffset) // timeOffset is subtracted from start and end after getting from the global state
+    useTimeseriesSelectionInitialization(timestamps[0], timestamps[timestamps.length - 1], timeOffset) // timeOffset is added to start and end before setting to the global state
+    const {visibleStartTimeSec, visibleEndTimeSec } = useTimeRange(timeOffset) // timeOffset is subtracted from start and end after getting from the global state
 
     const margins = useTimeseriesMargins(timeseriesLayoutOpts)
 
@@ -81,10 +81,10 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
 
     const series = useMemo(() => {
         const series: {dimensionIndex: number, times: number[], values: number[]}[] = []
-        if ((visibleTimeStartSeconds === undefined) || (visibleTimeEndSeconds === undefined)) {
+        if ((visibleStartTimeSec === undefined) || (visibleEndTimeSec === undefined)) {
             return series
         }
-        const filteredTimeIndices = timestamps.flatMap((t, ii) => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds) ? ii : [])
+        const filteredTimeIndices = timestamps.flatMap((t, ii) => (visibleStartTimeSec <= t) && (t <= visibleEndTimeSec) ? ii : [])
         const filteredTimes = filteredTimeIndices.map(i => timestamps[i])
         const filteredValues = filteredTimeIndices.map(index => positions[index])
         dimensionLabels.forEach((d, ii) => {
@@ -97,8 +97,8 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
 
         // ought to profile these two
         // for (let dimensionIndex=0; dimensionIndex<dimensionLabels.length; dimensionIndex++) {
-        //     const filteredTimes = timestamps.filter(t => (visibleTimeStartSeconds <= t) && (t <= visibleTimeEndSeconds))
-        //     const filteredValues = timestamps.map((t, ii) => (positions[ii][dimensionIndex])).filter((a, ii) => (visibleTimeStartSeconds <= timestamps[ii]) && (timestamps[ii] <= visibleTimeEndSeconds))
+        //     const filteredTimes = timestamps.filter(t => (visibleStartTimeSec <= t) && (t <= visibleEndTimeSec))
+        //     const filteredValues = timestamps.map((t, ii) => (positions[ii][dimensionIndex])).filter((a, ii) => (visibleStartTimeSec <= timestamps[ii]) && (timestamps[ii] <= visibleEndTimeSec))
         //     series.push({
         //         dimensionIndex,
         //         times: filteredTimes,
@@ -106,7 +106,7 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         //     })
         // }
         return series
-    }, [timestamps, visibleTimeStartSeconds, visibleTimeEndSeconds, dimensionLabels, positions])
+    }, [timestamps, visibleStartTimeSec, visibleEndTimeSec, dimensionLabels, positions])
 
     const valueRange = useMemo(() => {
         const yMin = Math.min(0, min(series.map(S => (min(S.values)))))
@@ -118,8 +118,8 @@ const PositionPlotView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts,
         totalPixelWidth: panelWidth,
         totalPixelHeight: panelHeight,
         // margins have already been accounted for since we use a panel-oriented scaling function here
-        dataXMin: visibleTimeStartSeconds,
-        dataXMax: visibleTimeEndSeconds,
+        dataXMin: visibleStartTimeSec,
+        dataXMax: visibleEndTimeSec,
         dataYMin: valueRange.yMin,
         dataYMax: valueRange.yMax
     })

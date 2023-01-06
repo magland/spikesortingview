@@ -1,15 +1,10 @@
-import { SortingCurationAction } from '@figurl/spike-sorting-views';
-import { SortingCurationContext, sortingCurationReducer } from '@figurl/spike-sorting-views';
-import { UnitMetricSelectionContext, unitMetricSelectionReducer } from '@figurl/spike-sorting-views';
-import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn } from '@figurl/interface';
-import { useUrlState } from '@figurl/interface';
-import { sortIds, useSelectedUnitIds } from '@figurl/spike-sorting-views';
-import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
+import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn, useUrlState } from '@figurl/interface';
+import { SortingCurationAction, SortingCurationContext, sortingCurationReducer, UnitMetricSelectionContext, unitMetricSelectionReducer, useSelectedUnitIds } from '@figurl/spike-sorting-views';
+import { ViewComponentProps } from 'libraries/core-view-component-props';
 import { feedIdForUri } from 'libraries/view-mountain-layout';
-import { onMessageFromBackend, sendMessageToBackend } from '@figurl/interface';
+import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
-import { ViewComponentProps } from 'libraries/core-view-component-props';
 
 type Props = {
     data: SortingLayoutViewData
@@ -23,7 +18,7 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, ViewComponent, width
 
     const {state: sortingCuration} = useFeedReducer({feedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
     const {userId, googleIdToken} = useSignedIn()
-    const {selectedUnitIds, unitIdSelectionDispatch} = useSelectedUnitIds()
+    const {unitIdSelectionDispatch} = useSelectedUnitIds()
     const sortingCurationDispatch = useCallback((a: SortingCurationAction) => {
         if (!data.sortingCurationUri) return
         initiateTask({
@@ -86,38 +81,38 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, ViewComponent, width
 
     const [unitMetricSelection, unitMetricSelectionDispatch] = useReducer(unitMetricSelectionReducer, {})
 
-    // syncing state with backend
-    useEffect(() => {
-        sendMessageToBackend({
-            type: 'setSelectedUnitIds',
-            selectedUnitIds: sortIds([...selectedUnitIds])
-        })
-    }, [selectedUnitIds])
-    useEffect(() => {
-        sendMessageToBackend({
-            type: 'setSortingCuration',
-            sortingCuration: sortingCuration2
-        })
-    }, [sortingCuration2])
-    useEffect(() => {
-        let canceled = false
-        onMessageFromBackend((message) => {
-            if (canceled) return
-            if (message.type === 'setSelectedUnitIds') {
-                unitIdSelectionDispatch({
-                    type: 'SET_SELECTION',
-                    incomingSelectedUnitIds: message.selectedUnitIds
-                })
-            }
-            else if (message.type === 'setSortingCuration') {
-                sortingCurationDispatch2({
-                    type: 'SET_CURATION',
-                    curation: message.sortingCuration
-                })
-            }
-        })
-        return () => {canceled = true}
-    }, [unitIdSelectionDispatch])
+    // // syncing state with backend
+    // useEffect(() => {
+    //     sendMessageToBackend({
+    //         type: 'setSelectedUnitIds',
+    //         selectedUnitIds: sortIds([...selectedUnitIds])
+    //     })
+    // }, [selectedUnitIds])
+    // useEffect(() => {
+    //     sendMessageToBackend({
+    //         type: 'setSortingCuration',
+    //         sortingCuration: sortingCuration2
+    //     })
+    // }, [sortingCuration2])
+    // useEffect(() => {
+    //     let canceled = false
+    //     onMessageFromBackend((message) => {
+    //         if (canceled) return
+    //         if (message.type === 'setSelectedUnitIds') {
+    //             unitIdSelectionDispatch({
+    //                 type: 'SET_SELECTION',
+    //                 incomingSelectedUnitIds: message.selectedUnitIds
+    //             })
+    //         }
+    //         else if (message.type === 'setSortingCuration') {
+    //             sortingCurationDispatch2({
+    //                 type: 'SET_CURATION',
+    //                 curation: message.sortingCuration
+    //             })
+    //         }
+    //     })
+    //     return () => {canceled = true}
+    // }, [unitIdSelectionDispatch])
 
     const content = (
         <UnitMetricSelectionContext.Provider value={{unitMetricSelection, unitMetricSelectionDispatch}}>

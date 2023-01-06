@@ -1,6 +1,6 @@
 import { Checkbox } from '@material-ui/core'
 import { DefaultToolbarWidth, TimeScrollView, TimeScrollViewPanel, usePanelDimensions, useTimeseriesMargins } from '@figurl/timeseries-views'
-import { useRecordingSelectionTimeInitialization, useTimeRange } from '@figurl/timeseries-views'
+import { useTimeseriesSelectionInitialization, useTimeRange } from '@figurl/timeseries-views'
 import { useFetchCache } from '@figurl/core-utils'
 import { FunctionComponent, useCallback, useMemo, useState } from 'react'
 import { TimeseriesLayoutOpts } from 'View'
@@ -66,45 +66,45 @@ const usePositionPdfDataModel = (fetchSegment: (q: FetchSegmentQuery) => Promise
 const emptyPanelSelection = new Set<number | string>()
 
 const PositionPdfPlotWidget: FunctionComponent<Props> = ({fetchSegment, startTimeSec, endTimeSec, samplingFrequency, numPositions, linearPositions, segmentSize, multiscaleFactor, timeseriesLayoutOpts, width, height}) => {
-    useRecordingSelectionTimeInitialization(startTimeSec, endTimeSec)
-    const { visibleTimeStartSeconds, visibleTimeEndSeconds } = useTimeRange()
+    useTimeseriesSelectionInitialization(startTimeSec, endTimeSec)
+    const { visibleStartTimeSec, visibleEndTimeSec } = useTimeRange()
     const numTimepoints = Math.floor((endTimeSec - startTimeSec) * samplingFrequency)
     const dataModel = usePositionPdfDataModel(fetchSegment, numPositions, segmentSize)
     const [showLinearPositionsOverlay, setShowLinearPositionsOverlay] = useState<boolean>(false)
     
     const rangeStartSample = useMemo(() => {
-        return visibleTimeStartSeconds === undefined ? 0 : Math.max(0, Math.floor(visibleTimeStartSeconds - startTimeSec) * samplingFrequency)
-    }, [visibleTimeStartSeconds, startTimeSec, samplingFrequency])
+        return visibleStartTimeSec === undefined ? 0 : Math.max(0, Math.floor(visibleStartTimeSec - startTimeSec) * samplingFrequency)
+    }, [visibleStartTimeSec, startTimeSec, samplingFrequency])
     const rangeEndSample = useMemo(() => {
-        return visibleTimeEndSeconds === undefined ? 0 : Math.min(numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
-    }, [visibleTimeEndSeconds, numTimepoints, startTimeSec, samplingFrequency])
+        return visibleEndTimeSec === undefined ? 0 : Math.min(numTimepoints, Math.ceil((visibleEndTimeSec - startTimeSec) * samplingFrequency))
+    }, [visibleEndTimeSec, numTimepoints, startTimeSec, samplingFrequency])
 
     const downsampleFactor = useMemo(() => {
-        if (visibleTimeStartSeconds === undefined || visibleTimeEndSeconds === undefined) return 1
+        if (visibleStartTimeSec === undefined || visibleEndTimeSec === undefined) return 1
         const target = (rangeEndSample - rangeStartSample)/width
         const factor = Math.ceil(Math.log(target)/Math.log(multiscaleFactor))
         return Math.pow(multiscaleFactor, factor)
-    }, [visibleTimeStartSeconds, visibleTimeEndSeconds, rangeEndSample, rangeStartSample, width, multiscaleFactor])
+    }, [visibleStartTimeSec, visibleEndTimeSec, rangeEndSample, rangeStartSample, width, multiscaleFactor])
 
     const visibleValues = useMemo(() => {
-        if (visibleTimeStartSeconds === undefined) return undefined
-        if (visibleTimeEndSeconds === undefined) return undefined
+        if (visibleStartTimeSec === undefined) return undefined
+        if (visibleEndTimeSec === undefined) return undefined
         if (rangeEndSample <= rangeStartSample) return undefined
 
         const j1 = Math.floor(rangeStartSample / downsampleFactor)
         const j2 = Math.ceil(rangeEndSample / downsampleFactor)
         const visibleValues = dataModel.get(j1, j2, downsampleFactor)
         return visibleValues
-    }, [dataModel, visibleTimeStartSeconds, visibleTimeEndSeconds, downsampleFactor, rangeStartSample, rangeEndSample])
+    }, [dataModel, visibleStartTimeSec, visibleEndTimeSec, downsampleFactor, rangeStartSample, rangeEndSample])
     
     const visibleLinearPositions: number[] | undefined = useMemo(() => {
         if (!linearPositions) return undefined
-        if (visibleTimeStartSeconds === undefined) return undefined
-        if (visibleTimeEndSeconds === undefined) return undefined
-        const i1 = Math.max(0, Math.floor((visibleTimeStartSeconds - startTimeSec) * samplingFrequency))
-        const i2 = Math.min(numTimepoints, Math.ceil((visibleTimeEndSeconds - startTimeSec) * samplingFrequency))
+        if (visibleStartTimeSec === undefined) return undefined
+        if (visibleEndTimeSec === undefined) return undefined
+        const i1 = Math.max(0, Math.floor((visibleStartTimeSec - startTimeSec) * samplingFrequency))
+        const i2 = Math.min(numTimepoints, Math.ceil((visibleEndTimeSec - startTimeSec) * samplingFrequency))
         return linearPositions.slice(i1, i2)
-    }, [numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleTimeStartSeconds, visibleTimeEndSeconds])
+    }, [numTimepoints, linearPositions, samplingFrequency, startTimeSec, visibleStartTimeSec, visibleEndTimeSec])
     
     const {minValue, maxValue} = useMemo(() => {
         if (!visibleValues) return {minValue: 0, maxValue: 0}

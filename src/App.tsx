@@ -2,7 +2,7 @@ import { useWindowDimensions } from '@figurl/core-utils';
 import { SetupStyleSettings } from '@figurl/franklab-views';
 import { getFigureData, SetupUrlState } from '@figurl/interface';
 import { defaultUnitSelection, SetupSortingCuration, UnitMetricSelectionContext, unitMetricSelectionReducer, UnitSelectionContext, unitSelectionReducer } from '@figurl/spike-sorting-views';
-import { SetupAnnotations, SetupRecordingSelection } from '@figurl/timeseries-views';
+import { SetupAnnotations, SetupTimeseriesSelection } from '@figurl/timeseries-views';
 import { MuiThemeProvider } from '@material-ui/core';
 import { useEffect, useMemo, useReducer, useState } from 'react';
 import './localStyles.css';
@@ -56,7 +56,7 @@ function App() {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <SetupRecordingSelection>
+      <SetupTimeseriesSelection>
         <UnitSelectionContext.Provider value={{unitSelection, unitSelectionDispatch}}>
           <UnitMetricSelectionContext.Provider value={{unitMetricSelection, unitMetricSelectionDispatch}}>
             <SetupAnnotations>
@@ -75,7 +75,7 @@ function App() {
             </SetupAnnotations>
           </UnitMetricSelectionContext.Provider>
         </UnitSelectionContext.Provider>
-      </SetupRecordingSelection>
+      </SetupTimeseriesSelection>
     </MuiThemeProvider>
   )
 }

@@ -2,9 +2,9 @@ import { Button } from '@material-ui/core';
 import { Hyperlink } from '@figurl/core-views';
 import { NiceTable } from '@figurl/core-views';
 import { NiceTableColumn, NiceTableRow } from '@figurl/core-views';
-import { useRecordingSelection } from '@figurl/timeseries-views';
-import { FunctionComponent, useCallback, useMemo, useState } from 'react';
+import { FunctionComponent, useCallback, useContext, useMemo, useState } from 'react';
 import { ExperimentalSelector1ViewData } from './ExperimentalSelector1ViewData';
+import { TimeseriesSelectionContext } from '@figurl/timeseries-views';
 
 type Props = {
     data: ExperimentalSelector1ViewData
@@ -24,8 +24,8 @@ const columns: NiceTableColumn[] = [
 ]
 
 const ExperimentalSelector1View: FunctionComponent<Props> = ({data, width, height}) => {
-    const {recordingSelection, recordingSelectionDispatch} = useRecordingSelection()
-    const {focusTimeSeconds} = recordingSelection
+    const {timeseriesSelection, timeseriesSelectionDispatch} = useContext(TimeseriesSelectionContext)
+    const {currentTimeSec} = timeseriesSelection
     const [savedTimes, setSavedTimes] = useState<number[]>([])
 
     const rows: NiceTableRow[] = useMemo(() => {
@@ -35,16 +35,16 @@ const ExperimentalSelector1View: FunctionComponent<Props> = ({data, width, heigh
                 columnValues: {
                     name: `${i}`,
                     time: {
-                        element: <Hyperlink onClick={() => recordingSelectionDispatch({type: 'setFocusTime', focusTimeSec: t})}>{t}</Hyperlink>
+                        element: <Hyperlink onClick={() => timeseriesSelectionDispatch({type: 'setFocusTime', currentTimeSec: t})}>{t}</Hyperlink>
                     }
                 }
             }
         ))
-    }, [savedTimes, recordingSelectionDispatch])
+    }, [savedTimes, timeseriesSelectionDispatch])
 
     const handleAdd = useCallback(() => {
-        focusTimeSeconds !== undefined && setSavedTimes(x => ([...x, focusTimeSeconds]))
-    }, [focusTimeSeconds])
+        currentTimeSec !== undefined && setSavedTimes(x => ([...x, currentTimeSec]))
+    }, [currentTimeSec])
 
     const handleDelete = useCallback((key: string) => {
         const i = parseInt(key)
@@ -58,8 +58,8 @@ const ExperimentalSelector1View: FunctionComponent<Props> = ({data, width, heigh
 
     return (
         <div style={{margin: 20}}>
-            Selected time (sec): {focusTimeSeconds !== undefined ? focusTimeSeconds : 'undefined'}
-            <Button disabled={focusTimeSeconds === undefined} onClick={handleAdd}>Add selected time</Button>
+            Selected time (sec): {currentTimeSec !== undefined ? currentTimeSec : 'undefined'}
+            <Button disabled={currentTimeSec === undefined} onClick={handleAdd}>Add selected time</Button>
             <hr />
             <NiceTable
                 rows={rows}

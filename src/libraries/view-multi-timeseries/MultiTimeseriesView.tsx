@@ -21,11 +21,11 @@ const MultiTimeseriesView: FunctionComponent<Props> = ({data, ViewComponent, wid
         overflowY: 'auto'
     }), [width, height])
 
-    const { zoomRecordingSelection, panRecordingSelection } = useTimeRange()
+    const { zoomTimeseriesSelection, panTimeseriesSelection } = useTimeRange()
     const timeControlActions = useMemo(() => {
-        if (!zoomRecordingSelection || !panRecordingSelection) return []
-        return TimeWidgetToolbarEntries({zoomRecordingSelection, panRecordingSelection})
-    }, [zoomRecordingSelection, panRecordingSelection])
+        if (!zoomTimeseriesSelection || !panTimeseriesSelection) return []
+        return TimeWidgetToolbarEntries({zoomTimeseriesSelection, panTimeseriesSelection})
+    }, [zoomTimeseriesSelection, panTimeseriesSelection])
     const horizontalToolbarTopPadding = 15
     const toolbarHeight = 30
     const effectiveHeight = height - toolbarHeight - horizontalToolbarTopPadding
