@@ -1,6 +1,5 @@
-import { validateObject } from "@figurl/core-utils"
+import { isString, validateObject } from "@figurl/core-utils"
 import { isArrayOf, isEqualTo, optional } from "@figurl/core-utils"
-import { isString } from "vega"
 
 export type MLViewData = {
     label: string

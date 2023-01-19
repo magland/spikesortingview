@@ -16,7 +16,6 @@
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
-    "@math.gl/core": "^3.6.2",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
@@ -24,43 +23,25 @@
     "@types/node": "^16.11.45",
     "@types/react": "^18.0.15",
     "@types/react-dom": "^18.0.6",
-    "@types/react-syntax-highlighter": "^15.5.3",
     "assert": "npm:assert-browserify",
     "buffer": "npm:buffer-browserify",
-    "chroma-js": "^2.4.2",
     "crypto": "npm:crypto-browserify",
     "deck.gl": "^8.8.4",
-    "github-markdown-css": "^5.1.0",
-    "mathjs": "^11.2.1",
-    "object-hash": "^3.0.0",
     "path": "npm:path-browserify",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-draggable": "^4.4.5",
-    "react-icons": "^4.4.0",
-    "react-markdown": "^4.3.1",
     "react-scripts": "5.0.1",
-    "react-select": "^5.4.0",
-    "react-sizeme": "^3.0.2",
-    "react-syntax-highlighter": "^15.5.0",
-    "react-vega": "^7.6.0",
-    "react-visibility-sensor": "^5.1.1",
-    "scale-color-perceptual": "^1.1.2",
     "stream": "npm:stream-browserify",
     "typescript": "^4.7.4",
-    "vega": "^5.22.1",
-    "vega-lite": "^5.3.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "BROWSER=none react-scripts start",
     "build": "GENERATE_SOURCEMAP=false react-scripts build",
+    "build-with-sourcemap": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "dependency-dot": "depcruise --include-only \"^src\" --output-type dot --ts-config --config .dependency-cruiser.js tsconfig.json src | dot -T svg > dependencygraph.svg",
-    "dependency-dot-libraries": "depcruise --include-only \"^src\" --collapse 3 --output-type dot --config .dependency-cruiser.js --ts-config tsconfig.json src/libraries | dot -T svg > dependencygraph.svg",
-    "dependency-dot-debug": "depcruise --include-only \"^src\" --collapse 3 --output-type dot --config .dependency-cruiser.js --ts-config tsconfig.json src/libraries > test.dot",
-    "dependency-check": "depcruise --include-only \"^src\" --config .dependency-cruiser.js src",
     "bundle-into-single-html": "GENERATE_SOURCEMAP=false node devel/bundle-into-single-html.js"
   },
   "eslintConfig": {
@@ -82,8 +63,6 @@
     ]
   },
   "devDependencies": {
-    "@types/chroma-js": "^2.1.4",
-    "@types/object-hash": "^2.2.1",
-    "dependency-cruiser": "^11.15.0"
+    "source-map-explorer": "^2.5.3"
   }
 }

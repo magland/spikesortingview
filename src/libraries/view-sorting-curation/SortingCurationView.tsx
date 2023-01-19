@@ -1,5 +1,4 @@
 import { FunctionComponent } from 'react';
-import { MVCurationControl } from 'libraries/MountainWorkspace';
 import { SortingCurationViewData } from './SortingCurationViewData';
 
 type Props = {
@@ -11,7 +10,7 @@ type Props = {
 const SortingCurationView: FunctionComponent<Props> = ({data, width, height}) => {
     return (
         <div style={{position: 'absolute', width, height}}>
-            <MVCurationControl />
+            {/* <MVCurationControl /> */}
         </div>
     )
 }

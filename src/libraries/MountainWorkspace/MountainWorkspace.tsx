@@ -1,14 +1,13 @@
+import { Splitter } from '@figurl/core-views';
 import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
+import { ViewComponentProps } from 'libraries/core-view-component-props';
+import { FunctionComponent, useCallback, useReducer } from 'react';
 import Expandable from './components/Expandable/Expandable';
-import React, { FunctionComponent, useCallback, useReducer } from 'react';
-import openViewsReducer from './openViewsReducer';
 import MWViewContainer from './MWContainer';
 import MWViewLauncher from './MWViewLauncher';
 import { MWView, MWViewPlugin } from './MWViewPlugin';
 import MWViewWidget from './MWViewWidget';
-import MWCurationControl from './MWCurationControl';
-import { Splitter } from '@figurl/core-views';
-import { ViewComponentProps } from 'libraries/core-view-component-props';
+import openViewsReducer from './openViewsReducer';
 
 type Props = {
     viewPlugins: MWViewPlugin[]
@@ -67,13 +66,13 @@ const MountainWorkspace: FunctionComponent<Props> = ({width, height, viewPlugins
                 </Expandable>
 
                 {/* Curation */}
-                {
+                {/* {
                     !hideCurationControl && (
                         <Expandable icon={launchIcon} label="Curation" defaultExpanded={true} unmountOnExit={false}>
                             <MWCurationControl />
                         </Expandable>
                     )
-                }
+                } */}
 
                 {
                     controlViewPlugins.map(v => (

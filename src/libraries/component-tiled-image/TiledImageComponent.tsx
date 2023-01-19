@@ -1,6 +1,5 @@
 import { validateObject, isArrayOf, isEqualTo, isJSONObject, isNumber, isString } from '@figurl/core-utils';
-import { FunctionComponent, useMemo, useState } from 'react';
-import DeckGLComponent from './DeckGLComponent/DeckGLComponent';
+import React, { FunctionComponent, useMemo, useState } from 'react';
 import LeftPanel from './LeftPanel';
 
 export type TiledImageLayerData = {
@@ -51,6 +50,8 @@ export const TiledImageComponent: FunctionComponent<Props> = ({data, width, heig
     }))), [layers])
     const layerLabels = useMemo(() => (layers.map(layer => (layer.label))), [layers])
     const [layerIndex, setLayerIndex] = useState<number>(0)
+    // lazy import this to reduce the js bundle size
+    const DeckGLComponent = React.lazy(() => import('./DeckGLComponent/DeckGLComponent'))
     return (
         <div style={{position: 'absolute', width, height}}>
             <div style={{position: 'absolute', left: 0, top: 0, width: 150, height}}>
