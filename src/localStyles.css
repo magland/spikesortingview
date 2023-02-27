@@ -54,8 +54,8 @@
 }
 
 .plotSelectedStyle {
-    border: 3px solid gray;
-    background-color: #eeeeff
+    border: 3px solid #9999ff;
+    background-color: white
 }
 .plotUnselectableStyle {
     border: 3px solid transparent;
@@ -63,7 +63,7 @@
 
 .plotCurrentStyle {
     border: 3px solid blue;
-    background-color: #ddddff;
+    background-color: white;
 }
 
 .plotLabelStyle {
