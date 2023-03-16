@@ -7,7 +7,7 @@
     "@figurl/core-utils": "^0.1",
     "@figurl/core-views": "^0.1",
     "@figurl/franklab-views": "^0.2",
-    "@figurl/interface": "^0.1",
+    "@figurl/interface": "^0.2.2",
     "@figurl/spike-sorting-views": "^0.2",
     "@figurl/timeseries-views": "^0.2",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",

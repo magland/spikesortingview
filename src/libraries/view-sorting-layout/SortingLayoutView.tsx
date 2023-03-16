@@ -1,8 +1,7 @@
-import { getFileData, getMutable, initiateTask, useFeedReducer, useSignedIn, useUrlState } from '@figurl/interface';
-import { SortingCurationAction, SortingCurationContext, sortingCurationReducer, UnitMetricSelectionContext, unitMetricSelectionReducer, useSelectedUnitIds } from '@figurl/spike-sorting-views';
+import { getFileData, useUrlState } from '@figurl/interface';
+import { SortingCurationContext, sortingCurationReducer, UnitMetricSelectionContext, unitMetricSelectionReducer, useSelectedUnitIds } from '@figurl/spike-sorting-views';
 import { ViewComponentProps } from 'libraries/core-view-component-props';
-import { feedIdForUri } from 'libraries/view-mountain-layout';
-import { FunctionComponent, useCallback, useEffect, useReducer, useState } from 'react';
+import { FunctionComponent, useEffect, useReducer } from 'react';
 import LayoutItemView from './LayoutItemView';
 import { SortingLayoutViewData } from './SortingLayoutViewData';
 
@@ -16,26 +15,26 @@ type Props = {
 const SortingLayoutView: FunctionComponent<Props> = ({data, ViewComponent, width, height}) => {
     const {layout, views} = data
 
-    const {state: sortingCuration} = useFeedReducer({feedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
-    const {userId, googleIdToken} = useSignedIn()
+    // const {state: sortingCuration} = useFeedReducer({feedUri: data.sortingCurationUri}, sortingCurationReducer, {}, {actionField: false})
+    // const {userId, googleIdToken} = useSignedIn()
     const {unitIdSelectionDispatch} = useSelectedUnitIds()
-    const sortingCurationDispatch = useCallback((a: SortingCurationAction) => {
-        if (!data.sortingCurationUri) return
-        initiateTask({
-          taskName: 'spikesortingview.sorting_curation_action.1',
-          taskInput: {
-            sorting_curation_uri: data.sortingCurationUri,
-            action: a,
-            user_id: userId,
-            google_id_token: googleIdToken
-          },
-          taskType: 'action',
-          onStatusChanged: () => {}
-        })
-        // this might be how we can do offline-first curation (get curationSubfeed from useSubfeedReducerS)
-        // curationSubfeed.appendOfflineMessages([a]) // this would need to be implemented
-    }, [data.sortingCurationUri, userId, googleIdToken])
-    const [canCurate, setCanCurate] = useState<boolean>(false)
+    // const sortingCurationDispatch = useCallback((a: SortingCurationAction) => {
+    //     if (!data.sortingCurationUri) return
+    //     initiateTask({
+    //       taskName: 'spikesortingview.sorting_curation_action.1',
+    //       taskInput: {
+    //         sorting_curation_uri: data.sortingCurationUri,
+    //         action: a,
+    //         user_id: userId,
+    //         google_id_token: googleIdToken
+    //       },
+    //       taskType: 'action',
+    //       onStatusChanged: () => {}
+    //     })
+    //     // this might be how we can do offline-first curation (get curationSubfeed from useSubfeedReducerS)
+    //     // curationSubfeed.appendOfflineMessages([a]) // this would need to be implemented
+    // }, [data.sortingCurationUri, userId, googleIdToken])
+    // const [canCurate, setCanCurate] = useState<boolean>(false)
 
     const [sortingCuration2, sortingCurationDispatch2] = useReducer(sortingCurationReducer, {})
 
@@ -61,23 +60,23 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, ViewComponent, width
         }
       }, [initialUrlState, unitIdSelectionDispatch])
 
-    useEffect(() => {
-        setCanCurate(false)
-        if (!data.sortingCurationUri) {
-            return
-        }
-        if ((!userId) || (!googleIdToken)) {
-            return
-        }
-        ;(async () => {
-            const a = await getMutable(`@sortingview/@sortingCurationAuthorizedUsers/${feedIdForUri(data.sortingCurationUri || '')}`)
-            if (!a) return
-            const authorizedUsers = JSON.parse(a)
-            if (authorizedUsers.includes(userId)) {
-                setCanCurate(true)
-            }
-        })()
-    }, [userId, googleIdToken, data.sortingCurationUri])
+    // useEffect(() => {
+    //     setCanCurate(false)
+    //     if (!data.sortingCurationUri) {
+    //         return
+    //     }
+    //     if ((!userId) || (!googleIdToken)) {
+    //         return
+    //     }
+    //     ;(async () => {
+    //         const a = await getMutable(`@sortingview/@sortingCurationAuthorizedUsers/${feedIdForUri(data.sortingCurationUri || '')}`)
+    //         if (!a) return
+    //         const authorizedUsers = JSON.parse(a)
+    //         if (authorizedUsers.includes(userId)) {
+    //             setCanCurate(true)
+    //         }
+    //     })()
+    // }, [userId, googleIdToken, data.sortingCurationUri])
 
     const [unitMetricSelection, unitMetricSelectionDispatch] = useReducer(unitMetricSelectionReducer, {})
 
@@ -128,11 +127,11 @@ const SortingLayoutView: FunctionComponent<Props> = ({data, ViewComponent, width
 
     return (
         <SortingCurationContext.Provider value={
-            data.sortingCurationUri ? (
-                {sortingCuration, sortingCurationDispatch: canCurate ? sortingCurationDispatch : undefined}
-            ) : (
+            // data.sortingCurationUri ? (
+            //     {sortingCuration, sortingCurationDispatch: canCurate ? sortingCurationDispatch : undefined}
+            // ) : (
                 {sortingCuration: sortingCuration2, sortingCurationDispatch: sortingCurationDispatch2}
-            )
+            // )
         }>
             {content}
         </SortingCurationContext.Provider>

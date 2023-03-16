@@ -107,5 +107,5 @@ export const isSortingLayoutViewData = (x: any): x is SortingLayoutViewData => {
         }))),
         layout: isLayoutItem,
         sortingCurationUri: optional(isString)
-    }, {callback: a => console.log('--- a', a)})
+    }, {})
 }
