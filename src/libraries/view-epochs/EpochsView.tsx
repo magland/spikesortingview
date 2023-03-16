@@ -26,7 +26,7 @@ type PanelProps = {
 
 const panelSpacing = 4
 
-const emptyPanelSelection = new Set<number | string>()
+const emptyPanelSelection = new Set<string | number>()
 
 const EpochsView: FunctionComponent<Props> = ({data, timeseriesLayoutOpts, width, height}) => {
     const {visibleStartTimeSec, visibleEndTimeSec } = useTimeRange()

@@ -8,6 +8,7 @@ export type SortingUnits = {
     units: {
         unitId: string | number
         color: string
+        peakChannelId?: string | number
         spikeFrames: number[]
     }[]
 }
@@ -19,7 +20,7 @@ export type Opts = {
     visibleStartTimeSec: number
     visibleEndTimeSec: number
     channels: {
-        channelId: number | string
+        channelId: string | number
         offset: number
         scale: number
     }[]

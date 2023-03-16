@@ -75,14 +75,30 @@ async function draw() {
     if (sortingUnits) {
         for (let unit of sortingUnits.units) {
             canvasContext.strokeStyle = unit.color
+            let y0: number | undefined = undefined
+            if (unit.peakChannelId !== undefined) {
+                const channelIndex = opts.channels.map(c => (c.channelId)).indexOf(unit.peakChannelId)
+                if (channelIndex >= 0) {
+                    y0 = channelIndexToY(channelIndex)
+                }
+            }
             for (let ff of unit.spikeFrames) {
+                canvasContext.lineWidth = 1
                 const x0 = frameIndexToX(ff)
                 canvasContext.beginPath()
                 canvasContext.moveTo(x0, 0)
-                canvasContext.lineTo(x0, canvasHeight - margins.bottom)
+                canvasContext.lineTo(x0, margins.top)
                 canvasContext.stroke()
+
+                if (y0 !== undefined) {
+                    canvasContext.lineWidth = 3
+                    canvasContext.beginPath()
+                    canvasContext.ellipse(x0, y0, 6, 6, 0, 0, Math.PI * 2, false)
+                    canvasContext.stroke()
+                }
             }
         }
+        canvasContext.lineWidth = 1
     }
 
     if (!tracesData) return

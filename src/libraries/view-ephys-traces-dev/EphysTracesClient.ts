@@ -8,7 +8,7 @@ type BinaryJson = {
         sampling_frequency: number
         num_chan: number
         dtype: '<i2'
-        channel_ids: (number | string)[]
+        channel_ids: (string | number)[]
         time_axis: number
         file_offset: number
     }
@@ -28,7 +28,7 @@ type ProbeJson = {
 export type EphysTracesInfo = {
     numChannels: number
     numFrames: number
-    channelIds: (number | string)[]
+    channelIds: (string | number)[]
     channelLocations: (number[])[]
     samplingFrequency: number
 }

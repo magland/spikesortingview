@@ -1,10 +1,11 @@
-import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
-import EphysTracesClient, { EphysTracesInfo } from "../EphysTracesClient";
-import TimeScrollView2, { useTimeScrollView2 } from '@figurl/timeseries-views/dist/component-time-scroll-view-2/TimeScrollView2'
-import { Opts, SortingUnits, TracesData } from "./WorkerTypes";
-import {useTimeRange} from '@figurl/timeseries-views'
 import { colorForUnitId } from "@figurl/core-utils";
 import { idToNum } from "@figurl/spike-sorting-views";
+import { useSelectedUnitIds } from "@figurl/spike-sorting-views/dist/context-unit-selection/UnitSelectionContext";
+import { useTimeRange } from '@figurl/timeseries-views';
+import TimeScrollView2, { useTimeScrollView2 } from '@figurl/timeseries-views/dist/component-time-scroll-view-2/TimeScrollView2';
+import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
+import EphysTracesClient, { EphysTracesInfo } from "../EphysTracesClient";
+import { Opts, SortingUnits, TracesData } from "./WorkerTypes";
 
 type Props = {
     ephysTracesClient: EphysTracesClient
@@ -18,6 +19,7 @@ export type SortingData = {
     samplingFrequency: number
     units: {
         unitId: string
+        peakChannelId?: string | number
         spikeTrain: number[]
     }[]
 }
@@ -123,6 +125,7 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
     }, [worker, ephysTracesInfo, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, margins, channelStats, zoomInRequired])
 
     const [sortingUnits, setSortingUnits] = useState<SortingUnits>()
+    const {selectedUnitIds} = useSelectedUnitIds()
     useEffect(() => {
         if (!sortingData) {
             setSortingUnits(undefined)
@@ -130,21 +133,22 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
         }
         if (visibleStartTimeSec === undefined) return
         if (visibleEndTimeSec === undefined) return
-        const units: {unitId: string | number, color: string, spikeFrames: number[]}[] = []
-        for (let u of sortingData.units) {
-            units.push({
+        console.log('--- x', sortingData.units, selectedUnitIds)
+        const units: {unitId: string | number, color: string, peakChannelId: string | number | undefined, spikeFrames: number[]}[] = sortingData.units.filter(u => (selectedUnitIds.has(u.unitId))).map(u => {
+            return {
                 unitId: u.unitId,
                 color: colorForUnitId(idToNum(u.unitId)),
+                peakChannelId: u.peakChannelId,
                 spikeFrames: u.spikeTrain.filter(f => {
                     const t0 = f / ephysTracesInfo.samplingFrequency
                     return (visibleStartTimeSec <= t0) && (t0 <= visibleEndTimeSec)    
                 })
-            })
-        }
+            }
+        })
         setSortingUnits({
             units
         })
-    }, [sortingData, ephysTracesInfo.samplingFrequency, visibleEndTimeSec, visibleStartTimeSec])
+    }, [sortingData, ephysTracesInfo.samplingFrequency, visibleEndTimeSec, visibleStartTimeSec, selectedUnitIds])
     useEffect(() => {
         if (!worker) return
         worker.postMessage({
