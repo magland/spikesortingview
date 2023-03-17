@@ -1,8 +1,8 @@
-import { Opts, SortingUnits, TracesData } from "./WorkerTypes";
+import { Opts, SortingUnits, SpikeMarkerLocation, TracesDataChunk } from "./WorkerTypes";
 
 let canvas: HTMLCanvasElement | undefined = undefined
 let opts: Opts | undefined = undefined
-let tracesData: TracesData | undefined = undefined
+let tracesDataChunks: {[index: number]: TracesDataChunk} = {}
 let sortingUnits: SortingUnits | undefined = undefined
 
 onmessage = function (evt) {
@@ -14,8 +14,9 @@ onmessage = function (evt) {
         opts = evt.data.opts
         drawDebounced()
     }
-    if (evt.data.tracesData) {
-        tracesData = evt.data.tracesData
+    if (evt.data.tracesDataChunk) {
+        const chunk: TracesDataChunk = evt.data.tracesDataChunk
+        tracesDataChunks[chunk.chunkIndex] = chunk
         drawDebounced()
     }
     if (evt.data.sortingUnits) {
@@ -43,7 +44,7 @@ async function draw() {
     if (!canvas) return
     if (!opts) return
 
-    const {margins, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, channels, samplingFrequency} = opts
+    const {margins, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, channels, samplingFrequency, chunkSizeInFrames} = opts
     const numChannels = channels.length
 
     // this is important because main thread no longer has control of canvas (it seems)
@@ -72,7 +73,11 @@ async function draw() {
         margins.left + (frameIndex / samplingFrequency - visibleStartTimeSec) / (visibleEndTimeSec - visibleStartTimeSec) * (canvasWidth - margins.left - margins.right)
     )
 
-    if (sortingUnits) {
+    const drawUnitMarkers = (o: {top?: boolean, channelLocation?: boolean}) => {
+        if (!sortingUnits) return
+        if (!opts) return
+
+        const spikeMarkerLocations: SpikeMarkerLocation[] = []
         for (let unit of sortingUnits.units) {
             canvasContext.strokeStyle = unit.color
             let y0: number | undefined = undefined
@@ -83,71 +88,130 @@ async function draw() {
                 }
             }
             for (let ff of unit.spikeFrames) {
-                canvasContext.lineWidth = 1
                 const x0 = frameIndexToX(ff)
-                canvasContext.beginPath()
-                canvasContext.moveTo(x0, 0)
-                canvasContext.lineTo(x0, margins.top)
-                canvasContext.stroke()
-
-                if (y0 !== undefined) {
-                    canvasContext.lineWidth = 3
+                if (o.top) {
+                    canvasContext.lineWidth = 1
                     canvasContext.beginPath()
-                    canvasContext.ellipse(x0, y0, 6, 6, 0, 0, Math.PI * 2, false)
+                    canvasContext.moveTo(x0, 0)
+                    canvasContext.lineTo(x0, margins.top)
                     canvasContext.stroke()
+                }
+
+                if (o.channelLocation) {
+                    if (y0 !== undefined) {
+                        canvasContext.lineWidth = 3
+                        let radius = 6
+                        canvasContext.beginPath()
+                        canvasContext.ellipse(x0, y0, 6, 6, 0, 0, Math.PI * 2, false)
+                        canvasContext.stroke()
+                        spikeMarkerLocations.push({
+                            rect: {x: x0 - radius, y: y0 - radius, w: radius * 2, h: radius * 2},
+                            unitId: unit.unitId
+                        })
+                    }
                 }
             }
         }
+        postMessage({spikeMarkerLocations})
         canvasContext.lineWidth = 1
     }
 
-    if (!tracesData) return
+    drawUnitMarkers({top: true, channelLocation: true})
 
     canvasContext.save()
     canvasContext.beginPath()
     canvasContext.rect(margins.left, margins.top, canvasWidth - margins.left - margins.right, canvasHeight - margins.top - margins.bottom)
     canvasContext.clip()
 
-    const channelPixelHeight = channelIndexToY(1) - channelIndexToY(0)
-
+    const i1 = Math.floor(visibleStartTimeSec * samplingFrequency / chunkSizeInFrames)
+    const i2 = Math.ceil(visibleEndTimeSec * samplingFrequency / chunkSizeInFrames)
     let timer = Date.now()
-    for (let i = 0; i < numChannels; i++) {
+    const interleavedOrdering = createInterleavedOrdering(numChannels)
+    for (const interleave of interleavedOrdering) {
+        const channelIndex = interleave.index
         if (thisDrawCode !== drawCode) return
-
-        const dd = tracesData.data[i]
-        if (!dd) continue
-
-        const chan = channels[i]
-
-        const y0 = channelIndexToY(i)
-        canvasContext.strokeStyle = 'black'
-        canvasContext.beginPath()
-        for (let ff = tracesData.startFrame; ff < tracesData.endFrame; ff++) {
-            const x0 = frameIndexToX(ff)
-            const y1 = y0 - (dd[ff - tracesData.startFrame] - chan.offset) * channelPixelHeight / 2 * amplitudeScale * chan.scale
-            if (ff === tracesData.startFrame) {
-                canvasContext.moveTo(x0, y1)
-            }
-            else {
-                canvasContext.lineTo(x0, y1)
-            }
+        let lastChunkIndexDrawn = -99
+        if (opts.mode === 'traces') {
+            canvasContext.strokeStyle = 'black'
+            canvasContext.beginPath()
         }
-        canvasContext.stroke()
+        for (let chunkIndex = i1; chunkIndex <= i2; chunkIndex++) {
+            const chunk = tracesDataChunks[chunkIndex]
+            if (chunk) {
+                const channelPixelHeight = channelIndexToY(1) - channelIndexToY(0)
 
+                const chunkStartFrame = chunkIndex * chunkSizeInFrames
+                const chunkEndFrame = (chunkIndex + 1) * chunkSizeInFrames
+
+                const dd = chunk.data[channelIndex]
+                const chan = channels[channelIndex]
+
+                if (opts.mode === 'traces') {
+                    const y0 = channelIndexToY(channelIndex)
+                    for (let ff = chunkStartFrame; ff < chunkEndFrame; ff++) {
+                        const x0 = frameIndexToX(ff)
+                        const y1 = y0 - (dd[ff - chunkStartFrame] - chan.offset) * channelPixelHeight / 2 * amplitudeScale * chan.scale
+                        if ((ff === chunkStartFrame) && (chunkIndex !== lastChunkIndexDrawn + 1)) {
+                            canvasContext.moveTo(x0, y1)
+                        }
+                        else {
+                            canvasContext.lineTo(x0, y1)
+                        }
+                    }
+                }
+                else if (opts.mode === 'heatmap') {
+                    const y1 = channelIndexToY(channelIndex + interleave.increment - 0.5)
+                    const y2 = channelIndexToY(channelIndex - 0.5)
+                    for (let ff = chunkStartFrame; ff < chunkEndFrame; ff++) {
+                        const x1 = frameIndexToX(ff)
+                        const x2 = frameIndexToX(ff + 1)
+                        const val = (dd[ff - chunkStartFrame] - chan.offset) * amplitudeScale * chan.scale
+                        canvasContext.fillStyle = val2color(val)
+                        canvasContext.fillRect(x1, y1, x2 - x1 + 1, y2 - y1 + 1)
+                    }
+                }
+                lastChunkIndexDrawn = chunkIndex
+            }
+        } // chunks
+        if (opts.mode === 'traces') {
+            canvasContext.stroke()
+        }
         const elapsed = Date.now() - timer
-        if (elapsed > 100) {
+        if (elapsed > 200) {
             timer = Date.now()
             await sleepMsec(0)
         }
-    }
+    } // channels
+    canvasContext.restore()
+
+    drawUnitMarkers({channelLocation: true})
 }
 
-const drawDebounced = debounce(draw, 10)
+const drawDebounced = debounce(draw, 100)
 
 function sleepMsec(msec: number) {
     return new Promise((resolve) => {
         setTimeout(resolve, msec)
     })
+}
+
+function val2color(v: number) {
+    const g = Math.min(255, Math.max(0, 128 + v * 128))
+    return `rgb(${g},${g},${g})`
+}
+
+const createInterleavedOrdering = (num: number) => {
+    const ret: {index: number, increment: number}[] = []
+    const used = new Set<number>()
+    for (const increment of [256, 128, 64, 32, 16, 8, 4, 2, 1]) {
+        for (let i = 0; i < num; i += increment) {
+            if (!used.has(i)) {
+                ret.push({index: i, increment})
+                used.add(i)
+            }
+        }
+    }
+    return ret
 }
 
 // export { }

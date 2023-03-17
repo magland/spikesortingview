@@ -1,11 +1,12 @@
-import { colorForUnitId } from "@figurl/core-utils";
-import { idToNum } from "@figurl/spike-sorting-views";
+import { getUnitColor, idToNum } from "@figurl/spike-sorting-views";
 import { useSelectedUnitIds } from "@figurl/spike-sorting-views/dist/context-unit-selection/UnitSelectionContext";
 import { useTimeRange } from '@figurl/timeseries-views';
 import TimeScrollView2, { useTimeScrollView2 } from '@figurl/timeseries-views/dist/component-time-scroll-view-2/TimeScrollView2';
-import { FunctionComponent, useCallback, useEffect, useMemo, useState } from "react";
+import { FunctionComponent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import EphysTracesClient, { EphysTracesInfo } from "../EphysTracesClient";
-import { Opts, SortingUnits, TracesData } from "./WorkerTypes";
+import HoverInfoComponent from "./HoverInfoComponent";
+import TracesWidgetBottomToolbar, { defaultTracesWidgetBottomToolbarOptions, tracesWidgetBottomToolbarHeight, TracesWidgetBottomToolbarOptions } from "./TracesWidgetBottomToolbar";
+import { Opts, SortingUnits, SpikeMarkerLocation, TracesDataChunk } from "./WorkerTypes";
 
 type Props = {
     ephysTracesClient: EphysTracesClient
@@ -38,13 +39,22 @@ const yAxisInfo = {
 const hideToolbar = false
 
 const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesInfo, sortingData, width, height}) => {
-    const {canvasWidth, canvasHeight, margins} = useTimeScrollView2({width, height, hideToolbar})
+    const {canvasWidth, canvasHeight, margins} = useTimeScrollView2({width, height: height - tracesWidgetBottomToolbarHeight, hideToolbar})
 
     const [canvasElement, setCanvasElement] = useState<HTMLCanvasElement | undefined>()
 
     const [zoomInRequired, setZoomInRequired] = useState(false)
 
     const {visibleStartTimeSec, visibleEndTimeSec} = useTimeRange()
+
+    const [bottomToolbarOptions, setBottomToolbarOptions] = useState<TracesWidgetBottomToolbarOptions>(defaultTracesWidgetBottomToolbarOptions)
+
+    const [spikeMarkerLocations, setSpikeMarkerLocations] = useState<SpikeMarkerLocation[]>([])
+
+    const chunkIndicesSent = useRef<Set<number>>(new Set<number>())
+
+    const [hoverInfoPosition, setHoverInfoPosition] = useState<{x: number, y: number}>()
+    const [hoverInfoText, setHoverInfoText] = useState<string>()
 
     const maxTimeSpanSec = useMemo(() => (
         3e6 / ephysTracesInfo.numChannels / ephysTracesInfo.samplingFrequency
@@ -62,6 +72,17 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
         }))
     }, [initialTraces])
 
+    const spikeMarkerAtLocation = useMemo(() => (
+        (p: {x: number, y: number}) => {
+            for (const m of spikeMarkerLocations) {
+                if ((m.rect.x <= p.x) && (p.x <= m.rect.x + m.rect.w) && (m.rect.y <= p.y) && (p.y <= m.rect.y + m.rect.h)) {
+                    return m
+                }
+            }
+            return undefined
+        }
+    ), [spikeMarkerLocations])
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
         
@@ -75,19 +96,43 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleMouseMove = useCallback((e: React.MouseEvent) => {
-        // const boundingRect = e.currentTarget.getBoundingClientRect()
-        // const p = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
-    }, [])
+        const boundingRect = e.currentTarget.getBoundingClientRect()
+        const p = {x: e.clientX - boundingRect.x, y: e.clientY - boundingRect.y}
+        const marker = spikeMarkerAtLocation(p)
+        if (marker) {
+            setHoverInfoPosition({x: marker.rect.x + marker.rect.w / 2, y: marker.rect.y + marker.rect.h / 2})
+            setHoverInfoText(`unit ${marker.unitId}`)
+        }
+        else {
+            setHoverInfoText(undefined)
+        }
+    }, [spikeMarkerAtLocation])
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleMouseOut = useCallback((e: React.MouseEvent) => {
+        setHoverInfoText(undefined)
     }, [])
 
     const [worker, setWorker] = useState<Worker | null>(null)
     useEffect(() => {
+        let canceled = false
         if (!canvasElement) return
+        let offscreenCanvas: OffscreenCanvas
+        try {
+            offscreenCanvas = canvasElement.transferControlToOffscreen();
+        }
+        catch(err) {
+            console.warn('Unable to transfer control of canvas.')
+            return
+        }
         const worker = new Worker(new URL('./worker', import.meta.url))
-        const offscreenCanvas = canvasElement.transferControlToOffscreen();
+        worker.onmessage = ev => {
+            if (canceled) return
+            if (ev.data.spikeMarkerLocations) {
+                setSpikeMarkerLocations(ev.data.spikeMarkerLocations)
+            }
+        }
+        
         worker.postMessage({
             canvas: offscreenCanvas,
         }, [offscreenCanvas])
@@ -95,9 +140,15 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
 		setWorker(worker)
 
         return () => {
+            chunkIndicesSent.current = new Set()
             worker.terminate()
+            canceled = true
         }
     }, [canvasElement])
+
+    const chunkSizeInFrames = useMemo(() => (
+        Math.ceil(1e5 / ephysTracesInfo.numChannels)
+    ), [ephysTracesInfo.numChannels])
 
     useEffect(() => {
         if (!worker) return
@@ -110,6 +161,7 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
             scale: (1 / cs.stdev) / 10
         }))
         const opts: Opts = {
+            chunkSizeInFrames,
             canvasWidth,
             canvasHeight,
             margins,
@@ -117,12 +169,13 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
             visibleEndTimeSec,
             channels,
             samplingFrequency: ephysTracesInfo.samplingFrequency,
-            zoomInRequired
+            zoomInRequired,
+            mode: bottomToolbarOptions.mode
         }
         worker.postMessage({
             opts
         })
-    }, [worker, ephysTracesInfo, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, margins, channelStats, zoomInRequired])
+    }, [worker, ephysTracesInfo, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, margins, channelStats, zoomInRequired, bottomToolbarOptions, chunkSizeInFrames])
 
     const [sortingUnits, setSortingUnits] = useState<SortingUnits>()
     const {selectedUnitIds} = useSelectedUnitIds()
@@ -133,11 +186,10 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
         }
         if (visibleStartTimeSec === undefined) return
         if (visibleEndTimeSec === undefined) return
-        console.log('--- x', sortingData.units, selectedUnitIds)
         const units: {unitId: string | number, color: string, peakChannelId: string | number | undefined, spikeFrames: number[]}[] = sortingData.units.filter(u => (selectedUnitIds.has(u.unitId))).map(u => {
             return {
                 unitId: u.unitId,
-                color: colorForUnitId(idToNum(u.unitId)),
+                color: getUnitColor(idToNum(u.unitId)),
                 peakChannelId: u.peakChannelId,
                 spikeFrames: u.spikeTrain.filter(f => {
                     const t0 = f / ephysTracesInfo.samplingFrequency
@@ -166,36 +218,59 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
             return
         }
         setZoomInRequired(false)
-        const startFrame = Math.round(visibleStartTimeSec * ephysTracesInfo.samplingFrequency)
-        const endFrame = Math.round(visibleEndTimeSec * ephysTracesInfo.samplingFrequency)
-        ephysTracesClient.getTraces(startFrame, endFrame).then(traces => {
-            if (canceled) return
-            if (!worker) return
-            const tracesData: TracesData = {
-                startFrame,
-                endFrame,
-                data: traces
+        ;(async () => {
+            const startFrame = Math.round(visibleStartTimeSec * ephysTracesInfo.samplingFrequency)
+            const endFrame = Math.round(visibleEndTimeSec * ephysTracesInfo.samplingFrequency)
+            const i1 = Math.floor(startFrame / chunkSizeInFrames)
+            const i2 = Math.ceil(endFrame / chunkSizeInFrames)
+            for (let i = i1; i <= i2; i++) {
+                if (!chunkIndicesSent.current.has(i)) {
+                    const start = i * chunkSizeInFrames
+                    const end = (i + 1) * chunkSizeInFrames
+                    const traces = await ephysTracesClient.getTraces(start, end)
+                    if (canceled) return
+                    if (!worker) return
+                    const tracesDataChunk: TracesDataChunk = {
+                        chunkIndex: i,
+                        data: traces
+                    }
+                    worker.postMessage({
+                        tracesDataChunk
+                    })
+                    chunkIndicesSent.current.add(i)
+                }
             }
-            worker.postMessage({
-                tracesData
-            })
-        })
+        })()
         return () => {canceled = true}
-    }, [worker, ephysTracesInfo, ephysTracesClient, visibleStartTimeSec, visibleEndTimeSec, maxTimeSpanSec])
+    }, [worker, ephysTracesInfo, ephysTracesClient, visibleStartTimeSec, visibleEndTimeSec, maxTimeSpanSec, chunkSizeInFrames])
 
     return (
-        <TimeScrollView2
-            width={width}
-            height={height}
-            onCanvasElement={setCanvasElement}
-            gridlineOpts={gridlineOpts}
-            onKeyDown={handleKeyDown}
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseOut={handleMouseOut}
-            hideToolbar={hideToolbar}
-            yAxisInfo={yAxisInfo}
-        />
+        <div style={{position: 'absolute', width, height}}>
+            <div style={{position: 'absolute', width, height: height - tracesWidgetBottomToolbarHeight}}>
+                <TimeScrollView2
+                    width={width}
+                    height={height - tracesWidgetBottomToolbarHeight}
+                    onCanvasElement={setCanvasElement}
+                    gridlineOpts={gridlineOpts}
+                    onKeyDown={handleKeyDown}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseOut={handleMouseOut}
+                    hideToolbar={hideToolbar}
+                    yAxisInfo={yAxisInfo}
+                />
+            </div>
+            <HoverInfoComponent
+                position={hoverInfoPosition}
+                text={hoverInfoText}
+            />
+            <div style={{position: 'absolute', width, top: height - tracesWidgetBottomToolbarHeight, height: tracesWidgetBottomToolbarHeight}}>
+                <TracesWidgetBottomToolbar
+                    options={bottomToolbarOptions}
+                    setOptions={setBottomToolbarOptions}
+                />
+            </div>
+        </div>
     )
 }
 

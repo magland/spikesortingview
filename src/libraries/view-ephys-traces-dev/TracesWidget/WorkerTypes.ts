@@ -1,6 +1,5 @@
-export type TracesData = {
-    startFrame: number
-    endFrame: number
+export type TracesDataChunk = {
+    chunkIndex: number
     data: (Int16Array | Float32Array)[]
 }
 
@@ -14,6 +13,7 @@ export type SortingUnits = {
 }
 
 export type Opts = {
+    chunkSizeInFrames: number
     canvasWidth: number
     canvasHeight: number
     margins: {left: number, right: number, top: number, bottom: number}
@@ -26,4 +26,10 @@ export type Opts = {
     }[]
     samplingFrequency: number
     zoomInRequired: boolean
+    mode: 'traces' | 'heatmap'
+}
+
+export type SpikeMarkerLocation = {
+    rect: {x: number, y: number, w: number, h: number}
+    unitId: string | number
 }

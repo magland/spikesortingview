@@ -60,7 +60,7 @@ class EphysTracesClient {
             throw Error(`Unable to find: ${binaryFname} in remote directory`)
         }
         this.#dataType = this.#binaryJson.kwargs.dtype
-        this.#bytesPerEntry = this.#dataType === '<i2' ? 2 : 2
+        this.#bytesPerEntry = this.#dataType === '<i2' ? 2 : '<f4' ? 4 : 2
         this.#fileSize = ff.size
         const channelIds = this.#binaryJson.kwargs.channel_ids
         this.#info = {
@@ -83,21 +83,29 @@ class EphysTracesClient {
         if (!buf) {
             throw Error('getTraces: Unable to get data from remote file')
         }
+        let createArrayFromBuffer: (a: ArrayBuffer) => Int16Array | Float32Array
+        let createArrayFromLength: (a: number) => Int16Array | Float32Array
         if (this.#dataType === '<i2') {
-            const aa = new Int16Array(buf)
-            const bb: Int16Array[] = []
-            for (let ich = 0; ich < info.numChannels; ich++) {
-                const cc = new Int16Array(endFrame - startFrame)
-                for (let it = 0; it < endFrame - startFrame; it++) {
-                    cc[it] = aa[ich + it * info.numChannels]
-                }
-                bb.push(cc)
-            }
-            return bb
+            createArrayFromBuffer = (a: ArrayBuffer) => new Int16Array(a)
+            createArrayFromLength = (a: number) => new Int16Array(a)
+        }
+        else if (this.#dataType === '<f4') {
+            createArrayFromBuffer = (a: ArrayBuffer) => new Float32Array(a)
+            createArrayFromLength = (a: number) => new Float32Array(a)
         }
         else {
             throw Error(`Unexpected data type: ${this.#dataType}`)
         }
+        const aa = createArrayFromBuffer(buf)
+        const bb: any = []
+        for (let ich = 0; ich < info.numChannels; ich++) {
+            const cc = createArrayFromLength(endFrame - startFrame)
+            for (let it = 0; it < endFrame - startFrame; it++) {
+                cc[it] = aa[ich + it * info.numChannels]
+            }
+            bb.push(cc)
+        }
+        return bb
     }
     async _fetchData(b1: number, b2: number): Promise<ArrayBuffer | undefined> {
         const i1 = Math.floor(b1 / chunkSize)
