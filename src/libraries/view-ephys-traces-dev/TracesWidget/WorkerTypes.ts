@@ -27,6 +27,7 @@ export type Opts = {
     samplingFrequency: number
     zoomInRequired: boolean
     mode: 'traces' | 'heatmap'
+    amplitudeScaleFactor: number
 }
 
 export type SpikeMarkerLocation = {

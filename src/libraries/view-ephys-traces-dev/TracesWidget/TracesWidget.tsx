@@ -56,6 +56,8 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
     const [hoverInfoPosition, setHoverInfoPosition] = useState<{x: number, y: number}>()
     const [hoverInfoText, setHoverInfoText] = useState<string>()
 
+    const [amplitudeScaleFactor, setAmplitudeScaleFactor] = useState(1)
+
     const maxTimeSpanSec = useMemo(() => (
         3e6 / ephysTracesInfo.numChannels / ephysTracesInfo.samplingFrequency
     ), [ephysTracesInfo])
@@ -85,7 +87,12 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-        
+        if (e.key === 'ArrowDown') {
+            setAmplitudeScaleFactor(x => (x / 1.3))
+        }
+        else if (e.key === 'ArrowUp') {
+            setAmplitudeScaleFactor(x => (x * 1.3))
+        }
     }, [])
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -170,12 +177,13 @@ const TracesWidget: FunctionComponent<Props> = ({ephysTracesClient, ephysTracesI
             channels,
             samplingFrequency: ephysTracesInfo.samplingFrequency,
             zoomInRequired,
-            mode: bottomToolbarOptions.mode
+            mode: bottomToolbarOptions.mode,
+            amplitudeScaleFactor
         }
         worker.postMessage({
             opts
         })
-    }, [worker, ephysTracesInfo, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, margins, channelStats, zoomInRequired, bottomToolbarOptions, chunkSizeInFrames])
+    }, [worker, ephysTracesInfo, canvasWidth, canvasHeight, visibleStartTimeSec, visibleEndTimeSec, margins, channelStats, zoomInRequired, bottomToolbarOptions, chunkSizeInFrames, amplitudeScaleFactor])
 
     const [sortingUnits, setSortingUnits] = useState<SortingUnits>()
     const {selectedUnitIds} = useSelectedUnitIds()

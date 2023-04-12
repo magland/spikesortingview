@@ -37,8 +37,6 @@ function debounce(f: () => void, msec: number) {
     }
 }
 
-const amplitudeScale = 1
-
 let drawCode = 0
 async function draw() {
     if (!canvas) return
@@ -79,6 +77,20 @@ async function draw() {
 
         const spikeMarkerLocations: SpikeMarkerLocation[] = []
         for (let unit of sortingUnits.units) {
+            let startAngle = 0
+            let endAngle = 2 * Math.PI
+
+            let arc = (unit.unitId + '').startsWith('A') ? 'top' : (unit.unitId + '').startsWith('B') ? 'bottom' : 'both'
+
+            if (arc === 'top') {
+                startAngle = Math.PI
+                endAngle = 2 * Math.PI
+            }
+            else if (arc === 'bottom') {
+                startAngle = 0
+                endAngle = Math.PI
+            }
+
             canvasContext.strokeStyle = unit.color
             let y0: number | undefined = undefined
             if (unit.peakChannelId !== undefined) {
@@ -102,10 +114,10 @@ async function draw() {
                         canvasContext.lineWidth = 3
                         let radius = 6
                         canvasContext.beginPath()
-                        canvasContext.ellipse(x0, y0, 6, 6, 0, 0, Math.PI * 2, false)
+                        canvasContext.ellipse(x0, y0, 6, 6, 0, startAngle, endAngle, false)
                         canvasContext.stroke()
                         spikeMarkerLocations.push({
-                            rect: {x: x0 - radius, y: y0 - radius, w: radius * 2, h: radius * 2},
+                            rect: arc === 'top' ? {x: x0 - radius, y: y0 - radius, w: radius * 2, h: radius} : arc === 'bottom' ? {x: x0 - radius, y: y0, w: radius * 2, h: radius} : {x: x0 - radius, y: y0 - radius, w: radius * 2, h: radius * 2},
                             unitId: unit.unitId
                         })
                     }
@@ -138,7 +150,7 @@ async function draw() {
         for (let chunkIndex = i1; chunkIndex <= i2; chunkIndex++) {
             const chunk = tracesDataChunks[chunkIndex]
             if (chunk) {
-                const channelPixelHeight = channelIndexToY(1) - channelIndexToY(0)
+                const channelPixelHeight = channelIndexToY(0) - channelIndexToY(1)
 
                 const chunkStartFrame = chunkIndex * chunkSizeInFrames
                 const chunkEndFrame = (chunkIndex + 1) * chunkSizeInFrames
@@ -150,7 +162,7 @@ async function draw() {
                     const y0 = channelIndexToY(channelIndex)
                     for (let ff = chunkStartFrame; ff < chunkEndFrame; ff++) {
                         const x0 = frameIndexToX(ff)
-                        const y1 = y0 - (dd[ff - chunkStartFrame] - chan.offset) * channelPixelHeight / 2 * amplitudeScale * chan.scale
+                        const y1 = y0 - (dd[ff - chunkStartFrame] - chan.offset) * channelPixelHeight / 2 * opts.amplitudeScaleFactor * chan.scale
                         if ((ff === chunkStartFrame) && (chunkIndex !== lastChunkIndexDrawn + 1)) {
                             canvasContext.moveTo(x0, y1)
                         }
@@ -165,7 +177,7 @@ async function draw() {
                     for (let ff = chunkStartFrame; ff < chunkEndFrame; ff++) {
                         const x1 = frameIndexToX(ff)
                         const x2 = frameIndexToX(ff + 1)
-                        const val = (dd[ff - chunkStartFrame] - chan.offset) * amplitudeScale * chan.scale
+                        const val = (dd[ff - chunkStartFrame] - chan.offset) * opts.amplitudeScaleFactor * chan.scale
                         canvasContext.fillStyle = val2color(val)
                         canvasContext.fillRect(x1, y1, x2 - x1 + 1, y2 - y1 + 1)
                     }
